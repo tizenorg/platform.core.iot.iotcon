@@ -55,11 +55,16 @@ typedef struct {
 	struct ic_repr_s *repr;
 } ic_val_repr_s;
 
+struct ic_options_s {
+	bool has_parent;
+	GHashTable *options;
+};
+
 /* related with iotcon_response_property_e */
 struct ic_res_response_s {
 	char *new_resource_uri;
 	int error_code;
-	iotcon_header_options header_options;
+	iotcon_options_h header_options;
 	iotcon_interface_e interface;
 	iotcon_request_h request_handle;
 	iotcon_resource_h resource_handle;

@@ -46,7 +46,7 @@ static void _entity_handler_door(const iotcon_request_s *request_s)
 
 	int requestFlag = request_s->request_handler_flag;
 	if (requestFlag & IOTCON_REQUEST_FLAG) {
-		iotcon_response_h pResponse = iotcon_create_response(request_s->request_handle,
+		iotcon_response_h pResponse = iotcon_response_new(request_s->request_handle,
 				request_s->resource_handle);
 		if (NULL == pResponse) {
 			ERR("pResponse is NULL");

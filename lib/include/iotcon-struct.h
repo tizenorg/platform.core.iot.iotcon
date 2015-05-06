@@ -35,23 +35,15 @@ typedef void* iotcon_observe_h;
 
 typedef GList* iotcon_observers;
 typedef unsigned char iotcon_observation_id;
-typedef GHashTable* iotcon_header_options;
-typedef GHashTable* iotcon_query_parameters;
+
+typedef struct ic_options_s* iotcon_options_h;
+typedef GHashTable* iotcon_query;
 
 typedef GList *iotcon_resource_types;
 typedef GList *iotcon_resource_interfaces;
 
 
 typedef struct ic_res_response_s* iotcon_response_h;
-
-/**
- * @brief These are used in setting header options.
- */
-typedef struct {
-	unsigned short option_id;
-	char *option_data;
-} iotcon_header_option;
-
 
 /**
  * @brief observation information structure
@@ -69,7 +61,7 @@ typedef struct {
 	char *resource_host;
 	bool is_observable;
 	bool is_collection;
-	iotcon_header_options header_options;
+	iotcon_options_h header_options;
 	iotcon_resource_types resource_types;
 	iotcon_resource_interfaces resource_interfaces;
 	iotcon_observe_h observe_handle;
@@ -79,8 +71,8 @@ typedef struct {
 typedef struct {
 	char *request_type;
 	char *res_uri;
-	iotcon_header_options header_opts;
-	iotcon_query_parameters query_params;
+	iotcon_options_h header_options;
+	iotcon_query query;
 	int request_handler_flag;
 	iotcon_request_h request_handle;
 	iotcon_resource_h resource_handle;

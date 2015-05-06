@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <glib.h>
@@ -25,6 +24,7 @@
 #include "ic-utils.h"
 #include "ic-struct.h"
 #include "ic-ioty.h"
+#include "ic-options.h"
 
 /**
  * @brief global context
@@ -91,7 +91,7 @@ API void iotcon_deinitialize()
 	_set_iotcon_init(FALSE);
 }
 
-API iotcon_response_h iotcon_create_response(iotcon_request_h req_h,
+API iotcon_response_h iotcon_response_new(iotcon_request_h req_h,
 		iotcon_resource_h res_h)
 {
 	FN_CALL;
@@ -114,6 +114,8 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 {
 	int value;
 	va_list args;
+	char *new_resource_uri = NULL;
+	iotcon_options_h options = NULL;
 
 	va_start(args, prop);
 
@@ -133,7 +135,25 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 		resp->error_code = va_arg(args, int);
 		break;
 	case IOTCON_RESP_RES_URI:
-		resp->new_resource_uri = va_arg(args, char*);
+		new_resource_uri = va_arg(args, char*);
+		if (resp->new_resource_uri)
+			free(resp->new_resource_uri);
+
+		if (new_resource_uri)
+			resp->new_resource_uri = ic_utils_strdup(new_resource_uri);
+		else
+			resp->new_resource_uri = NULL;
+		break;
+	case IOTCON_RESP_HEADER_OPTIONS:
+		options = va_arg(args, iotcon_options_h);
+		if (resp->header_options)
+			ic_options_free(resp->header_options);
+
+		if (true == options->has_parent)
+			resp->header_options = iotcon_options_clone(options);
+		else
+			resp->header_options = options;
+		resp->header_options->has_parent = true;
 		break;
 	case IOTCON_RESP_NONE:
 	default:
@@ -145,7 +165,7 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 	return IOTCON_ERR_NONE;
 }
 
-API void iotcon_delete_response(iotcon_response_h resp)
+API void iotcon_response_free(iotcon_response_h resp)
 {
 	FN_CALL;
 	struct ic_res_response_s *data = resp;
@@ -153,7 +173,7 @@ API void iotcon_delete_response(iotcon_response_h resp)
 	RET_IF(NULL == resp);
 
 	free(data->new_resource_uri);
-	iotcon_delete_header_options(data->header_options);
+	ic_options_free(resp->header_options);
 	iotcon_repr_free(resp->repr);
 	free(data);
 }
@@ -453,15 +473,15 @@ API iotcon_resource_s iotcon_construct_resource_object(const char *host,
 	resource_s.resource_host = ic_utils_strdup(host);
 	resource_s.resource_uri = ic_utils_strdup(uri);
 	resource_s.is_observable = is_observable;
-	resource_s.resource_types = iotcon_new_resource_types();
-	resource_s.resource_interfaces = iotcon_new_resource_interfaces();
+	resource_s.resource_types = iotcon_resource_types_new();
+	resource_s.resource_interfaces = iotcon_resource_interfaces_new();
 
-	for (node = g_list_first(resource_type); NULL != node; node = g_list_next(node)) {
+	for (node = g_list_first(resource_type); node; node = g_list_next(node)) {
 		resource_s.resource_types = g_list_append(resource_s.resource_types,
 				ic_utils_strdup(node->data));
 	}
 
-	for (node = g_list_first(resource_if); NULL != node; node = g_list_next(node)) {
+	for (node = g_list_first(resource_if); node; node = g_list_next(node)) {
 		resource_s.resource_interfaces = g_list_append(resource_s.resource_interfaces,
 				ic_utils_strdup(node->data));
 	}
@@ -475,9 +495,9 @@ API void iotcon_destruct_resource_object(iotcon_resource_s *resource)
 
 	free(resource->resource_uri);
 	free(resource->resource_host);
-	iotcon_delete_header_options(resource->header_options);
-	iotcon_delete_resource_types(resource->resource_types);
-	iotcon_delete_resource_interfaces(resource->resource_interfaces);
+	iotcon_options_free(resource->header_options);
+	iotcon_resource_types_free(resource->resource_types);
+	iotcon_resource_interfaces_free(resource->resource_interfaces);
 }
 
 API iotcon_resource_s iotcon_copy_resource(iotcon_resource_s resource)
@@ -490,17 +510,16 @@ API iotcon_resource_s iotcon_copy_resource(iotcon_resource_s resource)
 	resource_s.resource_host = ic_utils_strdup(resource.resource_host);
 	resource_s.resource_uri = ic_utils_strdup(resource.resource_uri);
 	resource_s.is_observable = resource.is_observable;
-	resource_s.resource_types = iotcon_new_resource_types();
-	resource_s.resource_interfaces = iotcon_new_resource_interfaces();
+	resource_s.resource_types = iotcon_resource_types_new();
+	resource_s.resource_interfaces = iotcon_resource_interfaces_new();
 	resource_s.observe_handle = resource.observe_handle;
 
-	for (node = g_list_first(resource.resource_types); NULL != node;
-			node = g_list_next(node)) {
+	for (node = g_list_first(resource.resource_types); node; node = g_list_next(node)) {
 		resource_s.resource_types = g_list_append(resource_s.resource_types,
 				ic_utils_strdup(node->data));
 	}
 
-	for (node = g_list_first(resource.resource_interfaces); NULL != node;
+	for (node = g_list_first(resource.resource_interfaces); node;
 			node = g_list_next(node)) {
 		resource_s.resource_interfaces = g_list_append(resource_s.resource_interfaces,
 				ic_utils_strdup(node->data));
@@ -509,22 +528,22 @@ API iotcon_resource_s iotcon_copy_resource(iotcon_resource_s resource)
 	return resource_s;
 }
 
-API int iotcon_get(iotcon_resource_s resource, iotcon_query_parameters query_params,
+API int iotcon_get(iotcon_resource_s resource, iotcon_query query,
 		iotcon_on_get_cb on_get_cb, void *user_data)
 {
 	FN_CALL;
 
 	int ret = IOTCON_ERR_NONE;
 
-	ret = ic_ioty_get(resource, query_params, on_get_cb, user_data);
+	ret = ic_ioty_get(resource, query, on_get_cb, user_data);
 	if (IOTCON_ERR_NONE != ret)
 		ERR("ic_ioty_get() Fail(%d)", ret);
 
 	return ret;
 }
 
-API int iotcon_put(iotcon_resource_s resource, iotcon_repr_h repr,
-		iotcon_query_parameters query_params, iotcon_on_put_cb on_put_cb, void *user_data)
+API int iotcon_put(iotcon_resource_s resource, iotcon_repr_h repr, iotcon_query query,
+		iotcon_on_put_cb on_put_cb, void *user_data)
 {
 	FN_CALL;
 
@@ -532,7 +551,7 @@ API int iotcon_put(iotcon_resource_s resource, iotcon_repr_h repr,
 
 	RETV_IF(NULL == repr, IOTCON_ERR_PARAM);
 
-	ret = ic_ioty_put(resource, repr, query_params, on_put_cb, user_data);
+	ret = ic_ioty_put(resource, repr, query, on_put_cb, user_data);
 	if (IOTCON_ERR_NONE != ret)
 		ERR("ic_ioty_put() Fail(%d)", ret);
 
@@ -541,7 +560,7 @@ API int iotcon_put(iotcon_resource_s resource, iotcon_repr_h repr,
 
 API int iotcon_post(iotcon_resource_s resource,
 		iotcon_repr_h repr,
-		iotcon_query_parameters query_params,
+		iotcon_query query,
 		iotcon_on_post_cb on_post_cb,
 		void *user_data)
 {
@@ -551,7 +570,7 @@ API int iotcon_post(iotcon_resource_s resource,
 
 	RETV_IF(NULL == repr, IOTCON_ERR_PARAM);
 
-	ret = ic_ioty_post(resource, repr, query_params, on_post_cb, user_data);
+	ret = ic_ioty_post(resource, repr, query, on_post_cb, user_data);
 	if (IOTCON_ERR_NONE != ret)
 		ERR("ic_ioty_post() Fail(%d)", ret);
 
@@ -574,7 +593,7 @@ API int iotcon_delete_resource(iotcon_resource_s resource,
 
 API int iotcon_observe(iotcon_observe_type_e observe_type,
 		iotcon_resource_s *resource,
-		iotcon_query_parameters query_params,
+		iotcon_query query,
 		iotcon_on_observe_cb on_observe_cb,
 		void *user_data)
 {
@@ -582,7 +601,7 @@ API int iotcon_observe(iotcon_observe_type_e observe_type,
 
 	int ret = IOTCON_ERR_NONE;
 
-	ret = ic_ioty_observe(resource, observe_type, query_params, on_observe_cb,
+	ret = ic_ioty_observe(resource, observe_type, query, on_observe_cb,
 			user_data);
 	if (IOTCON_ERR_NONE != ret)
 		ERR("ic_ioty_observe() Fail(%d)", ret);
@@ -603,13 +622,13 @@ API int iotcon_cancel_observe(iotcon_resource_s resource)
 	return ret;
 }
 
-API iotcon_resource_types iotcon_new_resource_types()
+API iotcon_resource_types iotcon_resource_types_new()
 {
 	return NULL;
 }
 
-API iotcon_resource_types iotcon_add_resource_types(iotcon_resource_types resource_types,
-		const char *resource_type)
+API iotcon_resource_types iotcon_resource_types_insert(
+		iotcon_resource_types resource_types, const char *resource_type)
 {
 	FN_CALL;
 
@@ -617,21 +636,21 @@ API iotcon_resource_types iotcon_add_resource_types(iotcon_resource_types resour
 	return resource_types;
 }
 
-API void iotcon_delete_resource_types(iotcon_resource_types resource_types)
+API void iotcon_resource_types_free(iotcon_resource_types resource_types)
 {
 	FN_CALL;
 
-	g_list_free_full(resource_types, g_free);
+	g_list_free_full(resource_types, free);
 }
 
-API iotcon_resource_interfaces iotcon_new_resource_interfaces()
+API iotcon_resource_interfaces iotcon_resource_interfaces_new()
 {
 	FN_CALL;
 
 	return NULL;
 }
 
-API iotcon_resource_interfaces iotcon_add_resource_interfaces(
+API iotcon_resource_interfaces iotcon_resource_interfaces_insert(
 		iotcon_resource_interfaces resource_interfaces, iotcon_interface_e interface)
 {
 	FN_CALL;
@@ -661,75 +680,45 @@ API iotcon_resource_interfaces iotcon_add_resource_interfaces(
 	return resource_interfaces;
 }
 
-API void iotcon_delete_resource_interfaces(iotcon_resource_interfaces resource_interfaces)
+API void iotcon_resource_interfaces_free(iotcon_resource_interfaces resource_interfaces)
 {
 	FN_CALL;
 
-	g_list_free_full(resource_interfaces, g_free);
+	g_list_free_full(resource_interfaces, free);
 }
 
-API iotcon_header_options iotcon_new_header_options()
+API iotcon_query iotcon_query_new()
 {
-	iotcon_header_options options = NULL;
-	options = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_free);
-	return options;
+	iotcon_query query = NULL;
+
+	query = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+
+	return query;
 }
 
-API iotcon_error_e iotcon_add_header_option(iotcon_header_options options,
-		const unsigned short id, const char *data)
+API void iotcon_query_insert(iotcon_query query, const char *key, const char *value)
 {
-	FN_CALL;
-
-	RETV_IF(((id < IOTCON_HEADER_OPTIONID_MIN)
-				|| (IOTCON_HEADER_OPTIONID_MAX < id)), IOTCON_ERR_PARAM);
-
-	gpointer value = ic_utils_strdup(data);
-
-	g_hash_table_insert(options, GUINT_TO_POINTER(id), value);
-
-	return IOTCON_ERR_NONE;
+	g_hash_table_insert(query, ic_utils_strdup(key), ic_utils_strdup(value));
 }
 
-API void iotcon_delete_header_options(iotcon_header_options options)
+API void iotcon_query_free(iotcon_query query)
 {
-	RET_IF(NULL == options);
+	RET_IF(NULL == query);
 
-	g_hash_table_destroy(options);
+	g_hash_table_destroy(query);
 }
 
-API iotcon_query_parameters iotcon_new_query_params()
+API char* iotcon_query_lookup(iotcon_query query, const char *key)
 {
-	iotcon_query_parameters query_params = NULL;
-
-	query_params = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-
-	return query_params;
+	return g_hash_table_lookup(query, key);
 }
 
-API void iotcon_add_query_param(iotcon_query_parameters query_params, const char *key,
-		const char *value)
-{
-	g_hash_table_insert(query_params, ic_utils_strdup(key), ic_utils_strdup(value));
-}
-
-API void iotcon_delete_query_params(iotcon_query_parameters query_params)
-{
-	RET_IF(NULL == query_params);
-
-	g_hash_table_destroy(query_params);
-}
-
-API char* iotcon_find_query_param(iotcon_query_parameters query_params, const char *key)
-{
-	return g_hash_table_lookup(query_params, key);
-}
-
-API iotcon_observers iotcon_new_observation()
+API iotcon_observers iotcon_observation_new()
 {
 	return NULL;
 }
 
-API iotcon_observers iotcon_add_observation(iotcon_observers observers,
+API iotcon_observers iotcon_observation_insert(iotcon_observers observers,
 		iotcon_observation_info_s obs)
 {
 	iotcon_observation_info_s *obs_node = calloc(1, sizeof(iotcon_observation_info_s));
@@ -743,7 +732,7 @@ API iotcon_observers iotcon_add_observation(iotcon_observers observers,
 	return observers;
 }
 
-API iotcon_observers iotcon_delete_observation(iotcon_observers observers,
+API iotcon_observers iotcon_observation_delete(iotcon_observers observers,
 		iotcon_observation_info_s obs)
 {
 	GList *node = NULL;
@@ -754,54 +743,43 @@ API iotcon_observers iotcon_delete_observation(iotcon_observers observers,
 	return observers;
 }
 
-API void iotcon_free_observation(iotcon_observers observers)
+API void iotcon_observation_free(iotcon_observers observers)
 {
-	g_list_free_full(observers, g_free);
+	g_list_free_full(observers, free);
 }
 
-API char* iotcon_get_resource_uri(iotcon_resource_s resource_s)
+API char* iotcon_resource_get_uri(iotcon_resource_s resource_s)
 {
 	return resource_s.resource_uri;
 }
 
-API char* iotcon_get_resource_host(iotcon_resource_s resource_s)
+API char* iotcon_resource_get_host(iotcon_resource_s resource_s)
 {
 	return resource_s.resource_host;
 }
 
-API iotcon_resource_types iotcon_get_resource_types(iotcon_resource_s resource_s)
+API iotcon_resource_types iotcon_resource_get_types(iotcon_resource_s resource_s)
 {
 	return resource_s.resource_types;
 }
 
-API iotcon_resource_interfaces iotcon_get_resource_interfaces(
-		iotcon_resource_s resource_s)
+API iotcon_resource_interfaces iotcon_resource_get_interfaces(iotcon_resource_s resource_s)
 {
 	return resource_s.resource_interfaces;
 }
 
-API void iotcon_set_header_options(iotcon_resource_s *resource_s,
-		iotcon_header_options options)
+API void iotcon_resource_set_options(iotcon_resource_s *resource,
+		iotcon_options_h header_options)
 {
-	iotcon_header_options header_options;
-	GHashTableIter iter;
-	gpointer key = NULL;
-	gpointer value = NULL;
+	RET_IF(NULL == resource);
 
-	RET_IF(NULL == resource_s);
-	RET_IF(NULL == options);
+	if (resource->header_options)
+		iotcon_options_free(resource->header_options);
 
-	header_options = iotcon_new_header_options();
-	g_hash_table_iter_init(&iter, options);
-	while (g_hash_table_iter_next(&iter, &key, &value)) {
-		iotcon_add_header_option(header_options, GPOINTER_TO_UINT(key), value);
-	}
-	resource_s->header_options = header_options;
+	resource->header_options = header_options;
 }
 
-API void iotcon_unset_header_options(iotcon_resource_s *resource_s)
+API iotcon_options_h iotcon_request_get_options(iotcon_request_s request)
 {
-	RET_IF(NULL == resource_s);
-	iotcon_delete_header_options(resource_s->header_options);
-	resource_s->header_options = NULL;
+	return request.header_options;
 }

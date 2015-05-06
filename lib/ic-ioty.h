@@ -59,29 +59,20 @@ int ic_ioty_stop_presence();
 int ic_ioty_find_resource(const char *host, const char *resource_name,
 		iotcon_found_resource_cb found_resource_cb, void *user_data);
 
-int ic_ioty_get(iotcon_resource_s resource,	iotcon_query_parameters query_params,
+int ic_ioty_get(iotcon_resource_s resource,	iotcon_query query,
 		iotcon_on_get_cb on_get_cb, void *user_data);
 
-int ic_ioty_put(iotcon_resource_s resource,
-		iotcon_repr_h repr,
-		iotcon_query_parameters query_params,
-		iotcon_on_put_cb on_put_cb,
-		void *user_data);
+int ic_ioty_put(iotcon_resource_s resource, iotcon_repr_h repr, iotcon_query query,
+		iotcon_on_put_cb on_put_cb, void *user_data);
 
-int ic_ioty_post(iotcon_resource_s resource,
-		iotcon_repr_h repr,
-		iotcon_query_parameters query_params,
-		iotcon_on_put_cb on_post_cb,
-		void *user_data);
+int ic_ioty_post(iotcon_resource_s resource, iotcon_repr_h repr, iotcon_query query,
+		iotcon_on_put_cb on_post_cb, void *user_data);
 
 int ic_ioty_delete_res(iotcon_resource_s resource,
 		iotcon_on_delete_cb on_delete_cb, void *user_data);
 
-int ic_ioty_observe(iotcon_resource_s *resource,
-		iotcon_observe_type_e observe_type,
-		iotcon_query_parameters query_params,
-		iotcon_on_observe_cb on_observe_cb,
-		void *user_data);
+int ic_ioty_observe(iotcon_resource_s *resource, iotcon_observe_type_e observe_type,
+		iotcon_query query, iotcon_on_observe_cb on_observe_cb, void *user_data);
 
 int ic_ioty_cancel_observe(iotcon_resource_s resource);
 

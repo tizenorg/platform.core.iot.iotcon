@@ -88,13 +88,13 @@ namespace icIotivityHandler {
 			resource_s.resource_uri = ic_utils_strdup(resource->uri().c_str());
 			resource_s.resource_host = ic_utils_strdup(resource->host().c_str());
 			resource_s.is_observable = resource->isObservable();
-			resource_s.resource_types = iotcon_new_resource_types();
-			resource_s.resource_interfaces = iotcon_new_resource_interfaces();
+			resource_s.resource_types = iotcon_resource_types_new();
+			resource_s.resource_interfaces = iotcon_resource_interfaces_new();
 
 			vector<string> resource_types = resource->getResourceTypes();
 			for (string &resource_type : resource_types)
 				resource_s.resource_types
-					= iotcon_add_resource_types(resource_s.resource_types,
+					= iotcon_resource_types_insert(resource_s.resource_types,
 							ic_utils_strdup(resource_type.c_str()));
 
 			vector<string> resource_interfaces = resource->getResourceInterfaces();
@@ -108,8 +108,8 @@ namespace icIotivityHandler {
 
 			free(resource_s.resource_uri);
 			free(resource_s.resource_host);
-			iotcon_delete_resource_types(resource_s.resource_types);
-			iotcon_delete_resource_interfaces(resource_s.resource_interfaces);
+			iotcon_resource_types_free(resource_s.resource_types);
+			iotcon_resource_interfaces_free(resource_s.resource_interfaces);
 		}
 	};
 
@@ -131,7 +131,7 @@ namespace icIotivityHandler {
 		{
 			FN_CALL;
 			int res;
-			iotcon_header_options header_options;
+			iotcon_options_h options;
 			iotcon_repr_h repr = NULL;
 
 			if (OC_STACK_OK == eCode)
@@ -139,18 +139,18 @@ namespace icIotivityHandler {
 			else
 				res = IOTCON_ERR_IOTIVITY;
 
-			header_options = iotcon_new_header_options();
+			options = iotcon_options_new();
 			for (HeaderOption::OCHeaderOption option : headerOptions) {
-				iotcon_add_header_option(header_options, option.getOptionID(),
+				iotcon_options_insert(options, option.getOptionID(),
 						option.getOptionData().c_str());
 			}
 
 			repr = ic_ioty_repr_generate_repr(ocRep);
 
 			if (on_get)
-				on_get(header_options, repr, res, cb_data);
+				on_get(options, repr, res, cb_data);
 
-			iotcon_delete_header_options(header_options);
+			iotcon_options_free(options);
 		}
 	};
 
@@ -172,7 +172,7 @@ namespace icIotivityHandler {
 		{
 			FN_CALL;
 			int res;
-			iotcon_header_options header_options;
+			iotcon_options_h options;
 			iotcon_repr_h repr = NULL;
 
 			if (OC_STACK_OK == eCode)
@@ -180,18 +180,18 @@ namespace icIotivityHandler {
 			else
 				res = IOTCON_ERR_IOTIVITY;
 
-			header_options = iotcon_new_header_options();
+			options = iotcon_options_new();
 			for (HeaderOption::OCHeaderOption option : headerOptions) {
-				iotcon_add_header_option(header_options, option.getOptionID(),
+				iotcon_options_insert(options, option.getOptionID(),
 						option.getOptionData().c_str());
 			}
 
 			repr = ic_ioty_repr_generate_repr(ocRep);
 
 			if (on_put)
-				on_put(header_options, repr, res, cb_data);
+				on_put(options, repr, res, cb_data);
 
-			iotcon_delete_header_options(header_options);
+			iotcon_options_free(options);
 		}
 	};
 
@@ -213,7 +213,7 @@ namespace icIotivityHandler {
 		{
 			FN_CALL;
 			int res;
-			iotcon_header_options header_options;
+			iotcon_options_h options;
 			iotcon_repr_h repr = NULL;
 
 			if (OC_STACK_OK == eCode)
@@ -221,18 +221,18 @@ namespace icIotivityHandler {
 			else
 				res = IOTCON_ERR_IOTIVITY;
 
-			header_options = iotcon_new_header_options();
+			options = iotcon_options_new();
 			for (HeaderOption::OCHeaderOption option : headerOptions) {
-				iotcon_add_header_option(header_options, option.getOptionID(),
+				iotcon_options_insert(options, option.getOptionID(),
 						option.getOptionData().c_str());
 			}
 
 			repr = ic_ioty_repr_generate_repr(ocRep);
 
 			if (on_post)
-				on_post(header_options, repr, res, cb_data);
+				on_post(options, repr, res, cb_data);
 
-			iotcon_delete_header_options(header_options);
+			iotcon_options_free(options);
 		}
 	};
 
@@ -252,23 +252,23 @@ namespace icIotivityHandler {
 		void onDelete(const HeaderOptions& headerOptions, const int eCode)
 		{
 			int res;
-			iotcon_header_options header_options;
+			iotcon_options_h options;
 
 			if (OC_STACK_OK == eCode)
 				res = IOTCON_ERR_NONE;
 			else
 				res = IOTCON_ERR_IOTIVITY;
 
-			header_options = iotcon_new_header_options();
+			options = iotcon_options_new();
 			for (HeaderOption::OCHeaderOption option : headerOptions) {
-				iotcon_add_header_option(header_options, option.getOptionID(),
+				iotcon_options_insert(options, option.getOptionID(),
 						option.getOptionData().c_str());
 			}
 
 			if (on_delete)
-				on_delete(header_options, res, cb_data);
+				on_delete(options, res, cb_data);
 
-			iotcon_delete_header_options(header_options);
+			iotcon_options_free(options);
 		}
 	};
 
@@ -290,7 +290,7 @@ namespace icIotivityHandler {
 		{
 			FN_CALL;
 			int res;
-			iotcon_header_options header_options;
+			iotcon_options_h options;
 			iotcon_repr_h repr = NULL;
 
 			if (OC_STACK_OK == eCode)
@@ -298,18 +298,18 @@ namespace icIotivityHandler {
 			else
 				res = IOTCON_ERR_IOTIVITY;
 
-			header_options = iotcon_new_header_options();
+			options = iotcon_options_new();
 			for (HeaderOption::OCHeaderOption option : headerOptions) {
-				iotcon_add_header_option(header_options, option.getOptionID(),
+				iotcon_options_insert(options, option.getOptionID(),
 						option.getOptionData().c_str());
 			}
 
 			repr = ic_ioty_repr_generate_repr(ocRep);
 
 			if (on_observe)
-				on_observe(header_options, repr, res, sequenceNumber, cb_data);
+				on_observe(options, repr, res, sequenceNumber, cb_data);
 
-			iotcon_delete_header_options(header_options);
+			iotcon_options_free(options);
 		}
 	};
 }
@@ -341,8 +341,8 @@ static OCEntityHandlerResult _entity_handler(shared_ptr<OCResourceRequest> reque
 		return OC_EH_ERROR;
 	}
 
-	request_s.query_params = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
-	if (NULL == request_s.query_params) {
+	request_s.query = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+	if (NULL == request_s.query) {
 		ERR("g_hash_table_new_full() Fail");
 		return OC_EH_ERROR;
 	}
@@ -351,13 +351,13 @@ static OCEntityHandlerResult _entity_handler(shared_ptr<OCResourceRequest> reque
 	queryParams = request->getQueryParameters();
 	for (it = queryParams.begin(); it != queryParams.end(); ++it) {
 		DBG("key=%s value=%s", it->first.c_str(), it->second.c_str());
-		g_hash_table_insert(request_s.query_params, ic_utils_strdup(it->first.c_str()),
+		g_hash_table_insert(request_s.query, ic_utils_strdup(it->first.c_str()),
 				ic_utils_strdup(it->second.c_str()));
 	}
 
-	request_s.header_opts = iotcon_new_header_options();
-	if (NULL == request_s.header_opts) {
-		ERR("iot_new_header_options() Fail");
+	request_s.header_options = iotcon_options_new();
+	if (NULL == request_s.header_options) {
+		ERR("iotcon_options_new() Fail");
 		return OC_EH_ERROR;
 	}
 
@@ -366,8 +366,7 @@ static OCEntityHandlerResult _entity_handler(shared_ptr<OCResourceRequest> reque
 		for (auto it1 = headerOptions.begin(); it1 != headerOptions.end(); ++it1) {
 			DBG("OptionID=%d, OptionData=%s",
 					it1->getOptionID(), it1->getOptionData().c_str());
-			iotcon_add_header_option(request_s.header_opts,
-					it1->getOptionID(),
+			iotcon_options_insert(request_s.header_options, it1->getOptionID(),
 					it1->getOptionData().c_str());
 		}
 	}
@@ -385,8 +384,8 @@ static OCEntityHandlerResult _entity_handler(shared_ptr<OCResourceRequest> reque
 	request_s.request_type = ic_utils_strdup(request->getRequestType().c_str());
 	if (NULL == request_s.request_type) {
 		ERR("ic_utils_strdup() Fail");
-		g_hash_table_destroy(request_s.header_opts);
-		g_hash_table_destroy(request_s.query_params);
+		iotcon_options_free(request_s.header_options);
+		iotcon_query_free(request_s.query);
 		return OC_EH_ERROR;
 	}
 
@@ -394,8 +393,8 @@ static OCEntityHandlerResult _entity_handler(shared_ptr<OCResourceRequest> reque
 	if (NULL == request_s.request_type) {
 		ERR("ic_utils_strdup() Fail");
 		free(request_s.request_type);
-		g_hash_table_destroy(request_s.header_opts);
-		g_hash_table_destroy(request_s.query_params);
+		iotcon_options_free(request_s.header_options);
+		iotcon_query_free(request_s.query);
 		return OC_EH_ERROR;
 	}
 
@@ -420,8 +419,8 @@ static OCEntityHandlerResult _entity_handler(shared_ptr<OCResourceRequest> reque
 	free(request_s.res_uri);
 	if (request_s.repr) /* To avoid unnecessary ERR log (repr could be NULL) */
 		iotcon_repr_free(request_s.repr);
-	g_hash_table_destroy(request_s.header_opts);
-	g_hash_table_destroy(request_s.query_params);
+	iotcon_options_free(request_s.header_options);
+	iotcon_query_free(request_s.query);
 
 	return OC_EH_OK;
 }
@@ -691,7 +690,7 @@ extern "C" iotcon_presence_h ic_ioty_subscribe_presence(const char *host_address
 	shared_ptr<icIotivityHandler::presenceObject> object
 		= make_shared<icIotivityHandler::presenceObject>(presence_handler_cb, user_data);
 	SubscribeCallback subscribeCallback
-		= bind(&icIotivityHandler::presenceObject::presenceHandler,	object,
+		= bind(&icIotivityHandler::presenceObject::presenceHandler, object,
 				placeholders::_1, placeholders::_2, placeholders::_3);
 
 	ret = subscribePresence(presence_handle, host_address, subscribeCallback);
@@ -748,7 +747,7 @@ extern "C" int ic_ioty_find_resource(const char *host, const char *resource_name
 	shared_ptr<icIotivityHandler::findObject> object
 		= make_shared<icIotivityHandler::findObject>(found_resource_cb, user_data);
 	FindCallback findCallback = bind(&icIotivityHandler::findObject::foundResource,
-			object,	placeholders::_1);
+			object, placeholders::_1);
 
 	ret = findResource(host, resource_name, findCallback);
 	if (OC_STACK_OK != ret) {
@@ -759,29 +758,33 @@ extern "C" int ic_ioty_find_resource(const char *host, const char *resource_name
 	return IOTCON_ERR_NONE;
 }
 
+static void _change_options(unsigned short id, char *data, void *user_data)
+{
+	HeaderOptions *options = static_cast<HeaderOptions *>(user_data);
+	HeaderOption::OCHeaderOption option(id, data);
+	(*options).push_back(option);
+}
+
 static OCResource::Ptr _create_oc_resource(iotcon_resource_s resource)
 {
-	RETV_IF(NULL == resource.resource_host, NULL);
-	RETV_IF(NULL == resource.resource_uri, NULL);
-
 	string host = resource.resource_host;
 	string uri = resource.resource_uri;
 	vector<string> resource_types;
 	vector<string> resource_ifs;
 
 	HeaderOptions header_options;
-	GHashTableIter iter;
-	gpointer key = NULL;
-	gpointer value = NULL;
+
+	RETV_IF(NULL == resource.resource_host, NULL);
+	RETV_IF(NULL == resource.resource_uri, NULL);
 
 	GList *node = resource.resource_types;
-	for (node = g_list_first(node); NULL != node; node = g_list_next(node)) {
+	for (node = g_list_first(node); node; node = g_list_next(node)) {
 		string resource_type_str = (char *)node->data;
 		resource_types.push_back(resource_type_str);
 	}
 
 	node = resource.resource_interfaces;
-	for (node = g_list_first(node); NULL != node; node = g_list_next(node)) {
+	for (node = g_list_first(node); node; node = g_list_next(node)) {
 		string resource_if_str = (char *)node->data;
 		resource_ifs.push_back(resource_if_str);
 	}
@@ -789,13 +792,9 @@ static OCResource::Ptr _create_oc_resource(iotcon_resource_s resource)
 	OCResource::Ptr ocResource = constructResourceObject(host, uri,
 			resource.is_observable, resource_types, resource_ifs);
 
-	if (NULL != resource.header_options) {
-		g_hash_table_iter_init(&iter, resource.header_options);
-		while (g_hash_table_iter_next(&iter, &key, &value)) {
-			HeaderOption::OCHeaderOption header_option(
-					GPOINTER_TO_UINT(key), (const char *)value);
-			header_options.push_back(header_option);
-		}
+	if (resource.header_options) {
+		iotcon_options_foreach(resource.header_options, _change_options,
+				(void *)&header_options);
 		ocResource->setHeaderOptions(header_options);
 	}
 
@@ -803,22 +802,23 @@ static OCResource::Ptr _create_oc_resource(iotcon_resource_s resource)
 }
 
 extern "C" int ic_ioty_get(iotcon_resource_s resource,
-		iotcon_query_parameters query_params, iotcon_on_get_cb on_get_cb, void *user_data)
+		iotcon_query query, iotcon_on_get_cb on_get_cb, void *user_data)
 {
 	FN_CALL;
 	OCStackResult ret;
 	OCResource::Ptr ocResource = NULL;
 
-	QueryParamsMap query;
+	QueryParamsMap queryParams;
+
 	GHashTableIter iter;
 	gpointer key, value;
 
-	if (NULL != query_params) {
-		g_hash_table_iter_init(&iter, query_params);
+	if (query) {
+		g_hash_table_iter_init(&iter, query);
 		while (g_hash_table_iter_next(&iter, &key, &value)) {
 			string keyStr = (char *)key;
 			string valueStr = (char *)value;
-			query[keyStr] = valueStr;
+			queryParams[keyStr] = valueStr;
 		}
 	}
 
@@ -828,7 +828,7 @@ extern "C" int ic_ioty_get(iotcon_resource_s resource,
 		= make_shared<icIotivityHandler::getObject>(on_get_cb, user_data);
 	GetCallback getCallback = bind(&icIotivityHandler::getObject::onGet, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
-	ret = ocResource->get(query, getCallback);
+	ret = ocResource->get(queryParams, getCallback);
 	if (OC_STACK_OK != ret) {
 		ERR("get() Fail(%d)", ret);
 		return IOTCON_ERR_IOTIVITY;
@@ -839,7 +839,7 @@ extern "C" int ic_ioty_get(iotcon_resource_s resource,
 
 extern "C" int ic_ioty_put(iotcon_resource_s resource,
 		iotcon_repr_h repr,
-		iotcon_query_parameters query_params,
+		iotcon_query query,
 		iotcon_on_put_cb on_put_cb,
 		void *user_data)
 {
@@ -848,17 +848,17 @@ extern "C" int ic_ioty_put(iotcon_resource_s resource,
 
 	OCResource::Ptr ocResource = NULL;
 	OCRepresentation ocRep;
-	QueryParamsMap query;
+	QueryParamsMap queryParams;
 
 	GHashTableIter iter;
 	gpointer key, value;
 
-	if (NULL != query_params) {
-		g_hash_table_iter_init(&iter, query_params);
+	if (query) {
+		g_hash_table_iter_init(&iter, query);
 		while (g_hash_table_iter_next(&iter, &key, &value)) {
 			string keyStr = (char *)key;
 			string valueStr = (char *)value;
-			query[keyStr] = valueStr;
+			queryParams[keyStr] = valueStr;
 		}
 	}
 
@@ -871,7 +871,7 @@ extern "C" int ic_ioty_put(iotcon_resource_s resource,
 	PutCallback putCallback = bind(&icIotivityHandler::putObject::onPut, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 
-	ret = ocResource->put(ocRep, query, putCallback);
+	ret = ocResource->put(ocRep, queryParams, putCallback);
 	if (OC_STACK_OK != ret) {
 		ERR("put() Fail(%d)", ret);
 		return IOTCON_ERR_IOTIVITY;
@@ -882,7 +882,7 @@ extern "C" int ic_ioty_put(iotcon_resource_s resource,
 
 extern "C" int ic_ioty_post(iotcon_resource_s resource,
 		iotcon_repr_h repr,
-		iotcon_query_parameters query_params,
+		iotcon_query query,
 		iotcon_on_post_cb on_post_cb,
 		void *user_data)
 {
@@ -890,16 +890,16 @@ extern "C" int ic_ioty_post(iotcon_resource_s resource,
 	OCStackResult ret;
 	GHashTableIter iter;
 	gpointer key, value;
-	QueryParamsMap query;
+	QueryParamsMap queryParams;
 	OCRepresentation ocRep;
 	OCResource::Ptr ocResource = NULL;
 
-	if (NULL != query_params) {
-		g_hash_table_iter_init(&iter, query_params);
+	if (query) {
+		g_hash_table_iter_init(&iter, query);
 		while (g_hash_table_iter_next(&iter, &key, &value)) {
 			string keyStr = (char *)key;
 			string valueStr = (char *)value;
-			query[keyStr] = valueStr;
+			queryParams[keyStr] = valueStr;
 		}
 	}
 
@@ -912,7 +912,7 @@ extern "C" int ic_ioty_post(iotcon_resource_s resource,
 	PostCallback postCallback = bind(&icIotivityHandler::postObject::onPost, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 
-	ret = ocResource->post(ocRep, query, postCallback);
+	ret = ocResource->post(ocRep, queryParams, postCallback);
 	if (OC_STACK_OK != ret) {
 		ERR("post() Fail(%d)", ret);
 		return IOTCON_ERR_IOTIVITY;
@@ -933,7 +933,7 @@ extern "C" int ic_ioty_delete_res(iotcon_resource_s resource,
 	shared_ptr<icIotivityHandler::deleteObject> object
 		= make_shared<icIotivityHandler::deleteObject>(on_delete_cb, user_data);
 	DeleteCallback deleteCallback = bind(&icIotivityHandler::deleteObject::onDelete,
-			object,	placeholders::_1, placeholders::_2);
+			object, placeholders::_1, placeholders::_2);
 
 	ret = ocResource->deleteResource(deleteCallback);
 	if (OC_STACK_OK != ret) {
@@ -946,7 +946,7 @@ extern "C" int ic_ioty_delete_res(iotcon_resource_s resource,
 
 extern "C" int ic_ioty_observe(iotcon_resource_s *resource,
 		iotcon_observe_type_e observe_type,
-		iotcon_query_parameters query_params,
+		iotcon_query query,
 		iotcon_on_observe_cb on_observe_cb,
 		void *user_data)
 {
@@ -955,16 +955,16 @@ extern "C" int ic_ioty_observe(iotcon_resource_s *resource,
 	OCResource::Ptr ocResource = NULL;
 	ObserveType observeType;
 
-	QueryParamsMap query;
+	QueryParamsMap queryParams;
 	GHashTableIter iter;
 	gpointer key, value;
 
-	if (NULL != query_params) {
-		g_hash_table_iter_init(&iter, query_params);
+	if (query) {
+		g_hash_table_iter_init(&iter, query);
 		while (g_hash_table_iter_next(&iter, &key, &value)) {
 			string keyStr = (char *)key;
 			string valueStr = (char *)value;
-			query[keyStr] = valueStr;
+			queryParams[keyStr] = valueStr;
 		}
 	}
 
@@ -988,9 +988,9 @@ extern "C" int ic_ioty_observe(iotcon_resource_s *resource,
 	shared_ptr<icIotivityHandler::observeObject> object
 		= make_shared<icIotivityHandler::observeObject>(on_observe_cb, user_data);
 	ObserveCallback observeCallback = bind(&icIotivityHandler::observeObject::onObserve,
-			object,	placeholders::_1, placeholders::_2, placeholders::_3,
+			object, placeholders::_1, placeholders::_2, placeholders::_3,
 			placeholders::_4);
-	ret = ocResource->observe(observeType, query, observeCallback);
+	ret = ocResource->observe(observeType, queryParams, observeCallback);
 	if (OC_STACK_OK != ret) {
 		ERR("observe() Fail(%d)", ret);
 		return IOTCON_ERR_IOTIVITY;

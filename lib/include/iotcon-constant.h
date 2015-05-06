@@ -22,8 +22,8 @@
  * range of 2048 to 3000 inclusive of lower and upper bound.
  * HeaderOptions instance creation fails if above condition is not satisfied.
  */
-#define IOTCON_HEADER_OPTIONID_MIN 2048
-#define IOTCON_HEADER_OPTIONID_MAX 3000
+#define IOTCON_OPTIONID_MIN 2048
+#define IOTCON_OPTIONID_MAX 3000
 
 
 /**
@@ -63,6 +63,7 @@ typedef enum {
 	IOTCON_RESP_ERR_CODE = 2,
 	IOTCON_RESP_RESULT = 3,
 	IOTCON_RESP_REPRESENTATION = 4,
+	IOTCON_RESP_HEADER_OPTIONS = 5
 } iotcon_response_property_e;
 
 typedef enum {

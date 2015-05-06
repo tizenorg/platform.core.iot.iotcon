@@ -65,7 +65,7 @@ void _print_repr_info(iotcon_repr_h repr)
 
 }
 
-static void _on_put(const iotcon_header_options header_options, iotcon_repr_h repr,
+static void _on_put(const iotcon_options_h header_options, iotcon_repr_h repr,
 		const int e_code, void *user_data)
 {
 	FN_CALL;
@@ -92,7 +92,7 @@ static void _on_put(const iotcon_header_options header_options, iotcon_repr_h re
 	/* set the flag for receiving response succesfully */
 }
 
-void _on_get(const iotcon_header_options header_options, iotcon_repr_h repr,
+void _on_get(const iotcon_options_h header_options, iotcon_repr_h repr,
 		const int e_code, void *user_data)
 {
 	FN_CALL;
@@ -116,8 +116,8 @@ void _on_get(const iotcon_header_options header_options, iotcon_repr_h repr,
 		iotcon_repr_h repr = iotcon_repr_new();
 		iotcon_repr_set_bool(repr, "opened", true);
 
-		iotcon_query_parameters query_params = iotcon_new_query_params();
-		iotcon_put(door_resource, repr, query_params, _on_put, NULL);
+		iotcon_query query = iotcon_query_new();
+		iotcon_put(door_resource, repr, query, _on_put, NULL);
 
 	}
 	else {
@@ -140,17 +140,17 @@ static void _found_resource(iotcon_resource_s *resource, void *user_data)
 		INFO("===== resource found =====");
 
 		/* Get the resource URI */
-		resource_uri = iotcon_get_resource_uri(*resource);
+		resource_uri = iotcon_resource_get_uri(*resource);
 		if (NULL == resource_uri) {
 			ERR("uri is NULL");
 			return;
 		}
 		/* Get the resource host address */
-		resource_host = iotcon_get_resource_host(*resource);
+		resource_host = iotcon_resource_get_host(*resource);
 		DBG("[%s] resource host : %s", resource_uri, resource_host);
 
 		/* Get the resource interfaces */
-		resource_interfaces = iotcon_get_resource_interfaces(*resource);
+		resource_interfaces = iotcon_resource_get_interfaces(*resource);
 		if (resource_interfaces) {
 			interfaces_str = _alloc_str_from_glist(resource_interfaces);
 			DBG("[%s] resource interfaces : %s", resource_uri, interfaces_str);
@@ -158,7 +158,7 @@ static void _found_resource(iotcon_resource_s *resource, void *user_data)
 		}
 
 		/* Get the resource types */
-		resource_types = iotcon_get_resource_types(*resource);
+		resource_types = iotcon_resource_get_types(*resource);
 		if (resource_types) {
 			res_types_str = _alloc_str_from_glist(resource_types);
 			DBG("[%s] resource types : %s", resource_uri, res_types_str);
@@ -168,12 +168,12 @@ static void _found_resource(iotcon_resource_s *resource, void *user_data)
 		if (!strcmp(door_uri, resource_uri)) {
 			door_resource = iotcon_copy_resource(*resource);
 
-			iotcon_query_parameters query_params = iotcon_new_query_params();
+			iotcon_query query = iotcon_query_new();
 
 			/* send GET Request */
-			iotcon_get(*resource, query_params, _on_get, NULL);
+			iotcon_get(*resource, query, _on_get, NULL);
 
-			iotcon_delete_query_params(query_params);
+			iotcon_query_free(query);
 		}
 	}
 }
