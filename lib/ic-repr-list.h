@@ -20,13 +20,10 @@
 
 #include "iotcon-struct.h"
 
-iotcon_list_h ic_list_new(int type);
 int ic_list_remove(iotcon_list_h list, iotcon_value_h val);
 iotcon_list_h ic_list_append(iotcon_list_h list, iotcon_value_h value);
 
 JsonArray* ic_repr_generate_json_array(iotcon_list_h list);
 iotcon_list_h ic_repr_parse_json_array(JsonArray *parray);
-
-void ic_repr_free_list(iotcon_list_h iotlist);
 
 #endif // __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__

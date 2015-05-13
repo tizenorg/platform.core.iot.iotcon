@@ -23,41 +23,11 @@
 
 #include "ic-common.h"
 #include "ic-struct.h"
-#include "ic-rep.h"
-#include "ic-rep-value.h"
-#include "ic-rep-list.h"
+#include "ic-repr.h"
+#include "ic-repr-value.h"
+#include "ic-repr-list.h"
 
-API iotcon_list_h iotcon_int_list_new()
-{
-	return ic_list_new(IOTCON_VALUE_INT);
-}
-
-API iotcon_list_h iotcon_bool_list_new()
-{
-	return ic_list_new(IOTCON_VALUE_BOOL);
-}
-
-API iotcon_list_h iotcon_double_list_new()
-{
-	return ic_list_new(IOTCON_VALUE_DOUBLE);
-}
-
-API iotcon_list_h iotcon_str_list_new()
-{
-	return ic_list_new(IOTCON_VALUE_STR);
-}
-
-API iotcon_list_h iotcon_list_list_new()
-{
-	return ic_list_new(IOTCON_VALUE_LIST);
-}
-
-API iotcon_list_h iotcon_repr_list_new()
-{
-	return ic_list_new(IOTCON_VALUE_REPR);
-}
-
-iotcon_list_h ic_list_new(int type)
+API iotcon_list_h iotcon_list_new(iotcon_repr_types_e type)
 {
 	iotcon_list_h list;
 	errno = 0;
@@ -78,11 +48,11 @@ API iotcon_list_h iotcon_list_append_int(iotcon_list_h list, int ival)
 	int ret = 0;
 
 	RETV_IF(NULL == list, NULL);
-	RETVM_IF(IOTCON_VALUE_INT != list->type, list, "IOTCON_ERR_PARAM(%d)", list->type);
+	RETVM_IF(IOTCON_TYPE_INT != list->type, list, "IOTCON_ERR_PARAM(%d)", list->type);
 
-	iotcon_value_h value = ic_value_new(IOTCON_VALUE_INT);
+	iotcon_value_h value = ic_value_new(IOTCON_TYPE_INT);
 	if (NULL == value) {
-		ERR("ic_value_new(IOTCON_VALUE_INT) Fail");
+		ERR("ic_value_new(IOTCON_TYPE_INT) Fail");
 		return list;
 	}
 
@@ -103,11 +73,11 @@ API iotcon_list_h iotcon_list_append_bool(iotcon_list_h list, bool bval)
 	int ret = 0;
 
 	RETV_IF(NULL == list, NULL);
-	RETVM_IF(IOTCON_VALUE_BOOL != list->type, list, "IOTCON_ERR_PARAM(%d)", list->type);
+	RETVM_IF(IOTCON_TYPE_BOOL != list->type, list, "IOTCON_ERR_PARAM(%d)", list->type);
 
-	iotcon_value_h value = ic_value_new(IOTCON_VALUE_BOOL);
+	iotcon_value_h value = ic_value_new(IOTCON_TYPE_BOOL);
 	if (NULL == value) {
-		ERR("ic_value_new(IOTCON_VALUE_BOOL) Fail");
+		ERR("ic_value_new(IOTCON_TYPE_BOOL) Fail");
 		return list;
 	}
 
@@ -128,12 +98,12 @@ API iotcon_list_h iotcon_list_append_double(iotcon_list_h list, double dbval)
 	int ret = 0;
 
 	RETV_IF(NULL == list, NULL);
-	RETVM_IF(IOTCON_VALUE_DOUBLE != list->type, list, "IOTCON_ERR_PARAM(%d)",
+	RETVM_IF(IOTCON_TYPE_DOUBLE != list->type, list, "IOTCON_ERR_PARAM(%d)",
 			list->type);
 
-	iotcon_value_h value = ic_value_new(IOTCON_VALUE_DOUBLE);
+	iotcon_value_h value = ic_value_new(IOTCON_TYPE_DOUBLE);
 	if (NULL == value) {
-		ERR("ic_value_new(IOTCON_VALUE_DOUBLE) Fail");
+		ERR("ic_value_new(IOTCON_TYPE_DOUBLE) Fail");
 		return list;
 	}
 
@@ -154,11 +124,11 @@ API iotcon_list_h iotcon_list_append_str(iotcon_list_h list, const char *strval)
 	int ret = 0;
 
 	RETV_IF(NULL == list, NULL);
-	RETVM_IF(IOTCON_VALUE_STR != list->type, list, "IOTCON_ERR_PARAM(%d)", list->type);
+	RETVM_IF(IOTCON_TYPE_STR != list->type, list, "IOTCON_ERR_PARAM(%d)", list->type);
 
-	iotcon_value_h value = ic_value_new(IOTCON_VALUE_STR);
+	iotcon_value_h value = ic_value_new(IOTCON_TYPE_STR);
 	if (NULL == value) {
-		ERR("ic_value_new(IOTCON_VALUE_STR) Fail");
+		ERR("ic_value_new(IOTCON_TYPE_STR) Fail");
 		return list;
 	}
 
@@ -174,20 +144,39 @@ API iotcon_list_h iotcon_list_append_str(iotcon_list_h list, const char *strval)
 	return list;
 }
 
-API iotcon_list_h iotcon_list_append_rep(iotcon_list_h list, iotcon_repr_h repr)
+API iotcon_list_h iotcon_list_append_list(iotcon_list_h dest, iotcon_list_h src)
+{
+	RETV_IF(NULL == dest, NULL);
+	RETV_IF(NULL == src, NULL);
+	RETVM_IF(IOTCON_TYPE_LIST != dest->type, dest, "IOTCON_ERR_PARAM(%d)", dest->type);
+
+	iotcon_value_h value = ic_value_new(IOTCON_TYPE_LIST);
+	if (NULL == value) {
+		ERR("ic_value_new(IOTCON_TYPE_LIST) Fail");
+		return dest;
+	}
+
+	ic_val_list_s *real = (ic_val_list_s *)value;
+	real->list = src;
+
+	dest = ic_list_append(dest, value);
+
+	return dest;
+}
+
+API iotcon_list_h iotcon_list_append_repr(iotcon_list_h list, iotcon_repr_h repr)
 {
 	RETV_IF(NULL == list, NULL);
 	RETV_IF(NULL == repr, NULL);
-	RETVM_IF(IOTCON_VALUE_REPR != list->type, list, "IOTCON_ERR_PARAM(%d)", list->type);
+	RETVM_IF(IOTCON_TYPE_REPR != list->type, list, "IOTCON_ERR_PARAM(%d)", list->type);
 
-	iotcon_value_h value = ic_value_new(IOTCON_VALUE_REPR);
+	iotcon_value_h value = ic_value_new(IOTCON_TYPE_REPR);
 	if (NULL == value) {
-		ERR("ic_value_new(IOTCON_VALUE_REPR) Fail");
+		ERR("ic_value_new(IOTCON_TYPE_REPR) Fail");
 		return list;
 	}
 
 	ic_val_repr_s *real = (ic_val_repr_s *)value;
-
 	real->repr = repr;
 
 	list = ic_list_append(list, value);
@@ -195,7 +184,7 @@ API iotcon_list_h iotcon_list_append_rep(iotcon_list_h list, iotcon_repr_h repr)
 	return list;
 }
 
-API iotcon_repr_h iotcon_list_get_nth_rep(iotcon_list_h list, int index)
+API iotcon_repr_h iotcon_list_get_nth_repr(iotcon_list_h list, int index)
 {
 	RETV_IF(NULL == list, NULL);
 	RETV_IF(NULL == list->list, NULL);
@@ -207,7 +196,7 @@ API iotcon_repr_h iotcon_list_get_nth_rep(iotcon_list_h list, int index)
 	}
 
 	ic_val_repr_s *real = (ic_val_repr_s *) value;
-	RETVM_IF(IOTCON_VALUE_REPR != real->type, NULL, "IOTCON_ERR_PARAM(%d)", real->type);
+	RETVM_IF(IOTCON_TYPE_REPR != real->type, NULL, "IOTCON_ERR_PARAM(%d)", real->type);
 
 	return real->repr;
 }
@@ -232,7 +221,7 @@ API iotcon_list_h iotcon_list_get_nth_list(iotcon_list_h list, int index)
 	}
 
 	ic_val_list_s *real = (ic_val_list_s *) value;
-	RETVM_IF(IOTCON_VALUE_LIST != real->type, NULL, "IOTCON_ERR_PARAM(%d)", real->type);
+	RETVM_IF(IOTCON_TYPE_LIST != real->type, NULL, "IOTCON_ERR_PARAM(%d)", real->type);
 
 	return real->list;
 }
@@ -301,11 +290,11 @@ JsonArray* ic_repr_generate_json_array(iotcon_list_h list)
 
 		int type = iotcon_value_get_type(iotvalue_child);
 		switch (type) {
-		case IOTCON_VALUE_INT:
-		case IOTCON_VALUE_BOOL:
-		case IOTCON_VALUE_DOUBLE:
-		case IOTCON_VALUE_STR:
-		case IOTCON_VALUE_NULL:
+		case IOTCON_TYPE_INT:
+		case IOTCON_TYPE_BOOL:
+		case IOTCON_TYPE_DOUBLE:
+		case IOTCON_TYPE_STR:
+		case IOTCON_TYPE_NULL:
 			node_child = ic_repr_generate_json_value(iotvalue_child);
 			if (NULL == node_child) {
 				ERR("ic_repr_generate_json_value(iotvalue_child) Fail");
@@ -314,7 +303,7 @@ JsonArray* ic_repr_generate_json_array(iotcon_list_h list)
 			}
 			json_array_add_element(parray, node_child);
 			break;
-		case IOTCON_VALUE_LIST:
+		case IOTCON_TYPE_LIST:
 			iotlist_child = iotcon_value_get_list(iotvalue_child);
 			array_child = ic_repr_generate_json_array(iotlist_child);
 			if (NULL == array_child) {
@@ -326,8 +315,8 @@ JsonArray* ic_repr_generate_json_array(iotcon_list_h list)
 			json_node_set_array(node_child, array_child);
 			json_array_add_element(parray, node_child);
 			break;
-		case IOTCON_VALUE_REPR:
-			repr_child = iotcon_value_get_rep(iotvalue_child);
+		case IOTCON_TYPE_REPR:
+			repr_child = iotcon_value_get_repr(iotvalue_child);
 			obj_child = ic_repr_generate_json_repr(repr_child, &error_code);
 			if (NULL == obj_child) {
 				ERR("ic_repr_generate_json_repr(repr_child) Fail");
@@ -347,7 +336,7 @@ iotcon_list_h ic_repr_parse_json_array(JsonArray *parray)
 	int i;
 	int count = json_array_get_length(parray);
 
-	iotcon_list_h list = ic_list_new(IOTCON_VALUE_NONE);
+	iotcon_list_h list = iotcon_list_new(IOTCON_TYPE_NONE);
 //	DBG("array count(%d)", count);
 
 	for (i = 0; i < count; i++) {
@@ -360,10 +349,10 @@ iotcon_list_h ic_repr_parse_json_array(JsonArray *parray)
 			}
 
 			ic_basic_s *real = (ic_basic_s*)value;
-			if (IOTCON_VALUE_NONE != list->type && list->type != real->type) {
+			if (IOTCON_TYPE_NONE != list->type && list->type != real->type) {
 				ERR("Type matching Fail(list:%d,value:%d)", list->type, real->type);
 				ic_repr_free_basic_value(value);
-				ic_repr_free_list(list);
+				iotcon_repr_free_list(list);
 				return NULL;
 			}
 
@@ -379,18 +368,18 @@ iotcon_list_h ic_repr_parse_json_array(JsonArray *parray)
 				return NULL;
 			}
 
-			if (IOTCON_VALUE_NONE != list->type
-					&& IOTCON_VALUE_LIST != list->type) {
+			if (IOTCON_TYPE_NONE != list->type
+					&& IOTCON_TYPE_LIST != list->type) {
 				ERR("Type matching Fail(%d)", list->type);
-				ic_repr_free_list(parsed_list);
-				ic_repr_free_list(list);
+				iotcon_repr_free_list(parsed_list);
+				iotcon_repr_free_list(list);
 				return NULL;
 			}
 
-			iotcon_value_h value = ic_value_new(IOTCON_VALUE_LIST);
+			iotcon_value_h value = ic_value_new(IOTCON_TYPE_LIST);
 			ic_value_set_list(value, parsed_list);
 			list = ic_list_append(list, value);
-			list->type = IOTCON_VALUE_LIST;
+			list->type = IOTCON_TYPE_LIST;
 
 			continue;
 		}
@@ -399,24 +388,24 @@ iotcon_list_h ic_repr_parse_json_array(JsonArray *parray)
 			JsonObject *child_obj = json_node_get_object(child_node);
 			JsonObject *repr_obj = json_object_get_object_member(child_obj,
 					IOTCON_KEY_REP);
-			iotcon_repr_h retrep = ic_repr_parse_json_obj(repr_obj, &error_code);
-			if (NULL == retrep) {
-				ERR("ic_repr_parse_json_obj() Fail(NULL == retrep)");
+			iotcon_repr_h ret_repr = ic_repr_parse_json_obj(repr_obj, &error_code);
+			if (NULL == ret_repr) {
+				ERR("ic_repr_parse_json_obj() Fail(NULL == ret_repr)");
 				return NULL;
 			}
 
-			if (IOTCON_VALUE_NONE != list->type
-					&& IOTCON_VALUE_REPR != list->type) {
+			if (IOTCON_TYPE_NONE != list->type
+					&& IOTCON_TYPE_REPR != list->type) {
 				ERR("Type matching Fail(%d)", list->type);
-				iotcon_repr_free(retrep);
-				ic_repr_free_list(list);
+				iotcon_repr_free(ret_repr);
+				iotcon_repr_free_list(list);
 				return NULL;
 			}
 
-			iotcon_value_h value = ic_value_new(IOTCON_VALUE_REPR);
-			ic_value_set_rep(value, retrep);
+			iotcon_value_h value = ic_value_new(IOTCON_TYPE_REPR);
+			ic_value_set_repr(value, ret_repr);
 			list = ic_list_append(list, value);
-			list->type = IOTCON_VALUE_REPR;
+			list->type = IOTCON_TYPE_REPR;
 			continue;
 		}
 	}
@@ -424,22 +413,22 @@ iotcon_list_h ic_repr_parse_json_array(JsonArray *parray)
 	return list;
 }
 
-void ic_repr_free_list(iotcon_list_h iotlist)
+API void iotcon_repr_free_list(iotcon_list_h list)
 {
 	FN_CALL;
 	int count = 0;
 	GList *cur = NULL;
 
-	RET_IF(NULL == iotlist);
+	RET_IF(NULL == list);
 
-	if (iotlist->list)
-		count = g_list_length(iotlist->list);
+	if (list->list)
+		count = g_list_length(list->list);
 
-	DBG("iotlist count(%d)", count);
-	cur = iotlist->list;
+	DBG("list count(%d)", count);
+	cur = list->list;
 	while (cur) {
 		ic_repr_free_value(cur->data);
 		cur = cur->next;
 	}
-	free(iotlist);
+	free(list);
 }

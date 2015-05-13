@@ -20,10 +20,10 @@
 extern "C" {
 #include "ic-common.h"
 #include "ic-utils.h"
-#include "ic-rep.h"
+#include "ic-repr.h"
 #include "ic-handler.h"
 }
-#include "ic-ioty-rep.h"
+#include "ic-ioty-repr.h"
 
 using namespace OC;
 using namespace std;

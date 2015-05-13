@@ -20,18 +20,6 @@
 
 #include "iotcon-struct.h"
 
-enum {
-	/* SHOULD NOT change this order */
-	IOTCON_VALUE_NONE = 0,
-	IOTCON_VALUE_INT,
-	IOTCON_VALUE_BOOL,
-	IOTCON_VALUE_DOUBLE,
-	IOTCON_VALUE_STR,
-	IOTCON_VALUE_NULL,
-	IOTCON_VALUE_LIST,
-	IOTCON_VALUE_REPR,
-};
-
 iotcon_value_h ic_value_new(int type);
 
 int ic_value_set_int(iotcon_value_h value, int ival);
@@ -39,7 +27,7 @@ int ic_value_set_bool(iotcon_value_h value, bool bval);
 int ic_value_set_double(iotcon_value_h value, double dbval);
 int ic_value_set_str(iotcon_value_h value, const char *strval);
 int ic_value_set_list(iotcon_value_h value, iotcon_list_h list);
-int ic_value_set_rep(iotcon_value_h value, iotcon_repr_h rep);
+int ic_value_set_repr(iotcon_value_h value, iotcon_repr_h rep);
 int ic_value_set_null(iotcon_value_h value);
 
 JsonNode* ic_repr_generate_json_value(iotcon_value_h value);

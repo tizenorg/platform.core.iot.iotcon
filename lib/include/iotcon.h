@@ -177,10 +177,12 @@ char* iotcon_repr_get_str(iotcon_repr_h repr, const char *key);
 int iotcon_repr_set_str(iotcon_repr_h repr, const char *key, const char *strval);
 iotcon_list_h iotcon_repr_get_list(iotcon_repr_h repr, const char *key);
 int iotcon_repr_replace_list(iotcon_repr_h repr, const char *key, iotcon_list_h list);
-iotcon_repr_h iotcon_repr_get_rep(iotcon_repr_h repr, const char *key);
-int iotcon_repr_replace_rep(iotcon_repr_h dest, const char *key, iotcon_repr_h src);
+iotcon_repr_h iotcon_repr_get_repr(iotcon_repr_h repr, const char *key);
+int iotcon_repr_replace_repr(iotcon_repr_h dest, const char *key, iotcon_repr_h src);
 bool iotcon_repr_is_null(iotcon_repr_h repr, const char *key);
 int iotcon_repr_set_null(iotcon_repr_h repr, const char *key);
+
+void iotcon_repr_free(iotcon_repr_h repr);
 
 GList* iotcon_repr_get_children(iotcon_repr_h parent);
 int iotcon_repr_get_children_count(iotcon_repr_h parent);
@@ -190,18 +192,16 @@ iotcon_repr_h iotcon_repr_get_nth_child(iotcon_repr_h parent, int index);
 GList* iotcon_repr_get_key_list(iotcon_repr_h repr);
 int iotcon_repr_get_keys_count(iotcon_repr_h repr);
 
-iotcon_list_h iotcon_int_list_new();
-iotcon_list_h iotcon_bool_list_new();
-iotcon_list_h iotcon_double_list_new();
-iotcon_list_h iotcon_str_list_new();
-iotcon_list_h iotcon_list_list_new();
-iotcon_list_h iotcon_repr_list_new();
+void iotcon_repr_print(iotcon_repr_h repr);
+
+iotcon_list_h iotcon_list_new(iotcon_repr_types_e type);
 iotcon_list_h iotcon_list_append_int(iotcon_list_h list, int ival);
 iotcon_list_h iotcon_list_append_bool(iotcon_list_h list, bool bval);
 iotcon_list_h iotcon_list_append_double(iotcon_list_h list, double dbval);
 iotcon_list_h iotcon_list_append_str(iotcon_list_h list, const char *strval);
-iotcon_list_h iotcon_list_append_rep(iotcon_list_h list, iotcon_repr_h repr);
-iotcon_repr_h iotcon_list_get_nth_rep(iotcon_list_h list, int index);
+iotcon_list_h iotcon_list_append_list(iotcon_list_h dest, iotcon_list_h src);
+iotcon_list_h iotcon_list_append_repr(iotcon_list_h list, iotcon_repr_h repr);
+iotcon_repr_h iotcon_list_get_nth_repr(iotcon_list_h list, int index);
 int iotcon_list_get_length(iotcon_list_h list);
 iotcon_list_h iotcon_list_get_nth_list(iotcon_list_h list, int index);
 iotcon_value_h iotcon_list_get_nth_value(iotcon_list_h list, int index);
@@ -209,17 +209,15 @@ iotcon_value_h iotcon_list_get_nth_value(iotcon_list_h list, int index);
 typedef void (*iotcon_list_fn)(iotcon_value_h value, void *user_data);
 void iotcon_list_foreach(iotcon_list_h list, iotcon_list_fn fn, void *user_data);
 
+void iotcon_repr_free_list(iotcon_list_h list);
+
 int iotcon_value_get_type(iotcon_value_h value);
 int iotcon_value_get_int(iotcon_value_h value);
 bool iotcon_value_get_bool(iotcon_value_h value);
 double iotcon_value_get_double(iotcon_value_h value);
 char* iotcon_value_get_str(iotcon_value_h value);
 iotcon_list_h iotcon_value_get_list(iotcon_value_h value);
-iotcon_repr_h iotcon_value_get_rep(iotcon_value_h value);
-
-void iotcon_repr_free(iotcon_repr_h repr);
-
-void iotcon_repr_print(iotcon_repr_h repr);
+iotcon_repr_h iotcon_value_get_repr(iotcon_value_h value);
 
 #ifdef __cplusplus
 }

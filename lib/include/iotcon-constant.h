@@ -82,4 +82,15 @@ typedef enum {
 	IOTCON_EH_MAX
 } iotcon_entity_handler_result_e;
 
+typedef enum {
+	IOTCON_TYPE_NONE = 0,
+	IOTCON_TYPE_INT,
+	IOTCON_TYPE_BOOL,
+	IOTCON_TYPE_DOUBLE,
+	IOTCON_TYPE_STR,
+	IOTCON_TYPE_NULL,
+	IOTCON_TYPE_LIST,
+	IOTCON_TYPE_REPR,
+} iotcon_repr_types_e;
+
 #endif //__IOT_CONNECTIVITY_MANAGER_CONSTANT_H__
