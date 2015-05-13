@@ -120,6 +120,9 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 	va_start(args, prop);
 
 	switch (prop) {
+	case IOTCON_RESP_INTERFACE:
+		resp->interface = va_arg(args, int);
+		break;
 	case IOTCON_RESP_REPRESENTATION:
 		resp->repr = va_arg(args, iotcon_repr_h);
 		break;

@@ -642,7 +642,6 @@ extern "C" int ic_ioty_send_res_response_data(struct ic_res_response_s *resp)
 	RETV_IF(NULL == resp->repr, IOTCON_ERR_PARAM);
 
 	OCRepresentation ocRep = ic_ioty_repr_parse(resp->repr);
-	iotcon_repr_free(resp->repr);
 
 	auto pResponse = make_shared<OCResourceResponse>();
 	if (pResponse) {
