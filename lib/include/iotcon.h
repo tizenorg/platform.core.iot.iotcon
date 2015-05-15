@@ -191,6 +191,7 @@ iotcon_repr_h iotcon_repr_get_nth_child(iotcon_repr_h parent, int index);
 
 GList* iotcon_repr_get_key_list(iotcon_repr_h repr);
 int iotcon_repr_get_keys_count(iotcon_repr_h repr);
+bool iotcon_repr_contains(iotcon_repr_h repr, const char *key);
 
 void iotcon_repr_print(iotcon_repr_h repr);
 
@@ -218,6 +219,8 @@ double iotcon_value_get_double(iotcon_value_h value);
 char* iotcon_value_get_str(iotcon_value_h value);
 iotcon_list_h iotcon_value_get_list(iotcon_value_h value);
 iotcon_repr_h iotcon_value_get_repr(iotcon_value_h value);
+
+char* iotcon_repr_generate_json(iotcon_repr_h repr);
 
 #ifdef __cplusplus
 }

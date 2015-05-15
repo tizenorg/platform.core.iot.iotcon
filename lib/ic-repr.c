@@ -463,7 +463,7 @@ API int iotcon_repr_get_keys_count(iotcon_repr_h repr)
 	return g_hash_table_size(repr->hash_table);
 }
 
-bool ic_repr_has_value(iotcon_repr_h repr, const char *key)
+API bool iotcon_repr_contains(iotcon_repr_h repr, const char *key)
 {
 	RETV_IF(NULL == repr, false);
 	RETV_IF(NULL == key, false);
@@ -618,26 +618,25 @@ JsonObject* _ic_repr_generate_json_foreach(iotcon_repr_h cur_repr,
 		DBG("Representation has \"%s\" key. count(%d)", IOTCON_KEY_RESOURCETYPES,
 				rt_count);
 		JsonArray *rt_array = json_array_new();
-		iotcon_repr_get_resource_interfaces(cur_repr, _ic_repr_get_res_type_fn, rt_array);
+		iotcon_repr_get_resource_types(cur_repr, _ic_repr_get_res_type_fn, rt_array);
 		json_object_set_array_member(prop_obj, IOTCON_KEY_RESOURCETYPES, rt_array);
 	}
 
 	if (0 < if_count) {
 		DBG("Representation has \"%s\" key. count(%d)", IOTCON_KEY_INTERFACES, if_count);
 		JsonArray *if_array = json_array_new();
-		iotcon_repr_get_resource_types(cur_repr, _ic_repr_get_res_interface_fn, if_array);
+		iotcon_repr_get_resource_interfaces(cur_repr, _ic_repr_get_res_interface_fn, if_array);
 		json_object_set_array_member(prop_obj, IOTCON_KEY_INTERFACES, if_array);
 	}
 
 	return repr_obj;
 }
 
-char* ic_repr_generate_json(iotcon_repr_h repr)
+
+static JsonObject* _ic_repr_generate_json_object(iotcon_repr_h repr)
 {
 	JsonObject *repr_obj = NULL;
-	gchar *json_data = NULL;
 	JsonObject *root_obj = NULL;
-	JsonNode *root_node = NULL;
 	JsonArray *root_array = NULL;
 	GList *children = NULL;
 	unsigned int child_count = 0;
@@ -675,9 +674,24 @@ char* ic_repr_generate_json(iotcon_repr_h repr)
 
 	json_object_set_array_member(root_obj, IOTCON_KEY_OC, root_array);
 
+	return root_obj;
+}
+
+char* ic_repr_generate_json(iotcon_repr_h repr, bool set_pretty)
+{
+	JsonNode *root_node = NULL;
+	char *json_data = NULL;
+
+	JsonObject *obj = _ic_repr_generate_json_object(repr);
+	if (NULL == obj) {
+		ERR("ic_repr_generate_json() Fail");
+		return NULL;
+	}
+
 	JsonGenerator *gen = json_generator_new();
+	json_generator_set_pretty(gen, set_pretty);
 	root_node = json_node_new(JSON_NODE_OBJECT);
-	json_node_set_object(root_node, root_obj);
+	json_node_set_object(root_node, obj);
 	json_generator_set_root(gen, root_node);
 
 	json_data = json_generator_to_data(gen, NULL);
@@ -862,25 +876,7 @@ API void iotcon_repr_free(iotcon_repr_h repr)
 	FN_END;
 }
 
-API void iotcon_repr_print(iotcon_repr_h repr)
+API char* iotcon_repr_generate_json(iotcon_repr_h repr)
 {
-	FN_CALL;
-	gchar *json_data = NULL;
-	JsonNode *root_node = NULL;
-	int error_code = IOTCON_ERR_NONE;
-
-	JsonObject *repr_obj = ic_repr_generate_json_repr(repr, &error_code);
-	if (NULL == repr_obj) {
-		ERR("ic_repr_generate_json_repr() Fail(NULL == repr_obj)");
-		return;
-	}
-
-	root_node = json_node_new(JSON_NODE_OBJECT);
-	JsonGenerator *gen = json_generator_new();
-	json_generator_set_pretty(gen, TRUE);
-	json_node_set_object(root_node, repr_obj);
-	json_generator_set_root(gen, root_node);
-
-	json_data = json_generator_to_data(gen, NULL);
-	DBG("\n%s", json_data);
+	return ic_repr_generate_json(repr, TRUE);
 }

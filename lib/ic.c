@@ -176,7 +176,10 @@ API void iotcon_response_free(iotcon_response_h resp)
 	RET_IF(NULL == resp);
 
 	free(data->new_resource_uri);
-	ic_options_free(resp->header_options);
+
+	/* To avoid unnecessary ERR log (header_options could be NULL) */
+	if (resp->header_options)
+		ic_options_free(resp->header_options);
 	iotcon_repr_free(resp->repr);
 	free(data);
 }

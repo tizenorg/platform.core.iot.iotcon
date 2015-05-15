@@ -87,7 +87,7 @@ OCRepresentation ic_ioty_repr_parse(iotcon_repr_h repr)
 
 	// TODO: It's better that iotcon_repr_h is changed to
 	// OCRepresentation at once.
-	char *repr_json = ic_repr_generate_json(repr);
+	char *repr_json = ic_repr_generate_json(repr, false);
 
 	try {
 		info.setJSONRepresentation(repr_json);

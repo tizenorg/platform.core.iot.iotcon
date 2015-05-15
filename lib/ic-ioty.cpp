@@ -150,6 +150,7 @@ namespace icIotivityHandler {
 			if (on_get)
 				on_get(options, repr, res, cb_data);
 
+			iotcon_repr_free(repr);
 			iotcon_options_free(options);
 		}
 	};
@@ -191,6 +192,7 @@ namespace icIotivityHandler {
 			if (on_put)
 				on_put(options, repr, res, cb_data);
 
+			iotcon_repr_free(repr);
 			iotcon_options_free(options);
 		}
 	};
@@ -216,7 +218,7 @@ namespace icIotivityHandler {
 			iotcon_options_h options;
 			iotcon_repr_h repr = NULL;
 
-			if (OC_STACK_OK == eCode)
+			if (OC_STACK_OK == eCode || OC_STACK_RESOURCE_CREATED == eCode)
 				res = IOTCON_ERR_NONE;
 			else
 				res = IOTCON_ERR_IOTIVITY;
@@ -232,6 +234,7 @@ namespace icIotivityHandler {
 			if (on_post)
 				on_post(options, repr, res, cb_data);
 
+			iotcon_repr_free(repr);
 			iotcon_options_free(options);
 		}
 	};
@@ -254,7 +257,7 @@ namespace icIotivityHandler {
 			int res;
 			iotcon_options_h options;
 
-			if (OC_STACK_OK == eCode)
+			if (OC_STACK_OK == eCode || OC_STACK_RESOURCE_DELETED == eCode)
 				res = IOTCON_ERR_NONE;
 			else
 				res = IOTCON_ERR_IOTIVITY;
@@ -309,6 +312,7 @@ namespace icIotivityHandler {
 			if (on_observe)
 				on_observe(options, repr, res, sequenceNumber, cb_data);
 
+			iotcon_repr_free(repr);
 			iotcon_options_free(options);
 		}
 	};
@@ -417,7 +421,9 @@ static OCEntityHandlerResult _entity_handler(shared_ptr<OCResourceRequest> reque
 
 	free(request_s.request_type);
 	free(request_s.res_uri);
-	if (request_s.repr) /* To avoid unnecessary ERR log (repr could be NULL) */
+
+	/* To avoid unnecessary ERR log (repr could be NULL) */
+	if (request_s.repr)
 		iotcon_repr_free(request_s.repr);
 	iotcon_options_free(request_s.header_options);
 	iotcon_query_free(request_s.query);
