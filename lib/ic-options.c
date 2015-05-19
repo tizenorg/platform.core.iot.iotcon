@@ -18,16 +18,14 @@
 #include <glib.h>
 
 #include "iotcon.h"
-
 #include "ic-common.h"
 #include "ic-utils.h"
 #include "ic-struct.h"
-#include "ic-ioty.h"
 #include "ic-options.h"
 
 API iotcon_options_h iotcon_options_new()
 {
-	iotcon_options_h options = calloc(1, sizeof(struct ic_options_s));
+	iotcon_options_h options = calloc(1, sizeof(struct ic_options));
 	if (NULL == options) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;
@@ -37,6 +35,7 @@ API iotcon_options_h iotcon_options_new()
 	return options;
 }
 
+
 void ic_options_free(iotcon_options_h options)
 {
 	RET_IF(NULL == options);
@@ -44,6 +43,7 @@ void ic_options_free(iotcon_options_h options)
 	g_hash_table_unref(options->options);
 	free(options);
 }
+
 
 API void iotcon_options_free(iotcon_options_h options)
 {
@@ -53,23 +53,25 @@ API void iotcon_options_free(iotcon_options_h options)
 	ic_options_free(options);
 }
 
-API int iotcon_options_insert(iotcon_options_h options, const unsigned short id,
+
+/* options id is always situated between 2014 and 3000 */
+API int iotcon_options_insert(iotcon_options_h options, unsigned short id,
 		const char *data)
 {
 	FN_CALL;
-	gpointer value;
 
-	RETVM_IF(((id < IOTCON_OPTIONID_MIN) || (IOTCON_OPTIONID_MAX < id)), IOTCON_ERROR_PARAM,
-			"Invalid id(%d)", id);
+	RETV_IF(NULL == options, IOTCON_ERROR_PARAM);
+	RETVM_IF(((id < IOTCON_OPTIONID_MIN) || (IOTCON_OPTIONID_MAX < id)),
+			IOTCON_ERROR_PARAM, "Invalid id(%d)", id);
+	RETV_IF(NULL == data, IOTCON_ERROR_PARAM);
 
-	value = ic_utils_strdup(data);
-
-	g_hash_table_insert(options->options, GUINT_TO_POINTER(id), value);
+	g_hash_table_insert(options->options, GUINT_TO_POINTER(id), ic_utils_strdup(data));
 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_options_delete(iotcon_options_h options, const unsigned short id)
+
+API int iotcon_options_delete(iotcon_options_h options, unsigned short id)
 {
 	gboolean ret;
 
@@ -83,7 +85,8 @@ API int iotcon_options_delete(iotcon_options_h options, const unsigned short id)
 	return IOTCON_ERROR_NONE;
 }
 
-API const char* iotcon_options_lookup(iotcon_options_h options, const unsigned short id)
+
+API const char* iotcon_options_lookup(iotcon_options_h options, unsigned short id)
 {
 	const char *ret;
 
@@ -96,33 +99,36 @@ API const char* iotcon_options_lookup(iotcon_options_h options, const unsigned s
 	return ret;
 }
 
+
 API void iotcon_options_foreach(iotcon_options_h options,
-		iotcon_options_foreach_cb foreach_cb, void *user_data)
+		iotcon_options_foreach_cb cb, void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key, value;
 
 	RET_IF(NULL == options);
+	RET_IF(NULL == cb);
 
 	g_hash_table_iter_init(&iter, options->options);
 	while (g_hash_table_iter_next(&iter, &key, &value))
-		foreach_cb(GPOINTER_TO_UINT(key), value, user_data);
+		cb(GPOINTER_TO_UINT(key), value, user_data);
 }
 
-API iotcon_options_h iotcon_options_clone(iotcon_options_h options)
+
+iotcon_options_h ic_options_ref(iotcon_options_h options)
 {
-	iotcon_options_h clone = NULL;
+	iotcon_options_h ref;
 
 	RETV_IF(NULL == options, NULL);
 
-	clone = calloc(1, sizeof(struct ic_options_s));
-	if (NULL == clone) {
+	ref = calloc(1, sizeof(struct ic_options));
+	if (NULL == ref) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;
 	}
 
-	clone->options = g_hash_table_ref(options->options);
+	ref->options = g_hash_table_ref(options->options);
 
-	return clone;
+	return ref;
 }
 

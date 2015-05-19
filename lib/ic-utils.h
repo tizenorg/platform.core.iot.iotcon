@@ -16,9 +16,10 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_UTILITY_H__
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_UTILITY_H__
 
-#include <glib.h>
+#include "iotcon-struct.h"
+
+#define STR_EQUAL 0
 
 char* ic_utils_strdup(const char *src);
-void ic_utils_print_str_list(GList *list);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_UTILITY_H__ */

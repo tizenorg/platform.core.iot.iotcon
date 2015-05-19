@@ -16,6 +16,12 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_STRUCT_H__
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_STRUCT_H__
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <glib.h>
+
+#include "iotcon.h"
+#include "iotcon-constant.h"
 #include "iotcon-struct.h"
 
 struct ic_value_s {
@@ -55,21 +61,78 @@ typedef struct {
 	struct ic_repr_s *repr;
 } ic_val_repr_s;
 
-struct ic_options_s {
+struct ic_options {
 	bool has_parent;
 	GHashTable *options;
 };
 
-/* related with iotcon_response_property_e */
-struct ic_res_response_s {
-	char *new_resource_uri;
+struct ic_observe_info {
+	iotcon_observe_action_e action;
+	uint8_t observer_id;
+};
+
+typedef void* oc_request_h;
+typedef void* oc_resource_h;
+
+typedef struct ic_resource {
+	void *handle;
+	iotcon_request_handler_cb request_handler_cb;
+	void *user_data;
+} resource_handler_s;
+
+struct ic_remote_resource {
+	char *uri;
+	char *host;
+	bool is_observable;
+	bool is_collection;
+	iotcon_options_h header_options;
+	iotcon_str_list_s *types;
+	int ifaces;
+	iotcon_observe_h observe_handle;
+};
+
+struct ic_resource_request {
+	char *request_type;
+	char *uri;
+	iotcon_options_h header_options;
+	iotcon_query_h query;
+	int request_handler_flag;
+	struct ic_observe_info observation_info;
+	iotcon_repr_h repr;
+	oc_request_h request_handle;
+	oc_resource_h resource_handle;
+};
+
+struct ic_resource_response {
+	char *new_uri;
 	int error_code;
 	iotcon_options_h header_options;
-	iotcon_interface_e interface;
-	iotcon_request_h request_handle;
-	iotcon_resource_h resource_handle;
-	iotcon_entity_handler_result_e result;
+	iotcon_interface_e iface;
+	iotcon_response_result_e result;
+	iotcon_repr_h repr;
+	oc_request_h request_handle;
+	oc_resource_h resource_handle;
+};
+
+struct ic_notify_msg {
+	int error_code;
+	iotcon_interface_e iface;
 	iotcon_repr_h repr;
 };
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_STRUCT_H__ */
+struct ic_device_info {
+	char *device_name;
+	char *host_name;
+	char *device_uuid;
+	char *content_type;
+	char *version;
+	char *manufacturer_name;
+	char *manufacturer_url;
+	char *model_number;
+	char *date_of_manufacture;
+	char *platform_ver;
+	char *firmware_ver;
+	char *support_url;
+};
+
+#endif //__IOT_CONNECTIVITY_MANAGER_INTERNAL_STRUCT_H__

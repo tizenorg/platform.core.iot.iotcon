@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "iotcon.h"
+#include <glib.h>
 
+#include "iotcon.h"
 #include "ic-common.h"
 #include "ic-struct.h"
 #include "ic-utils.h"
@@ -424,12 +425,12 @@ int ic_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value)
 	return IOTCON_ERROR_NONE;
 }
 
-static inline int _ic_obj_to_json(GHashTable *hash, GList *key_list, unsigned int index,
-		JsonObject *json_obj)
+static inline int _ic_obj_to_json(GHashTable *hash, iotcon_str_list_s *key_list,
+		unsigned int index, JsonObject *json_obj)
 {
 	FN_CALL;
 	int type;
-	char *key;
+	const char *key;
 	iotcon_repr_h child_repr = NULL;
 	iotcon_list_h child_list = NULL;
 	iotcon_value_h value = NULL;
@@ -442,7 +443,7 @@ static inline int _ic_obj_to_json(GHashTable *hash, GList *key_list, unsigned in
 	RETV_IF(NULL == key_list, IOTCON_ERROR_PARAM);
 	RETV_IF(index < 0, IOTCON_ERROR_PARAM);
 
-	key = g_list_nth_data(key_list, index);
+	key = iotcon_str_list_nth_data(key_list, index);
 	value = g_hash_table_lookup(hash, key);
 	if (NULL == value)
 		ERR("g_hash_table_lookup(%s) Fail", key);
@@ -499,7 +500,7 @@ JsonObject* ic_obj_to_json(iotcon_repr_h repr)
 	FN_CALL;
 	int ret;
 	unsigned int i = 0;
-	GList *key_list = NULL;
+	iotcon_str_list_s *key_list = NULL;
 	JsonObject *json_obj = NULL;
 	JsonObject *parent_obj;
 
@@ -508,18 +509,17 @@ JsonObject* ic_obj_to_json(iotcon_repr_h repr)
 	key_list = iotcon_repr_get_key_list(repr);
 	if (key_list) {
 		json_obj = json_object_new();
-		ic_utils_print_str_list(key_list);
-
-		for (i = 0; i < g_list_length(key_list); i++) {
+		for (i = 0; i < iotcon_str_list_length(key_list); i++) {
 			ret = _ic_obj_to_json(repr->hash_table, key_list, i, json_obj);
+
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("_ic_obj_to_json() Fail(%d)", ret);
 				json_object_unref(json_obj);
-				g_list_free(key_list);
+				iotcon_str_list_free(key_list);
 				return NULL;
 			}
 		}
-		g_list_free(key_list);
+		iotcon_str_list_free(key_list);
 	}
 
 	parent_obj = json_object_new();
@@ -601,8 +601,6 @@ iotcon_repr_h ic_obj_from_json(JsonObject *json_repr)
 
 	repr = iotcon_repr_new();
 	if (key_list) {
-		ic_utils_print_str_list(key_list);
-
 		for (i = 0; i < g_list_length(key_list); i++) {
 			ret = _ic_obj_from_json(obj, key_list, i, repr);
 			if (IOTCON_ERROR_NONE != ret) {

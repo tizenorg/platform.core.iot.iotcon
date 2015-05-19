@@ -16,6 +16,8 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <glib.h>
+
 #include <iotcon.h>
 #include "test-log.h"
 
@@ -31,7 +33,9 @@ static door_resource_s my_door;
 static bool resource_created = false;
 iotcon_resource_h new_door_handle;
 
-static void _request_handler(const iotcon_request_s *request);
+iotcon_observers_h observers = NULL;
+
+static void _request_handler(iotcon_request_h request, void *user_data);
 
 static iotcon_error_e _set_door_resource()
 {
@@ -62,9 +66,11 @@ static void _check_door_state()
 static iotcon_resource_h _create_door_resource(char *uri, iotcon_interface_e interfaces,
 		iotcon_resource_property_e properties)
 {
+	iotcon_str_list_s resource_types = {my_door.type, NULL};
+
 	/* register door resource */
-	iotcon_resource_h door_handle = iotcon_register_resource(uri, my_door.type,
-			interfaces, properties, _request_handler);
+	iotcon_resource_h door_handle = iotcon_register_resource(uri, &resource_types,
+			interfaces, properties, _request_handler, door_handle);
 	if (NULL == door_handle) {
 		ERR("iotcon_register_resource() Fail");
 		return NULL;
@@ -74,14 +80,13 @@ static iotcon_resource_h _create_door_resource(char *uri, iotcon_interface_e int
 }
 
 static void _send_response(iotcon_response_h response, iotcon_repr_h repr,
-		iotcon_entity_handler_result_e result)
+		iotcon_response_result_e result)
 {
-	iotcon_response_set(response, IOTCON_RESP_RESULT, result);
-	iotcon_response_set(response, IOTCON_RESP_REPRESENTATION, repr);
-	iotcon_response_set(response, IOTCON_RESP_ERR_CODE, 200);
+	iotcon_response_set(response, IOTCON_RESPONSE_RESULT, result);
+	iotcon_response_set(response, IOTCON_RESPONSE_REPRESENTATION, repr);
 
 	/* send Representation to the client */
-	iotcon_send_resource_response(response);
+	iotcon_response_send(response);
 }
 
 static void _request_handler_get(iotcon_response_h response)
@@ -94,11 +99,10 @@ static void _request_handler_get(iotcon_response_h response)
 	iotcon_repr_set_uri(resp_repr, my_door.uri);
 	iotcon_repr_set_bool(resp_repr, "opened", my_door.state);
 
-	_send_response(response, resp_repr, IOTCON_EH_OK);
+	_send_response(response, resp_repr, IOTCON_RESPONSE_RESULT_OK);
 }
 
-static void _request_handler_put(const iotcon_request_s *request,
-		iotcon_response_h response)
+static void _request_handler_put(iotcon_request_h request, iotcon_response_h response)
 {
 	iotcon_repr_h req_repr = NULL;
 	iotcon_repr_h resp_repr = NULL;
@@ -113,7 +117,7 @@ static void _request_handler_put(const iotcon_request_s *request,
 	iotcon_repr_set_uri(resp_repr, my_door.uri);
 	iotcon_repr_set_bool(resp_repr, "opened", my_door.state);
 
-	_send_response(response, resp_repr, IOTCON_EH_OK);
+	_send_response(response, resp_repr, IOTCON_RESPONSE_RESULT_OK);
 }
 
 static void _request_handler_post(iotcon_response_h response)
@@ -134,41 +138,42 @@ static void _request_handler_post(iotcon_response_h response)
 		resp_repr = iotcon_repr_new();
 		iotcon_repr_set_str(resp_repr, "createduri", "/a/door1");
 
-		_send_response(response, resp_repr, IOTCON_EH_RESOURCE_CREATED);
+		_send_response(response, resp_repr, IOTCON_RESPONSE_RESULT_RESOURCE_CREATED);
 	}
 
 }
 
 static void _request_handler_delete(iotcon_response_h response)
 {
-	int ret = IOTCON_ERROR_NONE;
 	iotcon_repr_h resp_repr = NULL;
-	iotcon_entity_handler_result_e result = IOTCON_EH_OK;
+	iotcon_response_result_e result = IOTCON_RESPONSE_RESULT_OK;
 	INFO("DELETE request");
 
-	ret = iotcon_unregister_resource(new_door_handle);
+	iotcon_unregister_resource(new_door_handle);
 	resp_repr = iotcon_repr_new();
-	if (IOTCON_ERROR_NONE == ret)
-		result = IOTCON_EH_RESOURCE_DELETED;
-	else
-		result = IOTCON_EH_ERROR;
+	result = IOTCON_RESPONSE_RESULT_RESOURCE_DELETED;
 
 	_send_response(response, resp_repr, result);
 }
 
-static void _request_handler(const iotcon_request_s *request)
+static void _request_handler(iotcon_request_h request, void *user_data)
 {
-	char *request_type = NULL;
+	const char *request_type = NULL;
 	int request_flag = IOTCON_INIT_FLAG;
 	iotcon_response_h response = NULL;
 	FN_CALL;
 
 	RET_IF(NULL == request);
 
-	request_type = request->request_type;
-	request_flag = request->request_handler_flag;
-	if (request_flag & IOTCON_REQUEST_FLAG) {
-		response = iotcon_response_new(request->request_handle, request->resource_handle);
+	request_type = iotcon_request_get_request_type(request);
+	if (NULL == request_type) {
+		ERR("request_type is NULL");
+		return;
+	}
+
+	request_flag = iotcon_request_get_request_handler_flag(request);
+	if (request_flag & IOTCON_CRUD_FLAG) {
+		response = iotcon_response_new(request);
 		if (NULL == response) {
 			ERR("iotcon_response_new() Fail(NULL == response)");
 			return;
@@ -188,6 +193,36 @@ static void _request_handler(const iotcon_request_s *request)
 
 		iotcon_response_free(response);
 	}
+	if (request_flag & IOTCON_OBSERVE_FLAG) {
+		if (IOTCON_OBSERVE_REGISTER == iotcon_request_get_observer_action(request))
+			observers = iotcon_observers_append(observers,
+					iotcon_request_get_observer_id(request));
+	}
+}
+
+static gboolean _timeout(gpointer user_data)
+{
+	static int i = 0;
+	i++;
+	if (i % 2)
+		iotcon_start_presence(10);
+	else
+		iotcon_stop_presence();
+
+	if (4 == i)
+		return FALSE;
+
+	return TRUE;
+}
+
+static gboolean _observe_timeout(gpointer user_data)
+{
+	INFO("NOTIFY!");
+	iotcon_repr_h repr = iotcon_repr_new();
+	iotcon_notimsg_h msg = iotcon_notimsg_new(repr, IOTCON_INTERFACE_DEFAULT);
+	iotcon_notify(user_data, msg, observers);
+
+	return TRUE;
 }
 
 int main(int argc, char **argv)
@@ -202,11 +237,10 @@ int main(int argc, char **argv)
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* initialize address and port */
-	iotcon_initialize("0.0.0.0", 0);
+	iotcon_initialize(IOTCON_ALL_INTERFACES, IOTCON_RANDOM_PORT);
 
 	/* set local door resource */
 	iotcon_error = _set_door_resource();
-
 	if (IOTCON_ERROR_NONE != iotcon_error) {
 		ERR("_set_door_resource() Fail");
 		return -1;
@@ -216,12 +250,18 @@ int main(int argc, char **argv)
 	door_interfaces |= IOTCON_INTERFACE_BATCH;
 	resource_properties |= IOTCON_OBSERVABLE;
 
+	/* add presence */
+	g_timeout_add_seconds(10, _timeout, NULL);
+
 	/* create new door resource */
 	door_handle = _create_door_resource("/a/door", door_interfaces, resource_properties);
 	if (NULL == door_handle) {
 		ERR("_create_door_resource() Fail");
 		return -1;
 	}
+
+	/* add observe */
+	g_timeout_add_seconds(10, _observe_timeout, door_handle);
 
 	_check_door_state();
 

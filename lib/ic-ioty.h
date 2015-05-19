@@ -16,74 +16,62 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_IOTIVITY_H__
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_IOTIVITY_H__
 
+#include <stdint.h>
+
 #include "iotcon.h"
+#include "iotcon-constant.h"
+#include "ic-struct.h"
 
-typedef struct _resource_handler_s {
-	char *rt_name;
-	char *if_name;
-	char *uri_name;
-	iotcon_rest_api_handle_cb rest_api_cb;
-} resource_handler_s;
+void ic_ioty_config(const char *addr, unsigned short port);
 
-void ic_iotivity_config(const char *addr, unsigned short port);
+void* ic_ioty_register_res(const char *uri, iotcon_str_list_s *res_types,
+		int ifaces, uint8_t properties);
 
-void* ic_ioty_register_res(const char *uri, const char *rt,
-		iotcon_interface_e iface, iotcon_resource_property_e rt_property);
+int ic_ioty_unregister_res(iotcon_resource_h resource_handle);
 
-int ic_ioty_unregister_res(const iotcon_resource_h resource_handle);
+int ic_ioty_bind_iface_to_res(void *resource_handle, iotcon_interface_e iface);
 
-int ic_ioty_bind_iface_to_res(const iotcon_resource_h resource_handle,
-		const char *interface_type);
+int ic_ioty_bind_type_to_res(void *resource_handle, const char *resource_type);
 
-int ic_ioty_bind_type_to_res(const iotcon_resource_h resource_handle,
-		const char *resource_type);
+int ic_ioty_bind_res(void *parent, void *child);
 
-int ic_ioty_bind_res(iotcon_resource_h parent, iotcon_resource_h child);
+int ic_ioty_register_device_info(iotcon_device_info_h device_info);
 
-int ic_ioty_register_device_info(iotcon_device_info_s *device_info);
+int ic_ioty_get_device_info(const char *host_address, iotcon_device_info_cb found_cb,
+		void *user_data);
 
-int ic_ioty_get_device_info(char *host, char *uri);
+int ic_ioty_send_notify(void *resource, struct ic_notify_msg *msg,
+		iotcon_observers_h observers);
 
-int ic_ioty_send_notify(struct ic_res_response_s *resp,
-		iotcon_observers observers);
+int ic_ioty_send_res_response_data(struct ic_resource_response *resp);
 
-int ic_ioty_send_res_response_data(struct ic_res_response_s *resp);
-
-iotcon_presence_h ic_ioty_subscribe_presence(const char *host_address,
-		iotcon_presence_handle_cb presence_handler_cb, void *user_data);
-
+const iotcon_presence_h ic_ioty_subscribe_presence(const char *host_address,
+		const char *resource_type,
+		iotcon_presence_cb presence_handler_cb,
+		void *user_data);
 int ic_ioty_unsubscribe_presence(iotcon_presence_h presence_handle);
-int ic_ioty_start_presence(const unsigned int time_to_live);
+int ic_ioty_start_presence(unsigned int time_to_live);
 int ic_ioty_stop_presence();
 
-int ic_ioty_find_resource(const char *host, const char *resource_name,
+int ic_ioty_find_resource(const char *host_address, const char *resource_type,
 		iotcon_found_resource_cb found_resource_cb, void *user_data);
 
-int ic_ioty_get(iotcon_resource_s resource,	iotcon_query query,
+int ic_ioty_get(iotcon_client_h resource, iotcon_query_h query,
 		iotcon_on_get_cb on_get_cb, void *user_data);
 
-int ic_ioty_put(iotcon_resource_s resource, iotcon_repr_h repr, iotcon_query query,
+int ic_ioty_put(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
 		iotcon_on_put_cb on_put_cb, void *user_data);
 
-int ic_ioty_post(iotcon_resource_s resource, iotcon_repr_h repr, iotcon_query query,
+int ic_ioty_post(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
 		iotcon_on_put_cb on_post_cb, void *user_data);
 
-int ic_ioty_delete_res(iotcon_resource_s resource,
+int ic_ioty_delete_res(iotcon_client_h resource,
 		iotcon_on_delete_cb on_delete_cb, void *user_data);
 
-int ic_ioty_observe(iotcon_resource_s *resource, iotcon_observe_type_e observe_type,
-		iotcon_query query, iotcon_on_observe_cb on_observe_cb, void *user_data);
+int ic_ioty_observe(iotcon_client_h resource, iotcon_observe_type_e observe_type,
+		iotcon_query_h query, iotcon_on_observe_cb on_observe_cb, void *user_data);
 
-int ic_ioty_cancel_observe(iotcon_resource_s resource);
+int ic_ioty_cancel_observe(iotcon_client_h resource);
 
-/**
- * @brief hash-table for resource callback handler
- */
-typedef struct _iot_ctx {
-	GHashTable *entity_cb_hash;
-	GList *found_device_cb_lst;
-} ic_ctx_s;
 
-ic_ctx_s* ic_get_ctx();
-
-#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_IOTIVITY_H__ */
+#endif //__IOT_CONNECTIVITY_MANAGER_INTERNAL_IOTIVITY_H__

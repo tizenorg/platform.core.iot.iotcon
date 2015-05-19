@@ -407,7 +407,7 @@ iotcon_list_h ic_list_insert(iotcon_list_h list, iotcon_value_h value, int pos)
 	return list;
 }
 
-API void iotcon_int_list_foreach(iotcon_list_h list, iotcon_int_list_fn fn, void *user_data)
+API void iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_fn fn, void *user_data)
 {
 	GList *cur;
 	int index = 0;
@@ -426,7 +426,7 @@ API void iotcon_int_list_foreach(iotcon_list_h list, iotcon_int_list_fn fn, void
 	}
 }
 
-API void iotcon_bool_list_foreach(iotcon_list_h list, iotcon_bool_list_fn fn, void *user_data)
+API void iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_fn fn, void *user_data)
 {
 	GList *cur;
 	int index = 0;
@@ -445,7 +445,7 @@ API void iotcon_bool_list_foreach(iotcon_list_h list, iotcon_bool_list_fn fn, vo
 	}
 }
 
-API void iotcon_double_list_foreach(iotcon_list_h list, iotcon_double_list_fn fn, void *user_data)
+API void iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_fn fn, void *user_data)
 {
 	GList *cur;
 	int index = 0;
@@ -464,7 +464,7 @@ API void iotcon_double_list_foreach(iotcon_list_h list, iotcon_double_list_fn fn
 	}
 }
 
-API void iotcon_str_list_foreach(iotcon_list_h list, iotcon_str_list_fn fn, void *user_data)
+API void iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_fn fn, void *user_data)
 {
 	GList *cur;
 	int index = 0;
@@ -502,7 +502,7 @@ API void iotcon_list_list_foreach(iotcon_list_h list, iotcon_list_list_fn fn, vo
 	}
 }
 
-API void iotcon_repr_list_foreach(iotcon_list_h list, iotcon_repr_list_fn fn, void *user_data)
+API void iotcon_list_foreach_repr(iotcon_list_h list, iotcon_list_repr_fn fn, void *user_data)
 {
 	int index = 0;
 	GList *cur = NULL;

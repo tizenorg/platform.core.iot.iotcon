@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_HANDLER_H__
-#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_HANDLER_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_H__
+#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_H__
 
-#include "ic-ioty.h"
+#include "ic-struct.h"
 
 resource_handler_s* ic_get_resource_handler_data(void *handle);
 
-void ic_get_device_info_handler(iotcon_device_info_s *info);
-
-#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_HANDLER_H__ */
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_H__ */

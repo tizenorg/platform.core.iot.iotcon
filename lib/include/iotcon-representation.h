@@ -16,13 +16,15 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_REPRESENTATION_H__
 #define __IOT_CONNECTIVITY_MANAGER_REPRESENTATION_H__
 
+#include <stdbool.h>
+
 iotcon_repr_h iotcon_repr_new();
 void iotcon_repr_free(iotcon_repr_h repr);
 iotcon_repr_h iotcon_repr_clone(const iotcon_repr_h src);
 
 int iotcon_repr_set_uri(iotcon_repr_h repr, const char *uri);
 const char* iotcon_repr_get_uri(iotcon_repr_h repr);
-int iotcon_repr_delete_uri(iotcon_repr_h repr);
+int iotcon_repr_del_uri(iotcon_repr_h repr);
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
@@ -43,14 +45,14 @@ typedef void (*iotcon_resourcetype_fn)(const char *res_type, void *user_data);
 void iotcon_repr_get_resource_types(iotcon_repr_h repr, iotcon_resourcetype_fn fn,
 		void *user_data);
 int iotcon_repr_get_resource_types_count(iotcon_repr_h repr);
-int iotcon_repr_delete_resource_types(iotcon_repr_h repr, const char *type);
+int iotcon_repr_del_resource_types(iotcon_repr_h repr, const char *type);
 
-int iotcon_repr_append_resource_interfaces(iotcon_repr_h repr, const char *interface);
+int iotcon_repr_append_resource_interfaces(iotcon_repr_h repr, const char *iface);
 typedef void (*iotcon_interface_fn)(const char *res_if, void *user_data);
 void iotcon_repr_get_resource_interfaces(iotcon_repr_h repr, iotcon_interface_fn fn,
 		void *user_data);
 int iotcon_repr_get_resource_interfaces_count(iotcon_repr_h repr);
-int iotcon_repr_delete_resource_interfaces(iotcon_repr_h repr, const char *type);
+int iotcon_repr_del_resource_interfaces(iotcon_repr_h repr, const char *type);
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
@@ -97,7 +99,7 @@ void iotcon_repr_get_children(iotcon_repr_h parent, iotcon_children_fn fn,
 int iotcon_repr_get_children_count(iotcon_repr_h parent);
 iotcon_repr_h iotcon_repr_get_nth_child(iotcon_repr_h parent, int index);
 
-GList* iotcon_repr_get_key_list(iotcon_repr_h repr);
+iotcon_str_list_s* iotcon_repr_get_key_list(iotcon_repr_h repr);
 int iotcon_repr_get_keys_count(iotcon_repr_h repr);
 
 char* iotcon_repr_generate_json(iotcon_repr_h repr);
@@ -129,17 +131,17 @@ int iotcon_list_del_nth_repr(iotcon_list_h list, int pos);
 int iotcon_list_get_type(iotcon_list_h list);
 int iotcon_list_get_length(iotcon_list_h list);
 
-typedef void (*iotcon_int_list_fn)(int index, const int value, void *user_data);
-void iotcon_int_list_foreach(iotcon_list_h list, iotcon_int_list_fn fn, void *user_data);
-typedef void (*iotcon_bool_list_fn)(int index, const bool value, void *user_data);
-void iotcon_bool_list_foreach(iotcon_list_h list, iotcon_bool_list_fn fn, void *user_data);
-typedef void (*iotcon_double_list_fn)(int index, const double value, void *user_data);
-void iotcon_double_list_foreach(iotcon_list_h list, iotcon_double_list_fn fn, void *user_data);
-typedef void (*iotcon_str_list_fn)(int index, const char *value, void *user_data);
-void iotcon_str_list_foreach(iotcon_list_h list, iotcon_str_list_fn fn, void *user_data);
+typedef void (*iotcon_list_int_fn)(int index, const int value, void *user_data);
+void iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_fn fn, void *user_data);
+typedef void (*iotcon_list_bool_fn)(int index, const bool value, void *user_data);
+void iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_fn fn, void *user_data);
+typedef void (*iotcon_list_double_fn)(int index, const double value, void *user_data);
+void iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_fn fn, void *user_data);
+typedef void (*iotcon_list_str_fn)(int index, const char *value, void *user_data);
+void iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_fn fn, void *user_data);
 typedef void (*iotcon_list_list_fn)(int index, iotcon_list_h value, void *user_data);
 void iotcon_list_list_foreach(iotcon_list_h list, iotcon_list_list_fn fn, void *user_data);
-typedef void (*iotcon_repr_list_fn)(int index, iotcon_repr_h value, void *user_data);
-void iotcon_repr_list_foreach(iotcon_list_h list, iotcon_repr_list_fn fn, void *user_data);
+typedef void (*iotcon_list_repr_fn)(int index, iotcon_repr_h value, void *user_data);
+void iotcon_list_foreach_repr(iotcon_list_h list, iotcon_list_repr_fn fn, void *user_data);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_REPRESENTATION_H__ */

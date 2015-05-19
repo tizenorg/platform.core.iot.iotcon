@@ -21,7 +21,7 @@ extern "C" {
 #include "ic-common.h"
 #include "ic-utils.h"
 #include "ic-repr.h"
-#include "ic-handler.h"
+#include "ic.h"
 }
 #include "ic-ioty-repr.h"
 
@@ -31,7 +31,7 @@ using namespace std;
 static iotcon_repr_h _ic_ioty_repr_create_repr(const OCRepresentation& ocRep)
 {
 	FN_CALL;
-
+	// incoming json format example : {"href":"/a/address","rep":{"text":"Hello world"}}
 	string jsonStr = ocRep.getJSONRepresentation();
 	iotcon_repr_h repr = ic_repr_parse_json(jsonStr.c_str());
 
@@ -122,62 +122,5 @@ OCRepresentation ic_ioty_repr_parse(iotcon_repr_h repr)
 
 	free(repr_json);
 	return ocRep;
-}
-
-void ic_ioty_repr_found_device_cb(const OCRepresentation& ocRep)
-{
-	iotcon_device_info_s info = {0};
-	string readbuf;
-
-	if (ocRep.getValue("ct", readbuf))
-		info.content_type = ic_utils_strdup(readbuf.c_str());
-
-	if (ocRep.getValue("mndt", readbuf))
-		info.date_of_manufacture = ic_utils_strdup(readbuf.c_str());
-
-	if (ocRep.getValue("dn", readbuf))
-		info.device_name = ic_utils_strdup(readbuf.c_str());
-
-	if (ocRep.getValue("di", readbuf))
-		info.device_uuid = ic_utils_strdup(readbuf.c_str());
-
-	if (ocRep.getValue("mnfv", readbuf))
-		info.firmware_version = ic_utils_strdup(readbuf.c_str());
-
-	if (ocRep.getValue("hn", readbuf))
-		info.host_name = ic_utils_strdup(readbuf.c_str());
-
-	if (ocRep.getValue("mnmn", readbuf))
-		info.manufacturer_name = ic_utils_strdup(readbuf.c_str());
-
-	if (ocRep.getValue("mnml", readbuf))
-		info.manufacturer_url = ic_utils_strdup(readbuf.c_str());
-
-	if (ocRep.getValue("mnmo", readbuf))
-		info.model_number = ic_utils_strdup(readbuf.c_str());
-
-	if (ocRep.getValue("mnpv", readbuf))
-		info.platform_version = ic_utils_strdup(readbuf.c_str());
-
-	if (ocRep.getValue("mnsl", readbuf))
-		info.support_url = ic_utils_strdup(readbuf.c_str());
-
-	if (ocRep.getValue("icv", readbuf))
-		info.version = ic_utils_strdup(readbuf.c_str());
-
-	ic_get_device_info_handler(&info);
-
-	free(info.device_name);
-	free(info.host_name);
-	free(info.device_uuid);
-	free(info.content_type);
-	free(info.version);
-	free(info.manufacturer_name);
-	free(info.manufacturer_url);
-	free(info.model_number);
-	free(info.date_of_manufacture);
-	free(info.platform_version);
-	free(info.firmware_version);
-	free(info.support_url);
 }
 

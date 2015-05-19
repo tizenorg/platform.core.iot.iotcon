@@ -20,6 +20,7 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
 #include <iotcon-errors.h>
 #include <iotcon-struct.h>
 #include <iotcon-constant.h>
@@ -28,123 +29,91 @@ extern "C" {
 void iotcon_initialize(const char *addr, unsigned short port);
 void iotcon_deinitialize();
 
-iotcon_response_h iotcon_response_new(iotcon_request_h req_h, iotcon_resource_h res_h);
-void iotcon_response_free(iotcon_response_h resp);
+typedef void (*iotcon_request_handler_cb)(iotcon_request_h request, void *user_data);
+iotcon_resource_h iotcon_register_resource(const char *uri,
+		iotcon_str_list_s *res_types,
+		int ifaces,
+		uint8_t properties,
+		iotcon_request_handler_cb cb,
+		void *user_data);
+void iotcon_unregister_resource(iotcon_resource_h resource_handle);
 
-typedef void (*iotcon_rest_api_handle_cb)(const iotcon_request_s *request);
-
-iotcon_repr_h iotcon_request_get_representation(const iotcon_request_s *request);
-
-iotcon_resource_h iotcon_register_resource(const char *uri, const char *rt,
-		iotcon_interface_e iot_if, iotcon_resource_property_e rt_type,
-		iotcon_rest_api_handle_cb entity_handler_cb);
-int iotcon_unregister_resource(const iotcon_resource_h resource_handle);
-
-int iotcon_bind_interface_to_resource(iotcon_resource_h resource_handle,
-		const char *interface_type);
-int iotcon_bind_type_to_resource(iotcon_resource_h resource_handle,
+int iotcon_bind_interface(iotcon_resource_h resource,
+		iotcon_interface_e iface);
+int iotcon_bind_type(iotcon_resource_h resource_handle,
 		const char *resource_type);
 int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child);
 
-typedef void (*iotcon_found_device_info_cb)(const iotcon_device_info_s *info);
+int iotcon_register_device_info(
+		char *device_name,
+		char *host_name,
+		char *device_uuid,
+		char *content_type,
+		char *version,
+		char *manufacturer_name,
+		char *manufacturer_url,
+		char *model_number,
+		char *date_of_manufacture,
+		char *platform_version,
+		char *firmware_version,
+		char *support_url);
+typedef void (*iotcon_device_info_cb)(iotcon_device_info_h info, void *user_data);
+int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
+		void *user_data);
 
-int iotcon_register_device_info(iotcon_device_info_s *device_info);
-
-int iotcon_subscribe_device_info(char *host, char *uri,
-		iotcon_found_device_info_cb found_cb);
-void iotcon_unsubscribe_device_info(char *host, char *uri,
-		iotcon_found_device_info_cb found_cb);
-
-int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e prop, ...);
-
-int iotcon_send_notify_response(iotcon_response_h resp, iotcon_observers observers);
-int iotcon_send_resource_response(iotcon_response_h resp);
-
-typedef void (*iotcon_presence_handle_cb)(iotcon_error_e result, const unsigned int nonce,
-		const char *host_address, void *user_data);
-
-iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
-		iotcon_presence_handle_cb presence_handler_cb, void *user_data);
-int iotcon_unsubscribe_presence(iotcon_presence_h presence_handle);
-int iotcon_start_presence(const unsigned int time_to_live);
+int iotcon_start_presence(unsigned int time_to_live);
 int iotcon_stop_presence();
-
-typedef void (*iotcon_found_resource_cb)(iotcon_resource_s *resource, void *user_data);
-
-int iotcon_find_resource(const char *host, const char *resource_name,
-		iotcon_found_resource_cb found_resource_cb, void *user_data);
-
-typedef void (*iotcon_on_get_cb)(const iotcon_options_h header_options,
-		const iotcon_repr_h repr, const int e_code, void *user_data);
-typedef void (*iotcon_on_put_cb)(const iotcon_options_h header_options,
-		const iotcon_repr_h repr, const int e_code, void *user_data);
-typedef void (*iotcon_on_post_cb)(const iotcon_options_h header_options,
-		const iotcon_repr_h repr, const int e_code, void *user_data);
-typedef void (*iotcon_on_observe_cb)(const iotcon_options_h header_options,
-		const iotcon_repr_h repr, const int e_code, const int sequence_number,
+typedef void (*iotcon_presence_cb)(int result, unsigned int nonce,
+		const char *host_address, void *user_data);
+iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
+		const char *resource_type,
+		iotcon_presence_cb cb,
 		void *user_data);
-typedef void (*iotcon_on_delete_cb)(const iotcon_options_h header_options,
-		const int e_code, void *user_data);
+int iotcon_unsubscribe_presence(iotcon_presence_h presence_handle);
 
-iotcon_resource_s iotcon_construct_resource_object(const char *host, const char *uri,
-bool is_observable, iotcon_resource_types resource_type,
-		iotcon_resource_interfaces resource_if);
-void iotcon_destruct_resource_object(iotcon_resource_s *resource);
-iotcon_resource_s iotcon_copy_resource(iotcon_resource_s resource);
+typedef void (*iotcon_found_resource_cb)(iotcon_client_h resource, void *user_data);
+int iotcon_find_resource(const char *host_address, const char *resource_type,
+		iotcon_found_resource_cb cb, void *user_data);
+iotcon_client_h iotcon_client_new(const char *host, const char *uri, bool is_observable,
+		iotcon_str_list_s *resource_types, iotcon_interface_e resource_interfaces);
+void iotcon_client_free(iotcon_client_h resource);
+iotcon_client_h iotcon_client_clone(iotcon_client_h resource);
 
-int iotcon_get(iotcon_resource_s resource, iotcon_query query, iotcon_on_get_cb on_get_cb,
+typedef void (*iotcon_on_observe_cb)(iotcon_options_h header_options, iotcon_repr_h repr,
+		int response_result, int sequence_number, void *user_data);
+int iotcon_observer_start(iotcon_client_h resource,
+		iotcon_observe_type_e observe_type,
+		iotcon_query_h query,
+		iotcon_on_observe_cb cb,
 		void *user_data);
-int iotcon_put(iotcon_resource_s resource, iotcon_repr_h repr, iotcon_query query,
-		iotcon_on_put_cb on_put_cb, void *user_data);
-int iotcon_post(iotcon_resource_s resource, iotcon_repr_h repr, iotcon_query query,
-		iotcon_on_post_cb on_post_cb, void *user_data);
-int iotcon_delete_resource(iotcon_resource_s resource, iotcon_on_delete_cb on_delete_cb,
+int iotcon_observer_stop(iotcon_client_h resource);
+
+int iotcon_response_send(iotcon_response_h resp);
+
+iotcon_notimsg_h iotcon_notimsg_new(iotcon_repr_h repr, iotcon_interface_e iface);
+void iotcon_notimsg_free(iotcon_notimsg_h msg);
+int iotcon_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
+		iotcon_observers_h observers);
+
+typedef void (*iotcon_on_get_cb)(iotcon_options_h header_options, iotcon_repr_h repr,
+		int response_result, void *user_data);
+int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
+		iotcon_on_get_cb cb, void *user_data);
+
+typedef void (*iotcon_on_put_cb)(iotcon_options_h header_options, iotcon_repr_h repr,
+		int response_result, void *user_data);
+int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
+		iotcon_on_put_cb cb, void *user_data);
+
+typedef void (*iotcon_on_post_cb)(iotcon_options_h header_options, iotcon_repr_h repr,
+		int response_result, void *user_data);
+int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
+		iotcon_on_post_cb cb, void *user_data);
+
+typedef void (*iotcon_on_delete_cb)(iotcon_options_h header_options, int response_result,
 		void *user_data);
-
-int iotcon_observe(iotcon_observe_type_e observe_type, iotcon_resource_s *resource,
-		iotcon_query query, iotcon_on_observe_cb on_observe_cb, void *user_data);
-int iotcon_cancel_observe(iotcon_resource_s resource);
-
-iotcon_resource_types iotcon_resource_types_new();
-iotcon_resource_types iotcon_resource_types_insert(iotcon_resource_types resource_types,
-		const char *resource_type);
-void iotcon_resource_types_free(iotcon_resource_types resource_types);
-
-iotcon_resource_interfaces iotcon_resource_interfaces_new();
-iotcon_resource_interfaces iotcon_resource_interfaces_insert(
-		iotcon_resource_interfaces resource_interfaces, iotcon_interface_e interface);
-void iotcon_resource_interfaces_free(iotcon_resource_interfaces resource_interfaces);
-
-iotcon_options_h iotcon_options_new();
-void iotcon_options_free(iotcon_options_h options);
-int iotcon_options_insert(iotcon_options_h options, const unsigned short id,
-		const char *data);
-int iotcon_options_delete(iotcon_options_h options, const unsigned short id);
-const char* iotcon_options_lookup(iotcon_options_h options, const unsigned short id);
-typedef void (*iotcon_options_foreach_cb)(unsigned short id, char *data, void *user_data);
-void iotcon_options_foreach(iotcon_options_h options,
-		iotcon_options_foreach_cb foreach_cb, void *user_data);
-iotcon_options_h iotcon_options_clone(iotcon_options_h options);
-
-iotcon_query iotcon_query_new();
-void iotcon_query_insert(iotcon_query query, const char *key, const char *value);
-void iotcon_query_free(iotcon_query query);
-char* iotcon_query_lookup(iotcon_query query, const char *key);
-
-iotcon_observers iotcon_observation_new();
-iotcon_observers iotcon_observation_insert(iotcon_observers observers,
-		iotcon_observation_info_s obs);
-iotcon_observers iotcon_observation_delete(iotcon_observers observers,
-		iotcon_observation_info_s obs);
-void iotcon_observation_free(iotcon_observers observers);
-
-char* iotcon_resource_get_uri(iotcon_resource_s resource_s);
-char* iotcon_resource_get_host(iotcon_resource_s resource_s);
-iotcon_resource_types iotcon_resource_get_types(iotcon_resource_s resource_s);
-iotcon_resource_interfaces iotcon_resource_get_interfaces(iotcon_resource_s resource_s);
-
-void iotcon_resource_set_options(iotcon_resource_s *resource,
-		iotcon_options_h header_options);
+int iotcon_delete(iotcon_client_h resource, iotcon_on_delete_cb cb,
+		void *user_data);
 
 #ifdef __cplusplus
 }

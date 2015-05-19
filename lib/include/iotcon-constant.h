@@ -17,7 +17,7 @@
 #define __IOT_CONNECTIVITY_MANAGER_CONSTANT_H__
 
 /**
- * @brief HeaderOption range from 2048 t0 3000
+ * @brief HeaderOption range from 2048 to 3000
  * NOTE: HeaderOptionID  is an unsigned integer value which MUST be within
  * range of 2048 to 3000 inclusive of lower and upper bound.
  * HeaderOptions instance creation fails if above condition is not satisfied.
@@ -25,6 +25,9 @@
 #define IOTCON_OPTIONID_MIN 2048
 #define IOTCON_OPTIONID_MAX 3000
 
+#define IOTCON_ALL_INTERFACES "0.0.0.0"
+#define IOTCON_RANDOM_PORT 0
+#define IOTCON_MULTICAST_ADDRESS "coap://224.0.1.187"
 
 /**
  * @brief Action associated with observation
@@ -33,7 +36,7 @@ typedef enum {
 	IOTCON_OBSERVE_REGISTER = 0,
 	IOTCON_OBSERVE_DEREGISTER = 1,
 	IOTCON_OBSERVE_NO_OPTION = 2
-} iotcon_osbserve_action_e;
+} iotcon_observe_action_e;
 
 typedef enum {
 	IOTCON_OBSERVE = 0,
@@ -41,11 +44,12 @@ typedef enum {
 } iotcon_observe_type_e;
 
 typedef enum {
-	IOTCON_INTERFACE_DEFAULT = 0,
-	IOTCON_INTERFACE_LINK = 1,
-	IOTCON_INTERFACE_BATCH = 2,
-	IOTCON_INTERFACE_GROUP = 3,
-	IOTCON_INTERFACE_MAX = 4
+	IOTCON_INTERFACE_NONE = 0,
+	IOTCON_INTERFACE_DEFAULT = (1 << 0),
+	IOTCON_INTERFACE_LINK = (1 << 1),
+	IOTCON_INTERFACE_BATCH = (1 << 2),
+	IOTCON_INTERFACE_GROUP = (1 << 3),
+	IOTCON_INTERFACE_MAX = (1 << 4)
 } iotcon_interface_e;
 
 typedef enum {
@@ -58,30 +62,37 @@ typedef enum {
 } iotcon_resource_property_e;
 
 typedef enum {
-	IOTCON_RESP_NONE = 0,
-	IOTCON_RESP_RES_URI = 1,
-	IOTCON_RESP_ERR_CODE = 2,
-	IOTCON_RESP_RESULT = 3,
-	IOTCON_RESP_REPRESENTATION = 4,
-	IOTCON_RESP_HEADER_OPTIONS = 5,
-	IOTCON_RESP_INTERFACE = 6,
+	IOTCON_RESPONSE_NONE = 0,
+	IOTCON_RESPONSE_RESOURCE_URI = 1,
+	IOTCON_RESPONSE_RESULT = 2,
+	IOTCON_RESPONSE_REPRESENTATION = 3,
+	IOTCON_RESPONSE_HEADER_OPTIONS = 4,
+	IOTCON_RESPONSE_INTERFACE = 5,
 } iotcon_response_property_e;
 
 typedef enum {
+	IOTCON_NO_FLAG = 0,
 	IOTCON_INIT_FLAG = (1 << 0),
-	IOTCON_REQUEST_FLAG = (1 << 1),
+	IOTCON_CRUD_FLAG = (1 << 1),
 	IOTCON_OBSERVE_FLAG = (1 << 2)
-} iotcon_entity_handler_flag_e;
+} iotcon_request_handler_flag_e;
 
 typedef enum {
-	IOTCON_EH_OK = 0,
-	IOTCON_EH_ERROR,
-	IOTCON_EH_RESOURCE_CREATED,
-	IOTCON_EH_RESOURCE_DELETED,
-	IOTCON_EH_SLOW,
-	IOTCON_EH_FORBIDDEN,
-	IOTCON_EH_MAX
-} iotcon_entity_handler_result_e;
+	IOTCON_RESPONSE_RESULT_OK = 0,
+	IOTCON_RESPONSE_RESULT_ERROR,
+	IOTCON_RESPONSE_RESULT_RESOURCE_CREATED,
+	IOTCON_RESPONSE_RESULT_RESOURCE_DELETED,
+	IOTCON_RESPONSE_RESULT_SLOW,
+	IOTCON_RESPONSE_RESULT_FORBIDDEN,
+	IOTCON_RESPONSE_RESULT_MAX
+} iotcon_response_result_e;
+
+typedef enum {
+	IOTCON_PRESENCE_OK = 0,
+	IOTCON_PRESENCE_STOPPED,
+	IOTCON_PRESENCE_TIMEOUT,
+	IOTCON_PRESENCE_ERROR
+} iotcon_presence_result_e;
 
 typedef enum {
 	IOTCON_TYPE_NONE = 0,

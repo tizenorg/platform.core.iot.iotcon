@@ -15,6 +15,8 @@
  */
 
 #include <stdlib.h>
+#include <glib.h>
+
 #include <iotcon.h>
 #include "test-log.h"
 
@@ -22,7 +24,7 @@
 
 const char* const door_uri = "/a/door";
 
-iotcon_resource_s door_resource = {0};
+iotcon_client_h door_resource = NULL;
 
 char* _alloc_str_from_glist(GList *list)
 {
@@ -45,23 +47,26 @@ void _print_repr_info(iotcon_repr_h repr)
 		DBG("rep : \n%s", iotcon_repr_generate_json(repr));
 }
 
-static void _on_delete(const iotcon_options_h header_options, const int e_code,
+static void _on_delete(iotcon_options_h header_options, int response_result,
 		void *user_data)
 {
-	RETM_IF(IOTCON_EH_OK != e_code && IOTCON_EH_RESOURCE_DELETED != e_code,
-			"_on_delete Response error(%d)", e_code);
+	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result
+			&& IOTCON_RESPONSE_RESULT_RESOURCE_DELETED != response_result,
+			"_on_delete Response error(%d)", response_result);
 	INFO("DELETE request was successful");
 
 	/* delete callback operations */
 }
 
-static void _on_post(const iotcon_options_h header_options, iotcon_repr_h recv_repr,
-		const int e_code, void *user_data)
+static void _on_post(iotcon_options_h header_options, iotcon_repr_h recv_repr,
+		int response_result, void *user_data)
 {
 	char *created_uri = NULL;
-	iotcon_resource_s new_door_resource = {0};
+	iotcon_client_h new_door_resource = NULL;
 
-	RETM_IF(IOTCON_EH_OK != e_code, "_on_post Response error(%d)", e_code);
+	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result
+			&& IOTCON_RESPONSE_RESULT_RESOURCE_CREATED != response_result,
+			"_on_post Response error(%d)", response_result);
 	INFO("POST request was successful");
 
 	_print_repr_info(recv_repr);
@@ -70,26 +75,30 @@ static void _on_post(const iotcon_options_h header_options, iotcon_repr_h recv_r
 	if (created_uri) {
 		DBG("New resource created : %s", created_uri);
 
-		new_door_resource = iotcon_construct_resource_object(door_resource.resource_host,
+		new_door_resource = iotcon_client_new(
+				iotcon_client_get_host(door_resource),
 				created_uri,
-				true, door_resource.resource_types, door_resource.resource_interfaces);
+				true,
+				iotcon_client_get_types(door_resource),
+				iotcon_client_get_interfaces(door_resource));
 
-		iotcon_delete_resource(new_door_resource, _on_delete, NULL);
+		iotcon_delete(new_door_resource, _on_delete, NULL);
 	}
 
 }
 
-static void _on_put(const iotcon_options_h header_options, iotcon_repr_h recv_repr,
-		const int e_code, void *user_data)
+static void _on_put(iotcon_options_h header_options, iotcon_repr_h recv_repr,
+		int response_result, void *user_data)
 {
-	RETM_IF(IOTCON_EH_OK != e_code, "_on_put Response error(%d)", e_code);
+	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result, "_on_put Response error(%d)",
+			response_result);
 	INFO("PUT request was successful");
 
 	_print_repr_info(recv_repr);
 
 	iotcon_repr_h send_repr = iotcon_repr_new();
 
-	iotcon_query query_params = iotcon_query_new();
+	iotcon_query_h query_params = iotcon_query_new();
 	/* send POST request */
 	iotcon_post(door_resource, send_repr, query_params, _on_post, NULL);
 
@@ -98,10 +107,11 @@ static void _on_put(const iotcon_options_h header_options, iotcon_repr_h recv_re
 
 }
 
-static void _on_get(const iotcon_options_h header_options, iotcon_repr_h recv_repr,
-		const int e_code, void *user_data)
+static void _on_get(iotcon_options_h header_options, iotcon_repr_h recv_repr,
+		int response_result, void *user_data)
 {
-	RETM_IF(IOTCON_EH_OK != e_code, "_on_get Response error(%d)", e_code);
+	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result, "_on_get Response error(%d)",
+			response_result);
 	INFO("GET request was successful");
 
 	_print_repr_info(recv_repr);
@@ -109,64 +119,86 @@ static void _on_get(const iotcon_options_h header_options, iotcon_repr_h recv_re
 	iotcon_repr_h send_repr = iotcon_repr_new();
 	iotcon_repr_set_bool(send_repr, "opened", true);
 
-	iotcon_query query_params = iotcon_query_new();
+	iotcon_query_h query_params = iotcon_query_new();
 	/* send PUT request */
 	iotcon_put(door_resource, send_repr, query_params, _on_put, NULL);
 
 	iotcon_repr_free(send_repr);
 	iotcon_query_free(query_params);
-
 }
 
-static void _found_resource(iotcon_resource_s *resource, void *user_data)
+static void _on_observe(iotcon_options_h header_options, iotcon_repr_h recv_repr,
+		int response_result, int sequence_number, void *user_data)
 {
-	char *resource_uri = NULL;
-	char *resource_host = NULL;
-	iotcon_resource_types resource_types = NULL;
-	iotcon_resource_interfaces resource_interfaces = NULL;
+	INFO("_on_observe");
+}
+
+static void _get_res_type_fn(const char *string, void *user_data)
+{
+	char *resource_uri = user_data;
+
+	DBG("[%s] resource type : %s", resource_uri, string);
+}
+
+static void _presence_handler(int result, unsigned int nonce,
+		const char *host_address, void *user_data)
+{
+	INFO("_presence_handler");
+	INFO("result : %d", result);
+	INFO("nonce : %d", nonce);
+	INFO("host_address : %s", host_address);
+}
+
+static void _found_resource(iotcon_client_h resource, void *user_data)
+{
+	const char *resource_uri = NULL;
+	const char *resource_host = NULL;
+	iotcon_str_list_s *resource_types = NULL;
+	int resource_interfaces = 0;
 
 	if (resource) {
-		char *interfaces_str = NULL;
-		char *res_types_str = NULL;
-
 		INFO("===== resource found =====");
 
 		/* get the resource URI */
-		resource_uri = iotcon_resource_get_uri(*resource);
+		resource_uri = iotcon_client_get_uri(resource);
 		if (NULL == resource_uri) {
 			ERR("uri is NULL");
 			return;
 		}
 
 		/* get the resource host address */
-		resource_host = iotcon_resource_get_host(*resource);
+		resource_host = iotcon_client_get_host(resource);
 		DBG("[%s] resource host : %s", resource_uri, resource_host);
 
 		/* get the resource interfaces */
-		resource_interfaces = iotcon_resource_get_interfaces(*resource);
-		if (resource_interfaces) {
-			interfaces_str = _alloc_str_from_glist(resource_interfaces);
-			DBG("[%s] resource interfaces : %s", resource_uri, interfaces_str);
-			free(interfaces_str);
-		}
+		resource_interfaces = iotcon_client_get_interfaces(resource);
+		if (IOTCON_INTERFACE_DEFAULT & resource_interfaces)
+			DBG("[%s] resource interface : DEFAULT_INTERFACE", resource_uri);
+		if (IOTCON_INTERFACE_LINK & resource_interfaces)
+			DBG("[%s] resource interface : LINK_INTERFACE", resource_uri);
+		if (IOTCON_INTERFACE_BATCH & resource_interfaces)
+			DBG("[%s] resource interface : BATCH_INTERFACE", resource_uri);
+		if (IOTCON_INTERFACE_GROUP & resource_interfaces)
+			DBG("[%s] resource interface : GROUP_INTERFACE", resource_uri);
 
 		/* get the resource types */
-		resource_types = iotcon_resource_get_types(*resource);
-		if (resource_types) {
-			res_types_str = _alloc_str_from_glist(resource_types);
-			DBG("[%s] resource types : %s", resource_uri, res_types_str);
-			free(res_types_str);
-		}
+		resource_types = iotcon_client_get_types(resource);
+		iotcon_str_list_foreach(resource_types, _get_res_type_fn,
+				(void *)resource_uri);
+
+		iotcon_subscribe_presence(resource_host, "core.door", _presence_handler, NULL);
 
 		if (!strcmp(door_uri, resource_uri)) {
-			/* copy resource to use elsewhere */
-			door_resource = iotcon_copy_resource(*resource);
+			door_resource = iotcon_client_clone(resource);
 
-			iotcon_query query_params = iotcon_query_new();
-			/* send GET request */
-			iotcon_get(*resource, query_params, _on_get, NULL);
+			iotcon_query_h query = iotcon_query_new();
 
-			iotcon_query_free(query_params);
+			/* send GET Request */
+			iotcon_get(resource, query, _on_get, NULL);
+			iotcon_query_free(query);
+
+			iotcon_observer_start(door_resource, IOTCON_OBSERVE_ALL, NULL, _on_observe,
+					NULL);
 		}
 	}
 }
@@ -178,11 +210,10 @@ int main(int argc, char **argv)
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* initialize address and port */
-	iotcon_initialize("0.0.0.0", 0);
+	iotcon_initialize(IOTCON_ALL_INTERFACES, IOTCON_RANDOM_PORT);
 
 	/* find door typed resources */
-	iotcon_find_resource("", "coap://224.0.1.187/oc/core?rt=core.door", &_found_resource,
-	NULL);
+	iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, "core.door", &_found_resource, NULL);
 
 	g_main_loop_run(loop);
 	g_main_loop_unref(loop);

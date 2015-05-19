@@ -132,7 +132,7 @@ iotcon_value_h ic_value_new_str(char *val)
 		return NULL;
 	}
 
-	value->val.s = val;
+	value->val.s = ic_utils_strdup(val);
 
 	return (iotcon_value_h)value;
 }
@@ -334,7 +334,11 @@ API iotcon_value_h ic_value_from_json(JsonNode *node)
 void ic_value_free(gpointer data)
 {
 	FN_CALL;
-	iotcon_value_h value = data;
+	iotcon_value_h value;
+
+	RET_IF(NULL == data);
+
+	value = data;
 
 	int type = value->type;
 	switch (type) {

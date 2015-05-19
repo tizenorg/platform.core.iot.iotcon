@@ -1,3 +1,5 @@
 cscope.out
 *~
 *.sw*
+.cproject
+.project

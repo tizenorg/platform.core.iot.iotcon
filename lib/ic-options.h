@@ -19,5 +19,6 @@
 #include "iotcon-struct.h"
 
 void ic_options_free(iotcon_options_h options);
+iotcon_options_h ic_options_ref(iotcon_options_h options);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_OPTIONS_H__ */
