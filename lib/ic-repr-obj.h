@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_UTILITY_H__
-#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_UTILITY_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_OBJECT_H__
+#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_OBJECT_H__
 
-#include <glib.h>
+#include <json-glib/json-glib.h>
 
-char* ic_utils_strdup(const char *src);
-void ic_utils_print_str_list(GList *list);
+int ic_obj_del_value(iotcon_repr_h repr, const char *key,
+		iotcon_repr_types_e value_type);
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_UTILITY_H__ */
+int ic_repr_obj_get_value(iotcon_repr_h repr, const char *key, iotcon_value_h *retval);
+int ic_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value);
+
+JsonObject* ic_obj_to_json(iotcon_repr_h repr);
+iotcon_repr_h ic_obj_from_json(JsonObject *obj);
+
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_OBJECT_H__ */

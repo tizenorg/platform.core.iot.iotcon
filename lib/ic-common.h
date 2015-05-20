@@ -23,4 +23,4 @@
 #endif
 #define API __attribute__((visibility("default")))
 
-#endif //__IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__ */

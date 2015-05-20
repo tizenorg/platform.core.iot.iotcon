@@ -94,4 +94,4 @@ typedef enum {
 	IOTCON_TYPE_REPR,
 } iotcon_repr_types_e;
 
-#endif //__IOT_CONNECTIVITY_MANAGER_CONSTANT_H__
+#endif /* __IOT_CONNECTIVITY_MANAGER_CONSTANT_H__ */

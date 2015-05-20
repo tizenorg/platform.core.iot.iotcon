@@ -86,4 +86,4 @@ typedef struct _iot_ctx {
 
 ic_ctx_s* ic_get_ctx();
 
-#endif //__IOT_CONNECTIVITY_MANAGER_INTERNAL_IOTIVITY_H__
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_IOTIVITY_H__ */

@@ -23,5 +23,5 @@ void ic_ioty_repr_found_device_cb(const OC::OCRepresentation& ocRep);
 iotcon_repr_h ic_ioty_repr_generate_repr(const OC::OCRepresentation& ocRep);
 OC::OCRepresentation ic_ioty_repr_parse(iotcon_repr_h repr);
 
-#endif //__IOT_CONNECTIVITY_MANAGER_INTERNAL_IOTIVITY_REPRESENTATION_H__
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_IOTIVITY_REPRESENTATION_H__ */
 

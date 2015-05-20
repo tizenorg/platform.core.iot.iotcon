@@ -20,20 +20,27 @@
 
 #include "iotcon-struct.h"
 
-iotcon_value_h ic_value_new(int type);
+iotcon_value_h ic_value_new_null();
+iotcon_value_h ic_value_new_int(int val);
+iotcon_value_h ic_value_new_bool(bool val);
+iotcon_value_h ic_value_new_double(double val);
+iotcon_value_h ic_value_new_str(char *val);
+iotcon_value_h ic_value_new_list(iotcon_list_h val);
+iotcon_value_h ic_value_new_repr(iotcon_repr_h val);
 
-int ic_value_set_int(iotcon_value_h value, int ival);
-int ic_value_set_bool(iotcon_value_h value, bool bval);
-int ic_value_set_double(iotcon_value_h value, double dbval);
-int ic_value_set_str(iotcon_value_h value, const char *strval);
-int ic_value_set_list(iotcon_value_h value, iotcon_list_h list);
-int ic_value_set_repr(iotcon_value_h value, iotcon_repr_h rep);
-int ic_value_set_null(iotcon_value_h value);
 
-JsonNode* ic_repr_generate_json_value(iotcon_value_h value);
-iotcon_value_h ic_repr_parse_json_value(JsonNode *node);
+int ic_value_get_int(iotcon_value_h value);
+bool ic_value_get_bool(iotcon_value_h value);
+double ic_value_get_double(iotcon_value_h value);
+const char* ic_value_get_str(iotcon_value_h value);
+iotcon_list_h ic_value_get_list(iotcon_value_h value);
+iotcon_repr_h ic_value_get_repr(iotcon_value_h value);
 
-void ic_repr_free_value(gpointer data);
-void ic_repr_free_basic_value(iotcon_value_h iotvalue);
 
-#endif // __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_VALUE_H__
+JsonNode* ic_value_to_json(iotcon_value_h value);
+iotcon_value_h ic_value_from_json(JsonNode *node);
+void ic_value_free(gpointer data);
+
+iotcon_value_h ic_value_clone(iotcon_value_h src);
+
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_VALUE_H__ */

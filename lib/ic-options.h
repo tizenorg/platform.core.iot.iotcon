@@ -20,4 +20,4 @@
 
 void ic_options_free(iotcon_options_h options);
 
-#endif //__IOT_CONNECTIVITY_MANAGER_INTERNAL_OPTIONS_H__
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_OPTIONS_H__ */

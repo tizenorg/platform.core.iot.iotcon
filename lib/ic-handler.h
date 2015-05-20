@@ -22,4 +22,4 @@ resource_handler_s* ic_get_resource_handler_data(void *handle);
 
 void ic_get_device_info_handler(iotcon_device_info_s *info);
 
-#endif //__IOT_CONNECTIVITY_MANAGER_INTERNAL_HANDLER_H__
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_HANDLER_H__ */

@@ -130,7 +130,7 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 		value = va_arg(args, int);
 		if (value < IOTCON_EH_OK || IOTCON_EH_MAX <= value) {
 			ERR("Invalid value");
-			return IOTCON_ERR_PARAM;
+			return IOTCON_ERROR_PARAM;
 		}
 		resp->result = value;
 		break;
@@ -165,7 +165,7 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 
 	va_end(args);
 
-	return IOTCON_ERR_NONE;
+	return IOTCON_ERROR_NONE;
 }
 
 API void iotcon_response_free(iotcon_response_h resp)
@@ -266,7 +266,7 @@ API int iotcon_unregister_resource(const iotcon_resource_h resource_handle)
 	int ret;
 
 	ret = ic_ioty_unregister_res(resource_handle);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_bind_type_to_res() Fail(%d)", ret);
 
 	g_hash_table_remove(ic_ctx.entity_cb_hash, resource_handle);
@@ -282,7 +282,7 @@ API int iot_bind_interface_to_resource(iotcon_resource_h resource_handle,
 	int ret;
 
 	ret = ic_ioty_bind_iface_to_res(resource_handle, interface_type);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_bind_type_to_res() Fail(%d)", ret);
 
 	return ret;
@@ -296,7 +296,7 @@ API int iotcon_bind_type_to_resource(iotcon_resource_h resource_handle,
 	int ret;
 
 	ret = ic_ioty_bind_type_to_res(resource_handle, resource_type);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_bind_type_to_res() Fail(%d)", ret);
 
 	return ret;
@@ -309,7 +309,7 @@ API int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child)
 	int ret;
 
 	ret = ic_ioty_bind_res(parent, child);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_bind_res() Fail(%d)", ret);
 
 	return ret;
@@ -323,7 +323,7 @@ API int iotcon_register_device_info(iotcon_device_info_s *device_info)
 	int ret;
 
 	ret = ic_ioty_register_device_info(device_info);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_register_device_info() Fail(%d)", ret);
 
 	return ret;
@@ -334,15 +334,15 @@ API int iotcon_subscribe_device_info(char *host, char *uri,
 {
 	FN_CALL;
 
-	int ret = IOTCON_ERR_NONE;
+	int ret = IOTCON_ERROR_NONE;
 
-	RETV_IF(NULL == uri, IOTCON_ERR_PARAM);
-	RETV_IF(NULL == found_cb, IOTCON_ERR_PARAM);
+	RETV_IF(NULL == uri, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == found_cb, IOTCON_ERROR_PARAM);
 
 	/* If we add device_cb to manage app's CB if we don't have any app's cb */
 	if (0 == g_list_length(ic_ctx.found_device_cb_lst)) {
 		ret = ic_ioty_get_device_info(host, uri);
-		if (IOTCON_ERR_NONE != ret) {
+		if (IOTCON_ERROR_NONE != ret) {
 			ERR("ic_ioty_get_device_info() Fail(%d)", ret);
 			return ret;
 		}
@@ -350,13 +350,17 @@ API int iotcon_subscribe_device_info(char *host, char *uri,
 
 	ic_ctx.found_device_cb_lst = g_list_append(ic_ctx.found_device_cb_lst, found_cb);
 
-	return IOTCON_ERR_NONE;
+	return IOTCON_ERROR_NONE;
 }
 
 API void iotcon_unsubscribe_device_info(char *host, char *uri,
 		iotcon_found_device_info_cb found_cb)
 {
 	FN_CALL;
+
+	RET_IF(NULL == host);
+	RET_IF(NULL == uri);
+	RET_IF(NULL == found_cb);
 
 	GList *node = g_list_first(ic_ctx.found_device_cb_lst);
 	while (node) {
@@ -377,8 +381,11 @@ API int iotcon_send_notify_response(iotcon_response_h resp, iotcon_observers obs
 	FN_CALL;
 	int ret;
 
+	RETV_IF(NULL == resp, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == observers, IOTCON_ERROR_PARAM);
+
 	ret = ic_ioty_send_notify(resp, observers);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_send_notify() Fail(%d)", ret);
 
 	return ret;
@@ -389,8 +396,10 @@ API int iotcon_send_resource_response(iotcon_response_h resp)
 	FN_CALL;
 	int ret;
 
+	RETV_IF(NULL == resp, IOTCON_ERROR_PARAM);
+
 	ret = ic_ioty_send_res_response_data(resp);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_send_res_response_data() Fail(%d)", ret);
 
 	return ret;
@@ -415,7 +424,7 @@ API int iotcon_unsubscribe_presence(iotcon_presence_h presence_handle)
 	int ret;
 
 	ret = ic_ioty_unsubscribe_presence(presence_handle);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_unsubscribe_presence() Fail(%d)", ret);
 
 	return ret;
@@ -428,7 +437,7 @@ API int iotcon_start_presence(const unsigned int time_to_live)
 	int ret;
 
 	ret = ic_ioty_start_presence(time_to_live);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_start_presence() Fail(%d)", ret);
 
 	return ret;
@@ -441,7 +450,7 @@ API int iotcon_stop_presence()
 	int ret;
 
 	ret = ic_ioty_stop_presence();
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_stop_presence() Fail(%d)", ret);
 
 	return ret;
@@ -452,14 +461,14 @@ API int iotcon_find_resource(const char *host, const char *resource_name,
 {
 	FN_CALL;
 
-	int ret = IOTCON_ERR_NONE;
+	int ret = IOTCON_ERROR_NONE;
 
-	RETV_IF(NULL == host, IOTCON_ERR_PARAM);
-	RETV_IF(NULL == resource_name, IOTCON_ERR_PARAM);
-	RETV_IF(NULL == found_resource_cb, IOTCON_ERR_PARAM);
+	RETV_IF(NULL == host, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resource_name, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == found_resource_cb, IOTCON_ERROR_PARAM);
 
 	ret = ic_ioty_find_resource(host, resource_name, found_resource_cb, user_data);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_find_resource() Fail(%d)", ret);
 
 	return ret;
@@ -539,10 +548,12 @@ API int iotcon_get(iotcon_resource_s resource, iotcon_query query,
 {
 	FN_CALL;
 
-	int ret = IOTCON_ERR_NONE;
+	RETV_IF(NULL == on_get_cb, IOTCON_ERROR_PARAM);
+
+	int ret = IOTCON_ERROR_NONE;
 
 	ret = ic_ioty_get(resource, query, on_get_cb, user_data);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_get() Fail(%d)", ret);
 
 	return ret;
@@ -553,31 +564,29 @@ API int iotcon_put(iotcon_resource_s resource, iotcon_repr_h repr, iotcon_query 
 {
 	FN_CALL;
 
-	int ret = IOTCON_ERR_NONE;
+	int ret = IOTCON_ERROR_NONE;
 
-	RETV_IF(NULL == repr, IOTCON_ERR_PARAM);
+	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == on_put_cb, IOTCON_ERROR_PARAM);
 
 	ret = ic_ioty_put(resource, repr, query, on_put_cb, user_data);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_put() Fail(%d)", ret);
 
 	return ret;
 }
 
-API int iotcon_post(iotcon_resource_s resource,
-		iotcon_repr_h repr,
-		iotcon_query query,
-		iotcon_on_post_cb on_post_cb,
-		void *user_data)
+API int iotcon_post(iotcon_resource_s resource, iotcon_repr_h repr, iotcon_query query,
+		iotcon_on_post_cb on_post_cb, void *user_data)
 {
 	FN_CALL;
 
-	int ret = IOTCON_ERR_NONE;
+	int ret = IOTCON_ERROR_NONE;
 
-	RETV_IF(NULL == repr, IOTCON_ERR_PARAM);
+	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
 
 	ret = ic_ioty_post(resource, repr, query, on_post_cb, user_data);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_post() Fail(%d)", ret);
 
 	return ret;
@@ -588,10 +597,10 @@ API int iotcon_delete_resource(iotcon_resource_s resource,
 {
 	FN_CALL;
 
-	int ret = IOTCON_ERR_NONE;
+	int ret = IOTCON_ERROR_NONE;
 
 	ret = ic_ioty_delete_res(resource, on_delete_cb, user_data);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_delete_res() Fail(%d)", ret);
 
 	return ret;
@@ -605,11 +614,12 @@ API int iotcon_observe(iotcon_observe_type_e observe_type,
 {
 	FN_CALL;
 
-	int ret = IOTCON_ERR_NONE;
+	int ret = IOTCON_ERROR_NONE;
 
-	ret = ic_ioty_observe(resource, observe_type, query, on_observe_cb,
-			user_data);
-	if (IOTCON_ERR_NONE != ret)
+	RETV_IF(NULL == on_observe_cb, IOTCON_ERROR_PARAM);
+
+	ret = ic_ioty_observe(resource, observe_type, query, on_observe_cb, user_data);
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_observe() Fail(%d)", ret);
 
 	return ret;
@@ -619,10 +629,10 @@ API int iotcon_cancel_observe(iotcon_resource_s resource)
 {
 	FN_CALL;
 
-	int ret = IOTCON_ERR_NONE;
+	int ret = IOTCON_ERROR_NONE;
 
 	ret = ic_ioty_cancel_observe(resource);
-	if (IOTCON_ERR_NONE != ret)
+	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_cancel_observe() Fail(%d)", ret);
 
 	return ret;

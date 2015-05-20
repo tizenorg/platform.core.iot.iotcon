@@ -16,21 +16,27 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_ERRORS_H__
 #define __IOT_CONNECTIVITY_MANAGER_ERRORS_H__
 
+/**
+ * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
+ * @brief Enumerations of Iotcon error codes.
+ * @since_tizen 3.0
+ */
 typedef enum
 {
-	IOTCON_ERR_NONE = 0,
-	IOTCON_ERR_MEMORY = -1,
-	IOTCON_ERR_GDBUS = -2,
-	IOTCON_ERR_ENVIRONMENT = -3,
-	IOTCON_ERR_SYSTEM = -4,
-	IOTCON_ERR_PLUGIN = -5,
-	IOTCON_ERR_PARAM = -6,
-	IOTCON_ERR_ALREADY = -7,
-	IOTCON_ERR_BUSY = -8,
-	IOTCON_ERR_NOT_SUPPORT = -9,
-	IOTCON_ERR_DISABLE = -10,
-	IOTCON_ERR_IOTIVITY = -11,
-	IOTCON_ERR_NO_DATA = -12
+	IOTCON_ERROR_NONE = 0, /**< Successful*/
+	IOTCON_ERROR_MEMORY = -1, /**< Out of memory */
+	IOTCON_ERROR_GDBUS = -2,
+	IOTCON_ERROR_ENVIRONMENT = -3,
+	IOTCON_ERROR_SYSTEM = -4,
+	IOTCON_ERROR_PLUGIN = -5,
+	IOTCON_ERROR_PARAM = -6, /**< Invalid parameter */
+	IOTCON_ERROR_ALREADY = -7,
+	IOTCON_ERROR_BUSY = -8, /**< Device or resource busy */
+	IOTCON_ERROR_NOT_SUPPORT = -9,
+	IOTCON_ERROR_DISABLE = -10,
+	IOTCON_ERROR_IOTIVITY = -11, /**< Iotivity errors */
+	IOTCON_ERROR_NO_DATA = -12, /**< No data available */
+	IOTCON_ERROR_FAIL = -13, /**< Fail */
 }iotcon_error_e;
 
-#endif //__IOT_CONNECTIVITY_MANAGER_ERRORS_H__
+#endif /* __IOT_CONNECTIVITY_MANAGER_ERRORS_H__ */

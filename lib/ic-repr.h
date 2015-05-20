@@ -27,11 +27,6 @@
 #define IOTCON_KEY_PROPERTY "prop"
 #define IOTCON_KEY_REP "rep"
 
-int ic_repr_get_value(iotcon_repr_h repr, const char *key, iotcon_value_h *retval);
-int ic_repr_replace_value(iotcon_repr_h repr, const char *key, iotcon_value_h value);
-
-JsonObject* ic_repr_generate_json_repr(iotcon_repr_h repr, int *err_code);
-
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
  * @brief Generates JSON string from Representation.
@@ -45,7 +40,6 @@ JsonObject* ic_repr_generate_json_repr(iotcon_repr_h repr, int *err_code);
  */
 char* ic_repr_generate_json(iotcon_repr_h repr, bool set_pretty);
 
-iotcon_repr_h ic_repr_parse_json_obj(JsonObject *obj, int *err_code);
 iotcon_repr_h ic_repr_parse_json(const char *json_string);
 
-#endif // __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_H__
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_H__ */

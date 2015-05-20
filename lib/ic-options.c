@@ -59,28 +59,28 @@ API int iotcon_options_insert(iotcon_options_h options, const unsigned short id,
 	FN_CALL;
 	gpointer value;
 
-	RETVM_IF(((id < IOTCON_OPTIONID_MIN) || (IOTCON_OPTIONID_MAX < id)), IOTCON_ERR_PARAM,
+	RETVM_IF(((id < IOTCON_OPTIONID_MIN) || (IOTCON_OPTIONID_MAX < id)), IOTCON_ERROR_PARAM,
 			"Invalid id(%d)", id);
 
 	value = ic_utils_strdup(data);
 
 	g_hash_table_insert(options->options, GUINT_TO_POINTER(id), value);
 
-	return IOTCON_ERR_NONE;
+	return IOTCON_ERROR_NONE;
 }
 
 API int iotcon_options_delete(iotcon_options_h options, const unsigned short id)
 {
 	gboolean ret;
 
-	RETV_IF(NULL == options, IOTCON_ERR_PARAM);
+	RETV_IF(NULL == options, IOTCON_ERROR_PARAM);
 
 	ret = g_hash_table_remove(options->options, GUINT_TO_POINTER(id));
 	if (FALSE == ret) {
 		ERR("g_hash_table_remove() Fail");
-		return IOTCON_ERR_PARAM;
+		return IOTCON_ERROR_PARAM;
 	}
-	return IOTCON_ERR_NONE;
+	return IOTCON_ERROR_NONE;
 }
 
 API const char* iotcon_options_lookup(iotcon_options_h options, const unsigned short id)

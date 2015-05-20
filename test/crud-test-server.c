@@ -39,16 +39,16 @@ static iotcon_error_e _set_door_resource()
 	my_door.type = strdup("core.door");
 	if (NULL == my_door.type) {
 		ERR("strdup(core.door) Fail");
-		return IOTCON_ERR_MEMORY;
+		return IOTCON_ERROR_MEMORY;
 	}
 
 	my_door.uri = strdup("/a/door");
 	if (NULL == my_door.uri) {
 		ERR("strdup(/a/door) Fail");
-		return IOTCON_ERR_MEMORY;
+		return IOTCON_ERROR_MEMORY;
 	}
 
-	return IOTCON_ERR_NONE;
+	return IOTCON_ERROR_NONE;
 }
 
 static void _check_door_state()
@@ -141,14 +141,14 @@ static void _request_handler_post(iotcon_response_h response)
 
 static void _request_handler_delete(iotcon_response_h response)
 {
-	int ret = IOTCON_ERR_NONE;
+	int ret = IOTCON_ERROR_NONE;
 	iotcon_repr_h resp_repr = NULL;
 	iotcon_entity_handler_result_e result = IOTCON_EH_OK;
 	INFO("DELETE request");
 
 	ret = iotcon_unregister_resource(new_door_handle);
 	resp_repr = iotcon_repr_new();
-	if (IOTCON_ERR_NONE == ret)
+	if (IOTCON_ERROR_NONE == ret)
 		result = IOTCON_EH_RESOURCE_DELETED;
 	else
 		result = IOTCON_EH_ERROR;
@@ -197,7 +197,7 @@ int main(int argc, char **argv)
 	iotcon_interface_e door_interfaces = IOTCON_INTERFACE_DEFAULT;
 	iotcon_resource_property_e resource_properties = IOTCON_DISCOVERABLE;
 	iotcon_resource_h door_handle = NULL;
-	iotcon_error_e iotcon_error = IOTCON_ERR_NONE;
+	iotcon_error_e iotcon_error = IOTCON_ERROR_NONE;
 
 	loop = g_main_loop_new(NULL, FALSE);
 
@@ -206,7 +206,8 @@ int main(int argc, char **argv)
 
 	/* set local door resource */
 	iotcon_error = _set_door_resource();
-	if (IOTCON_ERR_NONE != iotcon_error) {
+
+	if (IOTCON_ERROR_NONE != iotcon_error) {
 		ERR("_set_door_resource() Fail");
 		return -1;
 	}

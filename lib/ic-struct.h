@@ -72,4 +72,4 @@ struct ic_res_response_s {
 	iotcon_repr_h repr;
 };
 
-#endif //__IOT_CONNECTIVITY_MANAGER_INTERNAL_STRUCT_H__
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_STRUCT_H__ */

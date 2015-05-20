@@ -21,9 +21,11 @@
 #include "iotcon-struct.h"
 
 int ic_list_remove(iotcon_list_h list, iotcon_value_h val);
-iotcon_list_h ic_list_append(iotcon_list_h list, iotcon_value_h value);
+iotcon_list_h ic_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
 
-JsonArray* ic_repr_generate_json_array(iotcon_list_h list);
-iotcon_list_h ic_repr_parse_json_array(JsonArray *parray);
+JsonArray* ic_list_to_json(iotcon_list_h list);
+iotcon_list_h ic_list_from_json(JsonArray *parray);
 
-#endif // __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__
+iotcon_list_h ic_list_clone(iotcon_list_h list);
+
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__ */

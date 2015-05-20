@@ -126,4 +126,4 @@
 		} \
 	} while (0)
 
-#endif //__IOT_CONNECTIVITY_MANAGER_TEST_LOG_H__
+#endif /* __IOT_CONNECTIVITY_MANAGER_TEST_LOG_H__ */

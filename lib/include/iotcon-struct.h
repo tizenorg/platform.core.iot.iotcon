@@ -49,9 +49,9 @@ typedef struct ic_res_response_s* iotcon_response_h;
  * @brief observation information structure
  */
 typedef struct {
-	// Action associated with observation request
+	/* Action associated with observation request */
 	iotcon_osbserve_action_e action;
-	// Identifier for observation being registered/deregistered
+	/* Identifier for observation being registered/deregistered */
 	iotcon_observation_id obs_id;
 } iotcon_observation_info_s;
 
@@ -100,4 +100,4 @@ typedef struct
 	char *firmware_version;
 	char *support_url;
 } iotcon_device_info_s;
-#endif //__IOT_CONNECTIVITY_MANAGER_STRUCT_H__
+#endif /* __IOT_CONNECTIVITY_MANAGER_STRUCT_H__ */

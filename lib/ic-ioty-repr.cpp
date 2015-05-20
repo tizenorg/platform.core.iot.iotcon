@@ -31,7 +31,7 @@ using namespace std;
 static iotcon_repr_h _ic_ioty_repr_create_repr(const OCRepresentation& ocRep)
 {
 	FN_CALL;
-	// incoming json format example : {"href":"/a/address","rep":{"text":"Hello world"}}
+
 	string jsonStr = ocRep.getJSONRepresentation();
 	iotcon_repr_h repr = ic_repr_parse_json(jsonStr.c_str());
 
@@ -54,6 +54,13 @@ static iotcon_repr_h _ic_ioty_repr_create_child(const OCRepresentation& ocRep)
 	return _ic_ioty_repr_create_repr(ocRep);
 }
 
+
+/*
+ * A general input : {oc:[{"href":"/a/parent","rep":{"string":"Hello","intlist":[1,2,3]},
+ * 						"prop":{"rt":["core.light"],"if":["oc.mi.def"]}},
+ * 						{"href":"/a/child","rep":{"string":"World","double_val":5.7},
+ * 						"prop":{"rt":["core.light"],"if":["oc.mi.def"]}}]}
+ */
 iotcon_repr_h ic_ioty_repr_generate_repr(const OCRepresentation& ocRep)
 {
 	FN_CALL;
@@ -61,6 +68,11 @@ iotcon_repr_h ic_ioty_repr_generate_repr(const OCRepresentation& ocRep)
 	OCRepresentation ocChild;
 
 	iotcon_repr_h repr_parent = _ic_ioty_repr_create_parent(ocRep);
+	if (NULL == repr_parent) {
+		ERR("_ic_ioty_repr_create_parent() Fail");
+		iotcon_repr_free(repr_parent);
+		return NULL;
+	}
 
 	vector<OCRepresentation> childList = ocRep.getChildren();
 
@@ -85,8 +97,7 @@ OCRepresentation ic_ioty_repr_parse(iotcon_repr_h repr)
 	OCRepresentation ocRep;
 	MessageContainer info;
 
-	// TODO: It's better that iotcon_repr_h is changed to
-	// OCRepresentation at once.
+	/* TODO: It's better that iotcon_repr_h is changed to OCRepresentation at once. */
 	char *repr_json = ic_repr_generate_json(repr, false);
 
 	try {
