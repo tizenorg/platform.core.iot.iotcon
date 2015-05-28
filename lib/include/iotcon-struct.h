@@ -17,7 +17,9 @@
 #define __IOT_CONNECTIVITY_MANAGER_STRUCT_H__
 
 #include <stdint.h>
-#include <iotcon-constant.h>
+#include <stdbool.h>
+
+#include "iotcon-constant.h"
 
 typedef struct ic_value_s* iotcon_value_h;
 typedef struct ic_list_s* iotcon_list_h;
@@ -41,10 +43,10 @@ int iotcon_options_insert(iotcon_options_h options, unsigned short id,
 		const char *data);
 int iotcon_options_delete(iotcon_options_h options, unsigned short id);
 const char* iotcon_options_lookup(iotcon_options_h options, unsigned short id);
-typedef void (*iotcon_options_foreach_cb)(unsigned short id, const char *data,
+typedef int (*iotcon_options_foreach_cb)(unsigned short id, const char *data,
 		void *user_data);
-void iotcon_options_foreach(iotcon_options_h options,
-		iotcon_options_foreach_cb cb, void *user_data);
+int iotcon_options_foreach(iotcon_options_h options, iotcon_options_foreach_cb cb,
+		void *user_data);
 
 
 typedef struct ic_query* iotcon_query_h;
@@ -53,9 +55,9 @@ void iotcon_query_free(iotcon_query_h query);
 int iotcon_query_insert(iotcon_query_h query, const char *key, const char *value);
 int iotcon_query_delete(iotcon_query_h query, const char *key);
 const char* iotcon_query_lookup(iotcon_query_h query, const char *key);
-typedef void (*iotcon_query_foreach_cb)(const char *key, const char *value,
+typedef int (*iotcon_query_foreach_cb)(const char *key, const char *value,
 		void *user_data);
-void iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
+int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
 		void *user_data);
 iotcon_query_h iotcon_query_clone(iotcon_query_h query);
 
@@ -119,9 +121,9 @@ iotcon_str_list_s* iotcon_str_list_remove(iotcon_str_list_s *str_list,
 		const char *string);
 iotcon_str_list_s* iotcon_str_list_clone(iotcon_str_list_s *str_list);
 unsigned int iotcon_str_list_length(iotcon_str_list_s *str_list);
-typedef void (*iotcon_string_foreach_cb)(const char *string, void *user_data);
-void iotcon_str_list_foreach(iotcon_str_list_s *str_list,
-		iotcon_string_foreach_cb cb, void *user_data);
+typedef int (*iotcon_string_foreach_cb)(const char *string, void *user_data);
+int iotcon_str_list_foreach(iotcon_str_list_s *str_list, iotcon_string_foreach_cb cb,
+		void *user_data);
 const char* iotcon_str_list_nth_data(iotcon_str_list_s *str_list, unsigned int n);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_STRUCT_H__ */

@@ -26,7 +26,7 @@
 #include "ic-repr-obj.h"
 
 int ic_obj_del_value(iotcon_repr_h repr, const char *key,
-		iotcon_repr_types_e value_type)
+		iotcon_types_e value_type)
 {
 	gboolean ret = FALSE;
 	iotcon_value_h value = NULL;
@@ -54,23 +54,26 @@ int ic_obj_del_value(iotcon_repr_h repr, const char *key,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_get_int(iotcon_repr_h repr, const char *key)
+API int iotcon_repr_get_int(iotcon_repr_h repr, const char *key, int *val)
 {
 	iotcon_value_h value;
 
-	RETV_IF(NULL == repr, 0);
-	RETV_IF(NULL == key, 0);
+	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == key, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == val, IOTCON_ERROR_PARAM);
 
 	value = g_hash_table_lookup(repr->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
-		return 0;
+		return IOTCON_ERROR_NO_DATA;
 	}
 
 	ic_basic_s *real = (ic_basic_s*)value;
-	RETV_IF(IOTCON_TYPE_INT != real->type, 0);
+	RETV_IF(IOTCON_TYPE_INT != real->type, IOTCON_ERROR_FAIL);
 
-	return real->val.i;
+	*val = real->val.i;
+
+	return IOTCON_ERROR_NONE;
 }
 
 API int iotcon_repr_set_int(iotcon_repr_h repr, const char *key, int val)
@@ -105,24 +108,27 @@ API int iotcon_repr_del_int(iotcon_repr_h repr, const char *key)
 	return ret;
 }
 
-API bool iotcon_repr_get_bool(iotcon_repr_h repr, const char *key)
+API int iotcon_repr_get_bool(iotcon_repr_h repr, const char *key, bool *val)
 {
 	ic_basic_s *real = NULL;
 	iotcon_value_h value = NULL;
 
-	RETV_IF(NULL == repr, false);
-	RETV_IF(NULL == key, false);
+	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == key, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == val, IOTCON_ERROR_PARAM);
 
 	value = g_hash_table_lookup(repr->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
-		return false;
+		return IOTCON_ERROR_NO_DATA;
 	}
 
 	real = (ic_basic_s*)value;
-	RETV_IF(IOTCON_TYPE_BOOL != real->type, false);
+	RETV_IF(IOTCON_TYPE_BOOL != real->type, IOTCON_ERROR_FAIL);
 
-	return real->val.b;
+	*val = real->val.b;
+
+	return IOTCON_ERROR_NONE;
 }
 
 API int iotcon_repr_set_bool(iotcon_repr_h repr, const char *key, bool val)
@@ -154,24 +160,27 @@ API int iotcon_repr_del_bool(iotcon_repr_h repr, const char *key)
 	return ret;
 }
 
-API double iotcon_repr_get_double(iotcon_repr_h repr, const char *key)
+API int iotcon_repr_get_double(iotcon_repr_h repr, const char *key, double *val)
 {
 	ic_basic_s *real = NULL;
 	iotcon_value_h value = NULL;
 
-	RETV_IF(NULL == repr, 0.0);
-	RETV_IF(NULL == key, 0.0);
+	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == key, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == val, IOTCON_ERROR_PARAM);
 
 	value = g_hash_table_lookup(repr->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
-		return 0;
+		return IOTCON_ERROR_NO_DATA;
 	}
 
 	real = (ic_basic_s*)value;
-	RETV_IF(IOTCON_TYPE_DOUBLE != real->type, 0.0);
+	RETV_IF(IOTCON_TYPE_DOUBLE != real->type, IOTCON_ERROR_FAIL);
 
-	return real->val.d;
+	*val = real->val.d;
+
+	return IOTCON_ERROR_NONE;
 }
 
 API int iotcon_repr_set_double(iotcon_repr_h repr, const char *key, double val)
@@ -206,24 +215,27 @@ API int iotcon_repr_del_double(iotcon_repr_h repr, const char *key)
 	return ret;
 }
 
-API char* iotcon_repr_get_str(iotcon_repr_h repr, const char *key)
+API int iotcon_repr_get_str(iotcon_repr_h repr, const char *key, char **val)
 {
 	ic_basic_s *real = NULL;
 	iotcon_value_h value = NULL;
 
-	RETV_IF(NULL == repr, NULL);
-	RETV_IF(NULL == key, NULL);
+	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == key, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == val, IOTCON_ERROR_PARAM);
 
 	value = g_hash_table_lookup(repr->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
-		return NULL;
+		return IOTCON_ERROR_NO_DATA;
 	}
 
 	real = (ic_basic_s*)value;
-	RETV_IF(IOTCON_TYPE_STR != real->type, NULL);
+	RETV_IF(IOTCON_TYPE_STR != real->type, IOTCON_ERROR_FAIL);
 
-	return real->val.s;
+	*val = real->val.s;
+
+	return IOTCON_ERROR_NONE;
 }
 
 API int iotcon_repr_set_str(iotcon_repr_h repr, const char *key, char *val)
@@ -232,6 +244,7 @@ API int iotcon_repr_set_str(iotcon_repr_h repr, const char *key, char *val)
 
 	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
 	RETV_IF(NULL == key, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == val, IOTCON_ERROR_PARAM);
 
 	value = ic_value_new_str(val);
 	if (NULL == value) {
@@ -309,24 +322,27 @@ API int iotcon_repr_del_null(iotcon_repr_h repr, const char *key)
 	return ret;
 }
 
-API iotcon_list_h iotcon_repr_get_list(iotcon_repr_h repr, const char *key)
+API int iotcon_repr_get_list(iotcon_repr_h repr, const char *key, iotcon_list_h *list)
 {
 	iotcon_value_h value = NULL;
 	ic_val_list_s *real = NULL;
 
-	RETV_IF(NULL == repr, NULL);
-	RETV_IF(NULL == key, NULL);
+	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == key, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == list, IOTCON_ERROR_PARAM);
 
 	value = g_hash_table_lookup(repr->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
-		return NULL;
+		return IOTCON_ERROR_NO_DATA;
 	}
 
 	real = (ic_val_list_s*)value;
-	RETV_IF(IOTCON_TYPE_LIST != real->type, NULL);
+	RETV_IF(IOTCON_TYPE_LIST != real->type, IOTCON_ERROR_FAIL);
 
-	return real->list;
+	*list = real->list;
+
+	return IOTCON_ERROR_NONE;
 }
 
 API int iotcon_repr_set_list(iotcon_repr_h repr, const char *key, iotcon_list_h list)
@@ -335,6 +351,7 @@ API int iotcon_repr_set_list(iotcon_repr_h repr, const char *key, iotcon_list_h 
 
 	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
 	RETV_IF(NULL == key, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == list, IOTCON_ERROR_PARAM);
 
 	value = ic_value_new_list(list);
 	if (NULL == value) {
@@ -362,24 +379,28 @@ API int iotcon_repr_del_list(iotcon_repr_h repr, const char *key)
 	return ret;
 }
 
-API iotcon_repr_h iotcon_repr_get_repr(iotcon_repr_h repr, const char *key)
+
+API int iotcon_repr_get_repr(iotcon_repr_h src, const char *key, iotcon_repr_h *dest)
 {
 	ic_val_repr_s *real = NULL;
 	iotcon_value_h value = NULL;
 
-	RETV_IF(NULL == repr, NULL);
-	RETV_IF(NULL == key, NULL);
+	RETV_IF(NULL == src, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == key, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == dest, IOTCON_ERROR_PARAM);
 
-	value = g_hash_table_lookup(repr->hash_table, key);
+	value = g_hash_table_lookup(src->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
-		return NULL;
+		return IOTCON_ERROR_NO_DATA;
 	}
 
 	real = (ic_val_repr_s*)value;
-	RETV_IF(IOTCON_TYPE_REPR != real->type, NULL);
+	RETV_IF(IOTCON_TYPE_REPR != real->type, IOTCON_ERROR_FAIL);
 
-	return real->repr;
+	*dest = real->repr;
+
+	return IOTCON_ERROR_NONE;
 }
 
 API int iotcon_repr_set_repr(iotcon_repr_h repr, const char *key, iotcon_repr_h val)
@@ -416,6 +437,24 @@ API int iotcon_repr_del_repr(iotcon_repr_h repr, const char *key)
 	return ret;
 }
 
+API int iotcon_repr_get_type(iotcon_repr_h repr, const char *key, int *type)
+{
+	iotcon_value_h value = NULL;
+
+	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == key, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == type, IOTCON_ERROR_PARAM);
+
+	value = g_hash_table_lookup(repr->hash_table, key);
+	if (NULL == value) {
+		ERR("g_hash_table_lookup() Fail");
+		return IOTCON_ERROR_NO_DATA;
+	}
+	*type = value->type;
+
+	return IOTCON_ERROR_NONE;
+}
+
 int ic_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
@@ -431,7 +470,7 @@ static inline int _ic_obj_to_json(GHashTable *hash, iotcon_str_list_s *key_list,
 		unsigned int index, JsonObject *json_obj)
 {
 	FN_CALL;
-	int type;
+	int type, ret;
 	const char *key;
 	iotcon_repr_h child_repr = NULL;
 	iotcon_list_h child_list = NULL;
@@ -465,7 +504,12 @@ static inline int _ic_obj_to_json(GHashTable *hash, iotcon_str_list_s *key_list,
 		json_object_set_member(json_obj, key, child_node);
 		break;
 	case IOTCON_TYPE_LIST:
-		child_list = ic_value_get_list(value);
+		ret = ic_value_get_list(value, &child_list);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("ic_value_get_list() Fail(%d)", ret);
+			return IOTCON_ERROR_FAIL;
+		}
+
 		child_array = ic_list_to_json(child_list);
 		if (NULL == child_array) {
 			ERR("ic_list_to_json() Fail");
@@ -476,7 +520,12 @@ static inline int _ic_obj_to_json(GHashTable *hash, iotcon_str_list_s *key_list,
 		json_object_set_member(json_obj, key, child_node);
 		break;
 	case IOTCON_TYPE_REPR:
-		child_repr = ic_value_get_repr(value);
+		ret = ic_value_get_repr(value, &child_repr);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("ic_value_get_repr() Fail(%d)", ret);
+			return IOTCON_ERROR_FAIL;
+		}
+
 		child_obj = ic_obj_to_json(child_repr);
 		if (NULL == child_obj) {
 			ERR("ic_obj_to_json() Fail");

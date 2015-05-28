@@ -108,18 +108,22 @@ API const char* iotcon_options_lookup(iotcon_options_h options, unsigned short i
 }
 
 
-API void iotcon_options_foreach(iotcon_options_h options, iotcon_options_foreach_cb cb,
-		void *user_data)
+API int iotcon_options_foreach(iotcon_options_h options,
+		iotcon_options_foreach_cb cb, void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key, value;
 
-	RET_IF(NULL == options);
-	RET_IF(NULL == cb);
+	RETV_IF(NULL == options, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == cb, IOTCON_ERROR_PARAM);
 
 	g_hash_table_iter_init(&iter, options->hash);
-	while (g_hash_table_iter_next(&iter, &key, &value))
-		cb(GPOINTER_TO_UINT(key), value, user_data);
+	while (g_hash_table_iter_next(&iter, &key, &value)) {
+		if (false == cb(GPOINTER_TO_UINT(key), value, user_data))
+			break;
+	}
+
+	return IOTCON_ERROR_NONE;
 }
 
 

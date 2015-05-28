@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <stdbool.h>
 #include <stdlib.h>
 #include <glib.h>
 
@@ -64,7 +64,7 @@ static void _on_post(iotcon_options_h header_options, iotcon_repr_h recv_repr,
 
 	_print_repr_info(recv_repr);
 
-	created_uri = iotcon_repr_get_str(recv_repr, "createduri");
+	iotcon_repr_get_str(recv_repr, "createduri", &created_uri);
 	if (created_uri) {
 		DBG("New resource created : %s", created_uri);
 
@@ -120,11 +120,13 @@ static void _on_get(iotcon_options_h header_options, iotcon_repr_h recv_repr,
 	iotcon_query_free(query_params);
 }
 
-static void _get_res_type_fn(const char *string, void *user_data)
+static int _get_res_type_fn(const char *string, void *user_data)
 {
 	char *resource_uri = user_data;
 
 	DBG("[%s] resource type : %s", resource_uri, string);
+
+	return IOTCON_FUNC_CONTINUE;
 }
 
 static void _presence_handler(int result, unsigned int nonce,
@@ -138,6 +140,7 @@ static void _presence_handler(int result, unsigned int nonce,
 
 static void _found_resource(iotcon_client_h resource, void *user_data)
 {
+	int ret;
 	const char *resource_uri = NULL;
 	const char *resource_host = NULL;
 	iotcon_str_list_s *resource_types = NULL;
@@ -170,8 +173,12 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 
 		/* get the resource types */
 		resource_types = iotcon_client_get_types(resource);
-		iotcon_str_list_foreach(resource_types, _get_res_type_fn,
+		ret = iotcon_str_list_foreach(resource_types, _get_res_type_fn,
 				(void *)resource_uri);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_str_list_foreach() Fail(%d)", ret);
+			return;
+		}
 
 		iotcon_subscribe_presence(resource_host, "core.door", _presence_handler, NULL);
 

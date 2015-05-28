@@ -25,28 +25,38 @@ const char* const room_uri = "/a/room";
 
 iotcon_client_h room_resource = NULL;
 
-void _get_int_list_fn(int index, const int value, void *user_data)
+static int _get_int_list_fn(int index, const int value, void *user_data)
 {
 	DBG("%d°C", value);
+
+	return IOTCON_FUNC_CONTINUE;
 }
 
 static void _on_get(iotcon_repr_h recv_repr, int response_result)
 {
-	int i, children_count;
+	int i, ret;
+	unsigned int children_count;
+	const char *uri;
 	iotcon_repr_h child_repr;
 	iotcon_list_h list;
 	iotcon_str_list_s *key_list = NULL;
 
-	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result, "_on_get_1st Response error(%d)", response_result);
+	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result,
+			"_on_get Response error(%d)", response_result);
 	INFO("GET request was successful");
 
 	DBG("[ parent representation ]");
-	DBG("uri : %s", iotcon_repr_get_uri(recv_repr));
+	iotcon_repr_get_uri(recv_repr, &uri);
+	if (uri)
+		DBG("uri : %s", uri);
 	key_list = iotcon_repr_get_key_list(recv_repr);
 	if (key_list) {
-		DBG("name : %s", iotcon_repr_get_str(recv_repr, "name"));
+		char *str;
+		iotcon_repr_get_str(recv_repr, "name", &str);
+		if (str)
+			DBG("name : %s", str);
 
-		list = iotcon_repr_get_list(recv_repr, "today_temp");
+		iotcon_repr_get_list(recv_repr, "today_temp", &list);
 
 		DBG("today's temperature :");
 		iotcon_list_foreach_int(list, _get_int_list_fn, NULL);
@@ -59,21 +69,31 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 		DBG("[ child representation ]");
 		const char *uri;
 
-		child_repr = iotcon_repr_get_nth_child(recv_repr, i);
-		uri = iotcon_repr_get_uri(child_repr);
-		DBG("uri : %s", uri);
+		ret = iotcon_repr_get_nth_child(recv_repr, i, &child_repr);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_repr_get_nth_child(%d) Fail(%d)", i, ret);
+			continue;
+		}
+
+		iotcon_repr_get_uri(child_repr, &uri);
+		if (uri)
+			DBG("uri : %s", uri);
 
 		if (!strcmp("/a/light", uri)) {
 			key_list = iotcon_repr_get_key_list(child_repr);
 			if (key_list) {
-				DBG("brightness : %d", iotcon_repr_get_int(child_repr, "brightness"));
+				int brightness;
+				iotcon_repr_get_int(child_repr, "brightness", &brightness);
+				DBG("brightness : %d", brightness);
 				iotcon_str_list_free(key_list);
 			}
 		}
 		else if (!strcmp("/a/switch", uri)) {
 			key_list = iotcon_repr_get_key_list(child_repr);
 			if (key_list) {
-				DBG("switch : %d", iotcon_repr_get_bool(child_repr, "switch"));
+				bool bswitch;
+				iotcon_repr_get_bool(child_repr, "switch", &bswitch);
+				DBG("switch : %d", bswitch);
 				iotcon_str_list_free(key_list);
 			}
 		}
@@ -102,11 +122,13 @@ static void _on_get_1st(iotcon_options_h header_options, iotcon_repr_h recv_repr
 	iotcon_query_free(query_params);
 }
 
-static void _get_res_type_fn(const char *string, void *user_data)
+static int _get_res_type_fn(const char *string, void *user_data)
 {
 	char *resource_uri = user_data;
 
 	DBG("[%s] resource type : %s", resource_uri, string);
+
+	return IOTCON_FUNC_CONTINUE;
 }
 
 static void _found_resource(iotcon_client_h resource, void *user_data)

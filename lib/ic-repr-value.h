@@ -54,12 +54,12 @@ iotcon_value_h ic_value_new_list(iotcon_list_h val);
 iotcon_value_h ic_value_new_repr(iotcon_repr_h val);
 
 
-int ic_value_get_int(iotcon_value_h value);
-bool ic_value_get_bool(iotcon_value_h value);
-double ic_value_get_double(iotcon_value_h value);
-const char* ic_value_get_str(iotcon_value_h value);
-iotcon_list_h ic_value_get_list(iotcon_value_h value);
-iotcon_repr_h ic_value_get_repr(iotcon_value_h value);
+int ic_value_get_int(iotcon_value_h value, int *val);
+int ic_value_get_bool(iotcon_value_h value, bool *val);
+int ic_value_get_double(iotcon_value_h value, double *val);
+int ic_value_get_str(iotcon_value_h value, const char **val);
+int ic_value_get_list(iotcon_value_h value, iotcon_list_h *list);
+int ic_value_get_repr(iotcon_value_h value, iotcon_repr_h *repr);
 
 
 JsonNode* ic_value_to_json(iotcon_value_h value);

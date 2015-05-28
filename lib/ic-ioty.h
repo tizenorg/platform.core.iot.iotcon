@@ -73,5 +73,8 @@ int ic_ioty_observe(iotcon_client_h resource, iotcon_observe_type_e observe_type
 
 int ic_ioty_cancel_observe(iotcon_client_h resource);
 
+int ic_ioty_convert_interface_flag(iotcon_interface_e src, char **dest);
+int ic_ioty_convert_interface_string(const char *src, iotcon_interface_e *dest);
+
 
 #endif //__IOT_CONNECTIVITY_MANAGER_INTERNAL_IOTIVITY_H__

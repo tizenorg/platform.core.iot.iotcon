@@ -46,13 +46,14 @@ static void _light_request_handler_get(iotcon_response_h response)
 	iotcon_repr_free(resp_repr);
 }
 
-void _query_foreach_cb(const char *key, const char *value, void *user_data)
+static int _query_foreach_cb(const char *key, const char *value, void *user_data)
 {
 	char **interface_str = user_data;
 
 	if (!strcmp("if", key)) {
 		*interface_str = (char*)value;
 	}
+	return IOTCON_FUNC_CONTINUE;
 }
 
 static void _room_request_handler_get(iotcon_request_h request,

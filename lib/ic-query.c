@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -111,18 +112,21 @@ API const char* iotcon_query_lookup(iotcon_query_h query, const char *key)
 	return ret;
 }
 
-
-API void iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
+API int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
 		void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key, value;
 
-	RET_IF(NULL == query);
-	RET_IF(NULL == cb);
+	RETV_IF(NULL == query, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == cb, IOTCON_ERROR_PARAM);
 
 	g_hash_table_iter_init(&iter, query->hash);
-	while (g_hash_table_iter_next(&iter, &key, &value))
-		cb(key, value, user_data);
+	while (g_hash_table_iter_next(&iter, &key, &value)) {
+		if (false == cb(key, value, user_data))
+			break;
+	}
+
+	return IOTCON_ERROR_NONE;
 }
 

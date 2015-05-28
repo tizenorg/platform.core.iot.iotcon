@@ -106,12 +106,14 @@ static void _request_handler_get(iotcon_response_h response)
 
 static void _request_handler_put(iotcon_request_h request, iotcon_response_h response)
 {
+	bool bval;
 	iotcon_repr_h req_repr = NULL;
 	iotcon_repr_h resp_repr = NULL;
 	INFO("PUT request");
 
 	req_repr = iotcon_request_get_representation(request);
-	my_door.state = iotcon_repr_get_bool(req_repr, "opened");
+	iotcon_repr_get_bool(req_repr, "opened", &bval);
+	my_door.state = bval;
 
 	_check_door_state();
 
@@ -175,10 +177,12 @@ static void _request_handler_delete(iotcon_response_h response)
 	g_timeout_add_seconds(5, _notifier, door_handle);
 }
 
-static void query_cb(const char *key, const char *value, void *user_data)
+static int _query_cb(const char *key, const char *value, void *user_data)
 {
 	INFO("key : %s", key);
 	INFO("value : %s", value);
+
+	return IOTCON_FUNC_CONTINUE;
 }
 
 static void _request_handler(iotcon_request_h request, void *user_data)
@@ -193,7 +197,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 
 	query = iotcon_request_get_query(request);
 	if (query)
-		iotcon_query_foreach(query, query_cb, NULL);
+		iotcon_query_foreach(query, _query_cb, NULL);
 
 	request_type = iotcon_request_get_request_type(request);
 	if (NULL == request_type) {

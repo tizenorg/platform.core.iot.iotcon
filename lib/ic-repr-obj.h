@@ -22,7 +22,7 @@
 #include "iotcon-constant.h"
 
 int ic_obj_del_value(iotcon_repr_h repr, const char *key,
-		iotcon_repr_types_e value_type);
+		iotcon_types_e value_type);
 
 int ic_repr_obj_get_value(iotcon_repr_h repr, const char *key, iotcon_value_h *retval);
 int ic_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value);

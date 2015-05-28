@@ -46,6 +46,9 @@
 #define IOTCON_CONTAINED_RESOURCES_MAX 5
 */
 
+#define IOTCON_FUNC_STOP 0
+#define IOTCON_FUNC_CONTINUE 1
+
 /**
  * @brief Action associated with observation
  */
@@ -120,6 +123,6 @@ typedef enum {
 	IOTCON_TYPE_NULL,
 	IOTCON_TYPE_LIST,
 	IOTCON_TYPE_REPR,
-} iotcon_repr_types_e;
+} iotcon_types_e;
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_CONSTANT_H__ */

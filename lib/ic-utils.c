@@ -17,7 +17,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "iotcon-struct.h"
+#include "iotcon.h"
 #include "ic-common.h"
 #include "ic-utils.h"
 
@@ -151,16 +151,18 @@ API unsigned int iotcon_str_list_length(iotcon_str_list_s *str_list)
 	return length;
 }
 
-
-API void iotcon_str_list_foreach(iotcon_str_list_s *str_list,
-		iotcon_string_foreach_cb cb, void *user_data)
+API int iotcon_str_list_foreach(iotcon_str_list_s *str_list, iotcon_string_foreach_cb cb,
+		void *user_data)
 {
-	RET_IF(NULL == str_list);
+	RETV_IF(NULL == str_list, IOTCON_ERROR_PARAM);
 
 	while (str_list) {
-		cb(str_list->string, user_data);
+		if (false == cb(str_list->string, user_data))
+			break;
 		str_list = str_list->next;
 	}
+
+	return IOTCON_ERROR_NONE;
 }
 
 

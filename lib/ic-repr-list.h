@@ -23,11 +23,12 @@
 
 struct ic_list_s {
 	int type;
+	int ref_count;
 	GList *list;
 };
 
 int ic_list_remove(iotcon_list_h list, iotcon_value_h val);
-iotcon_list_h ic_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
+int ic_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
 
 JsonArray* ic_list_to_json(iotcon_list_h list);
 iotcon_list_h ic_list_from_json(JsonArray *parray);

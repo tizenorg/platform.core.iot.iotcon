@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdbool.h>
 #include <stdint.h>
 #include <glib.h>
 #include <OCApi.h>
@@ -609,26 +610,73 @@ extern "C" int ic_ioty_unregister_res(iotcon_resource_h resource_handle)
 	return IOTCON_ERROR_NONE;
 }
 
-static int _ic_ioty_generate_interface(iotcon_interface_e iface, string &interface_str)
+extern "C" int ic_ioty_convert_interface_string(const char *src, iotcon_interface_e *dest)
 {
-	switch (iface) {
-	case IOTCON_INTERFACE_GROUP:
-		interface_str = GROUP_INTERFACE;
-		break;
-	case IOTCON_INTERFACE_BATCH:
-		interface_str = BATCH_INTERFACE;
-		break;
-	case IOTCON_INTERFACE_LINK:
-		interface_str = LINK_INTERFACE;
-		break;
-	case IOTCON_INTERFACE_DEFAULT:
-	case IOTCON_INTERFACE_NONE:
-		interface_str = DEFAULT_INTERFACE;
-		break;
-	default:
+	RETV_IF(NULL == src, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == dest, IOTCON_ERROR_PARAM);
+
+	string interface_str(src);
+
+	if (STR_EQUAL == DEFAULT_INTERFACE.compare(interface_str)) {
+		*dest = IOTCON_INTERFACE_DEFAULT;
+	}
+	else if (STR_EQUAL == LINK_INTERFACE.compare(interface_str)) {
+		*dest = IOTCON_INTERFACE_LINK;
+	}
+	else if (STR_EQUAL == BATCH_INTERFACE.compare(interface_str)) {
+		*dest = IOTCON_INTERFACE_BATCH;
+	}
+	else if (STR_EQUAL == GROUP_INTERFACE.compare(interface_str)) {
+		*dest = IOTCON_INTERFACE_GROUP;
+	}
+	else {
 		ERR("Invalid interface");
+		*dest = IOTCON_INTERFACE_NONE;
 		return IOTCON_ERROR_PARAM;
 	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+static int _ic_ioty_convert_interface_flag(iotcon_interface_e src, string &dest)
+{
+	switch (src) {
+	case IOTCON_INTERFACE_GROUP:
+		dest = GROUP_INTERFACE;
+		break;
+	case IOTCON_INTERFACE_BATCH:
+		dest = BATCH_INTERFACE;
+		break;
+	case IOTCON_INTERFACE_LINK:
+		dest = LINK_INTERFACE;
+		break;
+	case IOTCON_INTERFACE_DEFAULT:
+		dest = DEFAULT_INTERFACE;
+		break;
+	case IOTCON_INTERFACE_NONE:
+	default:
+		ERR("Invalid interface");
+		dest = "";
+		return IOTCON_ERROR_PARAM;
+	}
+	return IOTCON_ERROR_NONE;
+}
+
+extern "C" int ic_ioty_convert_interface_flag(iotcon_interface_e src, char **dest)
+{
+	FN_CALL;
+	int ret;
+	string iface_str;
+
+	ret = _ic_ioty_convert_interface_flag(src, iface_str);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ic_ioty_convert_interface_flag() Fail(%d)", ret);
+		*dest = NULL;
+		return ret;
+	}
+
+	*dest = ic_utils_strdup(iface_str.c_str());
+
 	return IOTCON_ERROR_NONE;
 }
 
@@ -639,9 +687,9 @@ extern "C" int ic_ioty_bind_iface_to_res(OCResourceHandle resourceHandle,
 	OCStackResult ocRet;
 	string resource_interface;
 
-	ret = _ic_ioty_generate_interface(iface, resource_interface);
+	ret = _ic_ioty_convert_interface_flag(iface, resource_interface);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_ic_ioty_generate_interface() Fail(%d)", ret);
+		ERR("_ic_ioty_convert_interface_flag(%d) Fail(%d)", iface, ret);
 		return ret;
 	}
 
@@ -755,11 +803,18 @@ extern "C" int ic_ioty_send_notify(OCResourceHandle resHandle, struct ic_notify_
 	resourceResponse->setErrorCode(msg->error_code);
 
 	OCRepresentation ocRep = ic_ioty_repr_parse(msg->repr);
-	ret = _ic_ioty_generate_interface(msg->iface, iface);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_ic_ioty_generate_interface() Fail(%d)", ret);
-		return ret;
+
+	if (IOTCON_INTERFACE_NONE != msg->iface) {
+		ret = _ic_ioty_convert_interface_flag(msg->iface, iface);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_ic_ioty_convert_interface_flag(%d) Fail(%d)", msg->iface, ret);
+			return ret;
+		}
 	}
+	else {
+		iface = DEFAULT_INTERFACE;
+	}
+
 	resourceResponse->setResourceRepresentation(ocRep, iface);
 
 	ocRet = notifyListOfObservers(resHandle, obsIds, resourceResponse);
@@ -788,10 +843,15 @@ extern "C" int ic_ioty_send_res_response_data(struct ic_resource_response *resp)
 		pResponse->setErrorCode(resp->error_code);
 		pResponse->setResponseResult((OCEntityHandlerResult)resp->result);
 
-		ret = _ic_ioty_generate_interface(resp->iface, iface);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("_ic_ioty_generate_interface() Fail(%d)", ret);
-			return ret;
+		if (IOTCON_INTERFACE_NONE != resp->iface) {
+			ret = _ic_ioty_convert_interface_flag(resp->iface, iface);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("_ic_ioty_convert_interface_flag(%d) Fail(%d)", resp->iface, ret);
+				return ret;
+			}
+		}
+		else {
+			iface = DEFAULT_INTERFACE;
 		}
 
 		pResponse->setResourceRepresentation(ocRep, iface);
@@ -901,12 +961,14 @@ extern "C" int ic_ioty_find_resource(const char *host_address, const char *resou
 	return IOTCON_ERROR_NONE;
 }
 
-static void _ic_ioty_accumulate_options_vector(unsigned short id, const char *data,
+static int _ic_ioty_accumulate_options_vector(unsigned short id, const char *data,
 		void *user_data)
 {
 	HeaderOptions *options = static_cast<HeaderOptions*>(user_data);
 	HeaderOption::OCHeaderOption option(id, data);
 	(*options).push_back(option);
+
+	return IOTCON_FUNC_CONTINUE;
 }
 
 static OCResource::Ptr _ic_ioty_create_oc_resource(iotcon_client_h resource)
@@ -963,13 +1025,15 @@ static OCResource::Ptr _ic_ioty_create_oc_resource(iotcon_client_h resource)
 }
 
 
-static void _ic_ioty_accumulate_query_map(const char *key, const char *value,
+static int _ic_ioty_accumulate_query_map(const char *key, const char *value,
 		void *user_data)
 {
 	QueryParamsMap *queryParams = static_cast<QueryParamsMap*>(user_data);
 	string keyStr = key;
 	string valueStr = value;
 	(*queryParams)[keyStr] = valueStr;
+
+	return IOTCON_FUNC_CONTINUE;
 }
 
 

@@ -31,10 +31,11 @@
 
 struct ic_repr_s {
 	char *uri;
+	int ref_count;
+	int interfaces;
 	GHashTable *hash_table;
 	GList *children;
-	GList *res_types;
-	GList *interfaces;
+	iotcon_str_list_s *res_types;
 };
 
 /**
