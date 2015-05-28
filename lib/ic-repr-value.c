@@ -303,8 +303,6 @@ API iotcon_value_h ic_value_from_json(JsonNode *node)
 			value = ic_value_new_int(ival64);
 			if (NULL == value)
 				ERR("ic_value_new_int(%ll) Fail", ival64);
-
-			DBG("Set int value(%ll) to node", (int)ival64);
 			break;
 		case G_TYPE_BOOLEAN:
 			value = ic_value_new_bool(json_node_get_boolean(node));
@@ -331,7 +329,6 @@ API iotcon_value_h ic_value_from_json(JsonNode *node)
 
 void ic_value_free(gpointer data)
 {
-	FN_CALL;
 	iotcon_value_h value;
 
 	RET_IF(NULL == data);
@@ -346,14 +343,11 @@ void ic_value_free(gpointer data)
 	case IOTCON_TYPE_BOOL:
 	case IOTCON_TYPE_DOUBLE:
 	case IOTCON_TYPE_NULL:
-		DBG("value is basic. type(%d)", type);
 		break;
 	case IOTCON_TYPE_LIST:
-		DBG("value is list");
 		iotcon_list_free(ic_value_get_list(value));
 		break;
 	case IOTCON_TYPE_REPR:
-		DBG("value is Repr");
 		iotcon_repr_free(ic_value_get_repr(value));
 		break;
 	default:

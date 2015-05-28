@@ -21,6 +21,7 @@
 #include "ic-common.h"
 #include "ic-utils.h"
 #include "ic-ioty.h"
+#include "ic-repr.h"
 #include "ic-options.h"
 #include "ic-request.h"
 #include "ic-response.h"
@@ -76,6 +77,7 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 		break;
 	case IOTCON_RESPONSE_REPRESENTATION:
 		resp->repr = va_arg(args, iotcon_repr_h);
+		ic_repr_inc_ref_count(resp->repr);
 		break;
 	case IOTCON_RESPONSE_RESULT:
 		value = va_arg(args, int);

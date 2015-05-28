@@ -50,6 +50,8 @@ MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %{_bindir}/crud-test-server
 %{_bindir}/device-test-client
 %{_bindir}/device-test-server
+%{_bindir}/repr-test-client
+%{_bindir}/repr-test-server
 
 %files devel
 %{_libdir}/lib%{name}.so

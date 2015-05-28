@@ -52,4 +52,6 @@ char* ic_repr_generate_json(iotcon_repr_h repr, bool set_pretty);
 
 iotcon_repr_h ic_repr_parse_json(const char *json_string);
 
+void ic_repr_inc_ref_count(iotcon_repr_h val);
+
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_H__ */

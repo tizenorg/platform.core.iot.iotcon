@@ -31,7 +31,7 @@ using namespace std;
 static iotcon_repr_h _ic_ioty_repr_create_repr(const OCRepresentation& ocRep)
 {
 	FN_CALL;
-	// incoming json format example : {"href":"/a/address","rep":{"text":"Hello world"}}
+
 	string jsonStr = ocRep.getJSONRepresentation();
 	iotcon_repr_h repr = ic_repr_parse_json(jsonStr.c_str());
 
@@ -85,7 +85,7 @@ iotcon_repr_h ic_ioty_repr_generate_repr(const OCRepresentation& ocRep)
 			return NULL;
 		}
 
-		iotcon_repr_append_child(repr_parent, repr_child);
+		repr_parent->children = g_list_append(repr_parent->children, repr_child);
 	}
 
 	return repr_parent;

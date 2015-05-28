@@ -29,6 +29,30 @@
 #include "ic-repr-obj.h"
 #include "ic-repr.h"
 
+void ic_repr_inc_ref_count(iotcon_repr_h val)
+{
+	RET_IF(NULL == val);
+	RETM_IF(val->ref_count < 0, "Invalid Count(%d)", val->ref_count);
+
+	val->ref_count++;
+}
+
+static bool _ic_repr_dec_ref_count(iotcon_repr_h val)
+{
+	bool ret;
+
+	RETV_IF(NULL == val, -1);
+	RETVM_IF(val->ref_count <= 0, false, "Invalid Count(%d)", val->ref_count);
+
+	val->ref_count--;
+	if (0 == val->ref_count)
+		ret = true;
+	else
+		ret = false;
+
+	return ret;
+}
+
 API iotcon_repr_h iotcon_repr_new()
 {
 	iotcon_repr_h ret_val;
@@ -42,6 +66,7 @@ API iotcon_repr_h iotcon_repr_new()
 
 	ret_val->hash_table = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
 			ic_value_free);
+	ic_repr_inc_ref_count(ret_val);
 
 	return ret_val;
 }
@@ -185,6 +210,7 @@ API int iotcon_repr_append_child(iotcon_repr_h parent, iotcon_repr_h child)
 	RETV_IF(NULL == parent, IOTCON_ERROR_PARAM);
 	RETV_IF(NULL == child, IOTCON_ERROR_PARAM);
 
+	ic_repr_inc_ref_count(child);
 	parent->children = g_list_append(parent->children, child);
 
 	return IOTCON_ERROR_NONE;
@@ -269,7 +295,6 @@ static JsonObject* _ic_repr_data_generate_json(iotcon_repr_h cur_repr,
 	RETV_IF(NULL == cur_repr, NULL);
 
 	if (0 < iotcon_repr_get_keys_count(cur_repr)) {
-		DBG("Representation has \"%s\" key", IOTCON_KEY_REP);
 		repr_obj = ic_obj_to_json(cur_repr);
 		if (NULL == repr_obj) {
 			ERR("ic_obj_to_json() Fail()");
@@ -282,16 +307,13 @@ static JsonObject* _ic_repr_data_generate_json(iotcon_repr_h cur_repr,
 
 	if (cur_repr->uri) {
 		const char *uri = iotcon_repr_get_uri(cur_repr);
-		DBG("Representation has \"%s\" key", IOTCON_KEY_URI);
 		json_object_set_string_member(repr_obj, IOTCON_KEY_URI, uri);
 	}
 
 	if (cur_repr->res_types) {
-		DBG("Representation has \"%s\" key", IOTCON_KEY_RESOURCETYPES);
 		rt_count = iotcon_repr_get_resource_types_count(cur_repr);
 	}
 	if (cur_repr->interfaces) {
-		DBG("Representation has \"%s\" key", IOTCON_KEY_INTERFACES);
 		if_count = iotcon_repr_get_resource_interfaces_count(cur_repr);
 	}
 
@@ -301,17 +323,15 @@ static JsonObject* _ic_repr_data_generate_json(iotcon_repr_h cur_repr,
 	}
 
 	if (0 < rt_count) {
-		DBG("Representation has \"%s\" key. count(%d)", IOTCON_KEY_RESOURCETYPES,
-				rt_count);
 		JsonArray *rt_array = json_array_new();
 		iotcon_repr_get_resource_types(cur_repr, _ic_repr_get_res_type_fn, rt_array);
 		json_object_set_array_member(prop_obj, IOTCON_KEY_RESOURCETYPES, rt_array);
 	}
 
 	if (0 < if_count) {
-		DBG("Representation has \"%s\" key. count(%d)", IOTCON_KEY_INTERFACES, if_count);
 		JsonArray *if_array = json_array_new();
-		iotcon_repr_get_resource_interfaces(cur_repr, _ic_repr_get_res_interface_fn, if_array);
+		iotcon_repr_get_resource_interfaces(cur_repr, _ic_repr_get_res_interface_fn,
+				if_array);
 		json_object_set_array_member(prop_obj, IOTCON_KEY_INTERFACES, if_array);
 	}
 
@@ -443,9 +463,6 @@ iotcon_repr_h ic_repr_parse_json(const char *json_string)
 
 	iotcon_repr_h repr = NULL;
 	if (json_object_has_member(root_obj, IOTCON_KEY_REP)) {
-
-		DBG("Representation has \"%s\" key", IOTCON_KEY_REP);
-
 		repr = ic_obj_from_json(root_obj);
 		if (NULL == repr) {
 			ERR("ic_obj_from_json() Fail()");
@@ -453,28 +470,23 @@ iotcon_repr_h ic_repr_parse_json(const char *json_string)
 			return NULL;
 		}
 	}
-	else
+	else {
 		repr = iotcon_repr_new();
+	}
 
 	if (json_object_has_member(root_obj, IOTCON_KEY_URI)) {
 		uri_value = json_object_get_string_member(root_obj, IOTCON_KEY_URI);
-		DBG("Representation has \"%s\" key (%s)", IOTCON_KEY_URI, uri_value);
 		iotcon_repr_set_uri(repr, uri_value);
 	}
 
 	if (json_object_has_member(root_obj, IOTCON_KEY_PROPERTY)) {
-		DBG("Representation has \"%s\" key", IOTCON_KEY_PROPERTY);
 		JsonObject *property_obj = json_object_get_object_member(root_obj,
 		IOTCON_KEY_PROPERTY);
 
 		if (json_object_has_member(property_obj, IOTCON_KEY_RESOURCETYPES)) {
-			DBG("Representation has \"%s\" key", IOTCON_KEY_RESOURCETYPES);
 			JsonArray *rt_array = json_object_get_array_member(property_obj,
 			IOTCON_KEY_RESOURCETYPES);
 			unsigned int rt_count = json_array_get_length(rt_array);
-
-			DBG("rt_count:%d", rt_count);
-
 			unsigned int rt_index = 0;
 			for (rt_index = 0; rt_index < rt_count; rt_index++) {
 				iotcon_repr_append_resource_types(repr,
@@ -482,13 +494,9 @@ iotcon_repr_h ic_repr_parse_json(const char *json_string)
 			}
 		}
 		if (json_object_has_member(property_obj, IOTCON_KEY_INTERFACES)) {
-			DBG("Representation has \"%s\" key", IOTCON_KEY_INTERFACES);
 			JsonArray *if_array = json_object_get_array_member(property_obj,
 			IOTCON_KEY_INTERFACES);
 			unsigned int if_count = json_array_get_length(if_array);
-
-			DBG("if_count:%d", if_count);
-
 			unsigned int if_index = 0;
 			for (if_index = 0; if_index < if_count; if_index++)
 				iotcon_repr_append_resource_interfaces(repr,
@@ -512,7 +520,11 @@ iotcon_repr_h ic_repr_parse_json(const char *json_string)
 API void iotcon_repr_free(iotcon_repr_h repr)
 {
 	FN_CALL;
+	int ref_count;
 	RET_IF(NULL == repr);
+
+	if (false == _ic_repr_dec_ref_count(repr))
+		return;
 
 	free(repr->uri);
 
@@ -526,48 +538,60 @@ API void iotcon_repr_free(iotcon_repr_h repr)
 	FN_END;
 }
 
-static void _ic_repr_obj_clone(char *key, iotcon_value_h value,
-		iotcon_repr_h dest_repr)
+static void _ic_repr_obj_clone(char *key, iotcon_value_h src_val, iotcon_repr_h dest_repr)
 {
 	FN_CALL;
 	int type = IOTCON_TYPE_NONE;
-	iotcon_value_h copied_value = NULL;
-	iotcon_list_h child_list = NULL;
-	iotcon_list_h copied_list = NULL;
-	iotcon_repr_h child_repr = NULL;
-	iotcon_repr_h copied_repr = NULL;
+	iotcon_value_h value, copied_val;
+	iotcon_list_h child_list, copied_list;
+	iotcon_repr_h child_repr, copied_repr;
 
-	type = value->type;
+	type = src_val->type;
 	switch (type) {
 	case IOTCON_TYPE_INT:
 	case IOTCON_TYPE_BOOL:
 	case IOTCON_TYPE_DOUBLE:
 	case IOTCON_TYPE_STR:
 	case IOTCON_TYPE_NULL:
-		copied_value = ic_value_clone(value);
-		if (NULL == copied_value) {
+		copied_val = ic_value_clone(src_val);
+		if (NULL == copied_val) {
 			ERR("ic_value_clone() Fail");
 			return;
 		}
-		ic_obj_set_value(dest_repr, ic_utils_strdup(key), copied_value);
+		ic_obj_set_value(dest_repr, ic_utils_strdup(key), copied_val);
 		break;
 	case IOTCON_TYPE_LIST:
-		child_list = ic_value_get_list(value);
+		child_list = ic_value_get_list(src_val);
 		copied_list = ic_list_clone(child_list);
 		if (NULL == copied_list) {
 			ERR("ic_list_clone() Fail");
 			return;
 		}
-		iotcon_repr_set_list(dest_repr, ic_utils_strdup(key), copied_list);
+
+		value = ic_value_new_list(copied_list);
+		if (NULL == value) {
+			ERR("ic_value_new_list() Fail");
+			iotcon_list_free(copied_list);
+			return;
+		}
+
+		ic_obj_set_value(dest_repr, key, value);
 		break;
 	case IOTCON_TYPE_REPR:
-		child_repr = ic_value_get_repr(value);
+		child_repr = ic_value_get_repr(src_val);
 		copied_repr = iotcon_repr_clone(child_repr);
 		if (NULL == copied_repr) {
 			ERR("ic_list_clone() Fail");
 			return;
 		}
-		iotcon_repr_set_repr(dest_repr, ic_utils_strdup(key), copied_repr);
+
+		value = ic_value_new_repr(copied_repr);
+		if (NULL == value) {
+			ERR("ic_value_new_repr(%p) Fail", copied_repr);
+			return;
+		}
+
+		ic_obj_set_value(dest_repr, key, value);
 		break;
 	default:
 		ERR("Invalid type(%d)", type);

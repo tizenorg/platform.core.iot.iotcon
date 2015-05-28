@@ -27,6 +27,30 @@
 #include "ic-repr-value.h"
 #include "ic-repr-list.h"
 
+void ic_list_inc_ref_count(iotcon_list_h val)
+{
+	RET_IF(NULL == val);
+	RETM_IF(val->ref_count < 0, "Invalid Count(%d)", val->ref_count);
+
+	val->ref_count++;
+}
+
+static bool _ic_list_dec_ref_count(iotcon_list_h val)
+{
+	bool ret;
+
+	RETV_IF(NULL == val, false);
+	RETVM_IF(val->ref_count <= 0, false, "Invalid Count(%d)", val->ref_count);
+
+	val->ref_count--;
+	if (0 == val->ref_count)
+		ret = true;
+	else
+		ret = false;
+
+	return ret;
+}
+
 API iotcon_list_h iotcon_list_new(iotcon_repr_types_e type)
 {
 	iotcon_list_h list;
@@ -36,7 +60,7 @@ API iotcon_list_h iotcon_list_new(iotcon_repr_types_e type)
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;
 	}
-
+	ic_list_inc_ref_count(list);
 	list->type = type;
 
 	return list;
@@ -133,6 +157,8 @@ API iotcon_list_h iotcon_list_insert_list(iotcon_list_h list, iotcon_list_h val,
 		return list;
 	}
 
+	ic_list_inc_ref_count(val);
+
 	list = ic_list_insert(list, value, pos);
 
 	return list;
@@ -152,6 +178,7 @@ API iotcon_list_h iotcon_list_insert_repr(iotcon_list_h list, iotcon_repr_h val,
 		ERR("ic_value_new_repr(%p) Fail", val);
 		return list;
 	}
+	ic_repr_inc_ref_count(val);
 
 	list = ic_list_insert(list, value, pos);
 
@@ -549,7 +576,6 @@ JsonArray* ic_list_to_json(iotcon_list_h list)
 	RETV_IF(NULL == list->list, NULL);
 
 	count = g_list_length(list->list);
-	DBG("list count(%d)", count);
 
 	parray = json_array_new();
 	for (i = 0; i < count; i++) {
@@ -690,15 +716,13 @@ iotcon_list_h ic_list_from_json(JsonArray *parray)
 API void iotcon_list_free(iotcon_list_h list)
 {
 	FN_CALL;
-	int count = 0;
 	GList *cur = NULL;
 
 	RET_IF(NULL == list);
 
-	if (list->list)
-		count = g_list_length(list->list);
+	if (false == _ic_list_dec_ref_count(list))
+		return;
 
-	DBG("list count(%d)", count);
 	cur = list->list;
 	while (cur) {
 		ic_value_free(cur->data);
@@ -736,6 +760,7 @@ static int _ic_list_clone_value(iotcon_list_h list, iotcon_list_h ret_list)
 static int _ic_list_clone_list(iotcon_list_h list, iotcon_list_h ret_list)
 {
 	int i, count;
+	iotcon_value_h value;
 	iotcon_list_h list_val, copied_list;
 
 	count = g_list_length(list->list);
@@ -752,7 +777,14 @@ static int _ic_list_clone_list(iotcon_list_h list, iotcon_list_h ret_list)
 			return IOTCON_ERROR_FAIL;
 		}
 
-		iotcon_list_insert_list(ret_list, copied_list, -1);
+		value = ic_value_new_list(copied_list);
+		if (NULL == value) {
+			ERR("ic_value_new_list(%p) Fail", copied_list);
+			iotcon_list_free(copied_list);
+			return IOTCON_ERROR_FAIL;
+		}
+
+		ret_list = ic_list_insert(ret_list, value, -1);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -762,6 +794,7 @@ static int _ic_list_clone_list(iotcon_list_h list, iotcon_list_h ret_list)
 static int _ic_list_clone_repr(iotcon_list_h list, iotcon_list_h ret_list)
 {
 	int i, count;
+	iotcon_value_h value;
 	iotcon_repr_h repr_val, copied_repr;
 
 	count = g_list_length(list->list);
@@ -778,7 +811,14 @@ static int _ic_list_clone_repr(iotcon_list_h list, iotcon_list_h ret_list)
 			return IOTCON_ERROR_FAIL;
 		}
 
-		iotcon_list_insert_repr(ret_list, copied_repr, -1);
+		value = ic_value_new_repr(copied_repr);
+		if (NULL == value) {
+			ERR("ic_value_new_repr(%p) Fail", copied_repr);
+			iotcon_repr_free(copied_repr);
+			return IOTCON_ERROR_FAIL;
+		}
+
+		ret_list = ic_list_insert(ret_list, value, -1);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -830,7 +870,8 @@ iotcon_list_h ic_list_clone(iotcon_list_h list)
 			break;
 		default:
 			ERR("Invalid type(%d)", list->type);
-			break;
+			iotcon_list_free(ret_list);
+			return NULL;
 	}
 
 	return ret_list;

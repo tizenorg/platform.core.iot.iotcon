@@ -32,7 +32,7 @@ int iotcon_repr_del_uri(iotcon_repr_h repr);
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
  * @brief Appends resource type name.
  * @since_tizen 3.0
- * @remarks  Duplicate type names are allowed to append.
+ * @remarks  Duplicate type names are allowed.
  *
  * @param[in] repr The handle to the Representation
  * @param[in] type The resource type
@@ -109,6 +109,19 @@ char* iotcon_repr_generate_json(iotcon_repr_h repr);
 iotcon_list_h iotcon_list_new(iotcon_repr_types_e type);
 void iotcon_list_free(iotcon_list_h list);
 
+/**
+ * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
+ * @brief Inserts integer value to list.
+ * @since_tizen 3.0
+ * @remarks If @a pos is negative, or is larger than the number of value in the list,
+ * the new value is added on to the end of the list.
+ *
+ * @param[in] list The handle to the list
+ * @param[in] val The integer
+ * @param[in] pos The position to insert integer
+ *
+ * @return the (possibly changed) start of the list, otherwise a null pointer on failure
+ */
 iotcon_list_h iotcon_list_insert_int(iotcon_list_h list, int val, int pos);
 iotcon_list_h iotcon_list_insert_bool(iotcon_list_h list, bool val, int pos);
 iotcon_list_h iotcon_list_insert_double(iotcon_list_h list, double val, int pos);

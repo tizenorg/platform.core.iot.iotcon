@@ -25,6 +25,7 @@
 #include "ic-common.h"
 #include "ic-utils.h"
 #include "ic-ioty.h"
+#include "ic-repr.h"
 #include "ic.h"
 
 /**

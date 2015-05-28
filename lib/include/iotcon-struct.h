@@ -101,6 +101,18 @@ const char* iotcon_device_info_get_firmware_version(iotcon_device_info_h device_
 const char* iotcon_device_info_get_support_url(iotcon_device_info_h device_info);
 
 void iotcon_str_list_free(iotcon_str_list_s *str_list);
+
+/**
+ * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
+ * @brief Appends string value to list.
+ * @since_tizen 3.0
+ * @remarks  Duplicate strings are not allowed.
+ *
+ * @param[in] str_list The handle to the list
+ * @param[in] string The string
+ *
+ * @return the (possibly changed) start of the list, otherwise a null pointer on failure
+ */
 iotcon_str_list_s* iotcon_str_list_append(iotcon_str_list_s *str_list,
 		const char *string);
 iotcon_str_list_s* iotcon_str_list_remove(iotcon_str_list_s *str_list,

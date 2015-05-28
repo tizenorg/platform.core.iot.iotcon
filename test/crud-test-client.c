@@ -26,21 +26,6 @@ const char* const door_uri = "/a/door";
 
 iotcon_client_h door_resource = NULL;
 
-char* _alloc_str_from_glist(GList *list)
-{
-	int i;
-	char buf[CRUD_MAX_BUFFER_SIZE] = {0};
-	char *ret_str = NULL;
-
-	for (i = 0; i < g_list_length(list); i++) {
-		char *str = g_list_nth_data(list, i);
-		strncat(buf, str, strlen(str));
-	}
-
-	ret_str = strdup(buf);
-	return ret_str;
-}
-
 void _print_repr_info(iotcon_repr_h repr)
 {
 	if (0 < iotcon_repr_get_keys_count(repr))

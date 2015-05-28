@@ -34,4 +34,6 @@ iotcon_list_h ic_list_from_json(JsonArray *parray);
 
 iotcon_list_h ic_list_clone(iotcon_list_h list);
 
+void ic_list_inc_ref_count(iotcon_list_h val);
+
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__ */

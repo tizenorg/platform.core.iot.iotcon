@@ -331,7 +331,6 @@ API iotcon_list_h iotcon_repr_get_list(iotcon_repr_h repr, const char *key)
 
 API int iotcon_repr_set_list(iotcon_repr_h repr, const char *key, iotcon_list_h list)
 {
-	FN_CALL;
 	iotcon_value_h value = NULL;
 
 	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
@@ -342,6 +341,7 @@ API int iotcon_repr_set_list(iotcon_repr_h repr, const char *key, iotcon_list_h 
 		ERR("ic_value_new_list() Fail");
 		return IOTCON_ERROR_MEMORY;
 	}
+	ic_list_inc_ref_count(list);
 
 	g_hash_table_replace(repr->hash_table, ic_utils_strdup(key), value);
 
@@ -395,6 +395,7 @@ API int iotcon_repr_set_repr(iotcon_repr_h repr, const char *key, iotcon_repr_h 
 		ERR("ic_value_new_repr(%p) Fail", val);
 		return IOTCON_ERROR_MEMORY;
 	}
+	ic_repr_inc_ref_count(val);
 
 	g_hash_table_replace(repr->hash_table, ic_utils_strdup(key), value);
 
@@ -498,7 +499,6 @@ static inline int _ic_obj_to_json(GHashTable *hash, iotcon_str_list_s *key_list,
 */
 JsonObject* ic_obj_to_json(iotcon_repr_h repr)
 {
-	FN_CALL;
 	int ret;
 	unsigned int i = 0;
 	iotcon_str_list_s *key_list = NULL;
@@ -532,48 +532,68 @@ JsonObject* ic_obj_to_json(iotcon_repr_h repr)
 }
 
 static inline int _ic_obj_from_json(JsonObject *obj, GList *key_list, unsigned int index,
-		iotcon_repr_h repr)
+		iotcon_repr_h ret_repr)
 {
 	char *key;
 
 	RETV_IF(NULL == obj, IOTCON_ERROR_PARAM);
 	RETV_IF(NULL == key_list, IOTCON_ERROR_PARAM);
 	RETV_IF(index < 0, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == ret_repr, IOTCON_ERROR_PARAM);
 
 	key = g_list_nth_data(key_list, index);
 
 	/* search child object recursively */
 	JsonNode *child_node = json_object_get_member(obj, key);
 	if (NULL == child_node) {
-		ERR("json_object_get_member() Fail(NULL == child_node)");
+		ERR("json_object_get_member() Fail");
 		return IOTCON_ERROR_PARAM;
 	}
 	if (JSON_NODE_HOLDS_NULL(child_node) || JSON_NODE_HOLDS_VALUE(child_node)) {
 		iotcon_value_h value = ic_value_from_json(child_node);
 		if (NULL == value) {
-			ERR("ic_value_from_json() Fail(NULL == value)");
+			ERR("ic_value_from_json() Fail");
 			return IOTCON_ERROR_PARAM;
 		}
-		ic_obj_set_value(repr, key, value);
+		ic_obj_set_value(ret_repr, key, value);
 	}
 	else if (JSON_NODE_HOLDS_ARRAY(child_node)) {
+		iotcon_value_h value;
 		JsonArray *child_array = json_node_get_array(child_node);
+
 		iotcon_list_h list = ic_list_from_json(child_array);
 		if (NULL == list) {
-			ERR("ic_list_from_json() Fail(NULL == list)");
+			ERR("ic_list_from_json() Fail");
 			return IOTCON_ERROR_PARAM;
 		}
-		iotcon_repr_set_list(repr, key, list);
+
+		value = ic_value_new_list(list);
+		if (NULL == value) {
+			ERR("ic_value_new_list() Fail");
+			iotcon_list_free(list);
+			return IOTCON_ERROR_MEMORY;
+		}
+
+		ic_obj_set_value(ret_repr, key, value);
 	}
 	else if (JSON_NODE_HOLDS_OBJECT(child_node)) {
+		iotcon_value_h value;
 		JsonObject *child_obj = json_node_get_object(child_node);
-		iotcon_repr_h ret_repr = ic_obj_from_json(child_obj);
-		if (NULL == ret_repr) {
-			ERR("ic_obj_from_json() Fail(NULL == ret_repr)");
+
+		iotcon_repr_h repr = ic_obj_from_json(child_obj);
+		if (NULL == repr) {
+			ERR("ic_obj_from_json() Fail");
 			return IOTCON_ERROR_PARAM;
 		}
-		iotcon_repr_set_repr(repr, key, ret_repr);
+
+		value = ic_value_new_repr(repr);
+		if (NULL == value) {
+			ERR("ic_value_new_repr(%p) Fail", repr);
+			iotcon_repr_free(repr);
+			return IOTCON_ERROR_MEMORY;
+		}
+
+		ic_obj_set_value(ret_repr, key, value);
 	}
 	else {
 		ERR("node type(%d) Fail", json_node_get_node_type(child_node));
