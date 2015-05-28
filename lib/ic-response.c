@@ -20,9 +20,10 @@
 #include "iotcon.h"
 #include "ic-common.h"
 #include "ic-utils.h"
-#include "ic-struct.h"
 #include "ic-ioty.h"
 #include "ic-options.h"
+#include "ic-request.h"
+#include "ic-response.h"
 
 API iotcon_response_h iotcon_response_new(iotcon_request_h request_h)
 {

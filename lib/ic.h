@@ -16,8 +16,20 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_H__
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_H__
 
-#include "ic-struct.h"
+#include "iotcon.h"
 
-resource_handler_s* ic_get_resource_handler_data(void *handle);
+typedef struct _resource_s {
+	void *handle;
+	iotcon_request_handler_cb cb;
+	void *user_data;
+} ic_resource_s;
+
+struct ic_notify_msg {
+	int error_code;
+	iotcon_interface_e iface;
+	iotcon_repr_h repr;
+};
+
+ic_resource_s* ic_get_resource_handler_data(void *handle);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_H__ */

@@ -15,9 +15,10 @@
 
 #include <glib.h>
 
-#include "iotcon.h"
+#include "iotcon-struct.h"
+#include "iotcon-constant.h"
+#include "iotcon-representation.h"
 #include "ic-common.h"
-#include "ic-struct.h"
 #include "ic-utils.h"
 #include "ic-repr-list.h"
 #include "ic-repr-value.h"

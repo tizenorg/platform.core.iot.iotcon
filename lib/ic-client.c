@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <glib.h>
 
 #include "iotcon-struct.h"
 #include "ic-common.h"
 #include "ic-utils.h"
-#include "ic-struct.h"
-#include "ic-options.h"
 #include "ic-ioty.h"
+#include "ic-options.h"
+#include "ic-client.h"
 
 /* host address should begin with "coap://"
+ * The length of resource_type should be less than and equal to 61.
  * If resource_type is NULL, then All resources in host are discovered. */
 API int iotcon_find_resource(const char *host_addr, const char *resource_type,
 		iotcon_found_resource_cb cb, void *user_data)
@@ -34,6 +37,10 @@ API int iotcon_find_resource(const char *host_addr, const char *resource_type,
 
 	RETV_IF(NULL == host_addr, IOTCON_ERROR_PARAM);
 	RETV_IF(NULL == cb, IOTCON_ERROR_PARAM);
+	if (resource_type && (IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
+		ERR("The length of resource_type(%s) is invalid", resource_type);
+		return IOTCON_ERROR_NONE;
+	}
 
 	ret = ic_ioty_find_resource(host_addr, resource_type, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
@@ -43,7 +50,7 @@ API int iotcon_find_resource(const char *host_addr, const char *resource_type,
 }
 
 
-/* If you know the information of resource, then you make a proxy of the resource. */
+/* If you know the information of resource, then you can make a proxy of the resource. */
 API iotcon_client_h iotcon_client_new(const char *host,
 		const char *uri,
 		bool is_observable,
@@ -51,11 +58,20 @@ API iotcon_client_h iotcon_client_new(const char *host,
 		iotcon_interface_e resource_ifs)
 {
 	FN_CALL;
+	int i;
 	iotcon_client_h resource = NULL;
 
 	RETV_IF(NULL == host, NULL);
 	RETV_IF(NULL == uri, NULL);
 	RETV_IF(NULL == resource_types, NULL);
+
+	for (i = 0; i < iotcon_str_list_length(resource_types); i++) {
+		if (IOTCON_RESOURCE_TYPE_LENGTH_MAX
+				< strlen(iotcon_str_list_nth_data(resource_types, i))) {
+			ERR("The length of resource_type is invalid");
+			return NULL;
+		}
+	}
 
 	resource = calloc(1, sizeof(struct ic_remote_resource));
 	if (NULL == resource) {
@@ -138,15 +154,17 @@ API int iotcon_client_get_interfaces(iotcon_client_h resource)
 
 
 /* if header_options is NULL, then client's header_options is unset */
-API void iotcon_client_set_options(iotcon_client_h resource,
+API int iotcon_client_set_options(iotcon_client_h resource,
 		iotcon_options_h header_options)
 {
-	RET_IF(NULL == resource);
+	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
 
 	if (resource->header_options)
 		iotcon_options_free(resource->header_options);
 
 	resource->header_options = header_options;
+
+	return IOTCON_ERROR_NONE;
 }
 
 

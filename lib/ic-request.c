@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdlib.h>
 #include <stdint.h>
-#include <errno.h>
-#include <glib.h>
 
-#include "iotcon.h"
+#include "iotcon-struct.h"
+#include "iotcon-constant.h"
 #include "ic-common.h"
-#include "ic-struct.h"
+#include "ic-request.h"
 
 API iotcon_repr_h iotcon_request_get_representation(iotcon_request_h request)
 {

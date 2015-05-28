@@ -13,25 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__
-#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_REQUEST_H__
+#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_REQUEST_H__
 
-#include <glib.h>
-#include <json-glib/json-glib.h>
+#include <stdint.h>
 
 #include "iotcon-struct.h"
+#include "iotcon-constant.h"
 
-struct ic_list_s {
-	int type;
-	GList *list;
+typedef void* oc_request_h;
+typedef void* oc_resource_h;
+
+struct ic_observe_info {
+	iotcon_observe_action_e action;
+	uint8_t observer_id;
 };
 
-int ic_list_remove(iotcon_list_h list, iotcon_value_h val);
-iotcon_list_h ic_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
+struct ic_resource_request {
+	char *request_type;
+	char *uri;
+	iotcon_options_h header_options;
+	iotcon_query_h query;
+	int request_handler_flag;
+	struct ic_observe_info observation_info;
+	iotcon_repr_h repr;
+	oc_request_h request_handle;
+	oc_resource_h resource_handle;
+};
 
-JsonArray* ic_list_to_json(iotcon_list_h list);
-iotcon_list_h ic_list_from_json(JsonArray *parray);
-
-iotcon_list_h ic_list_clone(iotcon_list_h list);
-
-#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__ */
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_REQUEST_H__ */

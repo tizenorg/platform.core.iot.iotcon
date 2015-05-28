@@ -64,7 +64,7 @@ API void iotcon_str_list_free(iotcon_str_list_s *str_list)
 }
 
 
-/* If you want a new list, then you should set str_list is NULL. */
+/* If you want to make a new list, then you should set str_list is NULL. */
 API iotcon_str_list_s* iotcon_str_list_append(iotcon_str_list_s *str_list,
 		const char *string)
 {
@@ -170,7 +170,7 @@ API const char* iotcon_str_list_nth_data(iotcon_str_list_s *str_list, unsigned i
 
 	RETV_IF(NULL == str_list, NULL);
 
-	for (i = 1; i < n; i++) {
+	for (i = 0; i < n; i++) {
 		str_list = str_list->next;
 		if (NULL == str_list)
 			return NULL;

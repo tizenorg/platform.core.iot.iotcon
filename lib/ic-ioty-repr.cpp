@@ -16,14 +16,14 @@
 #include <OCApi.h>
 #include <OCPlatform.h>
 
-#include "iotcon.h"
 extern "C" {
+#include "iotcon-struct.h"
+#include "ic.h"
 #include "ic-common.h"
 #include "ic-utils.h"
 #include "ic-repr.h"
-#include "ic.h"
-}
 #include "ic-ioty-repr.h"
+}
 
 using namespace OC;
 using namespace std;

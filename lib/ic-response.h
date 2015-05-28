@@ -13,25 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__
-#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__
-
-#include <glib.h>
-#include <json-glib/json-glib.h>
+#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_RESPONSE_H__
+#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_RESPONSE_H__
 
 #include "iotcon-struct.h"
+#include "iotcon-constant.h"
+#include "ic-request.h"
 
-struct ic_list_s {
-	int type;
-	GList *list;
+struct ic_resource_response {
+	char *new_uri;
+	int error_code;
+	iotcon_options_h header_options;
+	iotcon_interface_e iface;
+	iotcon_response_result_e result;
+	iotcon_repr_h repr;
+	oc_request_h request_handle;
+	oc_resource_h resource_handle;
 };
 
-int ic_list_remove(iotcon_list_h list, iotcon_value_h val);
-iotcon_list_h ic_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
-
-JsonArray* ic_list_to_json(iotcon_list_h list);
-iotcon_list_h ic_list_from_json(JsonArray *parray);
-
-iotcon_list_h ic_list_clone(iotcon_list_h list);
-
-#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__ */
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_RESPONSE_H__ */

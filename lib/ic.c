@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdlib.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <glib.h>
 #include <glib-object.h>
@@ -22,7 +24,6 @@
 #include "iotcon.h"
 #include "ic-common.h"
 #include "ic-utils.h"
-#include "ic-struct.h"
 #include "ic-ioty.h"
 #include "ic.h"
 
@@ -84,12 +85,13 @@ static gboolean _find_valid_resource(gpointer key, gpointer value, gpointer user
 }
 
 
-resource_handler_s* ic_get_resource_handler_data(void *handle)
+ic_resource_s* ic_get_resource_handler_data(void *handle)
 {
 	return g_hash_table_find(ic_request_cb_hash, _find_valid_resource, handle);
 }
 
 
+/* The length of uri should be less than and equal to 36. */
 API iotcon_resource_h iotcon_register_resource(const char *uri,
 		iotcon_str_list_s *res_types,
 		int ifaces,
@@ -98,13 +100,24 @@ API iotcon_resource_h iotcon_register_resource(const char *uri,
 		void *user_data)
 {
 	FN_CALL;
+	int i;
 	iotcon_resource_h resource;
 
 	RETV_IF(NULL == uri, NULL);
+	RETVM_IF(IOTCON_URI_LENGTH_MAX < strlen(uri), NULL,
+			"The length of uri(%s) is invalid", uri);
 	RETV_IF(NULL == res_types, NULL);
 	RETV_IF(NULL == cb, NULL);
 
-	resource = calloc(1, sizeof(struct ic_resource));
+	for (i = 0; i < iotcon_str_list_length(res_types); i++) {
+		if (IOTCON_RESOURCE_TYPE_LENGTH_MAX
+				< strlen(iotcon_str_list_nth_data(res_types, i))) {
+			ERR("The length of resource_type is invalid");
+			return NULL;
+		}
+	}
+
+	resource = calloc(1, sizeof(struct _resource_s));
 	if (NULL == resource) {
 		ERR("calloc Fail(%d)", errno);
 		return NULL;
@@ -117,7 +130,7 @@ API iotcon_resource_h iotcon_register_resource(const char *uri,
 		return NULL;
 	}
 
-	resource->request_handler_cb = cb;
+	resource->cb = cb;
 	resource->user_data = user_data;
 
 	g_hash_table_insert(ic_request_cb_hash, resource->handle, resource);
@@ -158,6 +171,10 @@ API int iotcon_bind_type(iotcon_resource_h resource, const char *resource_type)
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
 	RETV_IF(NULL == resource_type, IOTCON_ERROR_PARAM);
+	if (IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type)) {
+		ERR("The length of resource_type(%s) is invalid", resource_type);
+		return IOTCON_ERROR_PARAM;
+	}
 
 	ret = ic_ioty_bind_type_to_res(resource->handle, resource_type);
 	if (IOTCON_ERROR_NONE != ret)
@@ -209,6 +226,7 @@ API int iotcon_stop_presence()
 }
 
 
+/* The length of resource_type should be less than and equal to 61. */
 API iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
 		const char *resource_type, iotcon_presence_cb cb, void *user_data)
 {
@@ -216,6 +234,11 @@ API iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
 
 	RETV_IF(NULL == host_address, NULL);
 	RETV_IF(NULL == cb, NULL);
+	if (resource_type &&(IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
+		ERR("The length of resource_type(%s) is invalid", resource_type);
+		return NULL;
+	}
+
 	if (NULL == resource_type)
 		resource_type = "";
 

@@ -47,6 +47,12 @@ void _print_repr_info(iotcon_repr_h repr)
 		DBG("rep : \n%s", iotcon_repr_generate_json(repr));
 }
 
+static void _on_observe(iotcon_options_h header_options, iotcon_repr_h recv_repr,
+		int response_result, int sequence_number, void *user_data)
+{
+	INFO("_on_observe");
+}
+
 static void _on_delete(iotcon_options_h header_options, int response_result,
 		void *user_data)
 {
@@ -56,6 +62,8 @@ static void _on_delete(iotcon_options_h header_options, int response_result,
 	INFO("DELETE request was successful");
 
 	/* delete callback operations */
+
+	iotcon_observer_start(door_resource, IOTCON_OBSERVE_ALL, NULL, _on_observe, NULL);
 }
 
 static void _on_post(iotcon_options_h header_options, iotcon_repr_h recv_repr,
@@ -127,12 +135,6 @@ static void _on_get(iotcon_options_h header_options, iotcon_repr_h recv_repr,
 	iotcon_query_free(query_params);
 }
 
-static void _on_observe(iotcon_options_h header_options, iotcon_repr_h recv_repr,
-		int response_result, int sequence_number, void *user_data)
-{
-	INFO("_on_observe");
-}
-
 static void _get_res_type_fn(const char *string, void *user_data)
 {
 	char *resource_uri = user_data;
@@ -192,13 +194,11 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 			door_resource = iotcon_client_clone(resource);
 
 			iotcon_query_h query = iotcon_query_new();
+			iotcon_query_insert(query, "key", "value");
 
 			/* send GET Request */
 			iotcon_get(resource, query, _on_get, NULL);
 			iotcon_query_free(query);
-
-			iotcon_observer_start(door_resource, IOTCON_OBSERVE_ALL, NULL, _on_observe,
-					NULL);
 		}
 	}
 }

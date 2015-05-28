@@ -18,6 +18,11 @@
 
 #include "iotcon-struct.h"
 
+struct ic_options {
+	bool has_parent;
+	GHashTable *hash;
+};
+
 void ic_options_free(iotcon_options_h options);
 iotcon_options_h ic_options_ref(iotcon_options_h options);
 

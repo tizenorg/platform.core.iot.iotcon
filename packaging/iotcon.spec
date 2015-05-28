@@ -48,6 +48,8 @@ MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %license LICENSE.APLv2
 %{_bindir}/crud-test-client
 %{_bindir}/crud-test-server
+%{_bindir}/device-test-client
+%{_bindir}/device-test-server
 
 %files devel
 %{_libdir}/lib%{name}.so

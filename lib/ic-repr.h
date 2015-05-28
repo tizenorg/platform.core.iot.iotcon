@@ -16,9 +16,11 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_H__
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_H__
 
+#include <stdbool.h>
+#include <glib.h>
 #include <json-glib/json-glib.h>
 
-#include "ic-struct.h"
+#include "iotcon-struct.h"
 
 #define IOTCON_KEY_OC "oc"
 #define IOTCON_KEY_URI "href"
@@ -26,6 +28,14 @@
 #define IOTCON_KEY_INTERFACES "if"
 #define IOTCON_KEY_PROPERTY "prop"
 #define IOTCON_KEY_REP "rep"
+
+struct ic_repr_s {
+	char *uri;
+	GHashTable *hash_table;
+	GList *children;
+	GList *res_types;
+	GList *interfaces;
+};
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE

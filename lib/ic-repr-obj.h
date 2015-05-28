@@ -18,6 +18,9 @@
 
 #include <json-glib/json-glib.h>
 
+#include "iotcon-struct.h"
+#include "iotcon-constant.h"
+
 int ic_obj_del_value(iotcon_repr_h repr, const char *key,
 		iotcon_repr_types_e value_type);
 

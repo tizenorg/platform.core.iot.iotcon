@@ -19,8 +19,8 @@
 #include <stdint.h>
 
 #include "iotcon.h"
-#include "iotcon-constant.h"
-#include "ic-struct.h"
+#include "ic.h"
+#include "ic-response.h"
 
 void ic_ioty_config(const char *addr, unsigned short port);
 

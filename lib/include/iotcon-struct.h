@@ -17,18 +17,16 @@
 #define __IOT_CONNECTIVITY_MANAGER_STRUCT_H__
 
 #include <stdint.h>
-
-#include "iotcon-constant.h"
+#include <iotcon-constant.h>
 
 typedef struct ic_value_s* iotcon_value_h;
 typedef struct ic_list_s* iotcon_list_h;
 typedef struct ic_repr_s* iotcon_repr_h;
 
-typedef struct ic_resource* iotcon_resource_h;
+typedef struct _resource_s* iotcon_resource_h;
 typedef struct ic_notify_msg* iotcon_notimsg_h;
 
 typedef void* iotcon_presence_h;
-typedef void* iotcon_observe_h;
 
 typedef struct _str_list {
 	char *string;
@@ -49,7 +47,7 @@ void iotcon_options_foreach(iotcon_options_h options,
 		iotcon_options_foreach_cb cb, void *user_data);
 
 
-typedef void* iotcon_query_h;
+typedef struct ic_query* iotcon_query_h;
 iotcon_query_h iotcon_query_new();
 void iotcon_query_free(iotcon_query_h query);
 int iotcon_query_insert(iotcon_query_h query, const char *key, const char *value);
@@ -71,7 +69,7 @@ const char* iotcon_client_get_uri(iotcon_client_h resource);
 const char* iotcon_client_get_host(iotcon_client_h resource);
 iotcon_str_list_s* iotcon_client_get_types(iotcon_client_h resource);
 int iotcon_client_get_interfaces(iotcon_client_h resource);
-void iotcon_client_set_options(iotcon_client_h resource,
+int iotcon_client_set_options(iotcon_client_h resource,
 		iotcon_options_h header_options);
 
 typedef struct ic_resource_request* iotcon_request_h;

@@ -16,6 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__
 
+#include "iotcon-errors.h"
 #include "ic-log.h"
 
 #ifdef API

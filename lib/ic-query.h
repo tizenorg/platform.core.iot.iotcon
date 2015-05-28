@@ -13,25 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__
-#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__
-
-#include <glib.h>
-#include <json-glib/json-glib.h>
+#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_QUERY_H__
+#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_QUERY_H__
 
 #include "iotcon-struct.h"
 
-struct ic_list_s {
-	int type;
-	GList *list;
+struct ic_query {
+	int len;
+	GHashTable *hash;
 };
 
-int ic_list_remove(iotcon_list_h list, iotcon_value_h val);
-iotcon_list_h ic_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
-
-JsonArray* ic_list_to_json(iotcon_list_h list);
-iotcon_list_h ic_list_from_json(JsonArray *parray);
-
-iotcon_list_h ic_list_clone(iotcon_list_h list);
-
-#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_LIST_H__ */
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_QUERY_H__ */

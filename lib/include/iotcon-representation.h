@@ -17,6 +17,8 @@
 #define __IOT_CONNECTIVITY_MANAGER_REPRESENTATION_H__
 
 #include <stdbool.h>
+#include <iotcon-constant.h>
+#include <iotcon-struct.h>
 
 iotcon_repr_h iotcon_repr_new();
 void iotcon_repr_free(iotcon_repr_h repr);

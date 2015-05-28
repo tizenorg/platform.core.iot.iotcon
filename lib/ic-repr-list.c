@@ -16,13 +16,12 @@
 
 #include <stdlib.h>
 #include <errno.h>
-
 #include <json-glib/json-glib.h>
 
-#include "iotcon.h"
-
+#include "iotcon-struct.h"
+#include "iotcon-constant.h"
+#include "iotcon-representation.h"
 #include "ic-common.h"
-#include "ic-struct.h"
 #include "ic-repr-obj.h"
 #include "ic-repr.h"
 #include "ic-repr-value.h"

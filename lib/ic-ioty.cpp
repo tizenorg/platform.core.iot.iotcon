@@ -22,11 +22,14 @@ extern "C" {
 #include "ic.h"
 #include "ic-common.h"
 #include "ic-utils.h"
+#include "ic-client.h"
+#include "ic-device.h"
+#include "ic-request.h"
+#include "ic-response.h"
 #include "ic-repr.h"
-#include "ic-struct.h"
+#include "ic-ioty-repr.h"
 #include "ic-ioty.h"
 }
-#include "ic-ioty-repr.h"
 
 #define IC_UNICAST_RESOURCE_DISCOVERY ":5683/oc/core"
 #define IC_MULTICAST_RESOURCE_DISCOVERY "/oc/core"
@@ -439,7 +442,7 @@ static OCEntityHandlerResult _ic_ioty_request_handler(
 	FN_CALL;
 	HeaderOptions headerOptions;
 	QueryParamsMap queryParams;
-	resource_handler_s *temp_res = NULL;
+	ic_resource_s *temp_res = NULL;
 	struct ic_resource_request request_s = {0};
 
 	temp_res = ic_get_resource_handler_data(request->getResourceHandle());
@@ -514,8 +517,8 @@ static OCEntityHandlerResult _ic_ioty_request_handler(
 	DBG("obs_info.obsId=%d", observationInfo.obsId);
 
 	/* call handler_cb */
-	if (temp_res->request_handler_cb) {
-		temp_res->request_handler_cb(&request_s, temp_res->user_data);
+	if (temp_res->cb) {
+		temp_res->cb(&request_s, temp_res->user_data);
 	}
 	else {
 		WARN("temp_res->request_handler_cb is null");
@@ -548,7 +551,7 @@ extern "C" OCResourceHandle ic_ioty_register_res(const char *uri,
 
 	resUri = uri;
 
-	resType = iotcon_str_list_nth_data(res_types, 1);
+	resType = iotcon_str_list_nth_data(res_types, 0);
 
 	if (IOTCON_INTERFACE_DEFAULT & ifaces) {
 		resInterface = DEFAULT_INTERFACE;
@@ -978,10 +981,8 @@ extern "C" int ic_ioty_get(iotcon_client_h resource, iotcon_query_h query,
 	OCResource::Ptr ocResource;
 	QueryParamsMap queryParams;
 
-	if (query) {
+	if (query)
 		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void *)&queryParams);
-		iotcon_query_free(query);
-	}
 
 	ocResource = _ic_ioty_create_oc_resource(resource);
 
@@ -1008,10 +1009,8 @@ extern "C" int ic_ioty_put(iotcon_client_h resource, iotcon_repr_h repr,
 	OCRepresentation ocRep;
 	QueryParamsMap queryParams;
 
-	if (query) {
+	if (query)
 		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void*)&queryParams);
-		iotcon_query_free(query);
-	}
 
 	ocRep = ic_ioty_repr_parse(repr);
 
@@ -1040,10 +1039,8 @@ extern "C" int ic_ioty_post(iotcon_client_h resource, iotcon_repr_h repr,
 	OCRepresentation ocRep;
 	OCResource::Ptr ocResource;
 
-	if (query) {
+	if (query)
 		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void*)&queryParams);
-		iotcon_query_free(query);
-	}
 
 	ocRep = ic_ioty_repr_parse(repr);
 
@@ -1097,10 +1094,8 @@ extern "C" int ic_ioty_observe(iotcon_client_h resource,
 	ObserveType observeType;
 	QueryParamsMap queryParams;
 
-	if (query) {
+	if (query)
 		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void*)&queryParams);
-		iotcon_query_free(query);
-	}
 
 	if (IOTCON_OBSERVE == observe_type) {
 		observeType = ObserveType::Observe;

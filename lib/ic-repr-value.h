@@ -16,9 +16,34 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_VALUE_H__
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_REPRESENTATION_VALUE_H__
 
+#include <stdbool.h>
 #include <json-glib/json-glib.h>
 
 #include "iotcon-struct.h"
+
+struct ic_value_s {
+	int type;
+};
+
+typedef struct {
+	int type;
+	union {
+		int i;
+		bool b;
+		double d;
+		char *s;
+	} val;
+} ic_basic_s;
+
+typedef struct {
+	int type;
+	struct ic_list_s *list;
+} ic_val_list_s;
+
+typedef struct {
+	int type;
+	struct ic_repr_s *repr;
+} ic_val_repr_s;
 
 iotcon_value_h ic_value_new_null();
 iotcon_value_h ic_value_new_int(int val);

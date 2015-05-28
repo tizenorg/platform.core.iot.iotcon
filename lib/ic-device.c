@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <glib.h>
 
 #include "iotcon.h"
 #include "ic-common.h"
-#include "ic-struct.h"
 #include "ic-ioty.h"
+#include "ic-device.h"
 
+/* The length of manufacturer_name should be less than and equal to 16.
+ * The length of manufacturer_url should be less than and equal to 32. */
 API int iotcon_register_device_info(
 		char *device_name,
 		char *host_name,
@@ -38,6 +41,18 @@ API int iotcon_register_device_info(
 {
 	int ret;
 	struct ic_device_info device_info = {0};
+
+	if (manufacturer_name
+			&& (IOTCON_MANUFACTURER_NAME_LENGTH_MAX < strlen(manufacturer_name))) {
+		ERR("The length of manufacturer_name(%s) is invalid.", manufacturer_name);
+		return IOTCON_ERROR_PARAM;
+	}
+
+	if (manufacturer_url
+			&& (IOTCON_MANUFACTURER_URL_LENGTH_MAX < strlen(manufacturer_url))) {
+		ERR("The length of manufacturer_url(%s) is invalid.", manufacturer_url);
+		return IOTCON_ERROR_PARAM;
+	}
 
 	device_info.device_name = device_name;
 	device_info.host_name = host_name;
