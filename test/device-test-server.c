@@ -7,35 +7,26 @@ int main()
 	int ret;
 	GMainLoop *loop;
 
-	char *device_name = "device_name";
-	char *host_name = "host_name";
-	char *device_uuid = "device_uuid";
-	char *content_type = "content_type";
-	char *version = "version";
-	char *manufacturer_name = "manuf_name";
-	char *manufacturer_url = "manuf_url";
-	char *model_number = "model_number";
-	char *date_of_manufacture = "date_of_manufacture";
-	char *platform_version = "platform_version";
-	char *firmware_version = "firmware_version";
-	char *support_url = "support_url";
+	iotcon_device_info_s device_info = {0};
+
+	device_info.name = "device_name";
+	device_info.host_name = "host_name";
+	device_info.uuid = "device_uuid";
+	device_info.content_type = "content_type";
+	device_info.version = "version";
+	device_info.manuf_name = "manuf_name";
+	device_info.manuf_url = "manuf_url";
+	device_info.model_number = "model_number";
+	device_info.date_of_manufacture = "date_of_manufacture";
+	device_info.platform_ver = "platform_version";
+	device_info.firmware_ver = "firmware_version";
+	device_info.support_url = "support_url";
 
 	loop = g_main_loop_new(NULL, FALSE);
 
 	iotcon_initialize(IOTCON_ALL_INTERFACES, IOTCON_RANDOM_PORT);
 
-	ret = iotcon_register_device_info(device_name,
-			host_name,
-			device_uuid,
-			content_type,
-			version,
-			manufacturer_name,
-			manufacturer_url,
-			model_number,
-			date_of_manufacture,
-			platform_version,
-			firmware_version,
-			support_url);
+	ret = iotcon_register_device_info(device_info);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_register_device_info() Fail(%d)", ret);
 		return -1;

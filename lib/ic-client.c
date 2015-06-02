@@ -24,10 +24,11 @@
 #include "ic-utils.h"
 #include "ic-ioty.h"
 #include "ic-options.h"
+#include "ic-resource-types.h"
 #include "ic-client.h"
 
 /* host address should begin with "coap://"
- * The length of resource_type should be less than and equal to 61.
+ * The length of resource_type should be less than or equal to 61.
  * If resource_type is NULL, then All resources in host are discovered. */
 API int iotcon_find_resource(const char *host_addr, const char *resource_type,
 		iotcon_found_resource_cb cb, void *user_data)
@@ -51,27 +52,15 @@ API int iotcon_find_resource(const char *host_addr, const char *resource_type,
 
 
 /* If you know the information of resource, then you can make a proxy of the resource. */
-API iotcon_client_h iotcon_client_new(const char *host,
-		const char *uri,
-		bool is_observable,
-		iotcon_str_list_s *resource_types,
-		iotcon_interface_e resource_ifs)
+API iotcon_client_h iotcon_client_new(const char *host, const char *uri,
+		bool is_observable, iotcon_resource_types_h resource_types, int resource_ifs)
 {
 	FN_CALL;
-	int i;
 	iotcon_client_h resource = NULL;
 
 	RETV_IF(NULL == host, NULL);
 	RETV_IF(NULL == uri, NULL);
 	RETV_IF(NULL == resource_types, NULL);
-
-	for (i = 0; i < iotcon_str_list_length(resource_types); i++) {
-		if (IOTCON_RESOURCE_TYPE_LENGTH_MAX
-				< strlen(iotcon_str_list_nth_data(resource_types, i))) {
-			ERR("The length of resource_type is invalid");
-			return NULL;
-		}
-	}
 
 	resource = calloc(1, sizeof(struct ic_remote_resource));
 	if (NULL == resource) {
@@ -82,7 +71,7 @@ API iotcon_client_h iotcon_client_new(const char *host,
 	resource->host = ic_utils_strdup(host);
 	resource->uri = ic_utils_strdup(uri);
 	resource->is_observable = is_observable;
-	resource->types = resource_types;
+	resource->types = ic_resource_types_ref(resource_types);
 	resource->ifaces = resource_ifs;
 
 	return resource;
@@ -98,7 +87,7 @@ API void iotcon_client_free(iotcon_client_h resource)
 	free(resource->uri);
 	free(resource->host);
 	ic_options_free(resource->header_options);
-	iotcon_str_list_free(resource->types);
+	iotcon_resource_types_free(resource->types);
 	free(resource);
 }
 
@@ -112,8 +101,12 @@ API iotcon_client_h iotcon_client_clone(iotcon_client_h resource)
 	clone = iotcon_client_new(resource->host,
 			resource->uri,
 			resource->is_observable,
-			iotcon_str_list_clone(resource->types),
+			iotcon_resource_types_clone(resource->types),
 			resource->ifaces);
+	if (NULL == clone) {
+		ERR("iotcon_client_new() Fail");
+		return clone;
+	}
 
 	clone->observe_handle = resource->observe_handle;
 
@@ -121,35 +114,61 @@ API iotcon_client_h iotcon_client_clone(iotcon_client_h resource)
 }
 
 
-API const char* iotcon_client_get_uri(iotcon_client_h resource)
+/* The content of the resource should not be freed by user. */
+API int iotcon_client_get_uri(iotcon_client_h resource, char **uri)
 {
-	RETV_IF(NULL == resource, NULL);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == uri, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return resource->uri;
+	*uri = resource->uri;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API const char* iotcon_client_get_host(iotcon_client_h resource)
+/* The content of the resource should not be freed by user. */
+API int iotcon_client_get_host(iotcon_client_h resource, char **host)
 {
-	RETV_IF(NULL == resource, NULL);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == host, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return resource->host;
+	*host = resource->host;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API iotcon_str_list_s* iotcon_client_get_types(iotcon_client_h resource)
+/* The content of the resource should not be freed by user. */
+API int iotcon_client_get_types(iotcon_client_h resource, iotcon_resource_types_h *types)
 {
-	RETV_IF(NULL == resource, NULL);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return resource->types;
+	*types = resource->types;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API int iotcon_client_get_interfaces(iotcon_client_h resource)
+API int iotcon_client_get_interfaces(iotcon_client_h resource, int *ifaces)
 {
-	RETV_IF(NULL == resource, IOTCON_INTERFACE_NONE);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return resource->ifaces;
+	*ifaces = resource->ifaces;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_client_is_observable(iotcon_client_h resource, bool *observable)
+{
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == observable, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*observable = resource->is_observable;
+
+	return IOTCON_ERROR_NONE;
 }
 
 

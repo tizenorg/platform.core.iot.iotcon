@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_DEVICE_H__
-#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_DEVICE_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_RESOURCE_TYPES_H__
+#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_RESOURCE_TYPES_H__
 
-struct ic_device_info {
-	char *device_name;
-	char *host_name;
-	char *device_uuid;
-	char *content_type;
-	char *version;
-	char *manufacturer_name;
-	char *manufacturer_url;
-	char *model_number;
-	char *date_of_manufacture;
-	char *platform_ver;
-	char *firmware_ver;
-	char *support_url;
+#include "iotcon-struct.h"
+
+struct ic_resource_types {
+	int ref_count;
+	GList *type_list;
 };
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_DEVICE_H__ */
+iotcon_resource_types_h ic_resource_types_ref(iotcon_resource_types_h res_types);
+const char* ic_resource_types_get_nth_data(iotcon_resource_types_h res_types, int index);
+unsigned int ic_resource_types_get_length(iotcon_resource_types_h res_types);
+
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_RESOURCE_TYPES_H__ */

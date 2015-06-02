@@ -54,8 +54,12 @@ static void _on_delete(iotcon_options_h header_options, int response_result,
 static void _on_post(iotcon_options_h header_options, iotcon_repr_h recv_repr,
 		int response_result, void *user_data)
 {
+	int ret;
 	char *created_uri = NULL;
 	iotcon_client_h new_door_resource = NULL;
+	char *host = NULL;
+	iotcon_resource_types_h types = NULL;
+	int ifaces = 0;
 
 	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result
 			&& IOTCON_RESPONSE_RESULT_RESOURCE_CREATED != response_result,
@@ -65,19 +69,35 @@ static void _on_post(iotcon_options_h header_options, iotcon_repr_h recv_repr,
 	_print_repr_info(recv_repr);
 
 	iotcon_repr_get_str(recv_repr, "createduri", &created_uri);
-	if (created_uri) {
-		DBG("New resource created : %s", created_uri);
 
-		new_door_resource = iotcon_client_new(
-				iotcon_client_get_host(door_resource),
-				created_uri,
-				true,
-				iotcon_client_get_types(door_resource),
-				iotcon_client_get_interfaces(door_resource));
-
-		iotcon_delete(new_door_resource, _on_delete, NULL);
+	if (NULL == created_uri) {
+		ERR("created_uri is NULL");
+		return;
 	}
 
+	DBG("New resource created : %s", created_uri);
+
+	ret = iotcon_client_get_host(door_resource, &host);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_host() Fail(%d)", ret);
+		return;
+	}
+
+	ret = iotcon_client_get_types(door_resource, &types);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_types() Fail(%d)", ret);
+		return;
+	}
+
+	ret = iotcon_client_get_interfaces(door_resource, &ifaces);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_ifaces() Fail(%d)", ret);
+		return;
+	}
+
+	new_door_resource = iotcon_client_new(host, created_uri, true, types, ifaces);
+
+	iotcon_delete(new_door_resource, _on_delete, NULL);
 }
 
 static void _on_put(iotcon_options_h header_options, iotcon_repr_h recv_repr,
@@ -141,57 +161,71 @@ static void _presence_handler(int result, unsigned int nonce,
 static void _found_resource(iotcon_client_h resource, void *user_data)
 {
 	int ret;
-	const char *resource_uri = NULL;
-	const char *resource_host = NULL;
-	iotcon_str_list_s *resource_types = NULL;
+	char *resource_uri = NULL;
+	char *resource_host = NULL;
+	iotcon_resource_types_h resource_types = NULL;
 	int resource_interfaces = 0;
 
-	if (resource) {
-		INFO("===== resource found =====");
+	if (NULL == resource)
+		return;
 
-		/* get the resource URI */
-		resource_uri = iotcon_client_get_uri(resource);
-		if (NULL == resource_uri) {
-			ERR("uri is NULL");
-			return;
-		}
+	INFO("===== resource found =====");
 
-		/* get the resource host address */
-		resource_host = iotcon_client_get_host(resource);
-		DBG("[%s] resource host : %s", resource_uri, resource_host);
+	/* get the resource URI */
+	ret = iotcon_client_get_uri(resource, &resource_uri);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_uri() Fail(%d)", ret);
+		return;
+	}
 
-		/* get the resource interfaces */
-		resource_interfaces = iotcon_client_get_interfaces(resource);
-		if (IOTCON_INTERFACE_DEFAULT & resource_interfaces)
-			DBG("[%s] resource interface : DEFAULT_INTERFACE", resource_uri);
-		if (IOTCON_INTERFACE_LINK & resource_interfaces)
-			DBG("[%s] resource interface : LINK_INTERFACE", resource_uri);
-		if (IOTCON_INTERFACE_BATCH & resource_interfaces)
-			DBG("[%s] resource interface : BATCH_INTERFACE", resource_uri);
-		if (IOTCON_INTERFACE_GROUP & resource_interfaces)
-			DBG("[%s] resource interface : GROUP_INTERFACE", resource_uri);
+	/* get the resource host address */
+	ret = iotcon_client_get_host(resource, &resource_host);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_host() Fail(%d)", ret);
+		return;
+	}
+	DBG("[%s] resource host : %s", resource_uri, resource_host);
 
-		/* get the resource types */
-		resource_types = iotcon_client_get_types(resource);
-		ret = iotcon_str_list_foreach(resource_types, _get_res_type_fn,
-				(void *)resource_uri);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_str_list_foreach() Fail(%d)", ret);
-			return;
-		}
+	/* get the resource interfaces */
+	ret = iotcon_client_get_interfaces(resource, &resource_interfaces);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_interfaces() Fail(%d)", ret);
+		return;
+	}
+	if (IOTCON_INTERFACE_DEFAULT & resource_interfaces)
+		DBG("[%s] resource interface : DEFAULT_INTERFACE", resource_uri);
+	if (IOTCON_INTERFACE_LINK & resource_interfaces)
+		DBG("[%s] resource interface : LINK_INTERFACE", resource_uri);
+	if (IOTCON_INTERFACE_BATCH & resource_interfaces)
+		DBG("[%s] resource interface : BATCH_INTERFACE", resource_uri);
+	if (IOTCON_INTERFACE_GROUP & resource_interfaces)
+		DBG("[%s] resource interface : GROUP_INTERFACE", resource_uri);
 
-		iotcon_subscribe_presence(resource_host, "core.door", _presence_handler, NULL);
+	/* get the resource types */
+	ret = iotcon_client_get_types(resource, &resource_types);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_types() Fail(%d)", ret);
+		return;
+	}
 
-		if (!strcmp(door_uri, resource_uri)) {
-			door_resource = iotcon_client_clone(resource);
+	ret = iotcon_resource_types_foreach(resource_types, _get_res_type_fn,
+			resource_uri);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_types_foreach() Fail(%d)", ret);
+		return;
+	}
 
-			iotcon_query_h query = iotcon_query_new();
-			iotcon_query_insert(query, "key", "value");
+	iotcon_subscribe_presence(resource_host, "core.door", _presence_handler, NULL);
 
-			/* send GET Request */
-			iotcon_get(resource, query, _on_get, NULL);
-			iotcon_query_free(query);
-		}
+	if (!strcmp(door_uri, resource_uri)) {
+		door_resource = iotcon_client_clone(resource);
+
+		iotcon_query_h query = iotcon_query_new();
+		iotcon_query_insert(query, "key", "value");
+
+		/* send GET Request */
+		iotcon_get(resource, query, _on_get, NULL);
+		iotcon_query_free(query);
 	}
 }
 

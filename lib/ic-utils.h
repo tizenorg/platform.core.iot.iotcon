@@ -16,7 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_UTILITY_H__
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_UTILITY_H__
 
-#define STR_EQUAL 0
+#define IC_STR_EQUAL 0
 
 char* ic_utils_strdup(const char *src);
 

@@ -20,13 +20,14 @@
 #include <OCPlatform.h>
 
 extern "C" {
+#include "iotcon-struct.h"
 #include "ic.h"
 #include "ic-common.h"
 #include "ic-utils.h"
 #include "ic-client.h"
-#include "ic-device.h"
 #include "ic-request.h"
 #include "ic-response.h"
+#include "ic-resource-types.h"
 #include "ic-repr.h"
 #include "ic-ioty-repr.h"
 #include "ic-ioty.h"
@@ -108,23 +109,24 @@ namespace icIotivityHandler {
 			resource_s.types = NULL;
 
 			vector<string> resource_types = resource->getResourceTypes();
-			for (string &resource_type : resource_types)
-				resource_s.types
-					= iotcon_str_list_append(resource_s.types,
-							resource_type.c_str());
+			if (0 < resource_types.size()) {
+				resource_s.types = iotcon_resource_types_new();
+				for (string &resource_type : resource_types)
+					iotcon_resource_types_insert(resource_s.types, resource_type.c_str());
+			}
 
 			vector<string> resource_interfaces = resource->getResourceInterfaces();
 			for (string &resource_interface : resource_interfaces) {
-				if (STR_EQUAL == resource_interface.compare(DEFAULT_INTERFACE))
+				if (IC_STR_EQUAL == resource_interface.compare(DEFAULT_INTERFACE))
 					resource_s.ifaces |= IOTCON_INTERFACE_DEFAULT;
 
-				if (STR_EQUAL == resource_interface.compare(BATCH_INTERFACE))
+				if (IC_STR_EQUAL == resource_interface.compare(BATCH_INTERFACE))
 					resource_s.ifaces |= IOTCON_INTERFACE_BATCH;
 
-				if (STR_EQUAL == resource_interface.compare(LINK_INTERFACE))
+				if (IC_STR_EQUAL == resource_interface.compare(LINK_INTERFACE))
 					resource_s.ifaces |= IOTCON_INTERFACE_LINK;
 
-				if (STR_EQUAL == resource_interface.compare(GROUP_INTERFACE))
+				if (IC_STR_EQUAL == resource_interface.compare(GROUP_INTERFACE))
 					resource_s.ifaces |= IOTCON_INTERFACE_GROUP;
 			}
 
@@ -133,7 +135,7 @@ namespace icIotivityHandler {
 
 			free(resource_s.uri);
 			free(resource_s.host);
-			iotcon_str_list_free(resource_s.types);
+			iotcon_resource_types_free(resource_s.types);
 		}
 	};
 
@@ -377,7 +379,7 @@ namespace icIotivityHandler {
 
 		void receivedDeviceInfo(const OCRepresentation& ocRep)
 		{
-			struct ic_device_info info = {0};
+			iotcon_device_info_s info = {0};
 			string readbuf;
 
 			if (ocRep.getValue("ct", readbuf))
@@ -385,17 +387,17 @@ namespace icIotivityHandler {
 			if (ocRep.getValue("mndt", readbuf))
 				info.date_of_manufacture = ic_utils_strdup(readbuf.c_str());
 			if (ocRep.getValue("dn", readbuf))
-				info.device_name = ic_utils_strdup(readbuf.c_str());
+				info.name = ic_utils_strdup(readbuf.c_str());
 			if (ocRep.getValue("di", readbuf))
-				info.device_uuid = ic_utils_strdup(readbuf.c_str());
+				info.uuid = ic_utils_strdup(readbuf.c_str());
 			if (ocRep.getValue("mnfv", readbuf))
 				info.firmware_ver = ic_utils_strdup(readbuf.c_str());
 			if (ocRep.getValue("hn", readbuf))
 				info.host_name = ic_utils_strdup(readbuf.c_str());
 			if (ocRep.getValue("mnmn", readbuf))
-				info.manufacturer_name = ic_utils_strdup(readbuf.c_str());
+				info.manuf_name = ic_utils_strdup(readbuf.c_str());
 			if (ocRep.getValue("mnml", readbuf))
-				info.manufacturer_url = ic_utils_strdup(readbuf.c_str());
+				info.manuf_url = ic_utils_strdup(readbuf.c_str());
 			if (ocRep.getValue("mnmo", readbuf))
 				info.model_number = ic_utils_strdup(readbuf.c_str());
 			if (ocRep.getValue("mnpv", readbuf))
@@ -406,15 +408,15 @@ namespace icIotivityHandler {
 				info.version = ic_utils_strdup(readbuf.c_str());
 
 			if (found_cb)
-				found_cb(&info, cb_data);
+				found_cb(info, cb_data);
 
-			free(info.device_name);
+			free(info.name);
 			free(info.host_name);
-			free(info.device_uuid);
+			free(info.uuid);
 			free(info.content_type);
 			free(info.version);
-			free(info.manufacturer_name);
-			free(info.manufacturer_url);
+			free(info.manuf_name);
+			free(info.manuf_url);
 			free(info.model_number);
 			free(info.date_of_manufacture);
 			free(info.platform_ver);
@@ -441,9 +443,10 @@ static OCEntityHandlerResult _ic_ioty_request_handler(
 		shared_ptr<OCResourceRequest> request)
 {
 	FN_CALL;
+	const char *request_type = NULL;
 	HeaderOptions headerOptions;
 	QueryParamsMap queryParams;
-	ic_resource_s *temp_res = NULL;
+	iotcon_resource_h temp_res = NULL;
 	struct ic_resource_request request_s = {0};
 
 	temp_res = ic_get_resource_handler_data(request->getResourceHandle());
@@ -452,32 +455,35 @@ static OCEntityHandlerResult _ic_ioty_request_handler(
 		return OC_EH_ERROR;
 	}
 
-	request_s.query = iotcon_query_new();
-	if (NULL == request_s.query) {
-		ERR("iotcon_query_new() Fail");
-		return OC_EH_ERROR;
-	}
-
-	map<string,string>::iterator it;
 	queryParams = request->getQueryParameters();
-	for (it = queryParams.begin(); it != queryParams.end(); ++it) {
-		DBG("key=%s value=%s", it->first.c_str(), it->second.c_str());
-		iotcon_query_insert(request_s.query, it->first.c_str(), it->second.c_str());
-	}
+	if (0 < queryParams.size()) {
+		request_s.query = iotcon_query_new();
+		if (NULL == request_s.query) {
+			ERR("iotcon_query_new() Fail");
+			return OC_EH_ERROR;
+		}
 
-	request_s.header_options = iotcon_options_new();
-	if (NULL == request_s.header_options) {
-		ERR("iotcon_options_new() Fail");
-		return OC_EH_ERROR;
+		for (auto it : queryParams) {
+			DBG("key = %s value = %s", it.first.c_str(), it.second.c_str());
+			iotcon_query_insert(request_s.query, it.first.c_str(), it.second.c_str());
+		}
 	}
 
 	headerOptions = request->getHeaderOptions();
 	if (0 < headerOptions.size()) {
-		for (auto it1 = headerOptions.begin(); it1 != headerOptions.end(); ++it1) {
-			DBG("OptionID=%d, OptionData=%s",
-					it1->getOptionID(), it1->getOptionData().c_str());
-			iotcon_options_insert(request_s.header_options, it1->getOptionID(),
-					it1->getOptionData().c_str());
+		request_s.header_options = iotcon_options_new();
+		if (NULL == request_s.header_options) {
+			ERR("iotcon_options_new() Fail");
+			if (request_s.query)
+				iotcon_query_free(request_s.query);
+			return OC_EH_ERROR;
+		}
+
+		for (auto it : headerOptions) {
+			DBG("OptionID = %d, OptionData = %s",
+					it.getOptionID(), it.getOptionData().c_str());
+			iotcon_options_insert(request_s.header_options, it.getOptionID(),
+					it.getOptionData().c_str());
 		}
 	}
 
@@ -491,24 +497,44 @@ static OCEntityHandlerResult _ic_ioty_request_handler(
 		}
 	}
 
-	request_s.request_type = ic_utils_strdup(request->getRequestType().c_str());
-	if (NULL == request_s.request_type) {
-		ERR("ic_utils_strdup() Fail");
-		iotcon_options_free(request_s.header_options);
-		iotcon_query_free(request_s.query);
-		return OC_EH_ERROR;
+	if (RequestFlag & request->getRequestHandlerFlag()) {
+		request_type = request->getRequestType().c_str();
+		if (NULL == request_type) {
+			ERR("request_type is NULL");
+			if (request_s.repr)
+				iotcon_repr_free(request_s.repr);
+			if (request_s.header_options)
+				iotcon_options_free(request_s.header_options);
+			if (request_s.query)
+				iotcon_query_free(request_s.query);
+			return OC_EH_ERROR;
+		}
+
+		if (IC_STR_EQUAL == strcmp("GET", request_type))
+			request_s.types = IOTCON_REQUEST_GET;
+		else if (IC_STR_EQUAL == strcmp("PUT", request_type))
+			request_s.types = IOTCON_REQUEST_PUT;
+		else if (IC_STR_EQUAL == strcmp("POST", request_type))
+			request_s.types = IOTCON_REQUEST_POST;
+		else if (IC_STR_EQUAL == strcmp("DELETE", request_type))
+			request_s.types = IOTCON_REQUEST_DELETE;
 	}
+
+	if (ObserverFlag & request->getRequestHandlerFlag())
+		request_s.types |= IOTCON_REQUEST_OBSERVE;
 
 	request_s.uri = ic_utils_strdup(request->getResourceUri().c_str());
-	if (NULL == request_s.request_type) {
+	if (NULL == request_s.uri) {
 		ERR("ic_utils_strdup() Fail");
-		free(request_s.request_type);
-		iotcon_options_free(request_s.header_options);
-		iotcon_query_free(request_s.query);
+		if (request_s.repr)
+			iotcon_repr_free(request_s.repr);
+		if (request_s.header_options)
+			iotcon_options_free(request_s.header_options);
+		if (request_s.query)
+			iotcon_query_free(request_s.query);
 		return OC_EH_ERROR;
 	}
 
-	request_s.request_handler_flag = request->getRequestHandlerFlag();
 	request_s.request_handle = (iotcon_request_h)request->getRequestHandle();
 	request_s.resource_handle = (iotcon_client_h)request->getResourceHandle();
 
@@ -525,34 +551,34 @@ static OCEntityHandlerResult _ic_ioty_request_handler(
 		WARN("temp_res->request_handler_cb is null");
 	}
 
-	free(request_s.request_type);
 	free(request_s.uri);
 
 	/* To avoid unnecessary ERR log (repr could be NULL) */
 	if (request_s.repr)
 		iotcon_repr_free(request_s.repr);
-
-	iotcon_options_free(request_s.header_options);
-	iotcon_query_free(request_s.query);
+	if (request_s.header_options)
+		iotcon_options_free(request_s.header_options);
+	if (request_s.query)
+		iotcon_query_free(request_s.query);
 
 	return OC_EH_OK;
 }
 
 
 extern "C" OCResourceHandle ic_ioty_register_res(const char *uri,
-		iotcon_str_list_s *res_types, int ifaces, uint8_t properties)
+		iotcon_resource_types_h res_types, int ifaces, uint8_t properties)
 {
 	FN_CALL;
+	unsigned int i;
 	OCStackResult ret;
 	string resUri;
 	string resType;
 	string resInterface;
 	OCResourceHandle handle;
-	unsigned int i;
 
 	resUri = uri;
 
-	resType = iotcon_str_list_nth_data(res_types, 0);
+	resType = ic_resource_types_get_nth_data(res_types, 0);
 
 	if (IOTCON_INTERFACE_DEFAULT & ifaces) {
 		resInterface = DEFAULT_INTERFACE;
@@ -577,9 +603,8 @@ extern "C" OCResourceHandle ic_ioty_register_res(const char *uri,
 		ERR("registerResource Fail(%d)", ret);
 		return NULL;
 	}
-
-	for (i = 1; i < iotcon_str_list_length(res_types); i++)
-		ic_ioty_bind_type_to_res(handle, iotcon_str_list_nth_data(res_types, i));
+	for (i = 1; i < ic_resource_types_get_length(res_types); i++)
+		ic_ioty_bind_type_to_res(handle, ic_resource_types_get_nth_data(res_types, i));
 
 	if (IOTCON_INTERFACE_DEFAULT & ifaces)
 		ic_ioty_bind_iface_to_res(handle, IOTCON_INTERFACE_DEFAULT);
@@ -617,16 +642,16 @@ extern "C" int ic_ioty_convert_interface_string(const char *src, iotcon_interfac
 
 	string interface_str(src);
 
-	if (STR_EQUAL == DEFAULT_INTERFACE.compare(interface_str)) {
+	if (IC_STR_EQUAL == DEFAULT_INTERFACE.compare(interface_str)) {
 		*dest = IOTCON_INTERFACE_DEFAULT;
 	}
-	else if (STR_EQUAL == LINK_INTERFACE.compare(interface_str)) {
+	else if (IC_STR_EQUAL == LINK_INTERFACE.compare(interface_str)) {
 		*dest = IOTCON_INTERFACE_LINK;
 	}
-	else if (STR_EQUAL == BATCH_INTERFACE.compare(interface_str)) {
+	else if (IC_STR_EQUAL == BATCH_INTERFACE.compare(interface_str)) {
 		*dest = IOTCON_INTERFACE_BATCH;
 	}
-	else if (STR_EQUAL == GROUP_INTERFACE.compare(interface_str)) {
+	else if (IC_STR_EQUAL == GROUP_INTERFACE.compare(interface_str)) {
 		*dest = IOTCON_INTERFACE_GROUP;
 	}
 	else {
@@ -731,24 +756,37 @@ extern "C" int ic_ioty_bind_res(OCResourceHandle parent, OCResourceHandle child)
 	return IOTCON_ERROR_NONE;
 }
 
-extern "C" int ic_ioty_register_device_info(iotcon_device_info_h device_info)
+extern "C" int ic_ioty_unbind_res(OCResourceHandle parent, OCResourceHandle child)
+{
+	OCStackResult ret;
+
+	ret = unbindResource(parent, child);
+	if (OC_STACK_OK != ret) {
+		ERR("unbindResource() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+extern "C" int ic_ioty_register_device_info(iotcon_device_info_s device_info)
 {
 	FN_CALL;
 	OCStackResult ret;
 
 	OCDeviceInfo deviceInfo = {0};
-	deviceInfo.deviceName = device_info->device_name;
-	deviceInfo.hostName = device_info->host_name;
-	deviceInfo.deviceUUID = device_info->device_uuid;
-	deviceInfo.contentType = device_info->content_type;
-	deviceInfo.version = device_info->version;
-	deviceInfo.manufacturerName = device_info->manufacturer_name;
-	deviceInfo.manufacturerUrl = device_info->manufacturer_url;
-	deviceInfo.modelNumber = device_info->model_number;
-	deviceInfo.dateOfManufacture = device_info->date_of_manufacture;
-	deviceInfo.platformVersion = device_info->platform_ver;
-	deviceInfo.firmwareVersion = device_info->firmware_ver;
-	deviceInfo.supportUrl = device_info->support_url;
+	deviceInfo.deviceName = device_info.name;
+	deviceInfo.hostName = device_info.host_name;
+	deviceInfo.deviceUUID = device_info.uuid;
+	deviceInfo.contentType = device_info.content_type;
+	deviceInfo.version = device_info.version;
+	deviceInfo.manufacturerName = device_info.manuf_name;
+	deviceInfo.manufacturerUrl = device_info.manuf_url;
+	deviceInfo.modelNumber = device_info.model_number;
+	deviceInfo.dateOfManufacture = device_info.date_of_manufacture;
+	deviceInfo.platformVersion = device_info.platform_ver;
+	deviceInfo.firmwareVersion = device_info.firmware_ver;
+	deviceInfo.supportUrl = device_info.support_url;
 
 	ret = registerDeviceInfo(deviceInfo);
 	if (OC_STACK_OK != ret) {
@@ -793,7 +831,7 @@ extern "C" int ic_ioty_send_notify(OCResourceHandle resHandle, struct ic_notify_
 
 	GList *node = g_list_first((GList*)observers);
 	while (node) {
-		uint8_t obs_id = GPOINTER_TO_UINT(node->data);
+		int obs_id = GPOINTER_TO_UINT(node->data);
 		obsIds.push_back(obs_id);
 
 		node = node->next;
@@ -939,7 +977,7 @@ extern "C" int ic_ioty_find_resource(const char *host_address, const char *resou
 	OCStackResult ret;
 	ostringstream resource_name;
 
-	if (STR_EQUAL == strcmp(IOTCON_MULTICAST_ADDRESS, host_address))
+	if (IC_STR_EQUAL == strcmp(IOTCON_MULTICAST_ADDRESS, host_address))
 		resource_name << host_address << IC_MULTICAST_RESOURCE_DISCOVERY;
 	else
 		resource_name << host_address << IC_UNICAST_RESOURCE_DISCOVERY;
@@ -971,6 +1009,16 @@ static int _ic_ioty_accumulate_options_vector(unsigned short id, const char *dat
 	return IOTCON_FUNC_CONTINUE;
 }
 
+
+static int _ic_ioty_accumulate_res_types(const char *type, void *user_data)
+{
+	vector<string> *types = static_cast<vector<string>*>(user_data);
+	(*types).push_back(type);
+
+	return IOTCON_FUNC_CONTINUE;
+}
+
+
 static OCResource::Ptr _ic_ioty_create_oc_resource(iotcon_client_h resource)
 {
 	string host;
@@ -988,12 +1036,8 @@ static OCResource::Ptr _ic_ioty_create_oc_resource(iotcon_client_h resource)
 	host = resource->host;
 	uri = resource->uri;
 
-	iotcon_str_list_s *list = resource->types;
-	while (list) {
-		string resource_type = list->string;
-		resource_types.push_back(resource_type);
-		list = list->next;
-	}
+	iotcon_resource_types_foreach(resource->types, _ic_ioty_accumulate_res_types,
+			(void*)&resource_types);
 
 	if (IOTCON_INTERFACE_NONE == resource->ifaces) {
 		resource_ifs.push_back(DEFAULT_INTERFACE);

@@ -16,7 +16,6 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_STRUCT_H__
 #define __IOT_CONNECTIVITY_MANAGER_STRUCT_H__
 
-#include <stdint.h>
 #include <stdbool.h>
 
 #include "iotcon-constant.h"
@@ -25,15 +24,24 @@ typedef struct ic_value_s* iotcon_value_h;
 typedef struct ic_list_s* iotcon_list_h;
 typedef struct ic_repr_s* iotcon_repr_h;
 
-typedef struct _resource_s* iotcon_resource_h;
 typedef struct ic_notify_msg* iotcon_notimsg_h;
 
 typedef void* iotcon_presence_h;
 
-typedef struct _str_list {
-	char *string;
-	struct _str_list *next;
-} iotcon_str_list_s;
+typedef struct _device_info {
+	char *name;
+	char *host_name;
+	char *uuid;
+	char *content_type;
+	char *version;
+	char *manuf_name;
+	char *manuf_url;
+	char *model_number;
+	char *date_of_manufacture;
+	char *platform_ver;
+	char *firmware_ver;
+	char *support_url;
+} iotcon_device_info_s;
 
 
 typedef struct ic_options* iotcon_options_h;
@@ -61,69 +69,64 @@ int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
 		void *user_data);
 iotcon_query_h iotcon_query_clone(iotcon_query_h query);
 
+
+/**
+ * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
+ * @brief Appends resource type to list.
+ * @since_tizen 3.0
+ * @remarks  Duplicate resource types are not allowed.
+ *
+ * @param[in] res_types The handle to the list
+ * @param[in] type The resource type
+ *
+ * @return the (possibly changed) start of the list, otherwise a null pointer on failure
+ */
+typedef struct ic_resource_types* iotcon_resource_types_h;
+iotcon_resource_types_h iotcon_resource_types_new();
+void iotcon_resource_types_free(iotcon_resource_types_h types);
+int iotcon_resource_types_insert(iotcon_resource_types_h types, const char *type);
+int iotcon_resource_types_delete(iotcon_resource_types_h types, const char *type);
+typedef int (*iotcon_resource_types_foreach_cb)(const char *type, void *user_data);
+int iotcon_resource_types_foreach(iotcon_resource_types_h types,
+		iotcon_resource_types_foreach_cb cb, void *user_data);
+iotcon_resource_types_h iotcon_resource_types_clone(iotcon_resource_types_h types);
+
+
 typedef void* iotcon_observers_h;
 void iotcon_observers_free(iotcon_observers_h observers);
-iotcon_observers_h iotcon_observers_append(iotcon_observers_h observers, uint8_t obs_id);
-iotcon_observers_h iotcon_observers_remove(iotcon_observers_h observers, uint8_t obs_id);
+iotcon_observers_h iotcon_observers_append(iotcon_observers_h observers, int obs_id);
+iotcon_observers_h iotcon_observers_remove(iotcon_observers_h observers, int obs_id);
+
+typedef struct ic_resource* iotcon_resource_h;
+int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *number);
+int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
+		iotcon_resource_h *child);
+int iotcon_resource_get_uri(iotcon_resource_h resource, char **uri);
+int iotcon_resource_get_host(iotcon_resource_h resource, char **host);
+int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_h *types);
+int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces);
+int iotcon_resource_is_observable(iotcon_resource_h resource, bool *observable);
 
 typedef struct ic_remote_resource* iotcon_client_h;
-const char* iotcon_client_get_uri(iotcon_client_h resource);
-const char* iotcon_client_get_host(iotcon_client_h resource);
-iotcon_str_list_s* iotcon_client_get_types(iotcon_client_h resource);
-int iotcon_client_get_interfaces(iotcon_client_h resource);
-int iotcon_client_set_options(iotcon_client_h resource,
-		iotcon_options_h header_options);
+int iotcon_client_get_uri(iotcon_client_h resource, char **uri);
+int iotcon_client_get_host(iotcon_client_h resource, char **host);
+int iotcon_client_get_types(iotcon_client_h resource, iotcon_resource_types_h *types);
+int iotcon_client_get_interfaces(iotcon_client_h resource, int *ifaces);
+int iotcon_client_is_observable(iotcon_client_h resource, bool *observable);
+int iotcon_client_set_options(iotcon_client_h resource, iotcon_options_h header_options);
 
 typedef struct ic_resource_request* iotcon_request_h;
-iotcon_repr_h iotcon_request_get_representation(iotcon_request_h request);
-const char* iotcon_request_get_request_type(iotcon_request_h request);
-int iotcon_request_get_request_handler_flag(iotcon_request_h request);
-iotcon_options_h iotcon_request_get_options(iotcon_request_h request);
-iotcon_query_h iotcon_request_get_query(iotcon_request_h request);
-iotcon_observe_action_e iotcon_request_get_observer_action(iotcon_request_h request);
-uint8_t iotcon_request_get_observer_id(iotcon_request_h request);
+int iotcon_request_get_representation(iotcon_request_h request, iotcon_repr_h *repr);
+int iotcon_request_get_types(iotcon_request_h request, int *types);
+int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *options);
+int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
+int iotcon_request_get_observer_action(iotcon_request_h request,
+		iotcon_observe_action_e *action);
+int iotcon_request_get_observer_id(iotcon_request_h request, int *observer_id);
 
 typedef struct ic_resource_response* iotcon_response_h;
 iotcon_response_h iotcon_response_new(iotcon_request_h request_h);
 void iotcon_response_free(iotcon_response_h resp);
 int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e prop, ...);
-
-typedef struct ic_device_info* iotcon_device_info_h;
-const char* iotcon_device_info_get_device_name(iotcon_device_info_h device_info);
-const char* iotcon_device_info_get_host_name(iotcon_device_info_h device_info);
-const char* iotcon_device_info_get_device_uuid(iotcon_device_info_h device_info);
-const char* iotcon_device_info_get_content_type(iotcon_device_info_h device_info);
-const char* iotcon_device_info_get_version(iotcon_device_info_h device_info);
-const char* iotcon_device_info_get_manufacturer_name(iotcon_device_info_h device_info);
-const char* iotcon_device_info_get_manufacturer_url(iotcon_device_info_h device_info);
-const char* iotcon_device_info_get_model_number(iotcon_device_info_h device_info);
-const char* iotcon_device_info_get_date_of_manufacture(iotcon_device_info_h device_info);
-const char* iotcon_device_info_get_platform_version(iotcon_device_info_h device_info);
-const char* iotcon_device_info_get_firmware_version(iotcon_device_info_h device_info);
-const char* iotcon_device_info_get_support_url(iotcon_device_info_h device_info);
-
-void iotcon_str_list_free(iotcon_str_list_s *str_list);
-
-/**
- * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
- * @brief Appends string value to list.
- * @since_tizen 3.0
- * @remarks  Duplicate strings are not allowed.
- *
- * @param[in] str_list The handle to the list
- * @param[in] string The string
- *
- * @return the (possibly changed) start of the list, otherwise a null pointer on failure
- */
-iotcon_str_list_s* iotcon_str_list_append(iotcon_str_list_s *str_list,
-		const char *string);
-iotcon_str_list_s* iotcon_str_list_remove(iotcon_str_list_s *str_list,
-		const char *string);
-iotcon_str_list_s* iotcon_str_list_clone(iotcon_str_list_s *str_list);
-unsigned int iotcon_str_list_length(iotcon_str_list_s *str_list);
-typedef int (*iotcon_string_foreach_cb)(const char *string, void *user_data);
-int iotcon_str_list_foreach(iotcon_str_list_s *str_list, iotcon_string_foreach_cb cb,
-		void *user_data);
-const char* iotcon_str_list_nth_data(iotcon_str_list_s *str_list, unsigned int n);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_STRUCT_H__ */

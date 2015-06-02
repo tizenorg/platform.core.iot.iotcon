@@ -37,6 +37,7 @@ typedef enum
 	IOTCON_ERROR_IOTIVITY = TIZEN_ERROR_IOTCON | 0x01, /**< Iotivity errors */
 	IOTCON_ERROR_REPRESENTATION = TIZEN_ERROR_IOTCON | 0x02, /**< Representation errors */
 	IOTCON_ERROR_INVALID_TYPE = TIZEN_ERROR_IOTCON | 0x03, /**< Invalid type */
+	IOTCON_ERROR_ALREADY = TIZEN_ERROR_IOTCON | 0x04, /**< Already */
 }iotcon_error_e;
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_ERRORS_H__ */

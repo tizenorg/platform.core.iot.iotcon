@@ -16,8 +16,6 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_REQUEST_H__
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_REQUEST_H__
 
-#include <stdint.h>
-
 #include "iotcon-struct.h"
 #include "iotcon-constant.h"
 
@@ -26,11 +24,11 @@ typedef void* oc_resource_h;
 
 struct ic_observe_info {
 	iotcon_observe_action_e action;
-	uint8_t observer_id;
+	int observer_id;
 };
 
 struct ic_resource_request {
-	char *request_type;
+	int types;
 	char *uri;
 	iotcon_options_h header_options;
 	iotcon_query_h query;

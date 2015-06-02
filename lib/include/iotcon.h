@@ -31,7 +31,7 @@ void iotcon_deinitialize();
 
 typedef void (*iotcon_request_handler_cb)(iotcon_request_h request, void *user_data);
 iotcon_resource_h iotcon_register_resource(const char *uri,
-		iotcon_str_list_s *res_types,
+		iotcon_resource_types_h res_types,
 		int ifaces,
 		uint8_t properties,
 		iotcon_request_handler_cb cb,
@@ -42,22 +42,12 @@ int iotcon_bind_interface(iotcon_resource_h resource,
 		iotcon_interface_e iface);
 int iotcon_bind_type(iotcon_resource_h resource_handle,
 		const char *resource_type);
+int iotcon_bind_request_handler(iotcon_resource_h resource, iotcon_request_handler_cb cb);
 int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child);
+int iotcon_unbind_resource(iotcon_resource_h parent, iotcon_resource_h child);
 
-int iotcon_register_device_info(
-		char *device_name,
-		char *host_name,
-		char *device_uuid,
-		char *content_type,
-		char *version,
-		char *manufacturer_name,
-		char *manufacturer_url,
-		char *model_number,
-		char *date_of_manufacture,
-		char *platform_version,
-		char *firmware_version,
-		char *support_url);
-typedef void (*iotcon_device_info_cb)(iotcon_device_info_h info, void *user_data);
+int iotcon_register_device_info(iotcon_device_info_s device_info);
+typedef void (*iotcon_device_info_cb)(iotcon_device_info_s info, void *user_data);
 int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 		void *user_data);
 
@@ -75,7 +65,7 @@ typedef void (*iotcon_found_resource_cb)(iotcon_client_h resource, void *user_da
 int iotcon_find_resource(const char *host_address, const char *resource_type,
 		iotcon_found_resource_cb cb, void *user_data);
 iotcon_client_h iotcon_client_new(const char *host, const char *uri, bool is_observable,
-		iotcon_str_list_s *resource_types, iotcon_interface_e resource_interfaces);
+		iotcon_resource_types_h resource_types, int resource_interfaces);
 void iotcon_client_free(iotcon_client_h resource);
 iotcon_client_h iotcon_client_clone(iotcon_client_h resource);
 

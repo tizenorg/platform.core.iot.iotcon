@@ -24,8 +24,8 @@
 
 void ic_ioty_config(const char *addr, unsigned short port);
 
-void* ic_ioty_register_res(const char *uri, iotcon_str_list_s *res_types,
-		int ifaces, uint8_t properties);
+void* ic_ioty_register_res(const char *uri, iotcon_resource_types_h res_types, int ifaces,
+		uint8_t properties);
 
 int ic_ioty_unregister_res(iotcon_resource_h resource_handle);
 
@@ -35,7 +35,9 @@ int ic_ioty_bind_type_to_res(void *resource_handle, const char *resource_type);
 
 int ic_ioty_bind_res(void *parent, void *child);
 
-int ic_ioty_register_device_info(iotcon_device_info_h device_info);
+int ic_ioty_unbind_res(void *parent, void *child);
+
+int ic_ioty_register_device_info(iotcon_device_info_s device_info);
 
 int ic_ioty_get_device_info(const char *host_address, iotcon_device_info_cb found_cb,
 		void *user_data);

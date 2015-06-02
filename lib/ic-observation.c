@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <glib.h>
@@ -28,15 +27,17 @@ API void iotcon_observers_free(iotcon_observers_h observers)
 	g_list_free(observers);
 }
 
+
 /* If you want to make a new list, then you should set observers is NULL. */
 API iotcon_observers_h iotcon_observers_append(iotcon_observers_h observers,
-		uint8_t obs_id)
+		int obs_id)
 {
 	return g_list_append(observers, GUINT_TO_POINTER(obs_id));
 }
 
+
 API iotcon_observers_h iotcon_observers_remove(iotcon_observers_h observers,
-		uint8_t obs_id)
+		int obs_id)
 {
 	RETV_IF(NULL == observers, observers);
 

@@ -59,6 +59,7 @@ static int _query_foreach_cb(const char *key, const char *value, void *user_data
 static void _room_request_handler_get(iotcon_request_h request,
 		iotcon_response_h response)
 {
+	int ret;
 	iotcon_repr_h room_repr;
 	iotcon_repr_h light_repr;
 	iotcon_repr_h switch_repr;
@@ -102,8 +103,13 @@ static void _room_request_handler_get(iotcon_request_h request,
 	iotcon_repr_free(light_repr);
 	iotcon_repr_free(switch_repr);
 
-	query = iotcon_request_get_query(request);
-	iotcon_query_foreach(query, _query_foreach_cb, &query_str);
+	ret = iotcon_request_get_query(request, &query);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_request_get_query() Fail(%d)", ret);
+		return;
+	}
+	if (query)
+		iotcon_query_foreach(query, _query_foreach_cb, &query_str);
 
 	if (query_str && !strcmp("oc.mi.b", query_str)) {
 		DBG("operation for BATCH interface");
@@ -160,97 +166,93 @@ static void _request_handler_delete(iotcon_response_h response)
 
 static void _light_request_handler(iotcon_request_h request, void *user_data)
 {
-	const char *request_type = NULL;
-	int request_flag = IOTCON_INIT_FLAG;
+	int ret;
+	int types;
 	iotcon_response_h response;
 	FN_CALL;
 
 	RET_IF(NULL == request);
 
-	request_type = iotcon_request_get_request_type(request);
-	if (NULL == request_type) {
-		ERR("request_type is NULL");
+	ret = iotcon_request_get_types(request, &types);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_request_get_types() Fail(%d)", ret);
 		return;
 	}
 
-	request_flag = iotcon_request_get_request_handler_flag(request);
-	if (request_flag & IOTCON_CRUD_FLAG) {
-		response = iotcon_response_new(request);
-		if (NULL == response) {
-			ERR("iotcon_response_new() Fail");
-			return;
+	response = iotcon_response_new(request);
+	if (NULL == response) {
+		ERR("iotcon_response_new() Fail");
+		return;
 		}
 
-		if (!strcmp("GET", request_type))
-			_light_request_handler_get(response);
+	if (IOTCON_REQUEST_GET & types)
+		_light_request_handler_get(response);
 
-		else if (!strcmp("PUT", request_type))
-			_request_handler_put(request, response);
+	else if (IOTCON_REQUEST_PUT & types)
+		_request_handler_put(request, response);
 
-		else if (!strcmp("POST", request_type))
-			_request_handler_post(response);
+	else if (IOTCON_REQUEST_POST & types)
+		_request_handler_post(response);
 
-		else if (!strcmp("DELETE", request_type))
-			_request_handler_delete(response);
+	else if (IOTCON_REQUEST_DELETE & types)
+		_request_handler_delete(response);
 
-		iotcon_response_free(response);
-	}
+	iotcon_response_free(response);
 }
 
 static void _room_request_handler(iotcon_request_h request, void *user_data)
 {
-	const char *request_type = NULL;
-	int request_flag = IOTCON_INIT_FLAG;
+	int ret;
+	int types;
 	iotcon_response_h response;
 	FN_CALL;
 
 	RET_IF(NULL == request);
 
-	request_type = iotcon_request_get_request_type(request);
-	if (NULL == request_type) {
-		ERR("request_type is NULL");
+	ret = iotcon_request_get_types(request, &types);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_request_get_types() Fail(%d)", ret);
 		return;
 	}
 
-	request_flag = iotcon_request_get_request_handler_flag(request);
-	if (request_flag & IOTCON_CRUD_FLAG) {
-		response = iotcon_response_new(request);
-		if (NULL == response) {
-			ERR("iotcon_response_new() Fail");
-			return;
+	response = iotcon_response_new(request);
+	if (NULL == response) {
+		ERR("iotcon_response_new() Fail");
+		return;
 		}
 
-		if (!strcmp("GET", request_type))
-			_room_request_handler_get(request, response);
+	if (IOTCON_REQUEST_GET & types)
+		_room_request_handler_get(request, response);
 
-		else if (!strcmp("PUT", request_type))
-			_request_handler_put(request, response);
+	else if (IOTCON_REQUEST_PUT & types)
+		_request_handler_put(request, response);
 
-		else if (!strcmp("POST", request_type))
-			_request_handler_post(response);
+	else if (IOTCON_REQUEST_POST & types)
+		_request_handler_post(response);
 
-		else if (!strcmp("DELETE", request_type))
-			_request_handler_delete(response);
+	else if (IOTCON_REQUEST_DELETE & types)
+		_request_handler_delete(response);
 
-		iotcon_response_free(response);
-	}
+	iotcon_response_free(response);
 }
 
 int main(int argc, char **argv)
 {
 	FN_CALL;
 	GMainLoop *loop;
-	iotcon_str_list_s room_rtypes = {strdup("core.room"), NULL};
-	iotcon_str_list_s light_rtypes = {strdup("core.light"), NULL};
+	iotcon_resource_types_h room_rtypes = NULL;
+	iotcon_resource_types_h light_rtypes = NULL;
 	iotcon_error_e iotcon_error = IOTCON_ERROR_NONE;
 
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* initialize address and port */
-	iotcon_initialize("0.0.0.0", 0);
+	iotcon_initialize(IOTCON_ALL_INTERFACES, IOTCON_RANDOM_PORT);
 
 	/* register room resource */
-	iotcon_resource_h room_handle = iotcon_register_resource("/a/room", &room_rtypes,
+	room_rtypes = iotcon_resource_types_new();
+	iotcon_resource_types_insert(room_rtypes, "core.room");
+	iotcon_resource_h room_handle = iotcon_register_resource("/a/room", room_rtypes,
 			(IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_BATCH),
 			(IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE), _room_request_handler,
 			NULL);
@@ -260,7 +262,9 @@ int main(int argc, char **argv)
 	}
 
 	/* register room resource */
-	iotcon_resource_h light_handle = iotcon_register_resource("/a/light", &light_rtypes,
+	light_rtypes = iotcon_resource_types_new();
+	iotcon_resource_types_insert(light_rtypes, "core.light");
+	iotcon_resource_h light_handle = iotcon_register_resource("/a/light", light_rtypes,
 			(IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_BATCH),
 			(IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE), _light_request_handler,
 			NULL);

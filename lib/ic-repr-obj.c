@@ -31,8 +31,8 @@ int ic_obj_del_value(iotcon_repr_h repr, const char *key,
 	gboolean ret = FALSE;
 	iotcon_value_h value = NULL;
 
-	RETV_IF(NULL == repr, false);
-	RETV_IF(NULL == key, false);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = g_hash_table_lookup(repr->hash_table, key);
 	if (NULL == value) {
@@ -484,28 +484,20 @@ int ic_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value)
 	return IOTCON_ERROR_NONE;
 }
 
-static inline int _ic_obj_to_json(GHashTable *hash, iotcon_str_list_s *key_list,
-		unsigned int index, JsonObject *json_obj)
+static inline int _ic_obj_to_json(const char *key, iotcon_value_h value,
+		JsonObject *json_obj)
 {
 	FN_CALL;
 	int type, ret;
-	const char *key;
 	iotcon_repr_h child_repr = NULL;
 	iotcon_list_h child_list = NULL;
-	iotcon_value_h value = NULL;
 
 	JsonObject *child_obj = NULL;
 	JsonNode *child_node = NULL;
 	JsonArray *child_array = NULL;
 
-	RETV_IF(NULL == hash, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == key_list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(index < 0, IOTCON_ERROR_INVALID_PARAMETER);
-
-	key = iotcon_str_list_nth_data(key_list, index);
-	value = g_hash_table_lookup(hash, key);
-	if (NULL == value)
-		ERR("g_hash_table_lookup(%s) Fail", key);
+	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
 
 	type = value->type;
 	switch (type) {
@@ -567,27 +559,29 @@ static inline int _ic_obj_to_json(GHashTable *hash, iotcon_str_list_s *key_list,
 JsonObject* ic_obj_to_json(iotcon_repr_h repr)
 {
 	int ret;
-	unsigned int i = 0;
-	iotcon_str_list_s *key_list = NULL;
+	int key_count;
 	JsonObject *json_obj = NULL;
-	JsonObject *parent_obj;
+	JsonObject *parent_obj = NULL;
+
+	GHashTableIter iter;
+	gpointer key, value;
 
 	RETV_IF(NULL == repr, NULL);
+	RETV_IF(NULL == repr->hash_table, NULL);
 
-	key_list = iotcon_repr_get_key_list(repr);
-	if (key_list) {
+	key_count = iotcon_repr_get_keys_count(repr);
+	if (key_count) {
 		json_obj = json_object_new();
-		for (i = 0; i < iotcon_str_list_length(key_list); i++) {
-			ret = _ic_obj_to_json(repr->hash_table, key_list, i, json_obj);
 
+		g_hash_table_iter_init(&iter, repr->hash_table);
+		while (g_hash_table_iter_next(&iter, &key, &value)) {
+			ret = _ic_obj_to_json(key, value, json_obj);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("_ic_obj_to_json() Fail(%d)", ret);
 				json_object_unref(json_obj);
-				iotcon_str_list_free(key_list);
 				return NULL;
 			}
 		}
-		iotcon_str_list_free(key_list);
 	}
 
 	parent_obj = json_object_new();

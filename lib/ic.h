@@ -18,11 +18,20 @@
 
 #include "iotcon.h"
 
-typedef struct _resource_s {
+#define IC_INTERFACE_MAX (IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_LINK | \
+		IOTCON_INTERFACE_BATCH | IOTCON_INTERFACE_GROUP)
+
+struct ic_resource {
+	char *uri;
+	char *host;
+	bool is_observable;
+	iotcon_resource_types_h types;
+	int ifaces;
 	void *handle;
 	iotcon_request_handler_cb cb;
 	void *user_data;
-} ic_resource_s;
+	iotcon_resource_h children[IOTCON_CONTAINED_RESOURCES_MAX];
+};
 
 struct ic_notify_msg {
 	int error_code;
@@ -30,6 +39,6 @@ struct ic_notify_msg {
 	iotcon_repr_h repr;
 };
 
-ic_resource_s* ic_get_resource_handler_data(void *handle);
+iotcon_resource_h ic_get_resource_handler_data(void *handle);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_H__ */

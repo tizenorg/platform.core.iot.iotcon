@@ -42,9 +42,7 @@
 #define IOTCON_MANUFACTURER_NAME_LENGTH_MAX 15
 #define IOTCON_MANUFACTURER_URL_LENGTH_MAX 32
 
-/* TODO
 #define IOTCON_CONTAINED_RESOURCES_MAX 5
-*/
 
 #define IOTCON_FUNC_STOP 0
 #define IOTCON_FUNC_CONTINUE 1
@@ -74,7 +72,6 @@ typedef enum {
 	IOTCON_INTERFACE_LINK = (1 << 1), /* discovers children of the parent resource */
 	IOTCON_INTERFACE_BATCH = (1 << 2), /* requests CRUD to children of the parent resource */
 	IOTCON_INTERFACE_GROUP = (1 << 3), /* requests CRUD to remote resources of a group. */
-	IOTCON_INTERFACE_MAX = (1 << 4)
 } iotcon_interface_e;
 
 typedef enum {
@@ -96,11 +93,12 @@ typedef enum {
 } iotcon_response_property_e;
 
 typedef enum {
-	IOTCON_NO_FLAG = 0,
-	IOTCON_INIT_FLAG = (1 << 0),
-	IOTCON_CRUD_FLAG = (1 << 1),
-	IOTCON_OBSERVE_FLAG = (1 << 2)
-} iotcon_request_handler_flag_e;
+	IOTCON_REQUEST_GET = (1 << 0),
+	IOTCON_REQUEST_PUT = (1 << 1),
+	IOTCON_REQUEST_POST = (1 << 2),
+	IOTCON_REQUEST_DELETE = (1 << 3),
+	IOTCON_REQUEST_OBSERVE = (1 << 4),
+} iotcon_request_type_e;
 
 typedef enum {
 	IOTCON_RESPONSE_RESULT_OK = 0,

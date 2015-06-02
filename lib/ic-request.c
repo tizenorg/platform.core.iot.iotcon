@@ -13,65 +13,89 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdint.h>
-
 #include "iotcon-struct.h"
 #include "iotcon-constant.h"
 #include "ic-common.h"
 #include "ic-request.h"
 
-API iotcon_repr_h iotcon_request_get_representation(iotcon_request_h request)
+/* The content of the request should not be freed by user. */
+API int iotcon_request_get_uri(iotcon_request_h request, char **uri)
 {
-	RETV_IF(NULL == request, NULL);
+	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == uri, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return request->repr;
+	*uri = request->uri;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API const char* iotcon_request_get_request_type(iotcon_request_h request)
+/* The content of the request should not be freed by user. */
+API int iotcon_request_get_representation(iotcon_request_h request, iotcon_repr_h *repr)
 {
-	RETV_IF(NULL == request, NULL);
+	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return request->request_type;
+	*repr = request->repr;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API int iotcon_request_get_request_handler_flag(iotcon_request_h request)
+API int iotcon_request_get_types(iotcon_request_h request, int *types)
 {
-	RETV_IF(NULL == request, 0);
+	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return request->request_handler_flag;
+	*types = request->types;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API iotcon_options_h iotcon_request_get_options(iotcon_request_h request)
+/* The content of the request should not be freed by user. */
+API int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *options)
 {
-	RETV_IF(NULL == request, NULL);
+	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return request->header_options;
+	*options = request->header_options;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API iotcon_query_h iotcon_request_get_query(iotcon_request_h request)
+/* The content of the request should not be freed by user. */
+API int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query)
 {
-	RETV_IF(NULL == request, NULL);
+	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return request->query;
+	*query = request->query;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API iotcon_observe_action_e iotcon_request_get_observer_action(iotcon_request_h request)
+API int iotcon_request_get_observer_action(iotcon_request_h request,
+		iotcon_observe_action_e *action)
 {
-	RETV_IF(NULL == request, IOTCON_OBSERVE_NO_OPTION);
+	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == action, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return request->observation_info.action;
+	*action = request->observation_info.action;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API uint8_t iotcon_request_get_observer_id(iotcon_request_h request)
+API int iotcon_request_get_observer_id(iotcon_request_h request, int *observer_id)
 {
-	RETV_IF(NULL == request, 0);
+	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == observer_id, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return request->observation_info.observer_id;
+	*observer_id = request->observation_info.observer_id;
+
+	return IOTCON_ERROR_NONE;
 }
 

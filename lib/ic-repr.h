@@ -35,7 +35,7 @@ struct ic_repr_s {
 	int interfaces;
 	GHashTable *hash_table;
 	GList *children;
-	iotcon_str_list_s *res_types;
+	iotcon_resource_types_h res_types;
 };
 
 /**

@@ -55,8 +55,8 @@ API void iotcon_options_free(iotcon_options_h options)
 
 
 /* iotcon_options_h can have up to 2 options.
- * option id is always situated between 2014 and 3000.
- * Length of option data is less than and equal to 15. */
+ * option id is always situated between 2048 and 3000.
+ * Length of option data is less than or equal to 15. */
 API int iotcon_options_insert(iotcon_options_h options, unsigned short id,
 		const char *data)
 {

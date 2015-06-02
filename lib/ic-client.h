@@ -27,7 +27,7 @@ struct ic_remote_resource {
 	bool is_observable;
 	bool is_collection;
 	iotcon_options_h header_options;
-	iotcon_str_list_s *types;
+	iotcon_resource_types_h types;
 	int ifaces;
 	iotcon_observe_h observe_handle;
 };

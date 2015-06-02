@@ -24,6 +24,7 @@
 #include "iotcon.h"
 #include "ic-common.h"
 #include "ic-utils.h"
+#include "ic-resource-types.h"
 #include "ic-ioty.h"
 #include "ic-repr.h"
 #include "ic.h"
@@ -86,22 +87,21 @@ static gboolean _find_valid_resource(gpointer key, gpointer value, gpointer user
 }
 
 
-ic_resource_s* ic_get_resource_handler_data(void *handle)
+iotcon_resource_h ic_get_resource_handler_data(void *handle)
 {
 	return g_hash_table_find(ic_request_cb_hash, _find_valid_resource, handle);
 }
 
 
-/* The length of uri should be less than and equal to 36. */
+/* The length of uri should be less than or equal to 36. */
 API iotcon_resource_h iotcon_register_resource(const char *uri,
-		iotcon_str_list_s *res_types,
+		iotcon_resource_types_h res_types,
 		int ifaces,
 		uint8_t properties,
 		iotcon_request_handler_cb cb,
 		void *user_data)
 {
 	FN_CALL;
-	int i;
 	iotcon_resource_h resource;
 
 	RETV_IF(NULL == uri, NULL);
@@ -110,15 +110,7 @@ API iotcon_resource_h iotcon_register_resource(const char *uri,
 	RETV_IF(NULL == res_types, NULL);
 	RETV_IF(NULL == cb, NULL);
 
-	for (i = 0; i < iotcon_str_list_length(res_types); i++) {
-		if (IOTCON_RESOURCE_TYPE_LENGTH_MAX
-				< strlen(iotcon_str_list_nth_data(res_types, i))) {
-			ERR("The length of resource_type is invalid");
-			return NULL;
-		}
-	}
-
-	resource = calloc(1, sizeof(struct _resource_s));
+	resource = calloc(1, sizeof(struct ic_resource));
 	if (NULL == resource) {
 		ERR("calloc Fail(%d)", errno);
 		return NULL;
@@ -133,6 +125,11 @@ API iotcon_resource_h iotcon_register_resource(const char *uri,
 
 	resource->cb = cb;
 	resource->user_data = user_data;
+
+	resource->uri = ic_utils_strdup(uri);
+	resource->types = ic_resource_types_ref(res_types);
+	resource->ifaces = ifaces;
+	resource->is_observable = properties & IOTCON_OBSERVABLE;
 
 	g_hash_table_insert(ic_request_cb_hash, resource->handle, resource);
 
@@ -185,19 +182,160 @@ API int iotcon_bind_type(iotcon_resource_h resource, const char *resource_type)
 }
 
 
+API int iotcon_bind_request_handler(iotcon_resource_h resource,
+		iotcon_request_handler_cb cb)
+{
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+
+	WARN("Request handler is changed");
+	resource->cb = cb;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
 API int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child)
 {
 	FN_CALL;
 	int ret;
+	int i;
+
+	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(parent == child, IOTCON_ERROR_INVALID_PARAMETER);
+
+	for (i = 0; i < IOTCON_CONTAINED_RESOURCES_MAX; i++) {
+		if (child == parent->children[i]) {
+			ERR("Child resource was already bound to parent resource.");
+			return IOTCON_ERROR_ALREADY;
+		}
+		if (NULL == parent->children[i]) {
+			ret = ic_ioty_bind_res(parent->handle, child->handle);
+			if (IOTCON_ERROR_NONE == ret)
+				parent->children[i] = child;
+			else
+				ERR("ic_ioty_bind_res() Fail(%d)", ret);
+
+			return ret;
+		}
+	}
+
+	ERR("There is no slot to bind a child resource");
+	return IOTCON_ERROR_OUT_OF_MEMORY;
+}
+
+
+API int iotcon_unbind_resource(iotcon_resource_h parent, iotcon_resource_h child)
+{
+	int ret;
+	int i;
 
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_ioty_bind_res(parent->handle, child->handle);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_ioty_bind_res() Fail(%d)", ret);
+	ret = ic_ioty_unbind_res(parent->handle, child->handle);
+	if (IOTCON_ERROR_NONE == ret) {
+		for (i = 0; i < IOTCON_CONTAINED_RESOURCES_MAX; i++) {
+			if (child == parent->children[i])
+				parent->children[i] = NULL;
+		}
+	}
+	else
+		ERR("ic_ioty_unbind_res() Fail(%d)", ret);
 
 	return ret;
+}
+
+
+API int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *number)
+{
+	int i;
+
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == number, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*number = 0;
+	for (i = 0; i < IOTCON_CONTAINED_RESOURCES_MAX; i++) {
+		if (resource->children[i])
+			*number += 1;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
+		iotcon_resource_h *child)
+{
+	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
+	if ((index < 0) || (IOTCON_CONTAINED_RESOURCES_MAX <= index)) {
+		ERR("Invalid index(%d)", index);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	*child = parent->children[index];
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+/* The content of the resource should not be freed by user. */
+API int iotcon_resource_get_uri(iotcon_resource_h resource, char **uri)
+{
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == uri, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*uri = resource->uri;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+/* The content of the resource should not be freed by user. */
+API int iotcon_resource_get_host(iotcon_resource_h resource, char **host)
+{
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == host, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*host = resource->host;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+/* The content of the resource should not be freed by user. */
+API int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_h *types)
+{
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*types = resource->types;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces)
+{
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*ifaces = resource->ifaces;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_resource_is_observable(iotcon_resource_h resource, bool *observable)
+{
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == observable, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*observable = resource->is_observable;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
@@ -227,7 +365,7 @@ API int iotcon_stop_presence()
 }
 
 
-/* The length of resource_type should be less than and equal to 61. */
+/* The length of resource_type should be less than or equal to 61. */
 API iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
 		const char *resource_type, iotcon_presence_cb cb, void *user_data)
 {

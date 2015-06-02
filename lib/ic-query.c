@@ -46,7 +46,7 @@ API void iotcon_query_free(iotcon_query_h query)
 }
 
 
-/* The full length of query should be less than and equal to 64. */
+/* The full length of query should be less than or equal to 64. */
 API int iotcon_query_insert(iotcon_query_h query, const char *key, const char *value)
 {
 	int query_len;

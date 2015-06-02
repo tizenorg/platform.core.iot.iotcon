@@ -35,11 +35,11 @@ static int _get_int_list_fn(int pos, const int value, void *user_data)
 static void _on_get(iotcon_repr_h recv_repr, int response_result)
 {
 	int i, ret;
+	int key_count;
 	unsigned int children_count;
 	const char *uri;
 	iotcon_repr_h child_repr;
 	iotcon_list_h list;
-	iotcon_str_list_s *key_list = NULL;
 
 	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result,
 			"_on_get Response error(%d)", response_result);
@@ -49,8 +49,8 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 	iotcon_repr_get_uri(recv_repr, &uri);
 	if (uri)
 		DBG("uri : %s", uri);
-	key_list = iotcon_repr_get_key_list(recv_repr);
-	if (key_list) {
+	key_count = iotcon_repr_get_keys_count(recv_repr);
+	if (key_count) {
 		char *str;
 		iotcon_repr_get_str(recv_repr, "name", &str);
 		if (str)
@@ -60,7 +60,6 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 
 		DBG("today's temperature :");
 		iotcon_list_foreach_int(list, _get_int_list_fn, NULL);
-		iotcon_str_list_free(key_list);
 
 		if (iotcon_repr_is_null(recv_repr, "null value"))
 			DBG("null value is null");
@@ -83,21 +82,19 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 			DBG("uri : %s", uri);
 
 		if (!strcmp("/a/light", uri)) {
-			key_list = iotcon_repr_get_key_list(child_repr);
-			if (key_list) {
+			key_count = iotcon_repr_get_keys_count(child_repr);
+			if (key_count) {
 				int brightness;
 				iotcon_repr_get_int(child_repr, "brightness", &brightness);
 				DBG("brightness : %d", brightness);
-				iotcon_str_list_free(key_list);
 			}
 		}
 		else if (!strcmp("/a/switch", uri)) {
-			key_list = iotcon_repr_get_key_list(child_repr);
-			if (key_list) {
+			key_count = iotcon_repr_get_keys_count(child_repr);
+			if (key_count) {
 				bool bswitch;
 				iotcon_repr_get_bool(child_repr, "switch", &bswitch);
 				DBG("switch : %d", bswitch);
-				iotcon_str_list_free(key_list);
 			}
 		}
 	}
@@ -136,52 +133,61 @@ static int _get_res_type_fn(const char *string, void *user_data)
 
 static void _found_resource(iotcon_client_h resource, void *user_data)
 {
-	const char *resource_uri;
-	const char *resource_host;
-	iotcon_str_list_s *resource_types = NULL;
+	int ret;
+	char *resource_uri;
+	char *resource_host;
+	iotcon_resource_types_h resource_types = NULL;
 	int resource_interfaces = 0;
 
-	if (resource) {
-		INFO("===== resource found =====");
+	if (NULL == resource)
+		return;
 
-		/* get the resource URI */
-		resource_uri = iotcon_client_get_uri(resource);
-		if (NULL == resource_uri) {
-			ERR("uri is NULL");
-			return;
-		}
+	INFO("===== resource found =====");
 
-		/* get the resource host address */
-		resource_host = iotcon_client_get_host(resource);
-		DBG("[%s] resource host : %s", resource_uri, resource_host);
+	/* get the resource URI */
+	ret = iotcon_client_get_uri(resource, &resource_uri);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_uri() Fail(%d)", ret);
+		return;
+	}
 
-		/* get the resource interfaces */
-		resource_interfaces = iotcon_client_get_interfaces(resource);
+	/* get the resource host address */
+	ret = iotcon_client_get_host(resource, &resource_host);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_host() Fail(%d)", ret);
+		return;
+	}
+	DBG("[%s] resource host : %s", resource_uri, resource_host);
 
-		if (IOTCON_INTERFACE_DEFAULT & resource_interfaces)
-			DBG("[%s] resource interface : DEFAULT_INTERFACE", resource_uri);
-		if (IOTCON_INTERFACE_LINK & resource_interfaces)
-			DBG("[%s] resource interface : LINK_INTERFACE", resource_uri);
-		if (IOTCON_INTERFACE_BATCH & resource_interfaces)
-			DBG("[%s] resource interface : BATCH_INTERFACE", resource_uri);
-		if (IOTCON_INTERFACE_GROUP & resource_interfaces)
-			DBG("[%s] resource interface : GROUP_INTERFACE", resource_uri);
+	/* get the resource interfaces */
+	ret = iotcon_client_get_interfaces(resource, &resource_interfaces);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_interfaces() Fail(%d)", ret);
+		return;
+	}
+	if (IOTCON_INTERFACE_DEFAULT & resource_interfaces)
+		DBG("[%s] resource interface : DEFAULT_INTERFACE", resource_uri);
+	if (IOTCON_INTERFACE_LINK & resource_interfaces)
+		DBG("[%s] resource interface : LINK_INTERFACE", resource_uri);
+	if (IOTCON_INTERFACE_BATCH & resource_interfaces)
+		DBG("[%s] resource interface : BATCH_INTERFACE", resource_uri);
+	if (IOTCON_INTERFACE_GROUP & resource_interfaces)
+		DBG("[%s] resource interface : GROUP_INTERFACE", resource_uri);
 
-		/* get the resource types */
-		resource_types = iotcon_client_get_types(resource);
-		iotcon_str_list_foreach(resource_types, _get_res_type_fn, (void *)resource_uri);
+	/* get the resource types */
+	ret = iotcon_client_get_types(resource, &resource_types);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_types() Fail(%d)", ret);
+		return;
+	}
+	iotcon_resource_types_foreach(resource_types, _get_res_type_fn, (void*)resource_uri);
 
-		if (!strcmp(room_uri, resource_uri)) {
-			iotcon_query_h query_params;
-			/* copy resource to use elsewhere */
-			room_resource = iotcon_client_clone(resource);
+	if (!strcmp(room_uri, resource_uri)) {
+		/* copy resource to use elsewhere */
+		room_resource = iotcon_client_clone(resource);
 
-			query_params = iotcon_query_new();
-			/* send GET request */
-			iotcon_get(resource, query_params, _on_get_1st, NULL);
-
-			iotcon_query_free(query_params);
-		}
+		/* send GET request */
+		iotcon_get(resource, NULL, _on_get_1st, NULL);
 	}
 }
 
