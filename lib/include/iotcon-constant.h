@@ -63,12 +63,17 @@ typedef enum {
 	IOTCON_OBSERVE_ALL = 1
 } iotcon_observe_type_e;
 
+/**
+ * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
+ * @brief Enumerations of Iotcon interface types.
+ * @since_tizen 3.0
+ */
 typedef enum {
 	IOTCON_INTERFACE_NONE = 0,
-	IOTCON_INTERFACE_DEFAULT = (1 << 0),
-	IOTCON_INTERFACE_LINK = (1 << 1),
-	IOTCON_INTERFACE_BATCH = (1 << 2),
-	IOTCON_INTERFACE_GROUP = (1 << 3),
+	IOTCON_INTERFACE_DEFAULT = (1 << 0), /* default interface */
+	IOTCON_INTERFACE_LINK = (1 << 1), /* discovers children of the parent resource */
+	IOTCON_INTERFACE_BATCH = (1 << 2), /* requests CRUD to children of the parent resource */
+	IOTCON_INTERFACE_GROUP = (1 << 3), /* requests CRUD to remote resources of a group. */
 	IOTCON_INTERFACE_MAX = (1 << 4)
 } iotcon_interface_e;
 

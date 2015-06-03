@@ -61,6 +61,9 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 		DBG("today's temperature :");
 		iotcon_list_foreach_int(list, _get_int_list_fn, NULL);
 		iotcon_str_list_free(key_list);
+
+		if (iotcon_repr_is_null(recv_repr, "null value"))
+			DBG("null value is null");
 	}
 
 	children_count = iotcon_repr_get_children_count(recv_repr);

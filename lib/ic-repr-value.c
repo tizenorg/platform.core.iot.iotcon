@@ -258,9 +258,13 @@ JsonNode* ic_value_to_json(iotcon_value_h value)
 
 	RETV_IF(NULL == value, NULL);
 
-	node = json_node_new(JSON_NODE_VALUE);
+	if (IOTCON_TYPE_NULL == value->type)
+		node = json_node_new(JSON_NODE_NULL);
+	else
+		node = json_node_new(JSON_NODE_VALUE);
+
 	if (NULL == node) {
-		ERR("json_node_new(VALUE) Fail");
+		ERR("json_node_new(%d) Fail", value->type);
 		return NULL;
 	}
 
@@ -278,7 +282,6 @@ JsonNode* ic_value_to_json(iotcon_value_h value)
 		json_node_set_string(node, real->val.s);
 		break;
 	case IOTCON_TYPE_NULL:
-		node = json_node_init_null(node);
 		break;
 	default:
 		ERR("Invalid type(%d)", value->type);

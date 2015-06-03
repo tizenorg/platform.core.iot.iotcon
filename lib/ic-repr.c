@@ -399,7 +399,10 @@ char* ic_repr_generate_json(iotcon_repr_h repr, bool set_pretty)
 	}
 
 	JsonGenerator *gen = json_generator_new();
+#if JSON_CHECK_VERSION(0,14,0)
 	json_generator_set_pretty(gen, set_pretty);
+#endif
+
 	root_node = json_node_new(JSON_NODE_OBJECT);
 	json_node_set_object(root_node, obj);
 	json_generator_set_root(gen, root_node);
@@ -597,26 +600,53 @@ static void _ic_repr_obj_clone(char *key, iotcon_value_h src_val, iotcon_repr_h 
 	}
 }
 
-static gpointer _ic_repr_copy_repr(gconstpointer src, gpointer data)
-{
-	FN_CALL;
-
-	return iotcon_repr_clone((iotcon_repr_h)src);
-}
-
 API iotcon_repr_h iotcon_repr_clone(const iotcon_repr_h src)
 {
 	FN_CALL;
-	iotcon_repr_h dest = NULL;
+	GList *node;
+	iotcon_repr_h dest, copied_repr;
+	iotcon_str_list_s *list = NULL;
 
 	RETV_IF(NULL == src, NULL);
 
 	dest = iotcon_repr_new();
-	if (src->uri)
+	if (NULL == dest) {
+		ERR("iotcon_repr_new() Fail");
+		return NULL;
+	}
+
+	if (src->uri) {
 		dest->uri = strdup(src->uri);
-	dest->interfaces = src->interfaces;
-	dest->res_types = iotcon_str_list_clone(src->res_types);
-	dest->children = g_list_copy_deep(src->children, _ic_repr_copy_repr, NULL);
+		if (NULL == dest->uri) {
+			ERR("strdup() Fail");
+			iotcon_repr_free(dest);
+			return NULL;
+		}
+	}
+
+	if (src->interfaces)
+		dest->interfaces = src->interfaces;
+
+	if (src->res_types) {
+		list = iotcon_str_list_clone(src->res_types);
+		if (NULL == list) {
+			ERR("iotcon_str_list_clone() Fail");
+			iotcon_repr_free(dest);
+			return NULL;
+		}
+		dest->res_types = list;
+	}
+
+	for (node = g_list_first(src->children); node; node = node->next) {
+		copied_repr = iotcon_repr_clone((iotcon_repr_h)node->data);
+		if (NULL == copied_repr) {
+			ERR("iotcon_repr_clone(child) Fail");
+			iotcon_repr_free(dest);
+			return NULL;
+		}
+		dest->children = g_list_append(dest->children, copied_repr);
+	}
+
 	g_hash_table_foreach(src->hash_table, (GHFunc)_ic_repr_obj_clone, dest);
 
 	return dest;

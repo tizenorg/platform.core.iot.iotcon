@@ -76,6 +76,9 @@ static void _room_request_handler_get(iotcon_request_h request,
 	iotcon_repr_set_uri(room_repr, "/a/room");
 	iotcon_repr_set_str(room_repr, "name", "Michael's Room");
 
+	/* set null */
+	iotcon_repr_set_null(room_repr, "null value");
+
 	temperature_list = iotcon_list_new(IOTCON_TYPE_INT);
 	iotcon_list_insert_int(temperature_list, 22, -1);
 	iotcon_list_insert_int(temperature_list, 23, -1);
