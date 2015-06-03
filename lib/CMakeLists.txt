@@ -2,7 +2,7 @@ INCLUDE_DIRECTORIES(include)
 
 FILE(GLOB CLIENT_SRCS *.c *.cpp)
 
-pkg_check_modules(client_pkgs REQUIRED glib-2.0 dlog json-glib-1.0)
+pkg_check_modules(client_pkgs REQUIRED glib-2.0 dlog json-glib-1.0 capi-base-common)
 INCLUDE_DIRECTORIES(${client_pkgs_INCLUDE_DIRS})
 LINK_DIRECTORIES(${client_pkgs_LIBRARY_DIRS})
 

@@ -45,13 +45,13 @@ API int iotcon_register_device_info(
 	if (manufacturer_name
 			&& (IOTCON_MANUFACTURER_NAME_LENGTH_MAX < strlen(manufacturer_name))) {
 		ERR("The length of manufacturer_name(%s) is invalid.", manufacturer_name);
-		return IOTCON_ERROR_PARAM;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	if (manufacturer_url
 			&& (IOTCON_MANUFACTURER_URL_LENGTH_MAX < strlen(manufacturer_url))) {
 		ERR("The length of manufacturer_url(%s) is invalid.", manufacturer_url);
-		return IOTCON_ERROR_PARAM;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	device_info.device_name = device_name;
@@ -81,8 +81,8 @@ API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb c
 	FN_CALL;
 	int ret = IOTCON_ERROR_NONE;
 
-	RETV_IF(NULL == host_address, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == cb, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_get_device_info(host_address, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret) {

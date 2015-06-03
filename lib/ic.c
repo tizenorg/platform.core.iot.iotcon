@@ -155,7 +155,7 @@ API int iotcon_bind_interface(iotcon_resource_h resource, iotcon_interface_e ifa
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_bind_iface_to_res(resource->handle, iface);
 	if (IOTCON_ERROR_NONE != ret)
@@ -170,11 +170,11 @@ API int iotcon_bind_type(iotcon_resource_h resource, const char *resource_type)
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == resource_type, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
 	if (IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type)) {
 		ERR("The length of resource_type(%s) is invalid", resource_type);
-		return IOTCON_ERROR_PARAM;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	ret = ic_ioty_bind_type_to_res(resource->handle, resource_type);
@@ -190,8 +190,8 @@ API int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child)
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == parent, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == child, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_bind_res(parent->handle, child->handle);
 	if (IOTCON_ERROR_NONE != ret)
@@ -256,7 +256,7 @@ API int iotcon_unsubscribe_presence(iotcon_presence_h handle)
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == handle, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == handle, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_unsubscribe_presence(handle);
 	if (IOTCON_ERROR_NONE != ret)
@@ -300,10 +300,10 @@ API int iotcon_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
 {
 	int ret;
 
-	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == observers, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == msg, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == msg->repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == msg, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == msg->repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_send_notify(resource->handle, msg, observers);
 	if (IOTCON_ERROR_NONE != ret)

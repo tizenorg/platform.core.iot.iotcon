@@ -51,16 +51,16 @@ API int iotcon_query_insert(iotcon_query_h query, const char *key, const char *v
 {
 	int query_len;
 
-	RETV_IF(NULL == query, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == key, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == value, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
 
 	/* first query : ?key=value
 	 * Rest of query : &key=value */
 	query_len = strlen(key) + strlen(value) + 2;
 	if (IOTCON_QUERY_LENGTH_MAX < (query->len + query_len)) {
 		ERR("Length of query is invalid.");
-		return IOTCON_ERROR_MEMORY;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	g_hash_table_insert(query->hash, ic_utils_strdup(key), ic_utils_strdup(value));
@@ -76,13 +76,13 @@ API int iotcon_query_delete(iotcon_query_h query, const char *key)
 	int query_len;
 	char *value;
 
-	RETV_IF(NULL == query, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == key, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = g_hash_table_lookup(query->hash, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
-		return IOTCON_ERROR_PARAM;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	query_len = strlen(key) + strlen(value) + 2;
@@ -90,7 +90,7 @@ API int iotcon_query_delete(iotcon_query_h query, const char *key)
 	ret = g_hash_table_remove(query->hash, key);
 	if (FALSE == ret) {
 		ERR("g_hash_table_remove() Fail");
-		return IOTCON_ERROR_PARAM;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 	query->len -= query_len;
 
@@ -118,8 +118,8 @@ API int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
 	GHashTableIter iter;
 	gpointer key, value;
 
-	RETV_IF(NULL == query, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == cb, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	g_hash_table_iter_init(&iter, query->hash);
 	while (g_hash_table_iter_next(&iter, &key, &value)) {

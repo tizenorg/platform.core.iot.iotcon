@@ -35,11 +35,11 @@ API int iotcon_find_resource(const char *host_addr, const char *resource_type,
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == host_addr, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == cb, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == host_addr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	if (resource_type && (IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
 		ERR("The length of resource_type(%s) is invalid", resource_type);
-		return IOTCON_ERROR_NONE;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	ret = ic_ioty_find_resource(host_addr, resource_type, cb, user_data);
@@ -157,7 +157,7 @@ API int iotcon_client_get_interfaces(iotcon_client_h resource)
 API int iotcon_client_set_options(iotcon_client_h resource,
 		iotcon_options_h header_options)
 {
-	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (resource->header_options)
 		iotcon_options_free(resource->header_options);
@@ -174,8 +174,8 @@ API int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == cb, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_get(resource, query, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
@@ -191,9 +191,9 @@ API int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr,
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == cb, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_put(resource, repr, query, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
@@ -209,9 +209,9 @@ API int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr,
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == cb, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_post(resource, repr, query, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
@@ -226,8 +226,8 @@ API int iotcon_delete(iotcon_client_h resource, iotcon_on_delete_cb cb, void *us
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == cb, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_delete_res(resource, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
@@ -246,8 +246,8 @@ API int iotcon_observer_start(iotcon_client_h resource,
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == cb, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_observe(resource, observe_type, query, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
@@ -262,7 +262,7 @@ API int iotcon_observer_stop(iotcon_client_h resource)
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == resource, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_cancel_observe(resource);
 	if (IOTCON_ERROR_NONE != ret)

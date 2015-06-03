@@ -612,8 +612,8 @@ extern "C" int ic_ioty_unregister_res(iotcon_resource_h resource_handle)
 
 extern "C" int ic_ioty_convert_interface_string(const char *src, iotcon_interface_e *dest)
 {
-	RETV_IF(NULL == src, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == dest, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
 
 	string interface_str(src);
 
@@ -632,7 +632,7 @@ extern "C" int ic_ioty_convert_interface_string(const char *src, iotcon_interfac
 	else {
 		ERR("Invalid interface");
 		*dest = IOTCON_INTERFACE_NONE;
-		return IOTCON_ERROR_PARAM;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -657,7 +657,7 @@ static int _ic_ioty_convert_interface_flag(iotcon_interface_e src, string &dest)
 	default:
 		ERR("Invalid interface");
 		dest = "";
-		return IOTCON_ERROR_PARAM;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 	return IOTCON_ERROR_NONE;
 }
@@ -1169,7 +1169,7 @@ extern "C" int ic_ioty_observe(iotcon_client_h resource,
 	}
 	else {
 		ERR("Invalid observe_type");
-		return IOTCON_ERROR_PARAM;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	ocResource = _ic_ioty_create_oc_resource(resource);

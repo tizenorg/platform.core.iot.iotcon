@@ -16,27 +16,27 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_ERRORS_H__
 #define __IOT_CONNECTIVITY_MANAGER_ERRORS_H__
 
+#include <tizen.h>
+
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
  * @brief Enumerations of Iotcon error codes.
  * @since_tizen 3.0
  */
+
+#ifndef TIZEN_ERROR_IOTCON
+#define TIZEN_ERROR_IOTCON -0x09000000
+#endif
+
 typedef enum
 {
-	IOTCON_ERROR_NONE = 0, /**< Successful*/
-	IOTCON_ERROR_MEMORY = -1, /**< Out of memory */
-	IOTCON_ERROR_GDBUS = -2,
-	IOTCON_ERROR_ENVIRONMENT = -3,
-	IOTCON_ERROR_SYSTEM = -4,
-	IOTCON_ERROR_PLUGIN = -5,
-	IOTCON_ERROR_PARAM = -6, /**< Invalid parameter */
-	IOTCON_ERROR_ALREADY = -7,
-	IOTCON_ERROR_BUSY = -8, /**< Device or resource busy */
-	IOTCON_ERROR_NOT_SUPPORT = -9,
-	IOTCON_ERROR_DISABLE = -10,
-	IOTCON_ERROR_IOTIVITY = -11, /**< Iotivity errors */
-	IOTCON_ERROR_NO_DATA = -12, /**< No data available */
-	IOTCON_ERROR_FAIL = -13, /**< Fail */
+	IOTCON_ERROR_NONE = TIZEN_ERROR_NONE, /**< Successful*/
+	IOTCON_ERROR_OUT_OF_MEMORY = TIZEN_ERROR_OUT_OF_MEMORY, /**< Out of memory */
+	IOTCON_ERROR_INVALID_PARAMETER = TIZEN_ERROR_INVALID_PARAMETER, /**< Invalid parameter */
+	IOTCON_ERROR_NO_DATA = TIZEN_ERROR_NO_DATA, /**< No data available */
+	IOTCON_ERROR_IOTIVITY = TIZEN_ERROR_IOTCON | 0x01, /**< Iotivity errors */
+	IOTCON_ERROR_REPRESENTATION = TIZEN_ERROR_IOTCON | 0x02, /**< Representation errors */
+	IOTCON_ERROR_INVALID_TYPE = TIZEN_ERROR_IOTCON | 0x03, /**< Invalid type */
 }iotcon_error_e;
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_ERRORS_H__ */

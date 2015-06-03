@@ -15,6 +15,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <limits.h>
 #include <glib.h>
@@ -74,8 +75,8 @@ API iotcon_repr_h iotcon_repr_new()
 
 API int iotcon_repr_get_uri(iotcon_repr_h repr, const char **uri)
 {
-	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == uri, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == uri, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*uri = repr->uri;
 
@@ -84,17 +85,18 @@ API int iotcon_repr_get_uri(iotcon_repr_h repr, const char **uri)
 
 API int iotcon_repr_set_uri(iotcon_repr_h repr, const char *uri)
 {
-	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	free(repr->uri);
 	repr->uri = NULL;
 
-	if (NULL != uri) {
-		repr->uri = ic_utils_strdup(uri);
-		if (NULL == repr->uri) {
-			ERR("ic_utils_strdup() Fail");
-			return IOTCON_ERROR_MEMORY;
-		}
+	if (NULL == uri)
+		return IOTCON_ERROR_NONE;
+
+	repr->uri = strdup(uri);
+	if (NULL == repr->uri) {
+		ERR("strdup() Fail");
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -102,8 +104,8 @@ API int iotcon_repr_set_uri(iotcon_repr_h repr, const char *uri)
 
 API int iotcon_repr_get_resource_types(iotcon_repr_h repr, iotcon_str_list_s **types)
 {
-	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == types, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*types = repr->res_types;
 
@@ -112,7 +114,7 @@ API int iotcon_repr_get_resource_types(iotcon_repr_h repr, iotcon_str_list_s **t
 
 API int iotcon_repr_set_resource_types(iotcon_repr_h repr, iotcon_str_list_s *types)
 {
-	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	iotcon_str_list_free(repr->res_types);
 	repr->res_types = NULL;
@@ -132,7 +134,7 @@ API int iotcon_repr_get_resource_interfaces(iotcon_repr_h repr)
 
 API int iotcon_repr_set_resource_interfaces(iotcon_repr_h repr, int ifaces)
 {
-	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	repr->interfaces = ifaces;
 
@@ -141,8 +143,8 @@ API int iotcon_repr_set_resource_interfaces(iotcon_repr_h repr, int ifaces)
 
 API int iotcon_repr_append_child(iotcon_repr_h parent, iotcon_repr_h child)
 {
-	RETV_IF(NULL == parent, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == child, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ic_repr_inc_ref_count(child);
 	parent->children = g_list_append(parent->children, child);
@@ -155,8 +157,8 @@ API int iotcon_repr_foreach_children(iotcon_repr_h parent, iotcon_children_fn fn
 {
 	GList *list, *next;
 
-	RETV_IF(NULL == parent, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == fn, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
 
 	list = parent->children;
 	while (list) {
@@ -179,9 +181,9 @@ API unsigned int iotcon_repr_get_children_count(iotcon_repr_h parent)
 
 API int iotcon_repr_get_nth_child(iotcon_repr_h parent, int pos, iotcon_repr_h *child)
 {
-	RETV_IF(NULL == parent, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == parent->children, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == child, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == parent->children, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*child = g_list_nth_data(parent->children, pos);
 	if (NULL == *child) {
@@ -210,8 +212,8 @@ API iotcon_str_list_s* iotcon_repr_get_key_list(iotcon_repr_h repr)
 
 API int iotcon_repr_get_keys_count(iotcon_repr_h repr)
 {
-	RETV_IF(NULL == repr, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == repr->hash_table, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == repr->hash_table, IOTCON_ERROR_INVALID_PARAMETER);
 
 	return g_hash_table_size(repr->hash_table);
 }

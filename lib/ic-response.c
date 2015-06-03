@@ -83,7 +83,7 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 		value = va_arg(args, int);
 		if (value < IOTCON_RESPONSE_RESULT_OK || IOTCON_RESPONSE_RESULT_MAX <= value) {
 			ERR("Invalid value(%d)", value);
-			return IOTCON_ERROR_PARAM;
+			return IOTCON_ERROR_INVALID_PARAMETER;
 		}
 		resp->result = value;
 		break;
@@ -124,8 +124,8 @@ API int iotcon_response_send(iotcon_response_h resp)
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == resp, IOTCON_ERROR_PARAM);
-	RETV_IF(NULL == resp->repr, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resp->repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = ic_ioty_send_res_response_data(resp);
 	if (IOTCON_ERROR_NONE != ret)

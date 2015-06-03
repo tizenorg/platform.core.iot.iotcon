@@ -45,13 +45,13 @@ static iotcon_error_e _set_door_resource()
 	my_door.type = strdup("core.door");
 	if (NULL == my_door.type) {
 		ERR("strdup(core.door) Fail");
-		return IOTCON_ERROR_MEMORY;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	my_door.uri = strdup("/a/door");
 	if (NULL == my_door.uri) {
 		ERR("strdup(/a/door) Fail");
-		return IOTCON_ERROR_MEMORY;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	return IOTCON_ERROR_NONE;

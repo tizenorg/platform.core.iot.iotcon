@@ -36,8 +36,8 @@ iotcon_repr_h iotcon_repr_clone(const iotcon_repr_h src);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_MEMORY  Out of memory
- * @retval #IOTCON_ERROR_PARAM  Invalid parameter
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_repr_set_uri(iotcon_repr_h repr, const char *uri);
 int iotcon_repr_get_uri(iotcon_repr_h repr, const char **uri);
@@ -53,7 +53,7 @@ int iotcon_repr_get_uri(iotcon_repr_h repr, const char **uri);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_PARAM  Invalid parameter
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_repr_set_resource_types(iotcon_repr_h repr, iotcon_str_list_s *types);
 int iotcon_repr_get_resource_types(iotcon_repr_h repr, iotcon_str_list_s **types);
@@ -72,8 +72,8 @@ int iotcon_repr_get_resource_interfaces(iotcon_repr_h repr);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_MEMORY  Out of memory
- * @retval #IOTCON_ERROR_PARAM  Invalid parameter
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_repr_set_int(iotcon_repr_h repr, const char *key, int val);
 int iotcon_repr_set_bool(iotcon_repr_h repr, const char *key, bool val);

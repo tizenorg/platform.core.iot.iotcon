@@ -154,7 +154,7 @@ API unsigned int iotcon_str_list_length(iotcon_str_list_s *str_list)
 API int iotcon_str_list_foreach(iotcon_str_list_s *str_list, iotcon_string_foreach_cb cb,
 		void *user_data)
 {
-	RETV_IF(NULL == str_list, IOTCON_ERROR_PARAM);
+	RETV_IF(NULL == str_list, IOTCON_ERROR_INVALID_PARAMETER);
 
 	while (str_list) {
 		if (false == cb(str_list->string, user_data))
