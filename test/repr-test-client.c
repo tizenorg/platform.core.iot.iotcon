@@ -25,7 +25,7 @@ const char* const room_uri = "/a/room";
 
 iotcon_client_h room_resource = NULL;
 
-static int _get_int_list_fn(int index, const int value, void *user_data)
+static int _get_int_list_fn(int pos, const int value, void *user_data)
 {
 	DBG("%d°C", value);
 

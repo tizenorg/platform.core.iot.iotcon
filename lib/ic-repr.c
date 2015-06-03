@@ -150,7 +150,7 @@ API int iotcon_repr_append_child(iotcon_repr_h parent, iotcon_repr_h child)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_get_children(iotcon_repr_h parent, iotcon_children_fn fn,
+API int iotcon_repr_foreach_children(iotcon_repr_h parent, iotcon_children_fn fn,
 		void *user_data)
 {
 	GList *list, *next;
@@ -177,13 +177,13 @@ API unsigned int iotcon_repr_get_children_count(iotcon_repr_h parent)
 	return g_list_length(parent->children);
 }
 
-API int iotcon_repr_get_nth_child(iotcon_repr_h parent, int index, iotcon_repr_h *child)
+API int iotcon_repr_get_nth_child(iotcon_repr_h parent, int pos, iotcon_repr_h *child)
 {
 	RETV_IF(NULL == parent, IOTCON_ERROR_PARAM);
 	RETV_IF(NULL == parent->children, IOTCON_ERROR_PARAM);
 	RETV_IF(NULL == child, IOTCON_ERROR_PARAM);
 
-	*child = g_list_nth_data(parent->children, index);
+	*child = g_list_nth_data(parent->children, pos);
 	if (NULL == *child) {
 		ERR("g_list_nth_data() Fail");
 		return IOTCON_ERROR_NO_DATA;
