@@ -5,7 +5,9 @@ Release:    0
 Group:      Network & Connectivity/Other
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
+Source1:    %{name}.service
 Source1001: %{name}.manifest
+Source1002: lib%{name}.manifest
 BuildRequires:  cmake
 BuildRequires:  boost-devel
 BuildRequires:  iotivity-devel
@@ -13,22 +15,44 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(json-glib-1.0)
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(capi-base-common)
-
+%define _unitdir /usr/lib/systemd/system
 
 %description
-IoT Connectivity Manager and Library
+IoT Connectivity Manager Daemon
+
+
+%package lib
+Summary:    IoT Connectivity Library
+Group:      Network & Connectivity/Libraries
+Requires:   %{name} = %{version}
+
+%description lib
+Tizen event notification service Client library for applications.
+
 
 %package devel
 Summary:    IoT Connectivity Manager (devel)
 Group:      Network & Connectivity/Development
-Requires:   %{name} = %{version}
+Requires:   %{name}-lib = %{version}
 
 %description devel
 IoT Connectivity Manager development Kit
 
+
+%package test
+Summary:    IoT Connectivity Manager (test)
+Group:      Network & Connectivity/Development
+Requires:   %{name}-lib = %{version}
+
+%description test
+IoT Connectivity Manager Test Programs
+
+
 %prep
 %setup -q
 cp %{SOURCE1001} .
+cp %{SOURCE1002} .
+
 
 %build
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
@@ -36,26 +60,57 @@ MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 
 
 %install
+rm -rf %{buildroot}/BUILD/%{name}*
 %make_install
 
-%post -p /sbin/ldconfig
+mkdir -p %{buildroot}%{_unitdir}/multi-user.target.wants
+cp -af %{SOURCE1} %{buildroot}%{_unitdir}/
+ln -s ../%{name}.service %{buildroot}%{_unitdir}/multi-user.target.wants/%{name}.service
 
-%postun -p /sbin/ldconfig
+%post
+systemctl daemon-reload
+if [ $1 == 1 ]; then
+    systemctl restart %{name}.service
+fi
+
+%postun
+/sbin/ldconfig
+if [ $1 == 0 ]; then
+    systemctl stop %{name}.service
+fi
+systemctl daemon-reload
+
+
+%post lib -p /sbin/ldconfig
+%postun lib -p /sbin/ldconfig
+
 
 %files
 %manifest %{name}.manifest
 %defattr(-,root,root,-)
+%{_unitdir}/%{name}.service
+%{_unitdir}/multi-user.target.wants/%{name}.service
+%{_bindir}/%{name}-daemon
+%{_datadir}/dbus-1/services/org.tizen.%{name}.service
+%license LICENSE.APLv2
+
+%files lib
+%manifest lib%{name}.manifest
+%defattr(-,root,root,-)
 %{_libdir}/lib%{name}.so.*
 %license LICENSE.APLv2
+
+%files devel
+%defattr(-,root,root,-)
+%{_libdir}/lib%{name}.so
+%{_libdir}/pkgconfig/%{name}.pc
+%{_includedir}/%{name}/*.h
+
+%files test
+%defattr(-,root,root,-)
 %{_bindir}/crud-test-client
 %{_bindir}/crud-test-server
 %{_bindir}/device-test-client
 %{_bindir}/device-test-server
 %{_bindir}/repr-test-client
 %{_bindir}/repr-test-server
-
-%files devel
-%{_libdir}/lib%{name}.so
-%{_libdir}/pkgconfig/%{name}.pc
-%{_includedir}/%{name}/*.h
-

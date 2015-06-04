@@ -1,0 +1,12 @@
+[Unit]
+Description=IoT Connectivity Manager
+After=system-server.service
+Requires=system-server.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/iotcon-daemon
+KillSignal=SIGKILL
+
+[Install]
+WantedBy=multi-user.target

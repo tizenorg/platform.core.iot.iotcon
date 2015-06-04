@@ -6,18 +6,16 @@
 			<smack permit="dbus" type="rwx" />
 			<smack permit="system::use_internet" type="rw" />
 			<smack permit="connman::get" type="rw" />
+			<smack permit="libiotcon" type="rwx" />
 		</permit>
 		<request>
 			<smack request="connman::get" type="rw" />
 			<smack request="dbus" type="rwx" />
+			<smack request="libiotcon" type="rwxt" />
 			<smack request="_" type="rw" />
 			<smack request="system::use_internet" type="rw" />
 		</request>
 	</define>
-	<assign>
-		<filesystem path="/usr/lib/libiotcon.so*" label="_" exec_label="_"/>
-	</assign>
-
 	<request>
 		<domain name="iotcon" />
 	</request>
