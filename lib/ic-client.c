@@ -181,7 +181,16 @@ API int iotcon_client_set_options(iotcon_client_h resource,
 	if (resource->header_options)
 		iotcon_options_free(resource->header_options);
 
-	resource->header_options = header_options;
+	if (NULL == header_options) {
+		resource->header_options = NULL;
+		return IOTCON_ERROR_NONE;
+	}
+
+	if (true == header_options->has_parent)
+		resource->header_options = ic_options_ref(header_options);
+	else
+		resource->header_options = header_options;
+	resource->header_options->has_parent = true;
 
 	return IOTCON_ERROR_NONE;
 }

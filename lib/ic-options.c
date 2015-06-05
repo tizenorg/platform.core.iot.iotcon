@@ -63,6 +63,8 @@ API int iotcon_options_insert(iotcon_options_h options, unsigned short id,
 	FN_CALL;
 
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(options->has_parent, IOTCON_ERROR_INVALID_PARAMETER,
+			"Don't modify it. It is already set.");
 	RETVM_IF(IOTCON_OPTIONS_MAX <= g_hash_table_size(options->hash),
 			IOTCON_ERROR_OUT_OF_MEMORY, "Options already have maximum elements.");
 
@@ -84,6 +86,8 @@ API int iotcon_options_delete(iotcon_options_h options, unsigned short id)
 	gboolean ret;
 
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(options->has_parent, IOTCON_ERROR_INVALID_PARAMETER,
+			"Don't modify it. It is already set.");
 
 	ret = g_hash_table_remove(options->hash, GUINT_TO_POINTER(id));
 	if (FALSE == ret) {

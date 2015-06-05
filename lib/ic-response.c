@@ -101,7 +101,10 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 		options = va_arg(args, iotcon_options_h);
 		if (resp->header_options)
 			ic_options_free(resp->header_options);
-
+		if (NULL == options) {
+			resp->header_options = NULL;
+			break;
+		}
 		if (true == options->has_parent)
 			resp->header_options = ic_options_ref(options);
 		else

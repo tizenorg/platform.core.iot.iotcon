@@ -89,6 +89,8 @@ API int iotcon_resource_types_insert(iotcon_resource_types_h types, const char *
 	char *resource_type;
 
 	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(1 < types->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
+			"Don't modify it. It is already set.");
 
 	if (IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(type)) {
 		ERR("The length of type(%s) should be less than or equal to %d.", type,
@@ -119,6 +121,8 @@ API int iotcon_resource_types_delete(iotcon_resource_types_h types, const char *
 
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(1 < types->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
+			"Don't modify it. It is already set.");
 
 	found_node = g_list_find_custom(types->type_list, type, _ic_resource_types_strcmp);
 	if (NULL == found_node) {
@@ -126,6 +130,7 @@ API int iotcon_resource_types_delete(iotcon_resource_types_h types, const char *
 		return IOTCON_ERROR_NO_DATA;
 	}
 
+	free(found_node->data);
 	types->type_list = g_list_delete_link(types->type_list, found_node);
 
 	return IOTCON_ERROR_NONE;
