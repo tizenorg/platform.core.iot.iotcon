@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}/bin
+libdir=@LIB_INSTALL_DIR@
+includedir=@INCLUDE_INSTALL_DIR@/@CLIENT@
+
+Name: @CLIENT@
+Description: IoT Connectivity Manager
+Version: @FULLVER@
+Requires:
+Libs: -L${libdir} -l@CLIENT@
+Cflags: -I${includedir}
