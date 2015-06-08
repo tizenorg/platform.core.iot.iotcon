@@ -142,11 +142,11 @@ namespace icIotivityHandler {
 	class getObject
 	{
 	private:
-		iotcon_on_get_cb on_get;
+		iotcon_on_cru_cb on_get;
 		void *cb_data;
 
 	public:
-		getObject(iotcon_on_get_cb user_cb, void *user_data)
+		getObject(iotcon_on_cru_cb user_cb, void *user_data)
 		{
 			on_get = user_cb;
 			cb_data = user_data;
@@ -187,11 +187,11 @@ namespace icIotivityHandler {
 	class putObject
 	{
 	private:
-		iotcon_on_put_cb on_put;
+		iotcon_on_cru_cb on_put;
 		void *cb_data;
 
 	public:
-		putObject(iotcon_on_put_cb user_cb, void *user_data)
+		putObject(iotcon_on_cru_cb user_cb, void *user_data)
 		{
 			on_put = user_cb;
 			cb_data = user_data;
@@ -232,11 +232,11 @@ namespace icIotivityHandler {
 	class postObject
 	{
 	private:
-		iotcon_on_post_cb on_post;
+		iotcon_on_cru_cb on_post;
 		void *cb_data;
 
 	public:
-		postObject(iotcon_on_post_cb user_cb, void *user_data)
+		postObject(iotcon_on_cru_cb user_cb, void *user_data)
 		{
 			on_post = user_cb;
 			cb_data = user_data;
@@ -799,13 +799,13 @@ extern "C" int ic_ioty_register_device_info(iotcon_device_info_s device_info)
 
 
 extern "C" int ic_ioty_get_device_info(const char *host_address,
-		iotcon_device_info_cb found_cb, void *user_data)
+		iotcon_device_info_cb cb, void *user_data)
 {
 	OCStackResult ret;
 	string resHost = host_address + string(IC_DEVICE_DISCOVERY);
 
 	shared_ptr<icIotivityHandler::deviceObject> object
-		= make_shared<icIotivityHandler::deviceObject>(found_cb, user_data);
+		= make_shared<icIotivityHandler::deviceObject>(cb, user_data);
 	FindDeviceCallback findDeviceCallback = bind(
 			&icIotivityHandler::deviceObject::receivedDeviceInfo,
 			object,
@@ -909,14 +909,14 @@ extern "C" int ic_ioty_send_res_response_data(struct ic_resource_response *resp)
 
 extern "C" const iotcon_presence_h ic_ioty_subscribe_presence(const char *host_address,
 		const char *resource_type,
-		iotcon_presence_cb presence_handler_cb,
+		iotcon_presence_cb cb,
 		void *user_data)
 {
 	OCStackResult ret;
 	iotcon_presence_h presence_handle = NULL;
 
 	shared_ptr<icIotivityHandler::presenceObject> object
-		= make_shared<icIotivityHandler::presenceObject>(presence_handler_cb, user_data);
+		= make_shared<icIotivityHandler::presenceObject>(cb, user_data);
 	SubscribeCallback subscribeCallback
 		= bind(&icIotivityHandler::presenceObject::presenceHandler, object,
 				placeholders::_1, placeholders::_2, placeholders::_3);
@@ -972,7 +972,7 @@ extern "C" int ic_ioty_stop_presence()
 }
 
 extern "C" int ic_ioty_find_resource(const char *host_address, const char *resource_type,
-		iotcon_found_resource_cb found_resource_cb, void *user_data)
+		iotcon_found_resource_cb cb, void *user_data)
 {
 	OCStackResult ret;
 	ostringstream resource_name;
@@ -986,7 +986,7 @@ extern "C" int ic_ioty_find_resource(const char *host_address, const char *resou
 		resource_name << "?rt=" << resource_type;
 
 	shared_ptr<icIotivityHandler::findObject> object
-		= make_shared<icIotivityHandler::findObject>(found_resource_cb, user_data);
+		= make_shared<icIotivityHandler::findObject>(cb, user_data);
 	FindCallback findCallback = bind(&icIotivityHandler::findObject::foundResource,
 			object, placeholders::_1);
 
@@ -1082,7 +1082,7 @@ static int _ic_ioty_accumulate_query_map(const char *key, const char *value,
 
 
 extern "C" int ic_ioty_get(iotcon_client_h resource, iotcon_query_h query,
-		iotcon_on_get_cb on_get_cb, void *user_data)
+		iotcon_on_cru_cb cb, void *user_data)
 {
 	FN_CALL;
 	OCStackResult ret;
@@ -1095,7 +1095,7 @@ extern "C" int ic_ioty_get(iotcon_client_h resource, iotcon_query_h query,
 	ocResource = _ic_ioty_create_oc_resource(resource);
 
 	shared_ptr<icIotivityHandler::getObject> object
-		= make_shared<icIotivityHandler::getObject>(on_get_cb, user_data);
+		= make_shared<icIotivityHandler::getObject>(cb, user_data);
 	GetCallback getCallback = bind(&icIotivityHandler::getObject::onGet, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 	ret = ocResource->get(queryParams, getCallback);
@@ -1109,7 +1109,7 @@ extern "C" int ic_ioty_get(iotcon_client_h resource, iotcon_query_h query,
 
 
 extern "C" int ic_ioty_put(iotcon_client_h resource, iotcon_repr_h repr,
-		iotcon_query_h query, iotcon_on_put_cb on_put_cb, void *user_data)
+		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data)
 {
 	FN_CALL;
 	OCStackResult ret;
@@ -1125,7 +1125,7 @@ extern "C" int ic_ioty_put(iotcon_client_h resource, iotcon_repr_h repr,
 	ocResource = _ic_ioty_create_oc_resource(resource);
 
 	shared_ptr<icIotivityHandler::putObject> object
-		= make_shared<icIotivityHandler::putObject>(on_put_cb, user_data);
+		= make_shared<icIotivityHandler::putObject>(cb, user_data);
 	PutCallback putCallback = bind(&icIotivityHandler::putObject::onPut, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 
@@ -1139,7 +1139,7 @@ extern "C" int ic_ioty_put(iotcon_client_h resource, iotcon_repr_h repr,
 }
 
 extern "C" int ic_ioty_post(iotcon_client_h resource, iotcon_repr_h repr,
-		iotcon_query_h query, iotcon_on_post_cb on_post_cb, void *user_data)
+		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data)
 {
 	FN_CALL;
 	OCStackResult ret;
@@ -1155,7 +1155,7 @@ extern "C" int ic_ioty_post(iotcon_client_h resource, iotcon_repr_h repr,
 	ocResource = _ic_ioty_create_oc_resource(resource);
 
 	shared_ptr<icIotivityHandler::postObject> object
-		= make_shared<icIotivityHandler::postObject>(on_post_cb, user_data);
+		= make_shared<icIotivityHandler::postObject>(cb, user_data);
 	PostCallback postCallback = bind(&icIotivityHandler::postObject::onPost, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 
@@ -1169,7 +1169,7 @@ extern "C" int ic_ioty_post(iotcon_client_h resource, iotcon_repr_h repr,
 }
 
 extern "C" int ic_ioty_delete_res(iotcon_client_h resource,
-		iotcon_on_delete_cb on_delete_cb, void *user_data)
+		iotcon_on_delete_cb cb, void *user_data)
 {
 	FN_CALL;
 	OCStackResult ret;
@@ -1178,7 +1178,7 @@ extern "C" int ic_ioty_delete_res(iotcon_client_h resource,
 	ocResource = _ic_ioty_create_oc_resource(resource);
 
 	shared_ptr<icIotivityHandler::deleteObject> object
-		= make_shared<icIotivityHandler::deleteObject>(on_delete_cb, user_data);
+		= make_shared<icIotivityHandler::deleteObject>(cb, user_data);
 	DeleteCallback deleteCallback = bind(&icIotivityHandler::deleteObject::onDelete,
 			object, placeholders::_1, placeholders::_2);
 
@@ -1194,7 +1194,7 @@ extern "C" int ic_ioty_delete_res(iotcon_client_h resource,
 extern "C" int ic_ioty_observe(iotcon_client_h resource,
 		iotcon_observe_type_e observe_type,
 		iotcon_query_h query,
-		iotcon_on_observe_cb on_observe_cb,
+		iotcon_on_observe_cb cb,
 		void *user_data)
 {
 	OCStackResult ret;
@@ -1223,7 +1223,7 @@ extern "C" int ic_ioty_observe(iotcon_client_h resource,
 	resource->observe_handle = (void*)obs_h;
 
 	shared_ptr<icIotivityHandler::observeObject> object
-		= make_shared<icIotivityHandler::observeObject>(on_observe_cb, user_data);
+		= make_shared<icIotivityHandler::observeObject>(cb, user_data);
 	ObserveCallback observeCallback = bind(&icIotivityHandler::observeObject::onObserve,
 			object, placeholders::_1, placeholders::_2, placeholders::_3,
 			placeholders::_4);

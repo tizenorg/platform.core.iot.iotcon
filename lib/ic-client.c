@@ -197,7 +197,7 @@ API int iotcon_client_set_options(iotcon_client_h resource,
 
 
 API int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
-		iotcon_on_get_cb cb, void *user_data)
+		iotcon_on_cru_cb cb, void *user_data)
 {
 	FN_CALL;
 	int ret;
@@ -214,7 +214,7 @@ API int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
 
 
 API int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr,
-		iotcon_query_h query, iotcon_on_put_cb cb, void *user_data)
+		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data)
 {
 	FN_CALL;
 	int ret;
@@ -232,7 +232,7 @@ API int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr,
 
 
 API int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr,
-		iotcon_query_h query, iotcon_on_post_cb cb, void *user_data)
+		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data)
 {
 	FN_CALL;
 	int ret;

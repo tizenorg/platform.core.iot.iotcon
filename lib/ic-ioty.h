@@ -39,7 +39,7 @@ int ic_ioty_unbind_res(void *parent, void *child);
 
 int ic_ioty_register_device_info(iotcon_device_info_s device_info);
 
-int ic_ioty_get_device_info(const char *host_address, iotcon_device_info_cb found_cb,
+int ic_ioty_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 		void *user_data);
 
 int ic_ioty_send_notify(void *resource, struct ic_notify_msg *msg,
@@ -49,29 +49,29 @@ int ic_ioty_send_res_response_data(struct ic_resource_response *resp);
 
 const iotcon_presence_h ic_ioty_subscribe_presence(const char *host_address,
 		const char *resource_type,
-		iotcon_presence_cb presence_handler_cb,
+		iotcon_presence_cb cb,
 		void *user_data);
 int ic_ioty_unsubscribe_presence(iotcon_presence_h presence_handle);
 int ic_ioty_start_presence(unsigned int time_to_live);
 int ic_ioty_stop_presence();
 
 int ic_ioty_find_resource(const char *host_address, const char *resource_type,
-		iotcon_found_resource_cb found_resource_cb, void *user_data);
+		iotcon_found_resource_cb cb, void *user_data);
 
 int ic_ioty_get(iotcon_client_h resource, iotcon_query_h query,
-		iotcon_on_get_cb on_get_cb, void *user_data);
+		iotcon_on_cru_cb cb, void *user_data);
 
 int ic_ioty_put(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
-		iotcon_on_put_cb on_put_cb, void *user_data);
+		iotcon_on_cru_cb cb, void *user_data);
 
 int ic_ioty_post(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
-		iotcon_on_put_cb on_post_cb, void *user_data);
+		iotcon_on_cru_cb cb, void *user_data);
 
 int ic_ioty_delete_res(iotcon_client_h resource,
-		iotcon_on_delete_cb on_delete_cb, void *user_data);
+		iotcon_on_delete_cb cb, void *user_data);
 
 int ic_ioty_observe(iotcon_client_h resource, iotcon_observe_type_e observe_type,
-		iotcon_query_h query, iotcon_on_observe_cb on_observe_cb, void *user_data);
+		iotcon_query_h query, iotcon_on_observe_cb cb, void *user_data);
 
 int ic_ioty_cancel_observe(iotcon_client_h resource);
 

@@ -85,20 +85,16 @@ void iotcon_notimsg_free(iotcon_notimsg_h msg);
 int iotcon_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
 		iotcon_observers_h observers);
 
-typedef void (*iotcon_on_get_cb)(iotcon_options_h header_options, iotcon_repr_h repr,
+typedef void (*iotcon_on_cru_cb)(iotcon_options_h header_options, iotcon_repr_h repr,
 		int response_result, void *user_data);
-int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
-		iotcon_on_get_cb cb, void *user_data);
+int iotcon_get(iotcon_client_h resource, iotcon_query_h query, iotcon_on_cru_cb cb,
+		void *user_data);
 
-typedef void (*iotcon_on_put_cb)(iotcon_options_h header_options, iotcon_repr_h repr,
-		int response_result, void *user_data);
 int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
-		iotcon_on_put_cb cb, void *user_data);
+		iotcon_on_cru_cb cb, void *user_data);
 
-typedef void (*iotcon_on_post_cb)(iotcon_options_h header_options, iotcon_repr_h repr,
-		int response_result, void *user_data);
 int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
-		iotcon_on_post_cb cb, void *user_data);
+		iotcon_on_cru_cb cb, void *user_data);
 
 typedef void (*iotcon_on_delete_cb)(iotcon_options_h header_options, int response_result,
 		void *user_data);
