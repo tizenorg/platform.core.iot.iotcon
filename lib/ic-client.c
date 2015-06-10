@@ -86,7 +86,10 @@ API void iotcon_client_free(iotcon_client_h resource)
 
 	free(resource->uri);
 	free(resource->host);
-	ic_options_free(resource->header_options);
+
+	/* null COULD be allowed */
+	if (resource->header_options)
+		ic_options_free(resource->header_options);
 	iotcon_resource_types_free(resource->types);
 	free(resource);
 }
@@ -190,6 +193,11 @@ API int iotcon_client_set_options(iotcon_client_h resource,
 		resource->header_options = ic_options_ref(header_options);
 	else
 		resource->header_options = header_options;
+	if (NULL == resource->header_options) {
+		ERR("header_options is NULL");
+		return IOTCON_ERROR_NO_DATA;
+	}
+
 	resource->header_options->has_parent = true;
 
 	return IOTCON_ERROR_NONE;

@@ -69,6 +69,11 @@ static iotcon_resource_h _create_door_resource(char *uri, iotcon_interface_e int
 		iotcon_resource_property_e properties)
 {
 	iotcon_resource_types_h resource_types = iotcon_resource_types_new();
+	if (NULL == resource_types) {
+		ERR("iotcon_resource_types_new() Fail");
+		return NULL;
+	}
+
 	int ret = iotcon_resource_types_insert(resource_types, my_door.type);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_free(resource_types);
@@ -111,6 +116,8 @@ static void _request_handler_get(iotcon_response_h response)
 	iotcon_repr_set_bool(resp_repr, "opened", my_door.state);
 
 	_send_response(response, resp_repr, IOTCON_RESPONSE_RESULT_OK);
+
+	iotcon_repr_free(resp_repr);
 }
 
 static void _request_handler_put(iotcon_request_h request, iotcon_response_h response)
@@ -136,6 +143,8 @@ static void _request_handler_put(iotcon_request_h request, iotcon_response_h res
 	iotcon_repr_set_bool(resp_repr, "opened", my_door.state);
 
 	_send_response(response, resp_repr, IOTCON_RESPONSE_RESULT_OK);
+
+	iotcon_repr_free(resp_repr);
 }
 
 static void _request_handler_post(iotcon_response_h response)
@@ -161,6 +170,8 @@ static void _request_handler_post(iotcon_response_h response)
 	iotcon_repr_set_str(resp_repr, "createduri", "/a/door1");
 
 	_send_response(response, resp_repr, IOTCON_RESPONSE_RESULT_RESOURCE_CREATED);
+
+	iotcon_repr_free(resp_repr);
 }
 
 static gboolean _notifier(gpointer user_data)
@@ -173,6 +184,8 @@ static gboolean _notifier(gpointer user_data)
 	iotcon_repr_h repr = iotcon_repr_new();
 	iotcon_notimsg_h msg = iotcon_notimsg_new(repr, IOTCON_INTERFACE_DEFAULT);
 	iotcon_notify(user_data, msg, observers);
+
+	iotcon_repr_free(repr);
 
 	return TRUE;
 }
@@ -191,6 +204,8 @@ static void _request_handler_delete(iotcon_response_h response)
 
 	/* add observe */
 	g_timeout_add_seconds(5, _notifier, door_handle);
+
+	iotcon_repr_free(resp_repr);
 }
 
 static int _query_cb(const char *key, const char *value, void *user_data)

@@ -87,6 +87,7 @@ static void _room_request_handler_get(iotcon_request_h request,
 	iotcon_list_insert_int(temperature_list, 25, -1);
 	iotcon_list_insert_int(temperature_list, 26, -1);
 	iotcon_repr_set_list(room_repr, "today_temp", temperature_list);
+	iotcon_list_free(temperature_list);
 
 	/* create a light Representation */
 	light_repr = iotcon_repr_new();
@@ -106,6 +107,7 @@ static void _room_request_handler_get(iotcon_request_h request,
 	ret = iotcon_request_get_query(request, &query);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_query() Fail(%d)", ret);
+		iotcon_repr_free(room_repr);
 		return;
 	}
 	if (query)
@@ -263,6 +265,11 @@ int main(int argc, char **argv)
 
 	/* register room resource */
 	light_rtypes = iotcon_resource_types_new();
+	if (NULL == light_rtypes) {
+		ERR("iotcon_resource_types_new() Fail");
+		return -1;
+	}
+
 	iotcon_resource_types_insert(light_rtypes, "core.light");
 	iotcon_resource_h light_handle = iotcon_register_resource("/a/light", light_rtypes,
 			(IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_BATCH),
@@ -278,6 +285,8 @@ int main(int argc, char **argv)
 		ERR("iotcon_bind_resource() Fail");
 		return -1;
 	}
+
+	iotcon_resource_types_free(light_rtypes);
 
 	g_main_loop_run(loop);
 	g_main_loop_unref(loop);

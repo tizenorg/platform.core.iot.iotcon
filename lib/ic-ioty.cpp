@@ -102,18 +102,23 @@ namespace icIotivityHandler {
 		void foundResource(shared_ptr<OCResource> resource)
 		{
 			struct ic_remote_resource resource_s = {0};
-
-			resource_s.uri = ic_utils_strdup(resource->uri().c_str());
-			resource_s.host = ic_utils_strdup(resource->host().c_str());
-			resource_s.is_observable = resource->isObservable();
 			resource_s.types = NULL;
 
 			vector<string> resource_types = resource->getResourceTypes();
 			if (0 < resource_types.size()) {
 				resource_s.types = iotcon_resource_types_new();
+				if (NULL == resource_s.types) {
+					ERR("iotcon_resource_types_new() Fail");
+					return;
+				}
+
 				for (string &resource_type : resource_types)
 					iotcon_resource_types_insert(resource_s.types, resource_type.c_str());
 			}
+
+			resource_s.uri = ic_utils_strdup(resource->uri().c_str());
+			resource_s.host = ic_utils_strdup(resource->host().c_str());
+			resource_s.is_observable = resource->isObservable();
 
 			vector<string> resource_interfaces = resource->getResourceInterfaces();
 			for (string &resource_interface : resource_interfaces) {
@@ -493,12 +498,16 @@ static OCEntityHandlerResult _ic_ioty_request_handler(
 		request_s.repr = ic_ioty_repr_generate_repr(ocRep);
 		if (NULL == request_s.repr) {
 			ERR("request_s.repr is NULL");
+			if (request_s.header_options)
+				iotcon_options_free(request_s.header_options);
+			if (request_s.query)
+				iotcon_query_free(request_s.query);
 			return OC_EH_ERROR;
 		}
 	}
 
 	if (RequestFlag & request->getRequestHandlerFlag()) {
-		request_type = request->getRequestType().c_str();
+		request_type = ic_utils_strdup(request->getRequestType().c_str());
 		if (NULL == request_type) {
 			ERR("request_type is NULL");
 			if (request_s.repr)
@@ -827,6 +836,7 @@ extern "C" int ic_ioty_send_notify(OCResourceHandle resHandle, struct ic_notify_
 	int ret;
 	OCStackResult ocRet;
 	ObservationIds obsIds;
+	OCRepresentation ocRep;
 	string iface;
 
 	GList *node = g_list_first((GList*)observers);
@@ -840,7 +850,11 @@ extern "C" int ic_ioty_send_notify(OCResourceHandle resHandle, struct ic_notify_
 	shared_ptr<OCResourceResponse> resourceResponse(new OCResourceResponse());
 	resourceResponse->setErrorCode(msg->error_code);
 
-	OCRepresentation ocRep = ic_ioty_repr_parse(msg->repr);
+	ret = ic_ioty_repr_parse(msg->repr, ocRep);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("ic_ioty_repr_parse() Fail(%d)", ret);
+		return ret;
+	}
 
 	if (IOTCON_INTERFACE_NONE != msg->iface) {
 		ret = _ic_ioty_convert_interface_flag(msg->iface, iface);
@@ -871,8 +885,13 @@ extern "C" int ic_ioty_send_res_response_data(struct ic_resource_response *resp)
 	string iface;
 	int ret;
 	OCStackResult ocRet;
+	OCRepresentation ocRep;
 
-	OCRepresentation ocRep = ic_ioty_repr_parse(resp->repr);
+	ret = ic_ioty_repr_parse(resp->repr, ocRep);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("ic_ioty_repr_parse() Fail(%d)", ret);
+		return ret;
+	}
 
 	auto pResponse = make_shared<OCResourceResponse>();
 	if (pResponse) {
@@ -1112,7 +1131,8 @@ extern "C" int ic_ioty_put(iotcon_client_h resource, iotcon_repr_h repr,
 		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data)
 {
 	FN_CALL;
-	OCStackResult ret;
+	int ret;
+	OCStackResult result;
 	OCResource::Ptr ocResource;
 	OCRepresentation ocRep;
 	QueryParamsMap queryParams;
@@ -1120,7 +1140,11 @@ extern "C" int ic_ioty_put(iotcon_client_h resource, iotcon_repr_h repr,
 	if (query)
 		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void*)&queryParams);
 
-	ocRep = ic_ioty_repr_parse(repr);
+	ret = ic_ioty_repr_parse(repr, ocRep);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("ic_ioty_repr_parse() Fail(%d)", ret);
+		return ret;
+	}
 
 	ocResource = _ic_ioty_create_oc_resource(resource);
 
@@ -1129,9 +1153,9 @@ extern "C" int ic_ioty_put(iotcon_client_h resource, iotcon_repr_h repr,
 	PutCallback putCallback = bind(&icIotivityHandler::putObject::onPut, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 
-	ret = ocResource->put(ocRep, queryParams, putCallback);
-	if (OC_STACK_OK != ret) {
-		ERR("put() Fail(%d)", ret);
+	result = ocResource->put(ocRep, queryParams, putCallback);
+	if (OC_STACK_OK != result) {
+		ERR("put() Fail(%d)", result);
 		return IOTCON_ERROR_IOTIVITY;
 	}
 
@@ -1142,7 +1166,8 @@ extern "C" int ic_ioty_post(iotcon_client_h resource, iotcon_repr_h repr,
 		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data)
 {
 	FN_CALL;
-	OCStackResult ret;
+	int ret;
+	OCStackResult ocRet;
 	QueryParamsMap queryParams;
 	OCRepresentation ocRep;
 	OCResource::Ptr ocResource;
@@ -1150,7 +1175,11 @@ extern "C" int ic_ioty_post(iotcon_client_h resource, iotcon_repr_h repr,
 	if (query)
 		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void*)&queryParams);
 
-	ocRep = ic_ioty_repr_parse(repr);
+	ret = ic_ioty_repr_parse(repr, ocRep);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("ic_ioty_repr_parse() Fail(%d)", ret);
+		return ret;
+	}
 
 	ocResource = _ic_ioty_create_oc_resource(resource);
 
@@ -1159,9 +1188,9 @@ extern "C" int ic_ioty_post(iotcon_client_h resource, iotcon_repr_h repr,
 	PostCallback postCallback = bind(&icIotivityHandler::postObject::onPost, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 
-	ret = ocResource->post(ocRep, queryParams, postCallback);
-	if (OC_STACK_OK != ret) {
-		ERR("post() Fail(%d)", ret);
+	ocRet = ocResource->post(ocRep, queryParams, postCallback);
+	if (OC_STACK_OK != ocRet) {
+		ERR("post() Fail(%d)", ocRet);
 		return IOTCON_ERROR_IOTIVITY;
 	}
 

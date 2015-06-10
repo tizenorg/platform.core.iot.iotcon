@@ -479,6 +479,13 @@ iotcon_repr_h ic_repr_parse_json(const char *json_string)
 
 			if (0 < rt_count) {
 				res_types = iotcon_resource_types_new();
+				if (NULL == res_types) {
+					ERR("iotcon_resource_types_new() Fail");
+					iotcon_repr_free(repr);
+					g_object_unref(parser);
+					return NULL;
+				}
+
 				for (rt_index = 0; rt_index < rt_count; rt_index++) {
 					rtype_str = json_array_get_string_element(rt_array, rt_index);
 					iotcon_resource_types_insert(res_types, rtype_str);
@@ -530,7 +537,7 @@ API void iotcon_repr_free(iotcon_repr_h repr)
 	/* (GDestroyNotify) : iotcon_repr_h is proper type than gpointer */
 	g_list_free_full(repr->children, (GDestroyNotify)iotcon_repr_free);
 
-	/* repr->res_types COULD be not null */
+	/* null COULD be allowed */
 	if (repr->res_types)
 		iotcon_resource_types_free(repr->res_types);
 	g_hash_table_destroy(repr->hash_table);
@@ -543,6 +550,7 @@ static void _ic_repr_obj_clone(char *key, iotcon_value_h src_val, iotcon_repr_h 
 {
 	FN_CALL;
 	int type, ret;
+	char *dup_key;
 	iotcon_value_h value, copied_val;
 	iotcon_list_h child_list, copied_list;
 	iotcon_repr_h child_repr, copied_repr;
@@ -559,7 +567,14 @@ static void _ic_repr_obj_clone(char *key, iotcon_value_h src_val, iotcon_repr_h 
 			ERR("ic_value_clone() Fail");
 			return;
 		}
-		ic_obj_set_value(dest_repr, ic_utils_strdup(key), copied_val);
+
+		dup_key = ic_utils_strdup(key);
+		if (NULL == dup_key) {
+			ERR("dupic_utils_strdup() Fail");
+			return;
+		}
+
+		ic_obj_set_value(dest_repr, dup_key, copied_val);
 		break;
 	case IOTCON_TYPE_LIST:
 		ret = ic_value_get_list(src_val, &child_list);

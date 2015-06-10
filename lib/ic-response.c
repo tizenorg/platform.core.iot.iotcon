@@ -109,6 +109,11 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 			resp->header_options = ic_options_ref(options);
 		else
 			resp->header_options = options;
+		if (NULL == resp->header_options) {
+			ERR("header_options is NULL");
+			return IOTCON_ERROR_NO_DATA;
+		}
+
 		resp->header_options->has_parent = true;
 		break;
 	case IOTCON_RESPONSE_NONE:

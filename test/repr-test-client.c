@@ -78,8 +78,10 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 		}
 
 		iotcon_repr_get_uri(child_repr, &uri);
-		if (uri)
-			DBG("uri : %s", uri);
+		if (NULL == uri)
+			continue;
+
+		DBG("uri : %s", uri);
 
 		if (!strcmp("/a/light", uri)) {
 			key_count = iotcon_repr_get_keys_count(child_repr);
@@ -88,8 +90,7 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 				iotcon_repr_get_int(child_repr, "brightness", &brightness);
 				DBG("brightness : %d", brightness);
 			}
-		}
-		else if (!strcmp("/a/switch", uri)) {
+		} else if (!strcmp("/a/switch", uri)) {
 			key_count = iotcon_repr_get_keys_count(child_repr);
 			if (key_count) {
 				bool bswitch;

@@ -98,6 +98,8 @@ static void _on_post(iotcon_options_h header_options, iotcon_repr_h recv_repr,
 	new_door_resource = iotcon_client_new(host, created_uri, true, types, ifaces);
 
 	iotcon_delete(new_door_resource, _on_delete, NULL);
+
+	iotcon_client_free(new_door_resource);
 }
 
 static void _on_put(iotcon_options_h header_options, iotcon_repr_h recv_repr,

@@ -73,6 +73,9 @@ static bool _ic_resource_types_duplicate_check(iotcon_resource_types_h types,
 {
 	GList *ret = NULL;
 
+	RETV_IF(NULL == types, false);
+	RETV_IF(NULL == type, false);
+
 	ret = g_list_find_custom(types->type_list, type, _ic_resource_types_strcmp);
 	if (NULL == ret)
 		return false;
@@ -81,13 +84,13 @@ static bool _ic_resource_types_duplicate_check(iotcon_resource_types_h types,
 }
 
 
-/* If you want to make a new list, then you should set res_types is NULL.
- * The length of resource type should be less than or equal to 61.
+/* The length of resource type should be less than or equal to 61.
  * Duplicate strings are not allowed. */
 API int iotcon_resource_types_insert(iotcon_resource_types_h types, const char *type)
 {
 	char *resource_type;
 
+	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(1 < types->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");

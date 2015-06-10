@@ -599,7 +599,6 @@ static inline int _ic_obj_from_json(JsonObject *obj, GList *key_list, unsigned i
 
 	RETV_IF(NULL == obj, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key_list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(index < 0, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ret_repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	key = g_list_nth_data(key_list, index);

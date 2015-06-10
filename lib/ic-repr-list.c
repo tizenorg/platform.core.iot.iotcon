@@ -750,7 +750,10 @@ iotcon_list_h ic_list_from_json(JsonArray *parray)
 	int count = json_array_get_length(parray);
 
 	iotcon_list_h list = _ic_list_new(IOTCON_TYPE_NONE);
-	/*	DBG("array count(%d)", count); */
+	if (NULL == list) {
+		ERR("_ic_list_new() Fail");
+		return NULL;
+	}
 
 	for (i = 0; i < count; i++) {
 		JsonNode *child_node = json_array_get_element(parray, i);
@@ -874,6 +877,10 @@ static int _ic_list_clone_value(iotcon_list_h list, iotcon_list_h ret_list)
 	count = g_list_length(list->list);
 	for (i = 0; i < count; i++) {
 		value = _ic_list_get_nth_value(list, i);
+		if (NULL == value) {
+			ERR("_ic_list_get_nth_value() Fail");
+			return IOTCON_ERROR_INVALID_PARAMETER;
+		}
 		if (list->type != value->type) {
 			ERR("Type Mismatching(list:%d, value:%d)", list->type, value->type);
 			return IOTCON_ERROR_INVALID_TYPE;

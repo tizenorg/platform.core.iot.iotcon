@@ -81,6 +81,8 @@ iotcon_repr_h ic_ioty_repr_generate_repr(const OCRepresentation& ocRep)
 		iotcon_repr_h repr_child = _ic_ioty_repr_create_child(ocChild);
 		if (NULL == repr_child) {
 			ERR("_ic_ioty_repr_create_child() Fail");
+			/* free parent because adding child is failed.
+			 * this func also will free children */
 			iotcon_repr_free(repr_parent);
 			return NULL;
 		}
@@ -91,10 +93,11 @@ iotcon_repr_h ic_ioty_repr_generate_repr(const OCRepresentation& ocRep)
 	return repr_parent;
 }
 
-OCRepresentation ic_ioty_repr_parse(iotcon_repr_h repr)
+int ic_ioty_repr_parse(iotcon_repr_h repr, OCRepresentation &ocRep)
 {
 	FN_CALL;
-	OCRepresentation ocRep;
+
+	int ret = IOTCON_ERROR_NONE;
 	MessageContainer info;
 
 	/* TODO: It's better that iotcon_repr_h is changed to OCRepresentation at once. */
@@ -115,12 +118,14 @@ OCRepresentation ic_ioty_repr_parse(iotcon_repr_h repr)
 		}
 		else {
 			ERR("Invalid parameter(%s)", repr_json);
+			ret = IOTCON_ERROR_INVALID_PARAMETER;
 		}
 	} catch (exception &e) {
 		ERR("setJSONRepresentation() Fail(%s)", e.what());
+		ret = IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	free(repr_json);
-	return ocRep;
+	return ret;
 }
 
