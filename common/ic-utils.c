@@ -13,11 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_UTILITY_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_UTILITY_H__
+#include <string.h>
+#include <errno.h>
 
-#define IC_STR_EQUAL 0
+#include "ic-log.h"
+#include "ic-utils.h"
 
-char* ic_utils_strdup(const char *src);
+char* ic_utils_strdup(const char *src)
+{
+	char *dest = NULL;
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_UTILITY_H__ */
+	RETV_IF(NULL == src, NULL);
+
+	errno = 0;
+	dest = strdup(src);
+	if (NULL == dest) {
+		ERR("strdup() Fail(%d)", errno);
+		return NULL;
+	}
+
+	return dest;
+}
+
+
+const char* ic_utils_dbus_encode_str(const char *src)
+{
+	return (src) ? src : IC_STR_NULL;
+}
+
+
+char* ic_utils_dbus_decode_str(char *src)
+{
+	RETV_IF(NULL == src, NULL);
+
+	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, src))
+		return NULL;
+	else
+		return src;
+}
+
+

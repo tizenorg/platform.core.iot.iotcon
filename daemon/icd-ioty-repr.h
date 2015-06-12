@@ -13,26 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
+#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_REPRESENTATION_H__
+#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_REPRESENTATION_H__
 
-#include "iotcon.h"
-#include "icl.h"
-#include "icl-utils.h"
+#include <OCRepresentation.h>
+#include <glib.h>
+#include "iotcon-struct.h"
 
-char* ic_utils_strdup(const char *src)
-{
-	char *dest = NULL;
+int icd_ioty_repr_parse_json(const char *repr_json, OC::OCRepresentation &ocRep);
+int icd_ioty_repr_generate_gvariant_builder(const OC::OCRepresentation &ocRep,
+		GVariantBuilder **builder);
 
-	RETV_IF(NULL == src, NULL);
+#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_REPRESENTATION_H__ */
 
-	errno = 0;
-	dest = strdup(src);
-	if (NULL == dest) {
-		ERR("strdup() Fail(%d)", errno);
-		return NULL;
-	}
-
-	return dest;
-}

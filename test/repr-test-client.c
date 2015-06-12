@@ -19,7 +19,7 @@
 #include <iotcon.h>
 #include "test.h"
 
-const char * const room_uri = "/a/room";
+const char* const room_uri = "/a/room";
 
 iotcon_client_h room_resource = NULL;
 
@@ -179,7 +179,7 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		ERR("iotcon_client_get_types() Fail(%d)", ret);
 		return;
 	}
-	iotcon_resource_types_foreach(resource_types, _get_res_type_fn, (void *)resource_uri);
+	iotcon_resource_types_foreach(resource_types, _get_res_type_fn, (void*)resource_uri);
 
 	if (TEST_STR_EQUAL == strcmp(room_uri, resource_uri)) {
 		/* copy resource to use elsewhere */

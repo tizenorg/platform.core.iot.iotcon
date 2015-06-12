@@ -91,7 +91,7 @@ systemctl daemon-reload
 %{_unitdir}/%{name}.service
 %{_unitdir}/multi-user.target.wants/%{name}.service
 %{_bindir}/%{name}-daemon
-%{_datadir}/dbus-1/services/org.tizen.%{name}.service
+%{_datadir}/dbus-1/services/org.tizen.%{name}.dbus.service
 %license LICENSE.APLv2
 
 %files lib

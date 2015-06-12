@@ -18,8 +18,9 @@
 #include <glib.h>
 
 #include "iotcon.h"
+#include "ic-utils.h"
 #include "icl.h"
-#include "icl-utils.h"
+#include "icl-dbus.h"
 #include "icl-ioty.h"
 #include "icl-repr.h"
 #include "icl-options.h"
@@ -77,7 +78,7 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 		break;
 	case IOTCON_RESPONSE_REPRESENTATION:
 		resp->repr = va_arg(args, iotcon_repr_h);
-		ic_repr_inc_ref_count(resp->repr);
+		icl_repr_inc_ref_count(resp->repr);
 		break;
 	case IOTCON_RESPONSE_RESULT:
 		value = va_arg(args, int);
@@ -110,7 +111,7 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 			iotcon_options_free(resp->header_options);
 
 		if (options)
-			resp->header_options = ic_options_ref(options);
+			resp->header_options = icl_options_ref(options);
 		else
 			resp->header_options = NULL;
 		break;
@@ -133,9 +134,9 @@ API int iotcon_response_send(iotcon_response_h resp)
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resp->repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_ioty_send_res_response_data(resp);
+	ret = icl_dbus_send_response(resp);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_ioty_send_res_response_data() Fail(%d)", ret);
+		ERR("icl_dbus_send_response() Fail(%d)", ret);
 
 	return ret;
 }

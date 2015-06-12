@@ -19,14 +19,10 @@
 #include "iotcon-errors.h"
 
 #ifndef IOTCON_DBUS_INTERFACE
-#define IOTCON_DBUS_INTERFACE "org.tizen.IoTCon"
+#define IOTCON_DBUS_INTERFACE "org.tizen.iotcon.dbus"
 #warning "IOTCON_DBUS_INTERFACE is redefined"
 #endif
 
-#define IOTCON_DBUS_OBJPATH "/org/tizen/IoTCon/GDBus"
-
-#define IOTCON_DBUS_METHOD1 "subscribe"
-#define IOTCON_DBUS_METHOD2 "subscribe"
-#define IOTCON_DBUS_METHOD3 "subscribe"
+#define IOTCON_DBUS_OBJPATH "/org/tizen/iotcon/dbus"
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__ */

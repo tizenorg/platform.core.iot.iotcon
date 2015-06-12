@@ -21,13 +21,13 @@
 #include "iotcon-struct.h"
 #include "iotcon-constant.h"
 
-int ic_obj_del_value(iotcon_repr_h repr, const char *key,
+int icl_obj_del_value(iotcon_repr_h repr, const char *key,
 		iotcon_types_e value_type);
 
 int ic_repr_obj_get_value(iotcon_repr_h repr, const char *key, iotcon_value_h *retval);
-int ic_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value);
+int icl_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value);
 
-JsonObject* ic_obj_to_json(iotcon_repr_h repr);
-iotcon_repr_h ic_obj_from_json(JsonObject *obj);
+JsonObject* icl_obj_to_json(iotcon_repr_h repr);
+iotcon_repr_h icl_obj_from_json(JsonObject *obj);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_OBJECT_H__ */

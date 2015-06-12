@@ -19,8 +19,6 @@
 #include "iotcon-struct.h"
 #include "icl-options.h"
 
-typedef void* iotcon_observe_h;
-
 struct ic_remote_resource {
 	char *uri;
 	char *host;
@@ -29,7 +27,7 @@ struct ic_remote_resource {
 	iotcon_options_h header_options;
 	iotcon_resource_types_h types;
 	int ifaces;
-	iotcon_observe_h observe_handle;
+	int observe_handle;
 };
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__ */

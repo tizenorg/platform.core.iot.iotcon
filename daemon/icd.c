@@ -17,7 +17,7 @@
 
 #include "icd.h"
 #include "icd-dbus.h"
-
+#include "icd-ioty.h"
 
 int main(int argc, char **argv)
 {
@@ -31,6 +31,7 @@ int main(int argc, char **argv)
 	loop = g_main_loop_new(NULL, FALSE);
 
 	id = icd_dbus_init();
+	icd_ioty_config(IOTCON_ALL_INTERFACES, IOTCON_RANDOM_PORT);
 
 	g_main_loop_run(loop);
 

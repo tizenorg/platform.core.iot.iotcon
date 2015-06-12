@@ -23,8 +23,8 @@ struct ic_resource_types {
 	GList *type_list;
 };
 
-iotcon_resource_types_h ic_resource_types_ref(iotcon_resource_types_h res_types);
-const char* ic_resource_types_get_nth_data(iotcon_resource_types_h res_types, int index);
-unsigned int ic_resource_types_get_length(iotcon_resource_types_h res_types);
+iotcon_resource_types_h icl_resource_types_ref(iotcon_resource_types_h res_types);
+const char* icl_resource_types_get_nth_data(iotcon_resource_types_h res_types, int index);
+unsigned int icl_resource_types_get_length(iotcon_resource_types_h res_types);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_TYPES_H__ */

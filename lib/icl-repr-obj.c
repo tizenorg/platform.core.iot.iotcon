@@ -18,14 +18,14 @@
 #include "iotcon-struct.h"
 #include "iotcon-constant.h"
 #include "iotcon-representation.h"
+#include "ic-utils.h"
 #include "icl.h"
-#include "icl-utils.h"
 #include "icl-repr-list.h"
 #include "icl-repr-value.h"
 #include "icl-repr.h"
 #include "icl-repr-obj.h"
 
-int ic_obj_del_value(iotcon_repr_h repr, const char *key,
+int icl_obj_del_value(iotcon_repr_h repr, const char *key,
 		iotcon_types_e value_type)
 {
 	gboolean ret = FALSE;
@@ -68,7 +68,7 @@ API int iotcon_repr_get_int(iotcon_repr_h repr, const char *key, int *val)
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	ic_basic_s *real = (ic_basic_s *)value;
+	ic_basic_s *real = (ic_basic_s*)value;
 	if (IOTCON_TYPE_INT != real->type) {
 		ERR("Invalid Type(%d)", real->type);
 		return IOTCON_ERROR_INVALID_TYPE;
@@ -86,9 +86,9 @@ API int iotcon_repr_set_int(iotcon_repr_h repr, const char *key, int val)
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = ic_value_new_int(val);
+	value = icl_value_new_int(val);
 	if (NULL == value) {
-		ERR("ic_value_new_int(%d) Fail", val);
+		ERR("icl_value_new_int(%d) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -104,9 +104,9 @@ API int iotcon_repr_del_int(iotcon_repr_h repr, const char *key)
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_obj_del_value(repr, key, IOTCON_TYPE_INT);
+	ret = icl_obj_del_value(repr, key, IOTCON_TYPE_INT);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_obj_del_value() Fail(%d)", ret);
+		ERR("icl_obj_del_value() Fail(%d)", ret);
 
 	return ret;
 }
@@ -126,7 +126,7 @@ API int iotcon_repr_get_bool(iotcon_repr_h repr, const char *key, bool *val)
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	real = (ic_basic_s *)value;
+	real = (ic_basic_s*)value;
 	if (IOTCON_TYPE_BOOL != real->type) {
 		ERR("Invalid Type(%d)", real->type);
 		return IOTCON_ERROR_INVALID_TYPE;
@@ -144,9 +144,9 @@ API int iotcon_repr_set_bool(iotcon_repr_h repr, const char *key, bool val)
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = ic_value_new_bool(val);
+	value = icl_value_new_bool(val);
 	if (NULL == value) {
-		ERR("ic_value_new_bool(%d) Fail", val);
+		ERR("icl_value_new_bool(%d) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -159,9 +159,9 @@ API int iotcon_repr_del_bool(iotcon_repr_h repr, const char *key)
 {
 	int ret;
 
-	ret = ic_obj_del_value(repr, key, IOTCON_TYPE_BOOL);
+	ret = icl_obj_del_value(repr, key, IOTCON_TYPE_BOOL);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_obj_del_value() Fail(%d)", ret);
+		ERR("icl_obj_del_value() Fail(%d)", ret);
 
 	return ret;
 }
@@ -181,7 +181,7 @@ API int iotcon_repr_get_double(iotcon_repr_h repr, const char *key, double *val)
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	real = (ic_basic_s *)value;
+	real = (ic_basic_s*)value;
 	if (IOTCON_TYPE_DOUBLE != real->type) {
 		ERR("Invalid Type(%d)", real->type);
 		return IOTCON_ERROR_INVALID_TYPE;
@@ -199,9 +199,9 @@ API int iotcon_repr_set_double(iotcon_repr_h repr, const char *key, double val)
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = ic_value_new_double(val);
+	value = icl_value_new_double(val);
 	if (NULL == value) {
-		ERR("ic_value_new_double(%f) Fail", val);
+		ERR("icl_value_new_double(%f) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -217,9 +217,9 @@ API int iotcon_repr_del_double(iotcon_repr_h repr, const char *key)
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_obj_del_value(repr, key, IOTCON_TYPE_DOUBLE);
+	ret = icl_obj_del_value(repr, key, IOTCON_TYPE_DOUBLE);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_obj_del_value() Fail(%d)", ret);
+		ERR("icl_obj_del_value() Fail(%d)", ret);
 
 	return ret;
 }
@@ -239,7 +239,7 @@ API int iotcon_repr_get_str(iotcon_repr_h repr, const char *key, char **val)
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	real = (ic_basic_s *)value;
+	real = (ic_basic_s*)value;
 	if (IOTCON_TYPE_STR != real->type) {
 		ERR("Invalid Type(%d)", real->type);
 		return IOTCON_ERROR_INVALID_TYPE;
@@ -258,9 +258,9 @@ API int iotcon_repr_set_str(iotcon_repr_h repr, const char *key, char *val)
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = ic_value_new_str(val);
+	value = icl_value_new_str(val);
 	if (NULL == value) {
-		ERR("ic_value_new_str(%s) Fail", val);
+		ERR("icl_value_new_str(%s) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -276,9 +276,9 @@ API int iotcon_repr_del_str(iotcon_repr_h repr, const char *key)
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_obj_del_value(repr, key, IOTCON_TYPE_STR);
+	ret = icl_obj_del_value(repr, key, IOTCON_TYPE_STR);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_obj_del_value() Fail(%d)", ret);
+		ERR("icl_obj_del_value() Fail(%d)", ret);
 
 	return ret;
 }
@@ -297,7 +297,7 @@ API bool iotcon_repr_is_null(iotcon_repr_h repr, const char *key)
 		return false;
 	}
 
-	real = (ic_basic_s *)value;
+	real = (ic_basic_s*)value;
 
 	return (IOTCON_TYPE_NULL == real->type) ? true : false;
 }
@@ -309,9 +309,9 @@ API int iotcon_repr_set_null(iotcon_repr_h repr, const char *key)
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = ic_value_new_null();
+	value = icl_value_new_null();
 	if (NULL == value) {
-		ERR("ic_value_new_null() Fail");
+		ERR("icl_value_new_null() Fail");
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -327,9 +327,9 @@ API int iotcon_repr_del_null(iotcon_repr_h repr, const char *key)
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_obj_del_value(repr, key, IOTCON_TYPE_NULL);
+	ret = icl_obj_del_value(repr, key, IOTCON_TYPE_NULL);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_obj_del_value() Fail(%d)", ret);
+		ERR("icl_obj_del_value() Fail(%d)", ret);
 
 	return ret;
 }
@@ -349,7 +349,7 @@ API int iotcon_repr_get_list(iotcon_repr_h repr, const char *key, iotcon_list_h 
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	real = (ic_val_list_s *)value;
+	real = (ic_val_list_s*)value;
 	if (IOTCON_TYPE_LIST != real->type) {
 		ERR("Invalid Type(%d)", real->type);
 		return IOTCON_ERROR_INVALID_TYPE;
@@ -368,12 +368,12 @@ API int iotcon_repr_set_list(iotcon_repr_h repr, const char *key, iotcon_list_h 
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = ic_value_new_list(list);
+	value = icl_value_new_list(list);
 	if (NULL == value) {
-		ERR("ic_value_new_list() Fail");
+		ERR("icl_value_new_list() Fail");
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
-	ic_list_inc_ref_count(list);
+	icl_list_inc_ref_count(list);
 
 	g_hash_table_replace(repr->hash_table, ic_utils_strdup(key), value);
 
@@ -387,9 +387,9 @@ API int iotcon_repr_del_list(iotcon_repr_h repr, const char *key)
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_obj_del_value(repr, key, IOTCON_TYPE_LIST);
+	ret = icl_obj_del_value(repr, key, IOTCON_TYPE_LIST);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_obj_del_value() Fail(%d)", ret);
+		ERR("icl_obj_del_value() Fail(%d)", ret);
 
 	return ret;
 }
@@ -410,7 +410,7 @@ API int iotcon_repr_get_repr(iotcon_repr_h src, const char *key, iotcon_repr_h *
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	real = (ic_val_repr_s *)value;
+	real = (ic_val_repr_s*)value;
 	if (IOTCON_TYPE_REPR != real->type) {
 		ERR("Invalid Type(%d)", real->type);
 		return IOTCON_ERROR_INVALID_TYPE;
@@ -429,12 +429,12 @@ API int iotcon_repr_set_repr(iotcon_repr_h repr, const char *key, iotcon_repr_h 
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = ic_value_new_repr(val);
+	value = icl_value_new_repr(val);
 	if (NULL == value) {
-		ERR("ic_value_new_repr(%p) Fail", val);
+		ERR("icl_value_new_repr(%p) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
-	ic_repr_inc_ref_count(val);
+	icl_repr_inc_ref_count(val);
 
 	g_hash_table_replace(repr->hash_table, ic_utils_strdup(key), value);
 
@@ -448,9 +448,9 @@ API int iotcon_repr_del_repr(iotcon_repr_h repr, const char *key)
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_obj_del_value(repr, key, IOTCON_TYPE_REPR);
+	ret = icl_obj_del_value(repr, key, IOTCON_TYPE_REPR);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_obj_del_value() Fail(%d)", ret);
+		ERR("icl_obj_del_value() Fail(%d)", ret);
 
 	return ret;
 }
@@ -473,7 +473,7 @@ API int iotcon_repr_get_type(iotcon_repr_h repr, const char *key, int *type)
 	return IOTCON_ERROR_NONE;
 }
 
-int ic_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value)
+int icl_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
@@ -484,7 +484,7 @@ int ic_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value)
 	return IOTCON_ERROR_NONE;
 }
 
-static inline int _ic_obj_to_json(const char *key, iotcon_value_h value,
+static inline int _icl_obj_to_json(const char *key, iotcon_value_h value,
 		JsonObject *json_obj)
 {
 	FN_CALL;
@@ -506,23 +506,23 @@ static inline int _ic_obj_to_json(const char *key, iotcon_value_h value,
 	case IOTCON_TYPE_DOUBLE:
 	case IOTCON_TYPE_STR:
 	case IOTCON_TYPE_NULL:
-		child_node = ic_value_to_json(value);
+		child_node = icl_value_to_json(value);
 		if (NULL == child_node) {
-			ERR("ic_value_to_json() Fail");
+			ERR("icl_value_to_json() Fail");
 			return IOTCON_ERROR_INVALID_PARAMETER;
 		}
 		json_object_set_member(json_obj, key, child_node);
 		break;
 	case IOTCON_TYPE_LIST:
-		ret = ic_value_get_list(value, &child_list);
+		ret = icl_value_get_list(value, &child_list);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("ic_value_get_list() Fail(%d)", ret);
+			ERR("icl_value_get_list() Fail(%d)", ret);
 			return IOTCON_ERROR_REPRESENTATION;
 		}
 
-		child_array = ic_list_to_json(child_list);
+		child_array = icl_list_to_json(child_list);
 		if (NULL == child_array) {
-			ERR("ic_list_to_json() Fail");
+			ERR("icl_list_to_json() Fail");
 			return IOTCON_ERROR_INVALID_PARAMETER;
 		}
 		child_node = json_node_new(JSON_NODE_ARRAY);
@@ -530,15 +530,15 @@ static inline int _ic_obj_to_json(const char *key, iotcon_value_h value,
 		json_object_set_member(json_obj, key, child_node);
 		break;
 	case IOTCON_TYPE_REPR:
-		ret = ic_value_get_repr(value, &child_repr);
+		ret = icl_value_get_repr(value, &child_repr);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("ic_value_get_repr() Fail(%d)", ret);
+			ERR("icl_value_get_repr() Fail(%d)", ret);
 			return IOTCON_ERROR_REPRESENTATION;
 		}
 
-		child_obj = ic_obj_to_json(child_repr);
+		child_obj = icl_obj_to_json(child_repr);
 		if (NULL == child_obj) {
-			ERR("ic_obj_to_json() Fail");
+			ERR("icl_obj_to_json() Fail");
 			return IOTCON_ERROR_INVALID_PARAMETER;
 		}
 		child_node = json_node_new(JSON_NODE_OBJECT);
@@ -556,7 +556,7 @@ static inline int _ic_obj_to_json(const char *key, iotcon_value_h value,
 /*
 * A general result : {"rep":{"string":"Hello","intlist":[1,2,3]}}
 */
-JsonObject* ic_obj_to_json(iotcon_repr_h repr)
+JsonObject* icl_obj_to_json(iotcon_repr_h repr)
 {
 	int ret;
 	int key_count;
@@ -575,9 +575,9 @@ JsonObject* ic_obj_to_json(iotcon_repr_h repr)
 
 		g_hash_table_iter_init(&iter, repr->hash_table);
 		while (g_hash_table_iter_next(&iter, &key, &value)) {
-			ret = _ic_obj_to_json(key, value, json_obj);
+			ret = _icl_obj_to_json(key, value, json_obj);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("_ic_obj_to_json() Fail(%d)", ret);
+				ERR("_icl_obj_to_json() Fail(%d)", ret);
 				json_object_unref(json_obj);
 				return NULL;
 			}
@@ -592,7 +592,7 @@ JsonObject* ic_obj_to_json(iotcon_repr_h repr)
 	return parent_obj;
 }
 
-static inline int _ic_obj_from_json(JsonObject *obj, GList *key_list, unsigned int index,
+static inline int _icl_obj_from_json(JsonObject *obj, GList *key_list, unsigned int index,
 		iotcon_repr_h ret_repr)
 {
 	char *key;
@@ -610,48 +610,48 @@ static inline int _ic_obj_from_json(JsonObject *obj, GList *key_list, unsigned i
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 	if (JSON_NODE_HOLDS_NULL(child_node) || JSON_NODE_HOLDS_VALUE(child_node)) {
-		iotcon_value_h value = ic_value_from_json(child_node);
+		iotcon_value_h value = icl_value_from_json(child_node);
 		if (NULL == value) {
-			ERR("ic_value_from_json() Fail");
+			ERR("icl_value_from_json() Fail");
 			return IOTCON_ERROR_INVALID_PARAMETER;
 		}
-		ic_obj_set_value(ret_repr, key, value);
+		icl_obj_set_value(ret_repr, key, value);
 	} else if (JSON_NODE_HOLDS_ARRAY(child_node)) {
 		iotcon_value_h value;
 		JsonArray *child_array = json_node_get_array(child_node);
 
-		iotcon_list_h list = ic_list_from_json(child_array);
+		iotcon_list_h list = icl_list_from_json(child_array);
 		if (NULL == list) {
-			ERR("ic_list_from_json() Fail");
+			ERR("icl_list_from_json() Fail");
 			return IOTCON_ERROR_INVALID_PARAMETER;
 		}
 
-		value = ic_value_new_list(list);
+		value = icl_value_new_list(list);
 		if (NULL == value) {
-			ERR("ic_value_new_list() Fail");
+			ERR("icl_value_new_list() Fail");
 			iotcon_list_free(list);
 			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
 
-		ic_obj_set_value(ret_repr, key, value);
+		icl_obj_set_value(ret_repr, key, value);
 	} else if (JSON_NODE_HOLDS_OBJECT(child_node)) {
 		iotcon_value_h value;
 		JsonObject *child_obj = json_node_get_object(child_node);
 
-		iotcon_repr_h repr = ic_obj_from_json(child_obj);
+		iotcon_repr_h repr = icl_obj_from_json(child_obj);
 		if (NULL == repr) {
-			ERR("ic_obj_from_json() Fail");
+			ERR("icl_obj_from_json() Fail");
 			return IOTCON_ERROR_INVALID_PARAMETER;
 		}
 
-		value = ic_value_new_repr(repr);
+		value = icl_value_new_repr(repr);
 		if (NULL == value) {
-			ERR("ic_value_new_repr(%p) Fail", repr);
+			ERR("icl_value_new_repr(%p) Fail", repr);
 			iotcon_repr_free(repr);
 			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
 
-		ic_obj_set_value(ret_repr, key, value);
+		icl_obj_set_value(ret_repr, key, value);
 	} else {
 		ERR("node type(%d) Fail", json_node_get_node_type(child_node));
 		return IOTCON_ERROR_INVALID_PARAMETER;
@@ -663,7 +663,7 @@ static inline int _ic_obj_from_json(JsonObject *obj, GList *key_list, unsigned i
 /*
 * A general input : {"rep:"{"string":"Hello","intlist":[1,2,3]}}
 */
-iotcon_repr_h ic_obj_from_json(JsonObject *json_repr)
+iotcon_repr_h icl_obj_from_json(JsonObject *json_repr)
 {
 	int ret;
 	unsigned int i = 0;
@@ -680,9 +680,9 @@ iotcon_repr_h ic_obj_from_json(JsonObject *json_repr)
 	repr = iotcon_repr_new();
 	if (key_list) {
 		for (i = 0; i < g_list_length(key_list); i++) {
-			ret = _ic_obj_from_json(obj, key_list, i, repr);
+			ret = _icl_obj_from_json(obj, key_list, i, repr);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("_ic_obj_from_json() Fail(%d)", ret);
+				ERR("_icl_obj_from_json() Fail(%d)", ret);
 				iotcon_repr_free(repr);
 				g_list_free(key_list);
 				return NULL;

@@ -27,14 +27,14 @@ struct ic_list_s {
 	GList *list;
 };
 
-int ic_list_remove(iotcon_list_h list, iotcon_value_h val);
-int ic_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
+int icl_list_remove(iotcon_list_h list, iotcon_value_h val);
+int icl_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
 
-JsonArray* ic_list_to_json(iotcon_list_h list);
-iotcon_list_h ic_list_from_json(JsonArray *parray);
+JsonArray* icl_list_to_json(iotcon_list_h list);
+iotcon_list_h icl_list_from_json(JsonArray *parray);
 
-iotcon_list_h ic_list_clone(iotcon_list_h list);
+iotcon_list_h icl_list_clone(iotcon_list_h list);
 
-void ic_list_inc_ref_count(iotcon_list_h val);
+void icl_list_inc_ref_count(iotcon_list_h val);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_LIST_H__ */

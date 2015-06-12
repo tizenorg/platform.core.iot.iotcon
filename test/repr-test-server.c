@@ -51,7 +51,7 @@ static int _query_foreach_cb(const char *key, const char *value, void *user_data
 	char **interface_str = user_data;
 
 	if (TEST_STR_EQUAL == strcmp("if", key))
-		*interface_str = (char *)value;
+		*interface_str = (char*)value;
 
 	return IOTCON_FUNC_CONTINUE;
 }

@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_REPRESENTATION_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_REPRESENTATION_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__
+#define __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__
 
-#include <OCRepresentation.h>
-#include "iotcon-struct.h"
+#define IC_STR_EQUAL 0
+#define IC_STR_NULL "(NULL)"
 
-void ic_ioty_repr_found_device_cb(const OC::OCRepresentation& ocRep);
-iotcon_repr_h ic_ioty_repr_generate_repr(const OC::OCRepresentation& ocRep);
-int ic_ioty_repr_parse(iotcon_repr_h repr, OC::OCRepresentation &ocRep);
+char* ic_utils_strdup(const char *src);
+const char* ic_utils_dbus_encode_str(const char *src);
+char* ic_utils_dbus_decode_str(char *src);
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_REPRESENTATION_H__ */
-
+#endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__ */

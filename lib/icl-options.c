@@ -19,11 +19,11 @@
 #include <glib.h>
 
 #include "iotcon-struct.h"
+#include "ic-utils.h"
 #include "icl.h"
-#include "icl-utils.h"
 #include "icl-options.h"
 
-iotcon_options_h ic_options_ref(iotcon_options_h options)
+iotcon_options_h icl_options_ref(iotcon_options_h options)
 {
 	RETV_IF(NULL == options, NULL);
 	RETV_IF(options->ref_count <= 0, NULL);

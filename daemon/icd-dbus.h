@@ -16,9 +16,9 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__
 #define __IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__
 
-int icd_dbus_publish(const char *key, const char *data);
+int icd_dbus_emit_signal(const char *sig_name, GVariant *value);
 unsigned int icd_dbus_init();
 void icd_dbus_deinit(unsigned int id);
 
 
-#endif //__IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__
+#endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__*/

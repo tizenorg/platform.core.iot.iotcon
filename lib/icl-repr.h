@@ -49,10 +49,12 @@ struct ic_repr_s {
  *
  * @return Generated JSON string, otherwise a null pointer if a parse error
  */
-char* ic_repr_generate_json(iotcon_repr_h repr, bool set_pretty);
+char* icl_repr_generate_json(iotcon_repr_h repr, bool set_pretty);
 
-iotcon_repr_h ic_repr_parse_json(const char *json_string);
+char* icl_repr_json_get_uri(const char *json_string);
 
-void ic_repr_inc_ref_count(iotcon_repr_h val);
+iotcon_repr_h icl_repr_parse_json(const char *json_string);
+
+void icl_repr_inc_ref_count(iotcon_repr_h val);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__ */

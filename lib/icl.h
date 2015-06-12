@@ -26,10 +26,9 @@
 #define API __attribute__((visibility("default")))
 
 
-#define IC_INTERFACE_MAX (IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_LINK | \
+#define ICL_INTERFACE_MAX (IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_LINK | \
 		IOTCON_INTERFACE_BATCH | IOTCON_INTERFACE_GROUP)
 
-
-iotcon_resource_h ic_get_resource_handler_data(void *handle);
+iotcon_resource_h icl_get_resource_handler_data(void *handle);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__ */

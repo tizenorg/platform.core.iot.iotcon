@@ -45,27 +45,27 @@ typedef struct {
 	struct ic_repr_s *repr;
 } ic_val_repr_s;
 
-iotcon_value_h ic_value_new_null();
-iotcon_value_h ic_value_new_int(int val);
-iotcon_value_h ic_value_new_bool(bool val);
-iotcon_value_h ic_value_new_double(double val);
-iotcon_value_h ic_value_new_str(char *val);
-iotcon_value_h ic_value_new_list(iotcon_list_h val);
-iotcon_value_h ic_value_new_repr(iotcon_repr_h val);
+iotcon_value_h icl_value_new_null();
+iotcon_value_h icl_value_new_int(int val);
+iotcon_value_h icl_value_new_bool(bool val);
+iotcon_value_h icl_value_new_double(double val);
+iotcon_value_h icl_value_new_str(char *val);
+iotcon_value_h icl_value_new_list(iotcon_list_h val);
+iotcon_value_h icl_value_new_repr(iotcon_repr_h val);
 
 
-int ic_value_get_int(iotcon_value_h value, int *val);
-int ic_value_get_bool(iotcon_value_h value, bool *val);
-int ic_value_get_double(iotcon_value_h value, double *val);
-int ic_value_get_str(iotcon_value_h value, const char **val);
-int ic_value_get_list(iotcon_value_h value, iotcon_list_h *list);
-int ic_value_get_repr(iotcon_value_h value, iotcon_repr_h *repr);
+int icl_value_get_int(iotcon_value_h value, int *val);
+int icl_value_get_bool(iotcon_value_h value, bool *val);
+int icl_value_get_double(iotcon_value_h value, double *val);
+int icl_value_get_str(iotcon_value_h value, const char **val);
+int icl_value_get_list(iotcon_value_h value, iotcon_list_h *list);
+int icl_value_get_repr(iotcon_value_h value, iotcon_repr_h *repr);
 
 
-JsonNode* ic_value_to_json(iotcon_value_h value);
-iotcon_value_h ic_value_from_json(JsonNode *node);
-void ic_value_free(gpointer data);
+JsonNode* icl_value_to_json(iotcon_value_h value);
+iotcon_value_h icl_value_from_json(JsonNode *node);
+void icl_value_free(gpointer data);
 
-iotcon_value_h ic_value_clone(iotcon_value_h src);
+iotcon_value_h icl_value_clone(iotcon_value_h src);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_VALUE_H__ */

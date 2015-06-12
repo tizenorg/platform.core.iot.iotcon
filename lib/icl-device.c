@@ -21,6 +21,7 @@
 #include "iotcon.h"
 #include "icl.h"
 #include "icl-ioty.h"
+#include "icl-dbus.h"
 
 /* The length of manufacturer_name should be less than and equal to 16.
  * The length of manufacturer_url should be less than and equal to 32. */
@@ -40,10 +41,9 @@ API int iotcon_register_device_info(iotcon_device_info_s device_info)
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-
-	ret = ic_ioty_register_device_info(device_info);
+	ret = icl_dbus_register_device_info(device_info);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_ioty_register_device_info() Fail(%d)", ret);
+		ERR("icl_dbus_register_device_info() Fail(%d)", ret);
 
 	return ret;
 }
@@ -58,9 +58,9 @@ API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb c
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_ioty_get_device_info(host_address, cb, user_data);
+	ret = icl_dbus_get_device_info(host_address, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("ic_ioty_get_device_info() Fail(%d)", ret);
+		ERR("icl_dbus_get_device_info() Fail(%d)", ret);
 		return ret;
 	}
 

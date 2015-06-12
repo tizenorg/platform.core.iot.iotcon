@@ -20,8 +20,8 @@
 #include <glib.h>
 
 #include "iotcon-struct.h"
+#include "ic-utils.h"
 #include "icl.h"
-#include "icl-utils.h"
 #include "icl-query.h"
 
 API iotcon_query_h iotcon_query_new()

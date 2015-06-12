@@ -20,11 +20,12 @@
 #include <glib.h>
 
 #include "iotcon-struct.h"
+#include "ic-utils.h"
 #include "icl.h"
-#include "icl-utils.h"
 #include "icl-ioty.h"
 #include "icl-options.h"
 #include "icl-resource-types.h"
+#include "icl-dbus.h"
 #include "icl-client.h"
 
 /* The length of resource_type should be less than or equal to 61.
@@ -42,9 +43,9 @@ API int iotcon_find_resource(const char *host_addr, const char *resource_type,
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	ret = ic_ioty_find_resource(host_addr, resource_type, cb, user_data);
+	ret = icl_dbus_find_resource(host_addr, resource_type, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_ioty_find_resource() Fail(%d)", ret);
+		ERR("icl_dbus_find_resource() Fail(%d)", ret);
 
 	return ret;
 }
@@ -70,7 +71,7 @@ API iotcon_client_h iotcon_client_new(const char *host, const char *uri,
 	resource->host = ic_utils_strdup(host);
 	resource->uri = ic_utils_strdup(uri);
 	resource->is_observable = is_observable;
-	resource->types = ic_resource_types_ref(resource_types);
+	resource->types = icl_resource_types_ref(resource_types);
 	resource->ifaces = resource_ifs;
 
 	return resource;
@@ -184,7 +185,7 @@ API int iotcon_client_set_options(iotcon_client_h resource,
 		iotcon_options_free(resource->header_options);
 
 	if (header_options)
-		resource->header_options = ic_options_ref(header_options);
+		resource->header_options = icl_options_ref(header_options);
 	else
 		resource->header_options = NULL;
 
@@ -201,9 +202,9 @@ API int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_ioty_get(resource, query, cb, user_data);
+	ret = icl_dbus_get(resource, query, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_ioty_get() Fail(%d)", ret);
+		ERR("icl_dbus_get() Fail(%d)", ret);
 
 	return ret;
 }
@@ -219,9 +220,9 @@ API int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr,
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_ioty_put(resource, repr, query, cb, user_data);
+	ret = icl_dbus_put(resource, repr, query, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_ioty_put() Fail(%d)", ret);
+		ERR("icl_dbus_put() Fail(%d)", ret);
 
 	return ret;
 }
@@ -237,9 +238,9 @@ API int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr,
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_ioty_post(resource, repr, query, cb, user_data);
+	ret = icl_dbus_post(resource, repr, query, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_ioty_post() Fail(%d)", ret);
+		ERR("icl_dbus_post() Fail(%d)", ret);
 
 	return ret;
 }
@@ -253,9 +254,9 @@ API int iotcon_delete(iotcon_client_h resource, iotcon_on_delete_cb cb, void *us
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_ioty_delete_res(resource, cb, user_data);
+	ret = icl_dbus_delete(resource, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_ioty_delete_res() Fail(%d)", ret);
+		ERR("icl_dbus_delete() Fail(%d)", ret);
 
 	return ret;
 }
@@ -273,9 +274,9 @@ API int iotcon_observer_start(iotcon_client_h resource,
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_ioty_observe(resource, observe_type, query, cb, user_data);
+	ret = icl_dbus_observer_start(resource, observe_type, query, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_ioty_observe() Fail(%d)", ret);
+		ERR("icl_dbus_observer_start() Fail(%d)", ret);
 
 	return ret;
 }
@@ -288,9 +289,9 @@ API int iotcon_observer_stop(iotcon_client_h resource)
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_ioty_cancel_observe(resource);
+	ret = icl_dbus_observer_stop(resource);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_ioty_cancel_observe() Fail(%d)", ret);
+		ERR("icl_dbus_observer_stop() Fail(%d)", ret);
 
 	return ret;
 }

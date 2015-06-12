@@ -20,7 +20,7 @@
 #include <iotcon.h>
 #include "test.h"
 
-const char * const door_uri = "/a/door";
+const char* const door_uri = "/a/door";
 
 iotcon_client_h door_resource = NULL;
 

@@ -20,11 +20,11 @@
 
 #include "iotcon-struct.h"
 #include "iotcon-constant.h"
+#include "ic-utils.h"
 #include "icl.h"
-#include "icl-utils.h"
 #include "icl-resource-types.h"
 
-iotcon_resource_types_h ic_resource_types_ref(iotcon_resource_types_h types)
+iotcon_resource_types_h icl_resource_types_ref(iotcon_resource_types_h types)
 {
 	RETV_IF(NULL == types, NULL);
 	RETV_IF(types->ref_count <= 0, NULL);
@@ -62,13 +62,13 @@ API void iotcon_resource_types_free(iotcon_resource_types_h types)
 }
 
 
-static int _ic_resource_types_strcmp(const void *a, const void *b)
+static int _icl_resource_types_strcmp(const void *a, const void *b)
 {
 	return strcmp(a, b);
 }
 
 
-static bool _ic_resource_types_duplicate_check(iotcon_resource_types_h types,
+static bool _icl_resource_types_duplicate_check(iotcon_resource_types_h types,
 		const char *type)
 {
 	GList *ret = NULL;
@@ -76,7 +76,7 @@ static bool _ic_resource_types_duplicate_check(iotcon_resource_types_h types,
 	RETV_IF(NULL == types, false);
 	RETV_IF(NULL == type, false);
 
-	ret = g_list_find_custom(types->type_list, type, _ic_resource_types_strcmp);
+	ret = g_list_find_custom(types->type_list, type, _icl_resource_types_strcmp);
 	if (NULL == ret)
 		return false;
 
@@ -101,7 +101,7 @@ API int iotcon_resource_types_insert(iotcon_resource_types_h types, const char *
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	if (true == _ic_resource_types_duplicate_check(types, type)) {
+	if (true == _icl_resource_types_duplicate_check(types, type)) {
 		ERR("%s is already contained.", type);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
@@ -127,7 +127,7 @@ API int iotcon_resource_types_delete(iotcon_resource_types_h types, const char *
 	RETVM_IF(1 < types->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
 
-	found_node = g_list_find_custom(types->type_list, type, _ic_resource_types_strcmp);
+	found_node = g_list_find_custom(types->type_list, type, _icl_resource_types_strcmp);
 	if (NULL == found_node) {
 		ERR("g_list_find_custom() Fail");
 		return IOTCON_ERROR_NO_DATA;
@@ -149,7 +149,7 @@ API int iotcon_resource_types_foreach(iotcon_resource_types_h types,
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	for (node = types->type_list; node; node = node->next) {
-		if (IOTCON_FUNC_STOP == cb((const char *)node->data, user_data))
+		if (IOTCON_FUNC_STOP == cb((const char*)node->data, user_data))
 			break;
 	}
 
@@ -188,13 +188,13 @@ API iotcon_resource_types_h iotcon_resource_types_clone(iotcon_resource_types_h 
 
 
 /* counting from 0 */
-const char* ic_resource_types_get_nth_data(iotcon_resource_types_h types, int index)
+const char* icl_resource_types_get_nth_data(iotcon_resource_types_h types, int index)
 {
 	return g_list_nth_data(types->type_list, index);
 }
 
 
-unsigned int ic_resource_types_get_length(iotcon_resource_types_h types)
+unsigned int icl_resource_types_get_length(iotcon_resource_types_h types)
 {
 	return g_list_length(types->type_list);
 }

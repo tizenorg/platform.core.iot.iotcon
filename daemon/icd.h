@@ -22,4 +22,4 @@
 #include "ic-log.h"
 
 
-#endif //__IOT_CONNECTIVITY_MANAGER_DAEMON_H__
+#endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_H__*/

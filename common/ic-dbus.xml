@@ -1,0 +1,118 @@
+<node>
+	<interface name="org.tizen.iotcon.dbus">
+		<method name="registerResource">
+			<arg type="s" name="uri" direction="in"/>
+			<arg type="as" name="resource_types" direction="in"/>
+			<arg type="i" name="ifaces" direction="in"/>
+			<arg type="y" name="properties" direction="in"/>
+			<arg type="i" name="resource" direction="out"/>
+		</method>
+		<method name="unregisterResource">
+			<arg type="i" name="resource" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="bindInterface">
+			<arg type="i" name="resource" direction="in"/>
+			<arg type="i" name="iface" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="bindType">
+			<arg type="i" name="resource" direction="in"/>
+			<arg type="s" name="type" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="bindResource">
+			<arg type="i" name="parent" direction="in"/>
+			<arg type="i" name="child" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="unbindResource">
+			<arg type="i" name="parent" direction="in"/>
+			<arg type="i" name="child" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="notifyListOfObservers">
+			<arg type="i" name="resource" direction="in"/>
+			<arg type="a(iis)" name="notify_msg" direction="in"/>
+			<arg type="ai" name="observers" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="notifyAll">
+			<arg type="i" name="resource" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="sendResponse">
+			<arg type="(sia(qs)iisii)" name="response" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="findResource">
+			<arg type="s" name="host_address" direction="in"/>
+			<arg type="s" name="type" direction="in"/>
+			<arg type="s" name="sig_name" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="get">
+			<arg type="(ssba(qs)asii)" name="client" direction="in"/>
+			<arg type="a(ss)" name="query" direction="in"/>
+			<arg type="s" name="sig_name" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="put">
+			<arg type="(ssba(qs)asii)" name="client" direction="in"/>
+			<arg type="s" name="repr" direction="in"/>
+			<arg type="a(ss)" name="query" direction="in"/>
+			<arg type="s" name="sig_name" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="post">
+			<arg type="(ssba(qs)asii)" name="client" direction="in"/>
+			<arg type="s" name="repr" direction="in"/>
+			<arg type="a(ss)" name="query" direction="in"/>
+			<arg type="s" name="sig_name" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="delete">
+			<arg type="(ssba(qs)asii)" name="client" direction="in"/>
+			<arg type="s" name="sig_name" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="observerStart">
+			<arg type="(ssba(qs)asii)" name="client" direction="in"/>
+			<arg type="i" name="observe_type" direction="in"/>
+			<arg type="a(ss)" name="query" direction="in"/>
+			<arg type="s" name="sig_name" direction="in"/>
+			<arg type="i" name="observe_h" direction="out"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="observerStop">
+			<arg type="i" name="observe_h" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="registerDeviceInfo">
+			<arg type="(ssssssssssss)" name="device_info" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="getDeviceInfo">
+			<arg type="s" name="host_address" direction="in"/>
+			<arg type="s" name="sig_name" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="subscribePresence">
+			<arg type="s" name="host_address" direction="in"/>
+			<arg type="s" name="type" direction="in"/>
+			<arg type="s" name="sig_name" direction="in"/>
+			<arg type="i" name="presence_h" direction="out"/>
+		</method>
+		<method name="unsubscribePresence">
+			<arg type="i" name="presence_h" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="startPresence">
+			<arg type="u" name="time_to_live" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="stopPresence">
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+	</interface>
+</node>

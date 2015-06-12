@@ -8,7 +8,6 @@
 		<request>
 			<smack request="dbus" type="rwx" />
 			<smack request="_" type="rw" />
-			<smack request="enotice" type="rwxat" />
 		</request>
 	</define>
 	<assign>

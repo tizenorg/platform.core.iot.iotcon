@@ -23,6 +23,6 @@ struct ic_options {
 	GHashTable *hash;
 };
 
-iotcon_options_h ic_options_ref(iotcon_options_h options);
+iotcon_options_h icl_options_ref(iotcon_options_h options);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_OPTIONS_H__ */

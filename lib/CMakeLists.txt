@@ -1,16 +1,18 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common/)
 INCLUDE_DIRECTORIES(include)
 
-FILE(GLOB CLIENT_SRCS *.c *.cpp)
+FILE(GLOB CLIENT_SRCS *.c *.cpp ${CMAKE_SOURCE_DIR}/common/*.c)
 
-pkg_check_modules(client_pkgs REQUIRED glib-2.0 dlog json-glib-1.0 capi-base-common)
+pkg_check_modules(client_pkgs REQUIRED glib-2.0 dlog json-glib-1.0 capi-base-common
+	gio-2.0 gio-unix-2.0)
 INCLUDE_DIRECTORIES(${client_pkgs_INCLUDE_DIRS})
 LINK_DIRECTORIES(${client_pkgs_LIBRARY_DIRS})
 
 ADD_DEFINITIONS("-DIOTCON_DBUS_INTERFACE=\"${DBUS_INTERFACE}\"")
 
 ADD_LIBRARY(${CLIENT} SHARED ${CLIENT_SRCS})
-TARGET_LINK_LIBRARIES(${CLIENT}	${client_pkgs_LIBRARIES}
+ADD_DEPENDENCIES(${CLIENT} GENERATED_DBUS_CODE)
+TARGET_LINK_LIBRARIES(${CLIENT} ${client_pkgs_LIBRARIES}
 	oc octbstack coap oc_logger_core oc_logger pthread)
 SET_TARGET_PROPERTIES(${CLIENT} PROPERTIES VERSION ${FULLVER} SOVERSION ${MAJORVER})
 INSTALL(TARGETS ${CLIENT} DESTINATION ${LIB_INSTALL_DIR})

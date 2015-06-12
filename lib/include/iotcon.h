@@ -26,7 +26,7 @@ extern "C" {
 #include <iotcon-constant.h>
 #include <iotcon-representation.h>
 
-void iotcon_initialize(const char *addr, unsigned short port);
+int iotcon_initialize(const char *addr, unsigned short port);
 void iotcon_deinitialize();
 
 typedef void (*iotcon_request_handler_cb)(iotcon_request_h request, void *user_data);
@@ -88,8 +88,8 @@ int iotcon_notify_all(iotcon_resource_h resource);
 
 typedef void (*iotcon_on_cru_cb)(iotcon_options_h header_options, iotcon_repr_h repr,
 		int response_result, void *user_data);
-int iotcon_get(iotcon_client_h resource, iotcon_query_h query, iotcon_on_cru_cb cb,
-		void *user_data);
+int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
+		iotcon_on_cru_cb cb, void *user_data);
 
 int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
 		iotcon_on_cru_cb cb, void *user_data);

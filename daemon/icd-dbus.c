@@ -16,132 +16,480 @@
 #include <stdlib.h>
 #include <gio/gio.h>
 
+#include "iotcon.h"
+#include "ic-common.h"
+#include "ic-dbus.h"
 #include "icd.h"
+#include "icd-ioty.h"
 #include "icd-dbus.h"
 
 static GDBusConnection *icd_dbus_conn;
+static icDbus *icd_dbus_object;
 
-int icd_dbus_publish(const char *key, const char *data)
+int icd_dbus_emit_signal(const char *sig_name, GVariant *value)
 {
 	gboolean ret;
 	GError *error = NULL;
-	int res = 0;
-	char *path = NULL;
+
+	DBG("SIG : %s, %s", sig_name, g_variant_print(value, FALSE));
 
 	ret = g_dbus_connection_emit_signal(icd_dbus_conn,
-			NULL, /* destination bus name */
-			"/",
+			NULL,
+			IOTCON_DBUS_OBJPATH,
 			IOTCON_DBUS_INTERFACE,
-			key,
-			g_variant_new("(s)", data),
+			sig_name,
+			value,
 			&error);
-	if (FALSE == ret)
-	{
+	if (FALSE == ret) {
 		ERR("g_dbus_connection_emit_signal() Fail(%s)", error->message);
 		g_error_free(error);
-		return -1;
+		return IOTCON_ERROR_DBUS;
 	}
 
-	if (FALSE == g_dbus_connection_flush_sync(icd_dbus_conn, NULL, &error))
-	{
+	if (FALSE == g_dbus_connection_flush_sync(icd_dbus_conn, NULL, &error)) {
 		ERR("g_dbus_connection_flush_sync() Fail(%s)", error->message);
 		g_error_free(error);
+		return IOTCON_ERROR_DBUS;
 	}
 
-	if (path)
-		free(path);
-
-	return 0;
+	return IOTCON_ERROR_NONE;
 }
 
-static void _dbus_handle_method_call(GDBusConnection *connection,
-		const gchar *sender,
-		const gchar *object_path,
-		const gchar *interface_name,
-		const gchar *method_name,
-		GVariant *parameters,
+
+static gboolean _dbus_handle_register_resource(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		gpointer user_data)
+		const gchar *arg_uri,
+		const gchar* const *arg_resource_types,
+		gint arg_ifaces,
+		guchar arg_properties)
 {
-	const gchar *key = NULL;
+	void *handle = NULL;
 
-	if (0 == g_strcmp0(method_name, IOTCON_DBUS_METHOD1)) {
-		g_variant_get(parameters, "(&s)", &key);
-		if (NULL == key) {
-			ERR("key is NULL");
-			// TODO: handle error
-		}
+	handle = icd_ioty_register_resource(arg_uri, arg_resource_types, arg_ifaces,
+			arg_properties);
+	if (NULL == handle)
+		ERR("icd_ioty_register_resource() Fail");
 
-		//icd_handler_subscribe(key);
+	ic_dbus_complete_register_resource(object, invocation, GPOINTER_TO_INT(handle));
 
-		// TODO: handle disconnect without unsubscribe
-
-		g_dbus_method_invocation_return_value(invocation, NULL);
-	}
-	else if (0 == g_strcmp0(method_name, IOTCON_DBUS_METHOD2)) {
-		g_variant_get(parameters, "(&s)", &key);
-		if (NULL == key) {
-			ERR("key is NULL");
-			// TODO: handle error
-		}
-
-		//icd_handler_unsubscribe(key);
-
-		g_dbus_method_invocation_return_value(invocation, NULL);
-	}
-	else if (0 == g_strcmp0(method_name, IOTCON_DBUS_METHOD3)) {
-		const gchar *data = NULL;
-
-		g_variant_get(parameters, "(&s&s)", &key, &data);
-		if (NULL == key) {
-			ERR("key is NULL");
-			// TODO: handle error
-		}
-
-		//icd_handler_publish(key, data);
-
-		g_dbus_method_invocation_return_value(invocation, NULL);
-	}
-	else {
-		g_dbus_method_invocation_return_error(invocation,
-			G_DBUS_ERROR, G_DBUS_ERROR_UNKNOWN_METHOD,
-			"Method %s is not implemented on interface %s", method_name, interface_name);
-	}
+	return TRUE;
 }
 
 
-static const GDBusInterfaceVTable interface_vtable =
+static gboolean _dbus_handle_unregister_resource(icDbus *object,
+		GDBusMethodInvocation *invocation, gint arg_resource)
 {
-	_dbus_handle_method_call,
-	NULL,
-	NULL
-};
+	int ret;
+
+	ret = icd_ioty_unregister_resource(GINT_TO_POINTER(arg_resource));
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_unregister_resource() Fail(%d)", ret);
+
+	ic_dbus_complete_unregister_resource(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_bind_interface(icDbus *object,
+		GDBusMethodInvocation *invocation, gint arg_resource, gint arg_iface)
+{
+	int ret;
+
+	ret = icd_ioty_bind_interface(GINT_TO_POINTER(arg_resource), arg_iface);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_bind_interface() Fail(%d)", ret);
+
+	ic_dbus_complete_bind_interface(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_bind_type(icDbus *object,
+		GDBusMethodInvocation *invocation, gint arg_resource, const gchar *arg_type)
+{
+	int ret;
+
+	ret = icd_ioty_bind_type(GINT_TO_POINTER(arg_resource), arg_type);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_bind_type() Fail(%d)", ret);
+
+	ic_dbus_complete_bind_type(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_bind_resource(icDbus *object,
+		GDBusMethodInvocation *invocation, gint arg_parent, gint arg_child)
+{
+	int ret;
+
+	ret = icd_ioty_bind_resource(GINT_TO_POINTER(arg_parent), GINT_TO_POINTER(arg_child));
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_bind_resource() Fail(%d)", ret);
+
+	ic_dbus_complete_bind_resource(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_unbind_resource(icDbus *object,
+		GDBusMethodInvocation *invocation, gint arg_parent, gint arg_child)
+{
+	int ret;
+
+	ret = icd_ioty_unbind_resource(GINT_TO_POINTER(arg_parent),
+			GINT_TO_POINTER(arg_child));
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_unbind_resource() Fail(%d)", ret);
+
+	ic_dbus_complete_unbind_resource(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_find_resource(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		const gchar *arg_host_address,
+		const gchar *arg_type,
+		const gchar *sig_name)
+{
+	int ret;
+
+	ret = icd_ioty_find_resource(arg_host_address, arg_type, sig_name);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_find_resource() Fail(%d)", ret);
+
+	ic_dbus_complete_find_resource(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_get(icDbus *object, GDBusMethodInvocation *invocation,
+		GVariant *arg_client, GVariant *arg_query, const gchar *sig_name)
+{
+	int ret;
+
+	ret = icd_ioty_get(arg_client, arg_query, sig_name);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_get() Fail(%d)", ret);
+
+	ic_dbus_complete_get(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_put(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		GVariant *arg_client,
+		const gchar *arg_repr,
+		GVariant *arg_query,
+		const gchar *sig_name)
+{
+	int ret;
+
+	ret = icd_ioty_put(arg_client, arg_repr, arg_query, sig_name);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_put() Fail(%d)", ret);
+
+	ic_dbus_complete_put(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_post(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		GVariant *arg_client,
+		const gchar *arg_repr,
+		GVariant *arg_query,
+		const gchar *sig_name)
+{
+	int ret;
+
+	ret = icd_ioty_post(arg_client, arg_repr, arg_query, sig_name);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_post() Fail(%d)", ret);
+
+	ic_dbus_complete_post(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_delete(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		GVariant *arg_client,
+		const gchar *sig_name)
+{
+	int ret;
+
+	ret = icd_ioty_delete(arg_client, sig_name);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_delete() Fail(%d)", ret);
+
+	ic_dbus_complete_delete(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_observer_start(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		GVariant *arg_client,
+		gint arg_observe_type,
+		GVariant *arg_query,
+		const gchar *sig_name)
+{
+	int ret;
+	int observe_h;
+
+	ret = icd_ioty_observer_start(arg_client, arg_observe_type, arg_query, sig_name,
+			&observe_h);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_observer_start() Fail(%d)", ret);
+
+	ic_dbus_complete_observer_start(object, invocation, observe_h, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_observer_stop(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		gint arg_observe_h)
+{
+	int ret;
+
+	ret = icd_ioty_observer_stop(GINT_TO_POINTER(arg_observe_h));
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_observer_stop() Fail(%d)", ret);
+
+	ic_dbus_complete_observer_stop(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_notify_list_of_observers(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		gint arg_resource,
+		GVariant *arg_notify_msg,
+		GVariant *arg_observers)
+{
+	int ret;
+
+	ret = icd_ioty_notify_list_of_observers(arg_resource, arg_notify_msg, arg_observers);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_notify_list_of_observers() Fail(%d)", ret);
+
+	ic_dbus_complete_notify_list_of_observers(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_notify_all(icDbus *object, GDBusMethodInvocation *invocation,
+		gint arg_resource)
+{
+	int ret;
+
+	ret = icd_ioty_notify_all(arg_resource);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_notify_all() Fail(%d)", ret);
+
+	ic_dbus_complete_notify_all(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_send_response(icDbus *object,
+		GDBusMethodInvocation *invocation, GVariant *arg_response)
+{
+	int ret;
+
+	ret = icd_ioty_send_response(arg_response);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_send_response() Fail(%d)", ret);
+
+	ic_dbus_complete_send_response(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_register_device_info(icDbus *object,
+		GDBusMethodInvocation *invocation, GVariant *arg_device_info)
+{
+	int ret;
+
+	ret = icd_ioty_register_device_info(arg_device_info);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_register_device_info() Fail(%d)", ret);
+
+	ic_dbus_complete_register_device_info(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_get_device_info(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		const gchar *arg_host_address,
+		const gchar *sig_name)
+{
+	int ret;
+
+	ret = icd_ioty_get_device_info(arg_host_address, sig_name);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_get_device_info() Fail(%d)", ret);
+
+	ic_dbus_complete_get_device_info(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_start_presence(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		guint arg_time_to_live)
+{
+	int ret;
+
+	ret = icd_ioty_start_presence(arg_time_to_live);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_start_presence() Fail(%d)", ret);
+
+	ic_dbus_complete_start_presence(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_stop_presence(icDbus *object,
+		GDBusMethodInvocation *invocation)
+{
+	int ret;
+
+	ret = icd_ioty_stop_presence();
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_stop_presence() Fail(%d)", ret);
+
+	ic_dbus_complete_stop_presence(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_subscribe_presence(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		const gchar *arg_host_address,
+		const gchar *arg_type,
+		const gchar *sig_name)
+{
+	void *presence_h;
+
+	presence_h = icd_ioty_subscribe_presence(arg_host_address, arg_type, sig_name);
+	if (NULL == presence_h)
+		ERR("icd_ioty_subscribe_presence() Fail");
+
+	ic_dbus_complete_subscribe_presence(object, invocation,
+			GPOINTER_TO_INT(presence_h));
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_unsubscribe_presence(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		gint arg_presence_h)
+{
+	int ret;
+
+	ret = icd_ioty_unsubscribe_presence(GINT_TO_POINTER(arg_presence_h));
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_unsubscribe_presence() Fail(%d)", ret);
+
+	ic_dbus_complete_unsubscribe_presence(object, invocation, ret);
+
+	return TRUE;
+}
 
 
 static void _dbus_on_bus_acquired(GDBusConnection *conn, const gchar *name,
 		gpointer user_data)
 {
-	guint registration_id;
 	GError *error = NULL;
-	GDBusNodeInfo *introspection_data = user_data;
-
-	FN_CALL;
+	gboolean ret;
 
 	icd_dbus_conn = conn;
 
-	registration_id = g_dbus_connection_register_object(conn,
-		IOTCON_DBUS_OBJPATH,
-		introspection_data->interfaces[0],
-		&interface_vtable,
-		NULL,/* user_data */
-		NULL,/* user_data_free_func */
-		&error);
-	if (0 == registration_id)
-	{
-		ERR("g_dbus_connection_register_object() Fail(%s)", error->message);
+	icd_dbus_object = ic_dbus_skeleton_new();
+	if (NULL == icd_dbus_object) {
+		ERR("ic_iotcon_skeletion_new() Fail");
+		return;
+	}
+
+	g_signal_connect(icd_dbus_object, "handle-register-resource",
+			G_CALLBACK(_dbus_handle_register_resource), NULL);
+	g_signal_connect(icd_dbus_object, "handle-unregister-resource",
+			G_CALLBACK(_dbus_handle_unregister_resource), NULL);
+	g_signal_connect(icd_dbus_object, "handle-bind-interface",
+			G_CALLBACK(_dbus_handle_bind_interface), NULL);
+	g_signal_connect(icd_dbus_object, "handle-bind-type",
+			G_CALLBACK(_dbus_handle_bind_type), NULL);
+	g_signal_connect(icd_dbus_object, "handle-bind-resource",
+			G_CALLBACK(_dbus_handle_bind_resource), NULL);
+	g_signal_connect(icd_dbus_object, "handle-unbind-resource",
+			G_CALLBACK(_dbus_handle_unbind_resource), NULL);
+	g_signal_connect(icd_dbus_object, "handle-find-resource",
+			G_CALLBACK(_dbus_handle_find_resource), NULL);
+	g_signal_connect(icd_dbus_object, "handle-get",
+			G_CALLBACK(_dbus_handle_get), NULL);
+	g_signal_connect(icd_dbus_object, "handle-put",
+			G_CALLBACK(_dbus_handle_put), NULL);
+	g_signal_connect(icd_dbus_object, "handle-post",
+			G_CALLBACK(_dbus_handle_post), NULL);
+	g_signal_connect(icd_dbus_object, "handle-delete",
+			G_CALLBACK(_dbus_handle_delete), NULL);
+	g_signal_connect(icd_dbus_object, "handle-observer-start",
+			G_CALLBACK(_dbus_handle_observer_start), NULL);
+	g_signal_connect(icd_dbus_object, "handle-observer-stop",
+			G_CALLBACK(_dbus_handle_observer_stop), NULL);
+	g_signal_connect(icd_dbus_object, "handle-notify-list-of-observers",
+			G_CALLBACK(_dbus_handle_notify_list_of_observers), NULL);
+	g_signal_connect(icd_dbus_object, "handle-notify-all",
+			G_CALLBACK(_dbus_handle_notify_all), NULL);
+	g_signal_connect(icd_dbus_object, "handle-send-response",
+			G_CALLBACK(_dbus_handle_send_response), NULL);
+	g_signal_connect(icd_dbus_object, "handle-register-device-info",
+			G_CALLBACK(_dbus_handle_register_device_info), NULL);
+	g_signal_connect(icd_dbus_object, "handle-get-device-info",
+			G_CALLBACK(_dbus_handle_get_device_info), NULL);
+	g_signal_connect(icd_dbus_object, "handle-start-presence",
+			G_CALLBACK(_dbus_handle_start_presence), NULL);
+	g_signal_connect(icd_dbus_object, "handle-stop-presence",
+			G_CALLBACK(_dbus_handle_stop_presence), NULL);
+	g_signal_connect(icd_dbus_object, "handle-subscribe-presence",
+			G_CALLBACK(_dbus_handle_subscribe_presence), NULL);
+	g_signal_connect(icd_dbus_object, "handle-unsubscribe-presence",
+			G_CALLBACK(_dbus_handle_unsubscribe_presence), NULL);
+
+	ret = g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(icd_dbus_object), conn,
+			IOTCON_DBUS_OBJPATH, &error);
+	if (FALSE == ret) {
+		ERR("g_dbus_interface_skeleton_export() Fail(%s)", error->message);
 		g_error_free(error);
 	}
 }
+
 
 static void _dbus_on_name_lost(GDBusConnection *connection, const gchar *name,
 		gpointer user_data)
@@ -149,41 +497,17 @@ static void _dbus_on_name_lost(GDBusConnection *connection, const gchar *name,
 	DBG("Lost the name %s", name);
 }
 
+
 static void _dbus_on_name_acquired(GDBusConnection *connection, const gchar *name,
 		gpointer user_data)
 {
 	DBG("Acquired the name %s", name);
 }
 
+
 unsigned int icd_dbus_init()
 {
 	guint id;
-	GError *error = NULL;
-	GDBusNodeInfo *introspection_data = NULL;
-
-	const gchar introspection_xml[] =
-	"<node>"
-	"	<interface name='"IOTCON_DBUS_INTERFACE"'>"
-	"		<method name='"IOTCON_DBUS_METHOD1"'>"
-	"			<arg type='s' name='key' direction='in'/>"
-	"		</method>"
-	"		<method name='"IOTCON_DBUS_METHOD2"'>"
-	"			<arg type='s' name='key' direction='in'/>"
-	"		</method>"
-	"		<method name='"IOTCON_DBUS_METHOD3"'>"
-	"			<arg type='s' name='key' direction='in'/>"
-	"			<arg type='s' name='data' direction='in'/>"
-	"		</method>"
-	"	</interface>"
-	"</node>";
-
-	introspection_data = g_dbus_node_info_new_for_xml(introspection_xml, &error);
-	if (NULL == introspection_data)
-	{
-		ERR("g_dbus_node_info_new_for_xml() Fail(%s)", error->message);
-		g_error_free(error);
-		return -1;
-	}
 
 	id = g_bus_own_name(G_BUS_TYPE_SYSTEM,
 			IOTCON_DBUS_INTERFACE,
@@ -191,16 +515,16 @@ unsigned int icd_dbus_init()
 			_dbus_on_bus_acquired,
 			_dbus_on_name_acquired,
 			_dbus_on_name_lost,
-			introspection_data,
-			(GDestroyNotify)g_dbus_node_info_unref);
-	if (0 == id)
-	{
+			NULL,
+			NULL);
+	if (0 == id) {
 		ERR("g_bus_own_name() Fail");
 		return 0;
 	}
 
 	return id;
 }
+
 
 void icd_dbus_deinit(unsigned int id)
 {
