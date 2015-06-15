@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include <glib.h>
 #include <iotcon.h>
-#include "test-log.h"
+#include "test.h"
 
 static void _room_request_handler(iotcon_request_h request, void *user_data);
 
@@ -50,9 +50,9 @@ static int _query_foreach_cb(const char *key, const char *value, void *user_data
 {
 	char **interface_str = user_data;
 
-	if (!strcmp("if", key)) {
-		*interface_str = (char*)value;
-	}
+	if (TEST_STR_EQUAL == strcmp("if", key))
+		*interface_str = (char *)value;
+
 	return IOTCON_FUNC_CONTINUE;
 }
 
@@ -113,11 +113,10 @@ static void _room_request_handler_get(iotcon_request_h request,
 	if (query)
 		iotcon_query_foreach(query, _query_foreach_cb, &query_str);
 
-	if (query_str && !strcmp("oc.mi.b", query_str)) {
+	if (query_str && (TEST_STR_EQUAL == strcmp("oc.mi.b", query_str))) {
 		DBG("operation for BATCH interface");
 		interface = IOTCON_INTERFACE_BATCH;
-	}
-	else {
+	} else {
 		DBG("operation for DEFAULT interface");
 		interface = IOTCON_INTERFACE_DEFAULT;
 	}

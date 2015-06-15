@@ -102,7 +102,6 @@ int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *numb
 int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 		iotcon_resource_h *child);
 int iotcon_resource_get_uri(iotcon_resource_h resource, char **uri);
-int iotcon_resource_get_host(iotcon_resource_h resource, char **host);
 int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_h *types);
 int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces);
 int iotcon_resource_is_observable(iotcon_resource_h resource, bool *observable);
@@ -116,6 +115,7 @@ int iotcon_client_is_observable(iotcon_client_h resource, bool *observable);
 int iotcon_client_set_options(iotcon_client_h resource, iotcon_options_h header_options);
 
 typedef struct ic_resource_request* iotcon_request_h;
+int iotcon_request_get_uri(iotcon_request_h request, char **uri);
 int iotcon_request_get_representation(iotcon_request_h request, iotcon_repr_h *repr);
 int iotcon_request_get_types(iotcon_request_h request, int *types);
 int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *options);

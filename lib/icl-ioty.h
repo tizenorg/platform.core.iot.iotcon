@@ -59,8 +59,11 @@ int ic_ioty_register_device_info(iotcon_device_info_s device_info);
 int ic_ioty_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 		void *user_data);
 
-int ic_ioty_send_notify(void *resource, struct ic_notify_msg *msg,
+int ic_ioty_notify_list_of_observers(void *resource, struct ic_notify_msg *msg,
 		iotcon_observers_h observers);
+
+int ic_ioty_notify_all(void *resource);
+
 int ic_ioty_send_res_response_data(struct ic_resource_response *resp);
 
 const iotcon_presence_h ic_ioty_subscribe_presence(const char *host_address,

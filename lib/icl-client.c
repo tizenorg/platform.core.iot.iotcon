@@ -27,8 +27,7 @@
 #include "icl-resource-types.h"
 #include "icl-client.h"
 
-/* host address should begin with "coap://"
- * The length of resource_type should be less than or equal to 61.
+/* The length of resource_type should be less than or equal to 61.
  * If resource_type is NULL, then All resources in host are discovered. */
 API int iotcon_find_resource(const char *host_addr, const char *resource_type,
 		iotcon_found_resource_cb cb, void *user_data)

@@ -114,8 +114,7 @@ int ic_ioty_repr_parse(iotcon_repr_h repr, OCRepresentation &ocRep)
 
 			for (; itr != back; ++itr)
 				ocRep.addChild(*itr);
-		}
-		else {
+		} else {
 			ERR("Invalid parameter(%s)", repr_json);
 			ret = IOTCON_ERROR_INVALID_PARAMETER;
 		}

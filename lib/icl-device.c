@@ -49,7 +49,6 @@ API int iotcon_register_device_info(iotcon_device_info_s device_info)
 }
 
 
-/* host_address should begin with "coap://" */
 API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 		void *user_data)
 {

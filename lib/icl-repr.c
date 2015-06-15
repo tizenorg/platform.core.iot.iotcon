@@ -92,7 +92,7 @@ API int iotcon_repr_set_uri(iotcon_repr_h repr, const char *uri)
 	repr->uri = NULL;
 
 	if (NULL == uri)
-		return IOTCON_ERROR_NONE;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 
 	repr->uri = strdup(uri);
 	if (NULL == repr->uri) {
@@ -256,8 +256,7 @@ static JsonObject* _ic_repr_data_generate_json(iotcon_repr_h cur_repr,
 			json_object_unref(repr_obj);
 			return NULL;
 		}
-	}
-	else {
+	} else {
 		repr_obj = json_object_new();
 	}
 
@@ -363,9 +362,8 @@ static JsonObject* _ic_repr_generate_json(iotcon_repr_h repr)
 	root_obj = json_object_new();
 	root_array = json_array_new();
 
-	if (repr->children) {
+	if (repr->children)
 		child_count = iotcon_repr_get_children_count(repr);
-	}
 
 	repr_obj = _ic_repr_data_generate_parent(repr, child_index);
 	if (NULL == repr_obj) {
@@ -405,7 +403,7 @@ char* ic_repr_generate_json(iotcon_repr_h repr, bool set_pretty)
 	}
 
 	JsonGenerator *gen = json_generator_new();
-#if JSON_CHECK_VERSION(0,14,0)
+#if JSON_CHECK_VERSION(0, 14, 0)
 	json_generator_set_pretty(gen, set_pretty);
 #endif
 
@@ -455,8 +453,7 @@ iotcon_repr_h ic_repr_parse_json(const char *json_string)
 			g_object_unref(parser);
 			return NULL;
 		}
-	}
-	else {
+	} else {
 		repr = iotcon_repr_new();
 	}
 

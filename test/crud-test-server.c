@@ -19,7 +19,7 @@
 #include <glib.h>
 
 #include <iotcon.h>
-#include "test-log.h"
+#include "test.h"
 
 /* Door Resource */
 typedef struct _door_resource_s {
@@ -177,13 +177,13 @@ static void _request_handler_post(iotcon_response_h response)
 static gboolean _notifier(gpointer user_data)
 {
 	static int i = 0;
-	if ((5 == i++) && !(observers))
+	if ((5 == i++) || !(observers))
 		return FALSE;
 
 	INFO("NOTIFY!");
 	iotcon_repr_h repr = iotcon_repr_new();
 	iotcon_notimsg_h msg = iotcon_notimsg_new(repr, IOTCON_INTERFACE_DEFAULT);
-	iotcon_notify(user_data, msg, observers);
+	iotcon_notify_list_of_observers(user_data, msg, observers);
 
 	iotcon_repr_free(repr);
 
@@ -267,6 +267,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 			ERR("iotcon_request_get_observer_action() Fail(%d)", ret);
 			return;
 		}
+
 		if (IOTCON_OBSERVE_REGISTER == observer_action) {
 			ret = iotcon_request_get_observer_id(request, &observer_id);
 			if (IOTCON_ERROR_NONE != ret) {
@@ -274,6 +275,13 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 				return;
 			}
 			observers = iotcon_observers_append(observers, observer_id);
+		} else if (IOTCON_OBSERVE_DEREGISTER == observer_action) {
+			ret = iotcon_request_get_observer_id(request, &observer_id);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("iotcon_request_get_observer_id() Fail(%d)", ret);
+				return;
+			}
+			observers = iotcon_observers_remove(observers, observer_id);
 		}
 	}
 }

@@ -374,15 +374,13 @@ static int _ic_list_del_nth_value(iotcon_list_h list, int pos, iotcon_types_e va
 	}
 
 	if (IOTCON_TYPE_STR == value->type) {
-		ic_basic_s *real = (ic_basic_s*)value;
+		ic_basic_s *real = (ic_basic_s *)value;
 		free(real->val.s);
-	}
-	else if (IOTCON_TYPE_LIST == value->type) {
-		ic_val_list_s *real = (ic_val_list_s*)value;
+	} else if (IOTCON_TYPE_LIST == value->type) {
+		ic_val_list_s *real = (ic_val_list_s *)value;
 		iotcon_list_free(real->list);
-	}
-	else if (IOTCON_TYPE_REPR == value->type) {
-		ic_val_repr_s *real = (ic_val_repr_s*)value;
+	} else if (IOTCON_TYPE_REPR == value->type) {
+		ic_val_repr_s *real = (ic_val_repr_s *)value;
 		iotcon_repr_free(real->repr);
 	}
 
@@ -663,8 +661,8 @@ static iotcon_value_h _ic_list_get_nth_value(iotcon_list_h list, int pos)
 
 
 /*
-* A general result : [1,2,3]
-*/
+ * A general result : [1,2,3]
+ */
 JsonArray* ic_list_to_json(iotcon_list_h list)
 {
 	int i, ret, count;
@@ -742,8 +740,8 @@ JsonArray* ic_list_to_json(iotcon_list_h list)
 }
 
 /*
-* A general input : [1,2,3]
-*/
+ * A general input : [1,2,3]
+ */
 iotcon_list_h ic_list_from_json(JsonArray *parray)
 {
 	int i, ret;
@@ -765,7 +763,7 @@ iotcon_list_h ic_list_from_json(JsonArray *parray)
 				return NULL;
 			}
 
-			ic_basic_s *real = (ic_basic_s*)value;
+			ic_basic_s *real = (ic_basic_s *)value;
 			if (IOTCON_TYPE_NONE != list->type && list->type != real->type) {
 				ERR("Type matching Fail(list:%d,value:%d)", list->type, real->type);
 				ic_value_free(value);
@@ -781,8 +779,7 @@ iotcon_list_h ic_list_from_json(JsonArray *parray)
 				return NULL;
 			}
 			list->type = real->type;
-		}
-		else if (JSON_NODE_HOLDS_ARRAY(child_node)) {
+		} else if (JSON_NODE_HOLDS_ARRAY(child_node)) {
 			if (IOTCON_TYPE_NONE != list->type && IOTCON_TYPE_LIST != list->type) {
 				ERR("Type matching Fail(%d)", list->type);
 				iotcon_list_free(list);
@@ -813,8 +810,7 @@ iotcon_list_h ic_list_from_json(JsonArray *parray)
 				return NULL;
 			}
 			list->type = IOTCON_TYPE_LIST;
-		}
-		else if (JSON_NODE_HOLDS_OBJECT(child_node)) {
+		} else if (JSON_NODE_HOLDS_OBJECT(child_node)) {
 			if (IOTCON_TYPE_NONE != list->type && IOTCON_TYPE_REPR != list->type) {
 				ERR("Type matching Fail(%d)", list->type);
 				iotcon_list_free(list);
@@ -998,38 +994,38 @@ iotcon_list_h ic_list_clone(iotcon_list_h list)
 	}
 
 	switch (list->type) {
-		case IOTCON_TYPE_INT:
-		case IOTCON_TYPE_BOOL:
-		case IOTCON_TYPE_DOUBLE:
-		case IOTCON_TYPE_STR:
-		case IOTCON_TYPE_NULL:
-			ret = _ic_list_clone_value(list, ret_list);
-			if (IOTCON_ERROR_NONE != ret) {
-				ERR("_ic_list_clone_value() Fail(%d)", ret);
-				iotcon_list_free(ret_list);
-				return NULL;
-			}
-			break;
-		case IOTCON_TYPE_LIST:
-			ret = _ic_list_clone_list(list, ret_list);
-			if (IOTCON_ERROR_NONE != ret) {
-				ERR("_ic_list_clone_list() Fail(%d)", ret);
-				iotcon_list_free(ret_list);
-				return NULL;
-			}
-			break;
-		case IOTCON_TYPE_REPR:
-			ret = _ic_list_clone_repr(list, ret_list);
-			if (IOTCON_ERROR_NONE != ret) {
-				ERR("_ic_list_clone_repr() Fail(%d)", ret);
-				iotcon_list_free(ret_list);
-				return NULL;
-			}
-			break;
-		default:
-			ERR("Invalid type(%d)", list->type);
+	case IOTCON_TYPE_INT:
+	case IOTCON_TYPE_BOOL:
+	case IOTCON_TYPE_DOUBLE:
+	case IOTCON_TYPE_STR:
+	case IOTCON_TYPE_NULL:
+		ret = _ic_list_clone_value(list, ret_list);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_ic_list_clone_value() Fail(%d)", ret);
 			iotcon_list_free(ret_list);
 			return NULL;
+		}
+		break;
+	case IOTCON_TYPE_LIST:
+		ret = _ic_list_clone_list(list, ret_list);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_ic_list_clone_list() Fail(%d)", ret);
+			iotcon_list_free(ret_list);
+			return NULL;
+		}
+		break;
+	case IOTCON_TYPE_REPR:
+		ret = _ic_list_clone_repr(list, ret_list);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_ic_list_clone_repr() Fail(%d)", ret);
+			iotcon_list_free(ret_list);
+			return NULL;
+		}
+		break;
+	default:
+		ERR("Invalid type(%d)", list->type);
+		iotcon_list_free(ret_list);
+		return NULL;
 	}
 
 	return ret_list;

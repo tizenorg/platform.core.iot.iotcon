@@ -32,7 +32,6 @@ struct ic_resource_request {
 	char *uri;
 	iotcon_options_h header_options;
 	iotcon_query_h query;
-	int request_handler_flag;
 	struct ic_observe_info observation_info;
 	iotcon_repr_h repr;
 	oc_request_h request_handle;

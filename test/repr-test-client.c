@@ -17,11 +17,9 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <iotcon.h>
-#include "test-log.h"
+#include "test.h"
 
-#define CRUD_MAX_BUFFER_SIZE (256)
-
-const char* const room_uri = "/a/room";
+const char * const room_uri = "/a/room";
 
 iotcon_client_h room_resource = NULL;
 
@@ -83,14 +81,14 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 
 		DBG("uri : %s", uri);
 
-		if (!strcmp("/a/light", uri)) {
+		if (TEST_STR_EQUAL == strcmp("/a/light", uri)) {
 			key_count = iotcon_repr_get_keys_count(child_repr);
 			if (key_count) {
 				int brightness;
 				iotcon_repr_get_int(child_repr, "brightness", &brightness);
 				DBG("brightness : %d", brightness);
 			}
-		} else if (!strcmp("/a/switch", uri)) {
+		} else if (TEST_STR_EQUAL == strcmp("/a/switch", uri)) {
 			key_count = iotcon_repr_get_keys_count(child_repr);
 			if (key_count) {
 				bool bswitch;
@@ -181,9 +179,9 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		ERR("iotcon_client_get_types() Fail(%d)", ret);
 		return;
 	}
-	iotcon_resource_types_foreach(resource_types, _get_res_type_fn, (void*)resource_uri);
+	iotcon_resource_types_foreach(resource_types, _get_res_type_fn, (void *)resource_uri);
 
-	if (!strcmp(room_uri, resource_uri)) {
+	if (TEST_STR_EQUAL == strcmp(room_uri, resource_uri)) {
 		/* copy resource to use elsewhere */
 		room_resource = iotcon_client_clone(resource);
 

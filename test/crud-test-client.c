@@ -18,11 +18,9 @@
 #include <glib.h>
 
 #include <iotcon.h>
-#include "test-log.h"
+#include "test.h"
 
-#define CRUD_MAX_BUFFER_SIZE (256)
-
-const char* const door_uri = "/a/door";
+const char * const door_uri = "/a/door";
 
 iotcon_client_h door_resource = NULL;
 
@@ -36,6 +34,12 @@ static void _on_observe(iotcon_options_h header_options, iotcon_repr_h recv_repr
 		int response_result, int sequence_number, void *user_data)
 {
 	INFO("_on_observe");
+
+	static int i = 0;
+	i++;
+
+	if (2 == i)
+		iotcon_observer_stop(door_resource);
 }
 
 static void _on_delete(iotcon_options_h header_options, int response_result,
@@ -219,7 +223,7 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 
 	iotcon_subscribe_presence(resource_host, "core.door", _presence_handler, NULL);
 
-	if (!strcmp(door_uri, resource_uri)) {
+	if (TEST_STR_EQUAL == strcmp(door_uri, resource_uri)) {
 		door_resource = iotcon_client_clone(resource);
 
 		iotcon_query_h query = iotcon_query_new();

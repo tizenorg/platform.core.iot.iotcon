@@ -1,6 +1,6 @@
 #include <glib.h>
 #include <iotcon.h>
-#include "test-log.h"
+#include "test.h"
 
 int main()
 {

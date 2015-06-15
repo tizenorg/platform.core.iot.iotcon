@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_TEST_LOG_H__
-#define __IOT_CONNECTIVITY_MANAGER_TEST_LOG_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_TEST_H__
+#define __IOT_CONNECTIVITY_MANAGER_TEST_H__
 
-#define ICTEST_LOGRED		"\033[0;31m"
-#define ICTEST_LOGGREEN		"\033[0;32m"
-#define ICTEST_LOGBROWN		"\033[0;33m"
-#define ICTEST_LOGBLUE		"\033[0;34m"
-#define ICTEST_LOGEND		"\033[0;m"
+/* for strcmp() */
+#define TEST_STR_EQUAL 0
+
+#define ICTEST_LOGRED "\033[0;31m"
+#define ICTEST_LOGGREEN "\033[0;32m"
+#define ICTEST_LOGBROWN "\033[0;33m"
+#define ICTEST_LOGBLUE "\033[0;34m"
+#define ICTEST_LOGEND "\033[0;m"
 
 #undef _DBG
 #undef _INFO
@@ -126,4 +129,4 @@
 		} \
 	} while (0)
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_TEST_LOG_H__ */
+#endif /* __IOT_CONNECTIVITY_MANAGER_TEST_H__ */

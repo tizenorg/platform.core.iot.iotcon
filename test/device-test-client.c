@@ -1,6 +1,6 @@
 #include <glib.h>
 #include <iotcon.h>
-#include "test-log.h"
+#include "test.h"
 
 static void _get_device_info(iotcon_device_info_s info, void *user_data)
 {

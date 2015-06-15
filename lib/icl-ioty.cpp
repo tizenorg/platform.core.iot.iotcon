@@ -32,7 +32,8 @@ extern "C" {
 #include "icl-ioty.h"
 }
 
-#define IC_UNICAST_RESOURCE_DISCOVERY ":5683/oc/core"
+#define IC_COAP "coap://"
+#define IC_UNICAST_RESOURCE_DISCOVERY "/oc/core"
 #define IC_MULTICAST_RESOURCE_DISCOVERY "/oc/core"
 #define IC_DEVICE_DISCOVERY "/oc/core/d"
 
@@ -102,6 +103,7 @@ namespace icIotivityHandler {
 		{
 			struct ic_remote_resource resource_s = {0};
 			resource_s.types = NULL;
+			string resource_host;
 
 			vector<string> resource_types = resource->getResourceTypes();
 			if (0 < resource_types.size()) {
@@ -116,7 +118,11 @@ namespace icIotivityHandler {
 			}
 
 			resource_s.uri = ic_utils_strdup(resource->uri().c_str());
-			resource_s.host = ic_utils_strdup(resource->host().c_str());
+
+			resource_host = resource->host();
+			resource_host.erase(0, strlen(IC_COAP));
+			resource_s.host = ic_utils_strdup(resource_host.c_str());
+
 			resource_s.is_observable = resource->isObservable();
 
 			vector<string> resource_interfaces = resource->getResourceInterfaces();
@@ -166,8 +172,7 @@ namespace icIotivityHandler {
 
 			if (OC_STACK_OK == eCode) {
 				res = IOTCON_RESPONSE_RESULT_OK;
-			}
-			else {
+			} else {
 				ERR("get() Fail(%d)", eCode);
 				res = IOTCON_RESPONSE_RESULT_ERROR;
 			}
@@ -211,8 +216,7 @@ namespace icIotivityHandler {
 
 			if (OC_STACK_OK == eCode) {
 				res = IOTCON_RESPONSE_RESULT_OK;
-			}
-			else {
+			} else {
 				ERR("put() Fail(%d)", eCode);
 				res = IOTCON_RESPONSE_RESULT_ERROR;
 			}
@@ -256,11 +260,9 @@ namespace icIotivityHandler {
 
 			if (OC_STACK_OK == eCode) {
 				res = IOTCON_RESPONSE_RESULT_OK;
-			}
-			else if (OC_STACK_RESOURCE_CREATED == eCode) {
+			} else if (OC_STACK_RESOURCE_CREATED == eCode) {
 				res = IOTCON_RESPONSE_RESULT_RESOURCE_CREATED;
-			}
-			else {
+			} else {
 				ERR("post() Fail(%d)", eCode);
 				res = IOTCON_RESPONSE_RESULT_ERROR;
 			}
@@ -301,11 +303,9 @@ namespace icIotivityHandler {
 
 			if (OC_STACK_OK == eCode) {
 				res = IOTCON_RESPONSE_RESULT_OK;
-			}
-			else if (OC_STACK_RESOURCE_DELETED == eCode) {
+			} else if (OC_STACK_RESOURCE_DELETED == eCode) {
 				res = IOTCON_RESPONSE_RESULT_RESOURCE_DELETED;
-			}
-			else {
+			} else {
 				ERR("deleteResource() Fail(%d)", eCode);
 				res = IOTCON_RESPONSE_RESULT_ERROR;
 			}
@@ -346,8 +346,7 @@ namespace icIotivityHandler {
 
 			if (OC_STACK_OK == eCode) {
 				res = IOTCON_RESPONSE_RESULT_OK;
-			}
-			else {
+			} else {
 				ERR("observe() Fail(%d)", eCode);
 				res = IOTCON_RESPONSE_RESULT_ERROR;
 			}
@@ -543,8 +542,8 @@ static OCEntityHandlerResult _ic_ioty_request_handler(
 		return OC_EH_ERROR;
 	}
 
-	request_s.request_handle = (iotcon_request_h)request->getRequestHandle();
-	request_s.resource_handle = (iotcon_client_h)request->getResourceHandle();
+	request_s.request_handle = request->getRequestHandle();
+	request_s.resource_handle = request->getResourceHandle();
 
 	ObservationInfo observationInfo = request->getObservationInfo();
 	request_s.observation_info.action = (iotcon_observe_action_e)observationInfo.action;
@@ -552,12 +551,10 @@ static OCEntityHandlerResult _ic_ioty_request_handler(
 	DBG("obs_info.obsId=%d", observationInfo.obsId);
 
 	/* call handler_cb */
-	if (temp_res->cb) {
+	if (temp_res->cb)
 		temp_res->cb(&request_s, temp_res->user_data);
-	}
-	else {
+	else
 		WARN("temp_res->request_handler_cb is null");
-	}
 
 	free(request_s.uri);
 
@@ -591,16 +588,13 @@ extern "C" OCResourceHandle ic_ioty_register_res(const char *uri,
 	if (IOTCON_INTERFACE_DEFAULT & ifaces) {
 		resInterface = DEFAULT_INTERFACE;
 		ifaces ^= IOTCON_INTERFACE_DEFAULT;
-	}
-	else if (IOTCON_INTERFACE_LINK & ifaces) {
+	} else if (IOTCON_INTERFACE_LINK & ifaces) {
 		resInterface = LINK_INTERFACE;
 		ifaces ^= IOTCON_INTERFACE_LINK;
-	}
-	else if (IOTCON_INTERFACE_BATCH & ifaces) {
+	} else if (IOTCON_INTERFACE_BATCH & ifaces) {
 		resInterface = BATCH_INTERFACE;
 		ifaces ^= IOTCON_INTERFACE_BATCH;
-	}
-	else if (IOTCON_INTERFACE_GROUP & ifaces) {
+	} else if (IOTCON_INTERFACE_GROUP & ifaces) {
 		resInterface = GROUP_INTERFACE;
 		ifaces ^= IOTCON_INTERFACE_GROUP;
 	}
@@ -635,7 +629,7 @@ extern "C" int ic_ioty_unregister_res(iotcon_resource_h resource_handle)
 	OCResourceHandle resourceHandle = resource_handle;
 
 	OCStackResult result = unregisterResource(resourceHandle);
-	if(OC_STACK_OK != result) {
+	if (OC_STACK_OK != result) {
 		ERR("unregisterResource Fail(%d)", result);
 		return IOTCON_ERROR_IOTIVITY;
 	}
@@ -652,17 +646,13 @@ extern "C" int ic_ioty_convert_interface_string(const char *src, iotcon_interfac
 
 	if (IC_STR_EQUAL == DEFAULT_INTERFACE.compare(interface_str)) {
 		*dest = IOTCON_INTERFACE_DEFAULT;
-	}
-	else if (IC_STR_EQUAL == LINK_INTERFACE.compare(interface_str)) {
+	} else if (IC_STR_EQUAL == LINK_INTERFACE.compare(interface_str)) {
 		*dest = IOTCON_INTERFACE_LINK;
-	}
-	else if (IC_STR_EQUAL == BATCH_INTERFACE.compare(interface_str)) {
+	} else if (IC_STR_EQUAL == BATCH_INTERFACE.compare(interface_str)) {
 		*dest = IOTCON_INTERFACE_BATCH;
-	}
-	else if (IC_STR_EQUAL == GROUP_INTERFACE.compare(interface_str)) {
+	} else if (IC_STR_EQUAL == GROUP_INTERFACE.compare(interface_str)) {
 		*dest = IOTCON_INTERFACE_GROUP;
-	}
-	else {
+	} else {
 		ERR("Invalid interface");
 		*dest = IOTCON_INTERFACE_NONE;
 		return IOTCON_ERROR_INVALID_PARAMETER;
@@ -810,7 +800,7 @@ extern "C" int ic_ioty_get_device_info(const char *host_address,
 		iotcon_device_info_cb cb, void *user_data)
 {
 	OCStackResult ret;
-	string resHost = host_address + string(IC_DEVICE_DISCOVERY);
+	string resHost = string(IC_COAP) + host_address + string(IC_DEVICE_DISCOVERY);
 
 	shared_ptr<icIotivityHandler::deviceObject> object
 		= make_shared<icIotivityHandler::deviceObject>(cb, user_data);
@@ -829,8 +819,8 @@ extern "C" int ic_ioty_get_device_info(const char *host_address,
 }
 
 
-extern "C" int ic_ioty_send_notify(OCResourceHandle resHandle, struct ic_notify_msg *msg,
-		iotcon_observers_h observers)
+extern "C" int ic_ioty_notify_list_of_observers(OCResourceHandle resHandle,
+		struct ic_notify_msg *msg, iotcon_observers_h observers)
 {
 	int ret;
 	OCStackResult ocRet;
@@ -838,7 +828,7 @@ extern "C" int ic_ioty_send_notify(OCResourceHandle resHandle, struct ic_notify_
 	OCRepresentation ocRep;
 	string iface;
 
-	GList *node = g_list_first((GList*)observers);
+	GList *node = g_list_first((GList *)observers);
 	while (node) {
 		int obs_id = GPOINTER_TO_UINT(node->data);
 		obsIds.push_back(obs_id);
@@ -847,30 +837,52 @@ extern "C" int ic_ioty_send_notify(OCResourceHandle resHandle, struct ic_notify_
 	}
 
 	shared_ptr<OCResourceResponse> resourceResponse(new OCResourceResponse());
-	resourceResponse->setErrorCode(msg->error_code);
 
-	ret = ic_ioty_repr_parse(msg->repr, ocRep);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("ic_ioty_repr_parse() Fail(%d)", ret);
-		return ret;
-	}
+	if (msg) {
+		resourceResponse->setErrorCode(msg->error_code);
 
-	if (IOTCON_INTERFACE_NONE != msg->iface) {
-		ret = _ic_ioty_convert_interface_flag(msg->iface, iface);
+		ret = ic_ioty_repr_parse(msg->repr, ocRep);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("_ic_ioty_convert_interface_flag(%d) Fail(%d)", msg->iface, ret);
+			ERR("ic_ioty_repr_parse() Fail(%d)", ret);
 			return ret;
 		}
-	}
-	else {
-		iface = DEFAULT_INTERFACE;
-	}
 
-	resourceResponse->setResourceRepresentation(ocRep, iface);
+		if (IOTCON_INTERFACE_NONE != msg->iface) {
+			ret = _ic_ioty_convert_interface_flag(msg->iface, iface);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("_ic_ioty_convert_interface_flag(%d) Fail(%d)", msg->iface, ret);
+				return ret;
+			}
+		} else {
+			iface = DEFAULT_INTERFACE;
+		}
+
+		resourceResponse->setResourceRepresentation(ocRep, iface);
+	}
 
 	ocRet = notifyListOfObservers(resHandle, obsIds, resourceResponse);
-	if (OC_STACK_OK != ocRet) {
+	if (OC_STACK_NO_OBSERVERS == ocRet) {
+		WARN("No observers. Stop notifying");
+		return IOTCON_ERROR_NONE;
+	} else if (OC_STACK_OK != ocRet) {
 		ERR("notifyListOfObservers() Fail(%d)", ocRet);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+extern "C" int ic_ioty_notify_all(OCResourceHandle resHandle)
+{
+	OCStackResult ocRet;
+
+	ocRet = notifyAllObservers(resHandle);
+	if (OC_STACK_NO_OBSERVERS == ocRet) {
+		WARN("No observers. Stop notifying");
+		return IOTCON_ERROR_NONE;
+	} else if (OC_STACK_OK != ocRet) {
+		ERR("notifyAllObservers() Fail(%d)", ocRet);
 		return IOTCON_ERROR_IOTIVITY;
 	}
 
@@ -905,8 +917,7 @@ extern "C" int ic_ioty_send_res_response_data(struct ic_resource_response *resp)
 				ERR("_ic_ioty_convert_interface_flag(%d) Fail(%d)", resp->iface, ret);
 				return ret;
 			}
-		}
-		else {
+		} else {
 			iface = DEFAULT_INTERFACE;
 		}
 
@@ -932,6 +943,7 @@ extern "C" const iotcon_presence_h ic_ioty_subscribe_presence(const char *host_a
 {
 	OCStackResult ret;
 	iotcon_presence_h presence_handle = NULL;
+	string host;
 
 	shared_ptr<icIotivityHandler::presenceObject> object
 		= make_shared<icIotivityHandler::presenceObject>(cb, user_data);
@@ -939,8 +951,8 @@ extern "C" const iotcon_presence_h ic_ioty_subscribe_presence(const char *host_a
 		= bind(&icIotivityHandler::presenceObject::presenceHandler, object,
 				placeholders::_1, placeholders::_2, placeholders::_3);
 
-	ret = subscribePresence(presence_handle, host_address, resource_type,
-			subscribeCallback);
+	host = string(IC_COAP) + string(host_address);
+	ret = subscribePresence(presence_handle, host, resource_type, subscribeCallback);
 
 	if (OC_STACK_OK != ret) {
 		ERR("subscribePresence() Fail(%d)", ret);
@@ -994,6 +1006,8 @@ extern "C" int ic_ioty_find_resource(const char *host_address, const char *resou
 {
 	OCStackResult ret;
 	ostringstream resource_name;
+
+	resource_name << IC_COAP;
 
 	if (IC_STR_EQUAL == strcmp(IOTCON_MULTICAST_ADDRESS, host_address))
 		resource_name << host_address << IC_MULTICAST_RESOURCE_DISCOVERY;
@@ -1051,16 +1065,15 @@ static OCResource::Ptr _ic_ioty_create_oc_resource(iotcon_client_h resource)
 	RETV_IF(NULL == resource->uri, NULL);
 	RETV_IF(NULL == resource->types, NULL);
 
-	host = resource->host;
+	host = string(IC_COAP) + string(resource->host);
 	uri = resource->uri;
 
 	iotcon_resource_types_foreach(resource->types, _ic_ioty_accumulate_res_types,
-			(void*)&resource_types);
+			(void *)&resource_types);
 
 	if (IOTCON_INTERFACE_NONE == resource->ifaces) {
 		resource_ifs.push_back(DEFAULT_INTERFACE);
-	}
-	else {
+	} else {
 		if (IOTCON_INTERFACE_DEFAULT & resource->ifaces)
 			resource_ifs.push_back(DEFAULT_INTERFACE);
 
@@ -1079,7 +1092,7 @@ static OCResource::Ptr _ic_ioty_create_oc_resource(iotcon_client_h resource)
 
 	if (resource->header_options) {
 		iotcon_options_foreach(resource->header_options,
-				_ic_ioty_accumulate_options_vector, (void*)&header_options);
+				_ic_ioty_accumulate_options_vector, (void *)&header_options);
 		ocResource->setHeaderOptions(header_options);
 	}
 
@@ -1137,7 +1150,7 @@ extern "C" int ic_ioty_put(iotcon_client_h resource, iotcon_repr_h repr,
 	QueryParamsMap queryParams;
 
 	if (query)
-		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void*)&queryParams);
+		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void *)&queryParams);
 
 	ret = ic_ioty_repr_parse(repr, ocRep);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -1172,7 +1185,7 @@ extern "C" int ic_ioty_post(iotcon_client_h resource, iotcon_repr_h repr,
 	OCResource::Ptr ocResource;
 
 	if (query)
-		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void*)&queryParams);
+		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void *)&queryParams);
 
 	ret = ic_ioty_repr_parse(repr, ocRep);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -1231,15 +1244,13 @@ extern "C" int ic_ioty_observe(iotcon_client_h resource,
 	QueryParamsMap queryParams;
 
 	if (query)
-		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void*)&queryParams);
+		iotcon_query_foreach(query, _ic_ioty_accumulate_query_map, (void *)&queryParams);
 
 	if (IOTCON_OBSERVE == observe_type) {
 		observeType = ObserveType::Observe;
-	}
-	else if (IOTCON_OBSERVE_ALL == observe_type) {
+	} else if (IOTCON_OBSERVE_ALL == observe_type) {
 		observeType = ObserveType::ObserveAll;
-	}
-	else {
+	} else {
 		ERR("Invalid observe_type");
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
@@ -1248,7 +1259,7 @@ extern "C" int ic_ioty_observe(iotcon_client_h resource,
 
 	resource_handle *obs_h = new resource_handle();
 	obs_h->ocResource = ocResource;
-	resource->observe_handle = (void*)obs_h;
+	resource->observe_handle = (void *)obs_h;
 
 	shared_ptr<icIotivityHandler::observeObject> object
 		= make_shared<icIotivityHandler::observeObject>(cb, user_data);
@@ -1273,7 +1284,7 @@ extern "C" int ic_ioty_cancel_observe(iotcon_client_h resource)
 	delete (resource_handle *)resource->observe_handle;
 	resource->observe_handle = NULL;
 
-	ret = ocResource->cancelObserve();
+	ret = ocResource->cancelObserve(QualityOfService::HighQos);
 	if (OC_STACK_OK != ret) {
 		ERR("cancelObserve() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;

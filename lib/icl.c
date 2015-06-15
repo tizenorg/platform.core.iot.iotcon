@@ -48,7 +48,7 @@ static void _free_resource(gpointer data)
 	free(resource);
 }
 
-/* Host address should begin with "coap://" */
+
 API void iotcon_initialize(const char *addr, unsigned short port)
 {
 	FN_CALL;
@@ -60,7 +60,7 @@ API void iotcon_initialize(const char *addr, unsigned short port)
 	ic_request_cb_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL,
 			_free_resource);
 
-#if !GLIB_CHECK_VERSION(2,35,0)
+#if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
 #endif
 	ic_is_init = true;
@@ -239,9 +239,9 @@ API int iotcon_unbind_resource(iotcon_resource_h parent, iotcon_resource_h child
 			if (child == parent->children[i])
 				parent->children[i] = NULL;
 		}
-	}
-	else
+	} else {
 		ERR("ic_ioty_unbind_res() Fail(%d)", ret);
+	}
 
 	return ret;
 }
@@ -287,18 +287,6 @@ API int iotcon_resource_get_uri(iotcon_resource_h resource, char **uri)
 	RETV_IF(NULL == uri, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*uri = resource->uri;
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-/* The content of the resource should not be freed by user. */
-API int iotcon_resource_get_host(iotcon_resource_h resource, char **host)
-{
-	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == host, IOTCON_ERROR_INVALID_PARAMETER);
-
-	*host = resource->host;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -372,7 +360,7 @@ API iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
 
 	RETV_IF(NULL == host_address, NULL);
 	RETV_IF(NULL == cb, NULL);
-	if (resource_type &&(IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
+	if (resource_type && (IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
 		ERR("The length of resource_type(%s) is invalid", resource_type);
 		return NULL;
 	}
@@ -416,6 +404,7 @@ API iotcon_notimsg_h iotcon_notimsg_new(iotcon_repr_h repr, iotcon_interface_e i
 	}
 
 	msg->repr = repr;
+	ic_repr_inc_ref_count(msg->repr);
 	msg->iface = iface;
 	msg->error_code = 200;
 
@@ -432,19 +421,31 @@ API void iotcon_notimsg_free(iotcon_notimsg_h msg)
 }
 
 
-API int iotcon_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
+API int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notimsg_h msg,
 		iotcon_observers_h observers)
 {
 	int ret;
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == msg, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == msg->repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_ioty_send_notify(resource->handle, msg, observers);
+	ret = ic_ioty_notify_list_of_observers(resource->handle, msg, observers);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("ic_ioty_send_notify() Fail(%d)", ret);
+
+	return ret;
+}
+
+
+API int iotcon_notify_all(iotcon_resource_h resource)
+{
+	int ret;
+
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+
+	ret = ic_ioty_notify_all(resource->handle);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("ic_ioty_send_notify_all() Fail(%d)", ret);
 
 	return ret;
 }

@@ -149,7 +149,7 @@ API int iotcon_resource_types_foreach(iotcon_resource_types_h types,
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	for (node = types->type_list; node; node = node->next) {
-		if (IOTCON_FUNC_STOP == cb((const char*)node->data, user_data))
+		if (IOTCON_FUNC_STOP == cb((const char *)node->data, user_data))
 			break;
 	}
 
@@ -159,7 +159,7 @@ API int iotcon_resource_types_foreach(iotcon_resource_types_h types,
 
 API iotcon_resource_types_h iotcon_resource_types_clone(iotcon_resource_types_h types)
 {
-	GList * node;
+	GList *node;
 	char *resource_type;
 	iotcon_resource_types_h clone;
 
