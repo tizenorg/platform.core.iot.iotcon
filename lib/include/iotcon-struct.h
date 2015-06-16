@@ -67,7 +67,6 @@ typedef int (*iotcon_query_foreach_cb)(const char *key, const char *value,
 		void *user_data);
 int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
 		void *user_data);
-iotcon_query_h iotcon_query_clone(iotcon_query_h query);
 
 
 /**

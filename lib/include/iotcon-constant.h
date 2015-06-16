@@ -84,7 +84,6 @@ typedef enum {
 } iotcon_resource_property_e;
 
 typedef enum {
-	IOTCON_RESPONSE_NONE = 0,
 	IOTCON_RESPONSE_RESOURCE_URI = 1,
 	IOTCON_RESPONSE_RESULT = 2,
 	IOTCON_RESPONSE_REPRESENTATION = 3,

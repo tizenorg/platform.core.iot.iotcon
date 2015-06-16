@@ -93,15 +93,14 @@ static void _room_request_handler_get(iotcon_request_h request,
 	light_repr = iotcon_repr_new();
 	iotcon_repr_set_uri(light_repr, "/a/light");
 	iotcon_repr_set_int(light_repr, "brightness", 50);
+	iotcon_repr_append_child(room_repr, light_repr);
+	iotcon_repr_free(light_repr);
 
 	/* create a switch Representation */
 	switch_repr = iotcon_repr_new();
 	iotcon_repr_set_uri(switch_repr, "/a/switch");
 	iotcon_repr_set_bool(switch_repr, "switch", false);
-
-	iotcon_repr_append_child(room_repr, light_repr);
 	iotcon_repr_append_child(room_repr, switch_repr);
-	iotcon_repr_free(light_repr);
 	iotcon_repr_free(switch_repr);
 
 	ret = iotcon_request_get_query(request, &query);

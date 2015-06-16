@@ -57,7 +57,7 @@ API void iotcon_response_free(iotcon_response_h resp)
 	if (resp->new_uri)
 		free(resp->new_uri);
 	if (resp->header_options)
-		ic_options_free(resp->header_options);
+		iotcon_options_free(resp->header_options);
 	free(resp);
 }
 
@@ -83,6 +83,7 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 		value = va_arg(args, int);
 		if (value < IOTCON_RESPONSE_RESULT_OK || IOTCON_RESPONSE_RESULT_MAX <= value) {
 			ERR("Invalid value(%d)", value);
+			va_end(args);
 			return IOTCON_ERROR_INVALID_PARAMETER;
 		}
 		resp->result = value;
@@ -92,32 +93,29 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 		if (resp->new_uri)
 			free(resp->new_uri);
 
-		if (new_resource_uri)
-			resp->new_uri = ic_utils_strdup(new_resource_uri);
-		else
+		if (new_resource_uri) {
+			resp->new_uri = strdup(new_resource_uri);
+			if (NULL == resp->new_uri) {
+				ERR("strdup() Fail(%d)", errno);
+				va_end(args);
+				return IOTCON_ERROR_OUT_OF_MEMORY;
+			}
+		} else {
 			resp->new_uri = NULL;
+		}
 		break;
 	case IOTCON_RESPONSE_HEADER_OPTIONS:
 		options = va_arg(args, iotcon_options_h);
 		if (resp->header_options)
-			ic_options_free(resp->header_options);
-		if (NULL == options) {
-			resp->header_options = NULL;
-			break;
-		}
-		if (true == options->has_parent)
+			iotcon_options_free(resp->header_options);
+
+		if (options)
 			resp->header_options = ic_options_ref(options);
 		else
-			resp->header_options = options;
-		if (NULL == resp->header_options) {
-			ERR("header_options is NULL");
-			return IOTCON_ERROR_NO_DATA;
-		}
-
-		resp->header_options->has_parent = true;
+			resp->header_options = NULL;
 		break;
-	case IOTCON_RESPONSE_NONE:
 	default:
+		ERR("Invalid Response Property(%d)", prop);
 		break;
 	}
 

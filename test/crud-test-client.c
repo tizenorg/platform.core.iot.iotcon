@@ -117,13 +117,10 @@ static void _on_put(iotcon_options_h header_options, iotcon_repr_h recv_repr,
 
 	iotcon_repr_h send_repr = iotcon_repr_new();
 
-	iotcon_query_h query_params = iotcon_query_new();
 	/* send POST request */
-	iotcon_post(door_resource, send_repr, query_params, _on_post, NULL);
+	iotcon_post(door_resource, send_repr, NULL, _on_post, NULL);
 
 	iotcon_repr_free(send_repr);
-	iotcon_query_free(query_params);
-
 }
 
 static void _on_get(iotcon_options_h header_options, iotcon_repr_h recv_repr,
@@ -138,12 +135,10 @@ static void _on_get(iotcon_options_h header_options, iotcon_repr_h recv_repr,
 	iotcon_repr_h send_repr = iotcon_repr_new();
 	iotcon_repr_set_bool(send_repr, "opened", true);
 
-	iotcon_query_h query_params = iotcon_query_new();
 	/* send PUT request */
-	iotcon_put(door_resource, send_repr, query_params, _on_put, NULL);
+	iotcon_put(door_resource, send_repr, NULL, _on_put, NULL);
 
 	iotcon_repr_free(send_repr);
-	iotcon_query_free(query_params);
 }
 
 static int _get_res_type_fn(const char *string, void *user_data)

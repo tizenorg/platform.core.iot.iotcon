@@ -23,6 +23,17 @@
 #include "icl-utils.h"
 #include "icl-options.h"
 
+iotcon_options_h ic_options_ref(iotcon_options_h options)
+{
+	RETV_IF(NULL == options, NULL);
+	RETV_IF(options->ref_count <= 0, NULL);
+
+	options->ref_count++;
+
+	return options;
+}
+
+
 API iotcon_options_h iotcon_options_new()
 {
 	iotcon_options_h options = calloc(1, sizeof(struct ic_options));
@@ -32,25 +43,22 @@ API iotcon_options_h iotcon_options_new()
 	}
 
 	options->hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, free);
+	options->ref_count = 1;
+
 	return options;
-}
-
-
-void ic_options_free(iotcon_options_h options)
-{
-	RET_IF(NULL == options);
-
-	g_hash_table_unref(options->hash);
-	free(options);
 }
 
 
 API void iotcon_options_free(iotcon_options_h options)
 {
 	RET_IF(NULL == options);
-	RETM_IF(true == options->has_parent, "iotcon_options has parent");
 
-	ic_options_free(options);
+	options->ref_count--;
+
+	if (0 == options->ref_count) {
+		g_hash_table_unref(options->hash);
+		free(options);
+	}
 }
 
 
@@ -60,10 +68,8 @@ API void iotcon_options_free(iotcon_options_h options)
 API int iotcon_options_insert(iotcon_options_h options, unsigned short id,
 		const char *data)
 {
-	FN_CALL;
-
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(options->has_parent, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(1 < options->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
 	RETVM_IF(IOTCON_OPTIONS_MAX <= g_hash_table_size(options->hash),
 			IOTCON_ERROR_OUT_OF_MEMORY, "Options already have maximum elements.");
@@ -86,7 +92,7 @@ API int iotcon_options_delete(iotcon_options_h options, unsigned short id)
 	gboolean ret;
 
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(options->has_parent, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(1 < options->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
 
 	ret = g_hash_table_remove(options->hash, GUINT_TO_POINTER(id));
@@ -129,22 +135,3 @@ API int iotcon_options_foreach(iotcon_options_h options,
 
 	return IOTCON_ERROR_NONE;
 }
-
-
-iotcon_options_h ic_options_ref(iotcon_options_h options)
-{
-	iotcon_options_h ref;
-
-	RETV_IF(NULL == options, NULL);
-
-	ref = calloc(1, sizeof(struct ic_options));
-	if (NULL == ref) {
-		ERR("calloc() Fail(%d)", errno);
-		return NULL;
-	}
-
-	ref->hash = g_hash_table_ref(options->hash);
-
-	return ref;
-}
-
