@@ -26,18 +26,18 @@
 static GDBusConnection *icd_dbus_conn;
 static icDbus *icd_dbus_object;
 
-int icd_dbus_emit_signal(const char *sig_name, GVariant *value)
+int icd_dbus_emit_signal(const char *signal_name, const char *sender, GVariant *value)
 {
 	gboolean ret;
 	GError *error = NULL;
 
-	DBG("SIG : %s, %s", sig_name, g_variant_print(value, FALSE));
+	DBG("SIG : %s, %s", signal_name, g_variant_print(value, FALSE));
 
 	ret = g_dbus_connection_emit_signal(icd_dbus_conn,
-			NULL,
+			sender,
 			IOTCON_DBUS_OBJPATH,
 			IOTCON_DBUS_INTERFACE,
-			sig_name,
+			signal_name,
 			value,
 			&error);
 	if (FALSE == ret) {
@@ -58,15 +58,14 @@ int icd_dbus_emit_signal(const char *sig_name, GVariant *value)
 
 static gboolean _dbus_handle_register_resource(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		const gchar *arg_uri,
-		const gchar* const *arg_resource_types,
-		gint arg_ifaces,
-		guchar arg_properties)
+		const gchar *uri,
+		const gchar* const *resource_types,
+		gint ifaces,
+		guchar properties)
 {
 	void *handle = NULL;
 
-	handle = icd_ioty_register_resource(arg_uri, arg_resource_types, arg_ifaces,
-			arg_properties);
+	handle = icd_ioty_register_resource(uri, resource_types, ifaces, properties);
 	if (NULL == handle)
 		ERR("icd_ioty_register_resource() Fail");
 
@@ -77,11 +76,11 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 
 
 static gboolean _dbus_handle_unregister_resource(icDbus *object,
-		GDBusMethodInvocation *invocation, gint arg_resource)
+		GDBusMethodInvocation *invocation, gint resource)
 {
 	int ret;
 
-	ret = icd_ioty_unregister_resource(GINT_TO_POINTER(arg_resource));
+	ret = icd_ioty_unregister_resource(GINT_TO_POINTER(resource));
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_unregister_resource() Fail(%d)", ret);
 
@@ -92,11 +91,11 @@ static gboolean _dbus_handle_unregister_resource(icDbus *object,
 
 
 static gboolean _dbus_handle_bind_interface(icDbus *object,
-		GDBusMethodInvocation *invocation, gint arg_resource, gint arg_iface)
+		GDBusMethodInvocation *invocation, gint resource, gint iface)
 {
 	int ret;
 
-	ret = icd_ioty_bind_interface(GINT_TO_POINTER(arg_resource), arg_iface);
+	ret = icd_ioty_bind_interface(GINT_TO_POINTER(resource), iface);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_bind_interface() Fail(%d)", ret);
 
@@ -107,11 +106,11 @@ static gboolean _dbus_handle_bind_interface(icDbus *object,
 
 
 static gboolean _dbus_handle_bind_type(icDbus *object,
-		GDBusMethodInvocation *invocation, gint arg_resource, const gchar *arg_type)
+		GDBusMethodInvocation *invocation, gint resource, const gchar *type)
 {
 	int ret;
 
-	ret = icd_ioty_bind_type(GINT_TO_POINTER(arg_resource), arg_type);
+	ret = icd_ioty_bind_type(GINT_TO_POINTER(resource), type);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_bind_type() Fail(%d)", ret);
 
@@ -122,11 +121,11 @@ static gboolean _dbus_handle_bind_type(icDbus *object,
 
 
 static gboolean _dbus_handle_bind_resource(icDbus *object,
-		GDBusMethodInvocation *invocation, gint arg_parent, gint arg_child)
+		GDBusMethodInvocation *invocation, gint parent, gint child)
 {
 	int ret;
 
-	ret = icd_ioty_bind_resource(GINT_TO_POINTER(arg_parent), GINT_TO_POINTER(arg_child));
+	ret = icd_ioty_bind_resource(GINT_TO_POINTER(parent), GINT_TO_POINTER(child));
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_bind_resource() Fail(%d)", ret);
 
@@ -137,12 +136,11 @@ static gboolean _dbus_handle_bind_resource(icDbus *object,
 
 
 static gboolean _dbus_handle_unbind_resource(icDbus *object,
-		GDBusMethodInvocation *invocation, gint arg_parent, gint arg_child)
+		GDBusMethodInvocation *invocation, gint parent, gint child)
 {
 	int ret;
 
-	ret = icd_ioty_unbind_resource(GINT_TO_POINTER(arg_parent),
-			GINT_TO_POINTER(arg_child));
+	ret = icd_ioty_unbind_resource(GINT_TO_POINTER(parent), GINT_TO_POINTER(child));
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_unbind_resource() Fail(%d)", ret);
 
@@ -154,13 +152,15 @@ static gboolean _dbus_handle_unbind_resource(icDbus *object,
 
 static gboolean _dbus_handle_find_resource(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		const gchar *arg_host_address,
-		const gchar *arg_type,
-		const gchar *sig_name)
+		const gchar *host_address,
+		const gchar *type,
+		guint signal_number)
 {
 	int ret;
+	const gchar *sender;
 
-	ret = icd_ioty_find_resource(arg_host_address, arg_type, sig_name);
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	ret = icd_ioty_find_resource(host_address, type, signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_find_resource() Fail(%d)", ret);
 
@@ -171,11 +171,13 @@ static gboolean _dbus_handle_find_resource(icDbus *object,
 
 
 static gboolean _dbus_handle_get(icDbus *object, GDBusMethodInvocation *invocation,
-		GVariant *arg_client, GVariant *arg_query, const gchar *sig_name)
+		GVariant *client, GVariant *query, guint signal_number)
 {
 	int ret;
+	const gchar *sender;
 
-	ret = icd_ioty_get(arg_client, arg_query, sig_name);
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	ret = icd_ioty_get(client, query, signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_get() Fail(%d)", ret);
 
@@ -187,14 +189,16 @@ static gboolean _dbus_handle_get(icDbus *object, GDBusMethodInvocation *invocati
 
 static gboolean _dbus_handle_put(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		GVariant *arg_client,
-		const gchar *arg_repr,
-		GVariant *arg_query,
-		const gchar *sig_name)
+		GVariant *client,
+		const gchar *repr,
+		GVariant *query,
+		guint signal_number)
 {
 	int ret;
+	const gchar *sender;
 
-	ret = icd_ioty_put(arg_client, arg_repr, arg_query, sig_name);
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	ret = icd_ioty_put(client, repr, query, signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_put() Fail(%d)", ret);
 
@@ -206,14 +210,16 @@ static gboolean _dbus_handle_put(icDbus *object,
 
 static gboolean _dbus_handle_post(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		GVariant *arg_client,
-		const gchar *arg_repr,
-		GVariant *arg_query,
-		const gchar *sig_name)
+		GVariant *client,
+		const gchar *repr,
+		GVariant *query,
+		guint signal_number)
 {
 	int ret;
+	const gchar *sender;
 
-	ret = icd_ioty_post(arg_client, arg_repr, arg_query, sig_name);
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	ret = icd_ioty_post(client, repr, query, signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_post() Fail(%d)", ret);
 
@@ -225,12 +231,14 @@ static gboolean _dbus_handle_post(icDbus *object,
 
 static gboolean _dbus_handle_delete(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		GVariant *arg_client,
-		const gchar *sig_name)
+		GVariant *client,
+		guint signal_number)
 {
 	int ret;
+	const gchar *sender;
 
-	ret = icd_ioty_delete(arg_client, sig_name);
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	ret = icd_ioty_delete(client, signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_delete() Fail(%d)", ret);
 
@@ -242,15 +250,17 @@ static gboolean _dbus_handle_delete(icDbus *object,
 
 static gboolean _dbus_handle_observer_start(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		GVariant *arg_client,
-		gint arg_observe_type,
-		GVariant *arg_query,
-		const gchar *sig_name)
+		GVariant *client,
+		gint observe_type,
+		GVariant *query,
+		guint signal_number)
 {
 	int ret;
 	int observe_h;
+	const gchar *sender;
 
-	ret = icd_ioty_observer_start(arg_client, arg_observe_type, arg_query, sig_name,
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	ret = icd_ioty_observer_start(client, observe_type, query, signal_number, sender,
 			&observe_h);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_observer_start() Fail(%d)", ret);
@@ -263,11 +273,11 @@ static gboolean _dbus_handle_observer_start(icDbus *object,
 
 static gboolean _dbus_handle_observer_stop(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		gint arg_observe_h)
+		gint observe_h)
 {
 	int ret;
 
-	ret = icd_ioty_observer_stop(GINT_TO_POINTER(arg_observe_h));
+	ret = icd_ioty_observer_stop(GINT_TO_POINTER(observe_h));
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_observer_stop() Fail(%d)", ret);
 
@@ -279,13 +289,13 @@ static gboolean _dbus_handle_observer_stop(icDbus *object,
 
 static gboolean _dbus_handle_notify_list_of_observers(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		gint arg_resource,
-		GVariant *arg_notify_msg,
-		GVariant *arg_observers)
+		gint resource,
+		GVariant *notify_msg,
+		GVariant *observers)
 {
 	int ret;
 
-	ret = icd_ioty_notify_list_of_observers(arg_resource, arg_notify_msg, arg_observers);
+	ret = icd_ioty_notify_list_of_observers(resource, notify_msg, observers);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_notify_list_of_observers() Fail(%d)", ret);
 
@@ -296,11 +306,11 @@ static gboolean _dbus_handle_notify_list_of_observers(icDbus *object,
 
 
 static gboolean _dbus_handle_notify_all(icDbus *object, GDBusMethodInvocation *invocation,
-		gint arg_resource)
+		gint resource)
 {
 	int ret;
 
-	ret = icd_ioty_notify_all(arg_resource);
+	ret = icd_ioty_notify_all(resource);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_notify_all() Fail(%d)", ret);
 
@@ -311,11 +321,11 @@ static gboolean _dbus_handle_notify_all(icDbus *object, GDBusMethodInvocation *i
 
 
 static gboolean _dbus_handle_send_response(icDbus *object,
-		GDBusMethodInvocation *invocation, GVariant *arg_response)
+		GDBusMethodInvocation *invocation, GVariant *response)
 {
 	int ret;
 
-	ret = icd_ioty_send_response(arg_response);
+	ret = icd_ioty_send_response(response);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_send_response() Fail(%d)", ret);
 
@@ -326,11 +336,11 @@ static gboolean _dbus_handle_send_response(icDbus *object,
 
 
 static gboolean _dbus_handle_register_device_info(icDbus *object,
-		GDBusMethodInvocation *invocation, GVariant *arg_device_info)
+		GDBusMethodInvocation *invocation, GVariant *device_info)
 {
 	int ret;
 
-	ret = icd_ioty_register_device_info(arg_device_info);
+	ret = icd_ioty_register_device_info(device_info);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_register_device_info() Fail(%d)", ret);
 
@@ -342,12 +352,14 @@ static gboolean _dbus_handle_register_device_info(icDbus *object,
 
 static gboolean _dbus_handle_get_device_info(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		const gchar *arg_host_address,
-		const gchar *sig_name)
+		const gchar *host_address,
+		guint signal_number)
 {
 	int ret;
+	const gchar *sender;
 
-	ret = icd_ioty_get_device_info(arg_host_address, sig_name);
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	ret = icd_ioty_get_device_info(host_address, signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_get_device_info() Fail(%d)", ret);
 
@@ -359,11 +371,11 @@ static gboolean _dbus_handle_get_device_info(icDbus *object,
 
 static gboolean _dbus_handle_start_presence(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		guint arg_time_to_live)
+		guint time_to_live)
 {
 	int ret;
 
-	ret = icd_ioty_start_presence(arg_time_to_live);
+	ret = icd_ioty_start_presence(time_to_live);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_start_presence() Fail(%d)", ret);
 
@@ -390,13 +402,15 @@ static gboolean _dbus_handle_stop_presence(icDbus *object,
 
 static gboolean _dbus_handle_subscribe_presence(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		const gchar *arg_host_address,
-		const gchar *arg_type,
-		const gchar *sig_name)
+		const gchar *host_address,
+		const gchar *type,
+		guint signal_number)
 {
 	void *presence_h;
+	const gchar *sender;
 
-	presence_h = icd_ioty_subscribe_presence(arg_host_address, arg_type, sig_name);
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	presence_h = icd_ioty_subscribe_presence(host_address, type, signal_number, sender);
 	if (NULL == presence_h)
 		ERR("icd_ioty_subscribe_presence() Fail");
 
@@ -409,11 +423,11 @@ static gboolean _dbus_handle_subscribe_presence(icDbus *object,
 
 static gboolean _dbus_handle_unsubscribe_presence(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		gint arg_presence_h)
+		gint presence_h)
 {
 	int ret;
 
-	ret = icd_ioty_unsubscribe_presence(GINT_TO_POINTER(arg_presence_h));
+	ret = icd_ioty_unsubscribe_presence(GINT_TO_POINTER(presence_h));
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_unsubscribe_presence() Fail(%d)", ret);
 

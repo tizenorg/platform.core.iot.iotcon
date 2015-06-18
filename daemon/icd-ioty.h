@@ -22,8 +22,8 @@
 
 void icd_ioty_config(const char *addr, unsigned short port);
 
-void* icd_ioty_register_resource(const char *uri, const char* const* res_types, int ifaces,
-		uint8_t properties);
+void* icd_ioty_register_resource(const char *uri, const char* const* res_types,
+		int ifaces, uint8_t properties);
 
 int icd_ioty_unregister_resource(iotcon_resource_h resource_handle);
 
@@ -42,29 +42,31 @@ int icd_ioty_notify_all(int resHandle);
 int icd_ioty_send_response(GVariant *resp);
 
 int icd_ioty_find_resource(const char *host_address, const char *resource_type,
-		const char *sig_name);
+		unsigned int signal_number, const char *sender);
 
-int icd_ioty_get(GVariant *resource, GVariant *query, const char *sig_name);
+int icd_ioty_get(GVariant *resource, GVariant *query, unsigned int signal_number,
+		const char *sender);
 
 int icd_ioty_put(GVariant *resource, const char *repr, GVariant *query,
-		const char *sig_name);
+		unsigned int signal_number, const char *sender);
 
 int icd_ioty_post(GVariant *resource, const char *repr, GVariant *query,
-		const char *sig_name);
+		unsigned int signal_number, const char *sender);
 
-int icd_ioty_delete(GVariant *resource, const char *sig_name);
+int icd_ioty_delete(GVariant *resource, unsigned int signal_number, const char *sender);
 
 int icd_ioty_observer_start(GVariant *resource, int observe_type, GVariant *query,
-	   const char *sig_name, int *observe_h);
+		unsigned int signal_number, const char *sender, int *observe_h);
 
 int icd_ioty_observer_stop(void *observe_h);
 
 int icd_ioty_register_device_info(GVariant *value);
 
-int icd_ioty_get_device_info(const char *host_address, const char *sig_name);
+int icd_ioty_get_device_info(const char *host_address, unsigned int signal_number,
+		const char *sender);
 
 iotcon_presence_h icd_ioty_subscribe_presence(const char *host_address,
-		const char *resource_type, const char *sig_name);
+		const char *resource_type, unsigned int signal_number, const char *sender);
 
 int icd_ioty_unsubscribe_presence(iotcon_presence_h presence_handle);
 

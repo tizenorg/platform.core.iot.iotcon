@@ -716,12 +716,12 @@ static const _ExtendedGDBusArgInfo _ic_dbus_method_info_find_resource_IN_ARG_typ
   FALSE
 };
 
-static const _ExtendedGDBusArgInfo _ic_dbus_method_info_find_resource_IN_ARG_sig_name =
+static const _ExtendedGDBusArgInfo _ic_dbus_method_info_find_resource_IN_ARG_signal_number =
 {
   {
     -1,
-    (gchar *) "sig_name",
-    (gchar *) "s",
+    (gchar *) "signal_number",
+    (gchar *) "u",
     NULL
   },
   FALSE
@@ -731,7 +731,7 @@ static const _ExtendedGDBusArgInfo * const _ic_dbus_method_info_find_resource_IN
 {
   &_ic_dbus_method_info_find_resource_IN_ARG_host_address,
   &_ic_dbus_method_info_find_resource_IN_ARG_type,
-  &_ic_dbus_method_info_find_resource_IN_ARG_sig_name,
+  &_ic_dbus_method_info_find_resource_IN_ARG_signal_number,
   NULL
 };
 
@@ -787,12 +787,12 @@ static const _ExtendedGDBusArgInfo _ic_dbus_method_info_get_IN_ARG_query =
   FALSE
 };
 
-static const _ExtendedGDBusArgInfo _ic_dbus_method_info_get_IN_ARG_sig_name =
+static const _ExtendedGDBusArgInfo _ic_dbus_method_info_get_IN_ARG_signal_number =
 {
   {
     -1,
-    (gchar *) "sig_name",
-    (gchar *) "s",
+    (gchar *) "signal_number",
+    (gchar *) "u",
     NULL
   },
   FALSE
@@ -802,7 +802,7 @@ static const _ExtendedGDBusArgInfo * const _ic_dbus_method_info_get_IN_ARG_point
 {
   &_ic_dbus_method_info_get_IN_ARG_client,
   &_ic_dbus_method_info_get_IN_ARG_query,
-  &_ic_dbus_method_info_get_IN_ARG_sig_name,
+  &_ic_dbus_method_info_get_IN_ARG_signal_number,
   NULL
 };
 
@@ -869,12 +869,12 @@ static const _ExtendedGDBusArgInfo _ic_dbus_method_info_put_IN_ARG_query =
   FALSE
 };
 
-static const _ExtendedGDBusArgInfo _ic_dbus_method_info_put_IN_ARG_sig_name =
+static const _ExtendedGDBusArgInfo _ic_dbus_method_info_put_IN_ARG_signal_number =
 {
   {
     -1,
-    (gchar *) "sig_name",
-    (gchar *) "s",
+    (gchar *) "signal_number",
+    (gchar *) "u",
     NULL
   },
   FALSE
@@ -885,7 +885,7 @@ static const _ExtendedGDBusArgInfo * const _ic_dbus_method_info_put_IN_ARG_point
   &_ic_dbus_method_info_put_IN_ARG_client,
   &_ic_dbus_method_info_put_IN_ARG_repr,
   &_ic_dbus_method_info_put_IN_ARG_query,
-  &_ic_dbus_method_info_put_IN_ARG_sig_name,
+  &_ic_dbus_method_info_put_IN_ARG_signal_number,
   NULL
 };
 
@@ -952,12 +952,12 @@ static const _ExtendedGDBusArgInfo _ic_dbus_method_info_post_IN_ARG_query =
   FALSE
 };
 
-static const _ExtendedGDBusArgInfo _ic_dbus_method_info_post_IN_ARG_sig_name =
+static const _ExtendedGDBusArgInfo _ic_dbus_method_info_post_IN_ARG_signal_number =
 {
   {
     -1,
-    (gchar *) "sig_name",
-    (gchar *) "s",
+    (gchar *) "signal_number",
+    (gchar *) "u",
     NULL
   },
   FALSE
@@ -968,7 +968,7 @@ static const _ExtendedGDBusArgInfo * const _ic_dbus_method_info_post_IN_ARG_poin
   &_ic_dbus_method_info_post_IN_ARG_client,
   &_ic_dbus_method_info_post_IN_ARG_repr,
   &_ic_dbus_method_info_post_IN_ARG_query,
-  &_ic_dbus_method_info_post_IN_ARG_sig_name,
+  &_ic_dbus_method_info_post_IN_ARG_signal_number,
   NULL
 };
 
@@ -1013,12 +1013,12 @@ static const _ExtendedGDBusArgInfo _ic_dbus_method_info_delete_IN_ARG_client =
   FALSE
 };
 
-static const _ExtendedGDBusArgInfo _ic_dbus_method_info_delete_IN_ARG_sig_name =
+static const _ExtendedGDBusArgInfo _ic_dbus_method_info_delete_IN_ARG_signal_number =
 {
   {
     -1,
-    (gchar *) "sig_name",
-    (gchar *) "s",
+    (gchar *) "signal_number",
+    (gchar *) "u",
     NULL
   },
   FALSE
@@ -1027,7 +1027,7 @@ static const _ExtendedGDBusArgInfo _ic_dbus_method_info_delete_IN_ARG_sig_name =
 static const _ExtendedGDBusArgInfo * const _ic_dbus_method_info_delete_IN_ARG_pointers[] =
 {
   &_ic_dbus_method_info_delete_IN_ARG_client,
-  &_ic_dbus_method_info_delete_IN_ARG_sig_name,
+  &_ic_dbus_method_info_delete_IN_ARG_signal_number,
   NULL
 };
 
@@ -1094,12 +1094,12 @@ static const _ExtendedGDBusArgInfo _ic_dbus_method_info_observer_start_IN_ARG_qu
   FALSE
 };
 
-static const _ExtendedGDBusArgInfo _ic_dbus_method_info_observer_start_IN_ARG_sig_name =
+static const _ExtendedGDBusArgInfo _ic_dbus_method_info_observer_start_IN_ARG_signal_number =
 {
   {
     -1,
-    (gchar *) "sig_name",
-    (gchar *) "s",
+    (gchar *) "signal_number",
+    (gchar *) "u",
     NULL
   },
   FALSE
@@ -1110,7 +1110,7 @@ static const _ExtendedGDBusArgInfo * const _ic_dbus_method_info_observer_start_I
   &_ic_dbus_method_info_observer_start_IN_ARG_client,
   &_ic_dbus_method_info_observer_start_IN_ARG_observe_type,
   &_ic_dbus_method_info_observer_start_IN_ARG_query,
-  &_ic_dbus_method_info_observer_start_IN_ARG_sig_name,
+  &_ic_dbus_method_info_observer_start_IN_ARG_signal_number,
   NULL
 };
 
@@ -1261,12 +1261,12 @@ static const _ExtendedGDBusArgInfo _ic_dbus_method_info_get_device_info_IN_ARG_h
   FALSE
 };
 
-static const _ExtendedGDBusArgInfo _ic_dbus_method_info_get_device_info_IN_ARG_sig_name =
+static const _ExtendedGDBusArgInfo _ic_dbus_method_info_get_device_info_IN_ARG_signal_number =
 {
   {
     -1,
-    (gchar *) "sig_name",
-    (gchar *) "s",
+    (gchar *) "signal_number",
+    (gchar *) "u",
     NULL
   },
   FALSE
@@ -1275,7 +1275,7 @@ static const _ExtendedGDBusArgInfo _ic_dbus_method_info_get_device_info_IN_ARG_s
 static const _ExtendedGDBusArgInfo * const _ic_dbus_method_info_get_device_info_IN_ARG_pointers[] =
 {
   &_ic_dbus_method_info_get_device_info_IN_ARG_host_address,
-  &_ic_dbus_method_info_get_device_info_IN_ARG_sig_name,
+  &_ic_dbus_method_info_get_device_info_IN_ARG_signal_number,
   NULL
 };
 
@@ -1331,12 +1331,12 @@ static const _ExtendedGDBusArgInfo _ic_dbus_method_info_subscribe_presence_IN_AR
   FALSE
 };
 
-static const _ExtendedGDBusArgInfo _ic_dbus_method_info_subscribe_presence_IN_ARG_sig_name =
+static const _ExtendedGDBusArgInfo _ic_dbus_method_info_subscribe_presence_IN_ARG_signal_number =
 {
   {
     -1,
-    (gchar *) "sig_name",
-    (gchar *) "s",
+    (gchar *) "signal_number",
+    (gchar *) "u",
     NULL
   },
   FALSE
@@ -1346,7 +1346,7 @@ static const _ExtendedGDBusArgInfo * const _ic_dbus_method_info_subscribe_presen
 {
   &_ic_dbus_method_info_subscribe_presence_IN_ARG_host_address,
   &_ic_dbus_method_info_subscribe_presence_IN_ARG_type,
-  &_ic_dbus_method_info_subscribe_presence_IN_ARG_sig_name,
+  &_ic_dbus_method_info_subscribe_presence_IN_ARG_signal_number,
   NULL
 };
 
@@ -1840,7 +1840,7 @@ ic_dbus_default_init (icDbusIface *iface)
    * @invocation: A #GDBusMethodInvocation.
    * @arg_host_address: Argument passed by remote caller.
    * @arg_type: Argument passed by remote caller.
-   * @arg_sig_name: Argument passed by remote caller.
+   * @arg_signal_number: Argument passed by remote caller.
    *
    * Signal emitted when a remote caller is invoking the <link linkend="gdbus-method-org-tizen-iotcon-dbus.findResource">findResource()</link> D-Bus method.
    *
@@ -1857,7 +1857,7 @@ ic_dbus_default_init (icDbusIface *iface)
     g_cclosure_marshal_generic,
     G_TYPE_BOOLEAN,
     4,
-    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT);
 
   /**
    * icDbus::handle-get:
@@ -1865,7 +1865,7 @@ ic_dbus_default_init (icDbusIface *iface)
    * @invocation: A #GDBusMethodInvocation.
    * @arg_client: Argument passed by remote caller.
    * @arg_query: Argument passed by remote caller.
-   * @arg_sig_name: Argument passed by remote caller.
+   * @arg_signal_number: Argument passed by remote caller.
    *
    * Signal emitted when a remote caller is invoking the <link linkend="gdbus-method-org-tizen-iotcon-dbus.get">get()</link> D-Bus method.
    *
@@ -1882,7 +1882,7 @@ ic_dbus_default_init (icDbusIface *iface)
     g_cclosure_marshal_generic,
     G_TYPE_BOOLEAN,
     4,
-    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_VARIANT, G_TYPE_VARIANT, G_TYPE_STRING);
+    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_VARIANT, G_TYPE_VARIANT, G_TYPE_UINT);
 
   /**
    * icDbus::handle-put:
@@ -1891,7 +1891,7 @@ ic_dbus_default_init (icDbusIface *iface)
    * @arg_client: Argument passed by remote caller.
    * @arg_repr: Argument passed by remote caller.
    * @arg_query: Argument passed by remote caller.
-   * @arg_sig_name: Argument passed by remote caller.
+   * @arg_signal_number: Argument passed by remote caller.
    *
    * Signal emitted when a remote caller is invoking the <link linkend="gdbus-method-org-tizen-iotcon-dbus.put">put()</link> D-Bus method.
    *
@@ -1908,7 +1908,7 @@ ic_dbus_default_init (icDbusIface *iface)
     g_cclosure_marshal_generic,
     G_TYPE_BOOLEAN,
     5,
-    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_VARIANT, G_TYPE_STRING, G_TYPE_VARIANT, G_TYPE_STRING);
+    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_VARIANT, G_TYPE_STRING, G_TYPE_VARIANT, G_TYPE_UINT);
 
   /**
    * icDbus::handle-post:
@@ -1917,7 +1917,7 @@ ic_dbus_default_init (icDbusIface *iface)
    * @arg_client: Argument passed by remote caller.
    * @arg_repr: Argument passed by remote caller.
    * @arg_query: Argument passed by remote caller.
-   * @arg_sig_name: Argument passed by remote caller.
+   * @arg_signal_number: Argument passed by remote caller.
    *
    * Signal emitted when a remote caller is invoking the <link linkend="gdbus-method-org-tizen-iotcon-dbus.post">post()</link> D-Bus method.
    *
@@ -1934,14 +1934,14 @@ ic_dbus_default_init (icDbusIface *iface)
     g_cclosure_marshal_generic,
     G_TYPE_BOOLEAN,
     5,
-    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_VARIANT, G_TYPE_STRING, G_TYPE_VARIANT, G_TYPE_STRING);
+    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_VARIANT, G_TYPE_STRING, G_TYPE_VARIANT, G_TYPE_UINT);
 
   /**
    * icDbus::handle-delete:
    * @object: A #icDbus.
    * @invocation: A #GDBusMethodInvocation.
    * @arg_client: Argument passed by remote caller.
-   * @arg_sig_name: Argument passed by remote caller.
+   * @arg_signal_number: Argument passed by remote caller.
    *
    * Signal emitted when a remote caller is invoking the <link linkend="gdbus-method-org-tizen-iotcon-dbus.delete">delete()</link> D-Bus method.
    *
@@ -1958,7 +1958,7 @@ ic_dbus_default_init (icDbusIface *iface)
     g_cclosure_marshal_generic,
     G_TYPE_BOOLEAN,
     3,
-    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_VARIANT, G_TYPE_STRING);
+    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_VARIANT, G_TYPE_UINT);
 
   /**
    * icDbus::handle-observer-start:
@@ -1967,7 +1967,7 @@ ic_dbus_default_init (icDbusIface *iface)
    * @arg_client: Argument passed by remote caller.
    * @arg_observe_type: Argument passed by remote caller.
    * @arg_query: Argument passed by remote caller.
-   * @arg_sig_name: Argument passed by remote caller.
+   * @arg_signal_number: Argument passed by remote caller.
    *
    * Signal emitted when a remote caller is invoking the <link linkend="gdbus-method-org-tizen-iotcon-dbus.observerStart">observerStart()</link> D-Bus method.
    *
@@ -1984,7 +1984,7 @@ ic_dbus_default_init (icDbusIface *iface)
     g_cclosure_marshal_generic,
     G_TYPE_BOOLEAN,
     5,
-    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_VARIANT, G_TYPE_INT, G_TYPE_VARIANT, G_TYPE_STRING);
+    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_VARIANT, G_TYPE_INT, G_TYPE_VARIANT, G_TYPE_UINT);
 
   /**
    * icDbus::handle-observer-stop:
@@ -2037,7 +2037,7 @@ ic_dbus_default_init (icDbusIface *iface)
    * @object: A #icDbus.
    * @invocation: A #GDBusMethodInvocation.
    * @arg_host_address: Argument passed by remote caller.
-   * @arg_sig_name: Argument passed by remote caller.
+   * @arg_signal_number: Argument passed by remote caller.
    *
    * Signal emitted when a remote caller is invoking the <link linkend="gdbus-method-org-tizen-iotcon-dbus.getDeviceInfo">getDeviceInfo()</link> D-Bus method.
    *
@@ -2054,7 +2054,7 @@ ic_dbus_default_init (icDbusIface *iface)
     g_cclosure_marshal_generic,
     G_TYPE_BOOLEAN,
     3,
-    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_STRING, G_TYPE_STRING);
+    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_STRING, G_TYPE_UINT);
 
   /**
    * icDbus::handle-subscribe-presence:
@@ -2062,7 +2062,7 @@ ic_dbus_default_init (icDbusIface *iface)
    * @invocation: A #GDBusMethodInvocation.
    * @arg_host_address: Argument passed by remote caller.
    * @arg_type: Argument passed by remote caller.
-   * @arg_sig_name: Argument passed by remote caller.
+   * @arg_signal_number: Argument passed by remote caller.
    *
    * Signal emitted when a remote caller is invoking the <link linkend="gdbus-method-org-tizen-iotcon-dbus.subscribePresence">subscribePresence()</link> D-Bus method.
    *
@@ -2079,7 +2079,7 @@ ic_dbus_default_init (icDbusIface *iface)
     g_cclosure_marshal_generic,
     G_TYPE_BOOLEAN,
     4,
-    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT);
 
   /**
    * icDbus::handle-unsubscribe-presence:
@@ -3146,7 +3146,7 @@ _out:
  * @proxy: A #icDbusProxy.
  * @arg_host_address: Argument to pass with the method invocation.
  * @arg_type: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
@@ -3162,17 +3162,17 @@ ic_dbus_call_find_resource (
     icDbus *proxy,
     const gchar *arg_host_address,
     const gchar *arg_type,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
   g_dbus_proxy_call (G_DBUS_PROXY (proxy),
     "findResource",
-    g_variant_new ("(sss)",
+    g_variant_new ("(ssu)",
                    arg_host_address,
                    arg_type,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -3215,7 +3215,7 @@ _out:
  * @proxy: A #icDbusProxy.
  * @arg_host_address: Argument to pass with the method invocation.
  * @arg_type: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @out_ret: (out): Return location for return parameter or %NULL to ignore.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
@@ -3231,7 +3231,7 @@ ic_dbus_call_find_resource_sync (
     icDbus *proxy,
     const gchar *arg_host_address,
     const gchar *arg_type,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error)
@@ -3239,10 +3239,10 @@ ic_dbus_call_find_resource_sync (
   GVariant *_ret;
   _ret = g_dbus_proxy_call_sync (G_DBUS_PROXY (proxy),
     "findResource",
-    g_variant_new ("(sss)",
+    g_variant_new ("(ssu)",
                    arg_host_address,
                    arg_type,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -3262,7 +3262,7 @@ _out:
  * @proxy: A #icDbusProxy.
  * @arg_client: Argument to pass with the method invocation.
  * @arg_query: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
@@ -3278,17 +3278,17 @@ ic_dbus_call_get (
     icDbus *proxy,
     GVariant *arg_client,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
   g_dbus_proxy_call (G_DBUS_PROXY (proxy),
     "get",
-    g_variant_new ("(@(ssba(qs)asii)@a(ss)s)",
+    g_variant_new ("(@(ssba(qs)asii)@a(ss)u)",
                    arg_client,
                    arg_query,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -3331,7 +3331,7 @@ _out:
  * @proxy: A #icDbusProxy.
  * @arg_client: Argument to pass with the method invocation.
  * @arg_query: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @out_ret: (out): Return location for return parameter or %NULL to ignore.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
@@ -3347,7 +3347,7 @@ ic_dbus_call_get_sync (
     icDbus *proxy,
     GVariant *arg_client,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error)
@@ -3355,10 +3355,10 @@ ic_dbus_call_get_sync (
   GVariant *_ret;
   _ret = g_dbus_proxy_call_sync (G_DBUS_PROXY (proxy),
     "get",
-    g_variant_new ("(@(ssba(qs)asii)@a(ss)s)",
+    g_variant_new ("(@(ssba(qs)asii)@a(ss)u)",
                    arg_client,
                    arg_query,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -3379,7 +3379,7 @@ _out:
  * @arg_client: Argument to pass with the method invocation.
  * @arg_repr: Argument to pass with the method invocation.
  * @arg_query: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
@@ -3396,18 +3396,18 @@ ic_dbus_call_put (
     GVariant *arg_client,
     const gchar *arg_repr,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
   g_dbus_proxy_call (G_DBUS_PROXY (proxy),
     "put",
-    g_variant_new ("(@(ssba(qs)asii)s@a(ss)s)",
+    g_variant_new ("(@(ssba(qs)asii)s@a(ss)u)",
                    arg_client,
                    arg_repr,
                    arg_query,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -3451,7 +3451,7 @@ _out:
  * @arg_client: Argument to pass with the method invocation.
  * @arg_repr: Argument to pass with the method invocation.
  * @arg_query: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @out_ret: (out): Return location for return parameter or %NULL to ignore.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
@@ -3468,7 +3468,7 @@ ic_dbus_call_put_sync (
     GVariant *arg_client,
     const gchar *arg_repr,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error)
@@ -3476,11 +3476,11 @@ ic_dbus_call_put_sync (
   GVariant *_ret;
   _ret = g_dbus_proxy_call_sync (G_DBUS_PROXY (proxy),
     "put",
-    g_variant_new ("(@(ssba(qs)asii)s@a(ss)s)",
+    g_variant_new ("(@(ssba(qs)asii)s@a(ss)u)",
                    arg_client,
                    arg_repr,
                    arg_query,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -3501,7 +3501,7 @@ _out:
  * @arg_client: Argument to pass with the method invocation.
  * @arg_repr: Argument to pass with the method invocation.
  * @arg_query: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
@@ -3518,18 +3518,18 @@ ic_dbus_call_post (
     GVariant *arg_client,
     const gchar *arg_repr,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
   g_dbus_proxy_call (G_DBUS_PROXY (proxy),
     "post",
-    g_variant_new ("(@(ssba(qs)asii)s@a(ss)s)",
+    g_variant_new ("(@(ssba(qs)asii)s@a(ss)u)",
                    arg_client,
                    arg_repr,
                    arg_query,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -3573,7 +3573,7 @@ _out:
  * @arg_client: Argument to pass with the method invocation.
  * @arg_repr: Argument to pass with the method invocation.
  * @arg_query: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @out_ret: (out): Return location for return parameter or %NULL to ignore.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
@@ -3590,7 +3590,7 @@ ic_dbus_call_post_sync (
     GVariant *arg_client,
     const gchar *arg_repr,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error)
@@ -3598,11 +3598,11 @@ ic_dbus_call_post_sync (
   GVariant *_ret;
   _ret = g_dbus_proxy_call_sync (G_DBUS_PROXY (proxy),
     "post",
-    g_variant_new ("(@(ssba(qs)asii)s@a(ss)s)",
+    g_variant_new ("(@(ssba(qs)asii)s@a(ss)u)",
                    arg_client,
                    arg_repr,
                    arg_query,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -3621,7 +3621,7 @@ _out:
  * ic_dbus_call_delete:
  * @proxy: A #icDbusProxy.
  * @arg_client: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
@@ -3636,16 +3636,16 @@ void
 ic_dbus_call_delete (
     icDbus *proxy,
     GVariant *arg_client,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
   g_dbus_proxy_call (G_DBUS_PROXY (proxy),
     "delete",
-    g_variant_new ("(@(ssba(qs)asii)s)",
+    g_variant_new ("(@(ssba(qs)asii)u)",
                    arg_client,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -3687,7 +3687,7 @@ _out:
  * ic_dbus_call_delete_sync:
  * @proxy: A #icDbusProxy.
  * @arg_client: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @out_ret: (out): Return location for return parameter or %NULL to ignore.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
@@ -3702,7 +3702,7 @@ gboolean
 ic_dbus_call_delete_sync (
     icDbus *proxy,
     GVariant *arg_client,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error)
@@ -3710,9 +3710,9 @@ ic_dbus_call_delete_sync (
   GVariant *_ret;
   _ret = g_dbus_proxy_call_sync (G_DBUS_PROXY (proxy),
     "delete",
-    g_variant_new ("(@(ssba(qs)asii)s)",
+    g_variant_new ("(@(ssba(qs)asii)u)",
                    arg_client,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -3733,7 +3733,7 @@ _out:
  * @arg_client: Argument to pass with the method invocation.
  * @arg_observe_type: Argument to pass with the method invocation.
  * @arg_query: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
@@ -3750,18 +3750,18 @@ ic_dbus_call_observer_start (
     GVariant *arg_client,
     gint arg_observe_type,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
   g_dbus_proxy_call (G_DBUS_PROXY (proxy),
     "observerStart",
-    g_variant_new ("(@(ssba(qs)asii)i@a(ss)s)",
+    g_variant_new ("(@(ssba(qs)asii)i@a(ss)u)",
                    arg_client,
                    arg_observe_type,
                    arg_query,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -3808,7 +3808,7 @@ _out:
  * @arg_client: Argument to pass with the method invocation.
  * @arg_observe_type: Argument to pass with the method invocation.
  * @arg_query: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @out_observe_h: (out): Return location for return parameter or %NULL to ignore.
  * @out_ret: (out): Return location for return parameter or %NULL to ignore.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
@@ -3826,7 +3826,7 @@ ic_dbus_call_observer_start_sync (
     GVariant *arg_client,
     gint arg_observe_type,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_observe_h,
     gint *out_ret,
     GCancellable *cancellable,
@@ -3835,11 +3835,11 @@ ic_dbus_call_observer_start_sync (
   GVariant *_ret;
   _ret = g_dbus_proxy_call_sync (G_DBUS_PROXY (proxy),
     "observerStart",
-    g_variant_new ("(@(ssba(qs)asii)i@a(ss)s)",
+    g_variant_new ("(@(ssba(qs)asii)i@a(ss)u)",
                    arg_client,
                    arg_observe_type,
                    arg_query,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -4067,7 +4067,7 @@ _out:
  * ic_dbus_call_get_device_info:
  * @proxy: A #icDbusProxy.
  * @arg_host_address: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
@@ -4082,16 +4082,16 @@ void
 ic_dbus_call_get_device_info (
     icDbus *proxy,
     const gchar *arg_host_address,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
   g_dbus_proxy_call (G_DBUS_PROXY (proxy),
     "getDeviceInfo",
-    g_variant_new ("(ss)",
+    g_variant_new ("(su)",
                    arg_host_address,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -4133,7 +4133,7 @@ _out:
  * ic_dbus_call_get_device_info_sync:
  * @proxy: A #icDbusProxy.
  * @arg_host_address: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @out_ret: (out): Return location for return parameter or %NULL to ignore.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
@@ -4148,7 +4148,7 @@ gboolean
 ic_dbus_call_get_device_info_sync (
     icDbus *proxy,
     const gchar *arg_host_address,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error)
@@ -4156,9 +4156,9 @@ ic_dbus_call_get_device_info_sync (
   GVariant *_ret;
   _ret = g_dbus_proxy_call_sync (G_DBUS_PROXY (proxy),
     "getDeviceInfo",
-    g_variant_new ("(ss)",
+    g_variant_new ("(su)",
                    arg_host_address,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -4178,7 +4178,7 @@ _out:
  * @proxy: A #icDbusProxy.
  * @arg_host_address: Argument to pass with the method invocation.
  * @arg_type: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
@@ -4194,17 +4194,17 @@ ic_dbus_call_subscribe_presence (
     icDbus *proxy,
     const gchar *arg_host_address,
     const gchar *arg_type,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
   g_dbus_proxy_call (G_DBUS_PROXY (proxy),
     "subscribePresence",
-    g_variant_new ("(sss)",
+    g_variant_new ("(ssu)",
                    arg_host_address,
                    arg_type,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -4247,7 +4247,7 @@ _out:
  * @proxy: A #icDbusProxy.
  * @arg_host_address: Argument to pass with the method invocation.
  * @arg_type: Argument to pass with the method invocation.
- * @arg_sig_name: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @out_presence_h: (out): Return location for return parameter or %NULL to ignore.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
@@ -4263,7 +4263,7 @@ ic_dbus_call_subscribe_presence_sync (
     icDbus *proxy,
     const gchar *arg_host_address,
     const gchar *arg_type,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_presence_h,
     GCancellable *cancellable,
     GError **error)
@@ -4271,10 +4271,10 @@ ic_dbus_call_subscribe_presence_sync (
   GVariant *_ret;
   _ret = g_dbus_proxy_call_sync (G_DBUS_PROXY (proxy),
     "subscribePresence",
-    g_variant_new ("(sss)",
+    g_variant_new ("(ssu)",
                    arg_host_address,
                    arg_type,
-                   arg_sig_name),
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,

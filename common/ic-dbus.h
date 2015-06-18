@@ -50,27 +50,27 @@ struct _icDbusIface
     icDbus *object,
     GDBusMethodInvocation *invocation,
     GVariant *arg_client,
-    const gchar *arg_sig_name);
+    guint arg_signal_number);
 
   gboolean (*handle_find_resource) (
     icDbus *object,
     GDBusMethodInvocation *invocation,
     const gchar *arg_host_address,
     const gchar *arg_type,
-    const gchar *arg_sig_name);
+    guint arg_signal_number);
 
   gboolean (*handle_get) (
     icDbus *object,
     GDBusMethodInvocation *invocation,
     GVariant *arg_client,
     GVariant *arg_query,
-    const gchar *arg_sig_name);
+    guint arg_signal_number);
 
   gboolean (*handle_get_device_info) (
     icDbus *object,
     GDBusMethodInvocation *invocation,
     const gchar *arg_host_address,
-    const gchar *arg_sig_name);
+    guint arg_signal_number);
 
   gboolean (*handle_notify_all) (
     icDbus *object,
@@ -90,7 +90,7 @@ struct _icDbusIface
     GVariant *arg_client,
     gint arg_observe_type,
     GVariant *arg_query,
-    const gchar *arg_sig_name);
+    guint arg_signal_number);
 
   gboolean (*handle_observer_stop) (
     icDbus *object,
@@ -103,7 +103,7 @@ struct _icDbusIface
     GVariant *arg_client,
     const gchar *arg_repr,
     GVariant *arg_query,
-    const gchar *arg_sig_name);
+    guint arg_signal_number);
 
   gboolean (*handle_put) (
     icDbus *object,
@@ -111,7 +111,7 @@ struct _icDbusIface
     GVariant *arg_client,
     const gchar *arg_repr,
     GVariant *arg_query,
-    const gchar *arg_sig_name);
+    guint arg_signal_number);
 
   gboolean (*handle_register_device_info) (
     icDbus *object,
@@ -145,7 +145,7 @@ struct _icDbusIface
     GDBusMethodInvocation *invocation,
     const gchar *arg_host_address,
     const gchar *arg_type,
-    const gchar *arg_sig_name);
+    guint arg_signal_number);
 
   gboolean (*handle_unbind_resource) (
     icDbus *object,
@@ -488,7 +488,7 @@ void ic_dbus_call_find_resource (
     icDbus *proxy,
     const gchar *arg_host_address,
     const gchar *arg_type,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data);
@@ -503,7 +503,7 @@ gboolean ic_dbus_call_find_resource_sync (
     icDbus *proxy,
     const gchar *arg_host_address,
     const gchar *arg_type,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error);
@@ -512,7 +512,7 @@ void ic_dbus_call_get (
     icDbus *proxy,
     GVariant *arg_client,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data);
@@ -527,7 +527,7 @@ gboolean ic_dbus_call_get_sync (
     icDbus *proxy,
     GVariant *arg_client,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error);
@@ -537,7 +537,7 @@ void ic_dbus_call_put (
     GVariant *arg_client,
     const gchar *arg_repr,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data);
@@ -553,7 +553,7 @@ gboolean ic_dbus_call_put_sync (
     GVariant *arg_client,
     const gchar *arg_repr,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error);
@@ -563,7 +563,7 @@ void ic_dbus_call_post (
     GVariant *arg_client,
     const gchar *arg_repr,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data);
@@ -579,7 +579,7 @@ gboolean ic_dbus_call_post_sync (
     GVariant *arg_client,
     const gchar *arg_repr,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error);
@@ -587,7 +587,7 @@ gboolean ic_dbus_call_post_sync (
 void ic_dbus_call_delete (
     icDbus *proxy,
     GVariant *arg_client,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data);
@@ -601,7 +601,7 @@ gboolean ic_dbus_call_delete_finish (
 gboolean ic_dbus_call_delete_sync (
     icDbus *proxy,
     GVariant *arg_client,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error);
@@ -611,7 +611,7 @@ void ic_dbus_call_observer_start (
     GVariant *arg_client,
     gint arg_observe_type,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data);
@@ -628,7 +628,7 @@ gboolean ic_dbus_call_observer_start_sync (
     GVariant *arg_client,
     gint arg_observe_type,
     GVariant *arg_query,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_observe_h,
     gint *out_ret,
     GCancellable *cancellable,
@@ -677,7 +677,7 @@ gboolean ic_dbus_call_register_device_info_sync (
 void ic_dbus_call_get_device_info (
     icDbus *proxy,
     const gchar *arg_host_address,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data);
@@ -691,7 +691,7 @@ gboolean ic_dbus_call_get_device_info_finish (
 gboolean ic_dbus_call_get_device_info_sync (
     icDbus *proxy,
     const gchar *arg_host_address,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_ret,
     GCancellable *cancellable,
     GError **error);
@@ -700,7 +700,7 @@ void ic_dbus_call_subscribe_presence (
     icDbus *proxy,
     const gchar *arg_host_address,
     const gchar *arg_type,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data);
@@ -715,7 +715,7 @@ gboolean ic_dbus_call_subscribe_presence_sync (
     icDbus *proxy,
     const gchar *arg_host_address,
     const gchar *arg_type,
-    const gchar *arg_sig_name,
+    guint arg_signal_number,
     gint *out_presence_h,
     GCancellable *cancellable,
     GError **error);

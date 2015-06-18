@@ -47,12 +47,14 @@ namespace icdIotivityHandler {
 	class getObject
 	{
 	private:
-		string sig_name;
+		unsigned int m_signalNumber;
+		string m_sender;
 
 	public:
-		getObject(const char *user_data)
+		getObject(unsigned int signalNumber, const char *sender)
 		{
-			sig_name = user_data;
+			m_signalNumber = signalNumber;
+			m_sender = sender;
 		}
 
 		void onGet(const HeaderOptions& headerOptions, const OCRepresentation& ocRep,
@@ -63,6 +65,7 @@ namespace icdIotivityHandler {
 			GVariant *value;
 			GVariantBuilder *options;
 			GVariantBuilder *repr;
+			char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 			if (OC_STACK_OK == eCode) {
 				res = IOTCON_RESPONSE_RESULT_OK;
@@ -88,19 +91,23 @@ namespace icdIotivityHandler {
 			g_variant_builder_unref(options);
 			g_variant_builder_unref(repr);
 
-			icd_dbus_emit_signal(sig_name.c_str(), value);
+			snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_GET,
+					m_signalNumber);
+			icd_dbus_emit_signal(signal_name, m_sender.c_str(), value);
 		}
 	};
 
 	class putObject
 	{
 	private:
-		string sig_name;
+		unsigned int m_signalNumber;
+		string m_sender;
 
 	public:
-		putObject(const char *user_data)
+		putObject(unsigned int signalNumber, const char *sender)
 		{
-			sig_name = user_data;
+			m_signalNumber = signalNumber;
+			m_sender = sender;
 		}
 
 		void onPut(const HeaderOptions& headerOptions, const OCRepresentation& ocRep,
@@ -111,6 +118,7 @@ namespace icdIotivityHandler {
 			GVariant *value;
 			GVariantBuilder *options;
 			GVariantBuilder *repr;
+			char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 			if (OC_STACK_OK == eCode) {
 				res = IOTCON_RESPONSE_RESULT_OK;
@@ -136,19 +144,23 @@ namespace icdIotivityHandler {
 			g_variant_builder_unref(options);
 			g_variant_builder_unref(repr);
 
-			icd_dbus_emit_signal(sig_name.c_str(), value);
+			snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_PUT,
+					m_signalNumber);
+			icd_dbus_emit_signal(signal_name, m_sender.c_str(), value);
 		}
 	};
 
 	class postObject
 	{
 	private:
-		string sig_name;
+		unsigned int m_signalNumber;
+		string m_sender;
 
 	public:
-		postObject(const char *user_data)
+		postObject(unsigned int signalNumber, const char *sender)
 		{
-			sig_name = user_data;
+			m_signalNumber = signalNumber;
+			m_sender = sender;
 		}
 
 		void onPost(const HeaderOptions& headerOptions, const OCRepresentation& ocRep,
@@ -159,6 +171,7 @@ namespace icdIotivityHandler {
 			GVariant *value;
 			GVariantBuilder *options;
 			GVariantBuilder *repr;
+			char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 			if (OC_STACK_OK == eCode) {
 				res = IOTCON_RESPONSE_RESULT_OK;
@@ -186,19 +199,23 @@ namespace icdIotivityHandler {
 			g_variant_builder_unref(options);
 			g_variant_builder_unref(repr);
 
-			icd_dbus_emit_signal(sig_name.c_str(), value);
+			snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_POST,
+					m_signalNumber);
+			icd_dbus_emit_signal(signal_name, m_sender.c_str(), value);
 		}
 	};
 
 	class deleteObject
 	{
 	private:
-		string sig_name;
+		unsigned int m_signalNumber;
+		string m_sender;
 
 	public:
-		deleteObject(const char *user_data)
+		deleteObject(unsigned int signalNumber, const char *sender)
 		{
-			sig_name = user_data;
+			m_signalNumber = signalNumber;
+			m_sender = sender;
 		}
 
 		void onDelete(const HeaderOptions& headerOptions, const int eCode)
@@ -206,6 +223,7 @@ namespace icdIotivityHandler {
 			int res;
 			GVariant *value;
 			GVariantBuilder *options;
+			char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 			if (OC_STACK_OK == eCode) {
 				res = IOTCON_RESPONSE_RESULT_OK;
@@ -225,19 +243,23 @@ namespace icdIotivityHandler {
 			value = g_variant_new("(a(qs)i)", options, res);
 			g_variant_builder_unref(options);
 
-			icd_dbus_emit_signal(sig_name.c_str(), value);
+			snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_DELETE,
+					m_signalNumber);
+			icd_dbus_emit_signal(signal_name, m_sender.c_str(), value);
 		}
 	};
 
 	class observeObject
 	{
 	private:
-		string sig_name;
+		unsigned int m_signalNumber;
+		string m_sender;
 
 	public:
-		observeObject(const char *user_data)
+		observeObject(unsigned int signalNumber, const char *sender)
 		{
-			sig_name = user_data;
+			m_signalNumber = signalNumber;
+			m_sender = sender;
 		}
 
 		void onObserve(const HeaderOptions& headerOptions, const OCRepresentation& ocRep,
@@ -248,6 +270,7 @@ namespace icdIotivityHandler {
 			GVariant *value;
 			GVariantBuilder *options;
 			GVariantBuilder *repr;
+			char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 			if (OC_STACK_OK == eCode) {
 				res = IOTCON_RESPONSE_RESULT_OK;
@@ -272,19 +295,23 @@ namespace icdIotivityHandler {
 			g_variant_builder_unref(options);
 			g_variant_builder_unref(repr);
 
-			icd_dbus_emit_signal(sig_name.c_str(), value);
+			snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_OBSERVE,
+					m_signalNumber);
+			icd_dbus_emit_signal(signal_name, m_sender.c_str(), value);
 		}
 	};
 
 	class findObject
 	{
 	private:
-		string sig_name;
+		unsigned int m_signalNumber;
+		string m_sender;
 
 	public:
-		findObject(const char *user_data)
+		findObject(unsigned int signalNumber, const char *sender)
 		{
-			sig_name = user_data;
+			m_signalNumber = signalNumber;
+			m_sender = sender;
 		}
 
 		void foundResource(shared_ptr<OCResource> resource)
@@ -294,14 +321,13 @@ namespace icdIotivityHandler {
 			GVariant *value;
 			GVariantBuilder *builder;
 			string resource_host;
+			char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 			builder = g_variant_builder_new(G_VARIANT_TYPE("as"));
 			vector<string> resource_types = resource->getResourceTypes();
 			if (0 < resource_types.size()) {
-				for (string &resource_type : resource_types) {
-					INFO("type : %s", resource_type.c_str());
+				for (string &resource_type : resource_types)
 					g_variant_builder_add(builder, "s", resource_type.c_str());
-				}
 			}
 
 			vector<string> resource_interfaces = resource->getResourceInterfaces();
@@ -330,25 +356,30 @@ namespace icdIotivityHandler {
 					ifaces);
 			g_variant_builder_unref(builder);
 
-			icd_dbus_emit_signal(sig_name.c_str(), value);
+			snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_FOUND_RESOURCE,
+					m_signalNumber);
+			icd_dbus_emit_signal(signal_name, m_sender.c_str(), value);
 		}
 	};
 
 	class deviceObject
 	{
 	private:
-		string sig_name;
+		unsigned int m_signalNumber;
+		string m_sender;
 
 	public:
-		deviceObject(const char *user_data)
+		deviceObject(unsigned int signalNumber, const char *sender)
 		{
-			sig_name = user_data;
+			m_signalNumber = signalNumber;
+			m_sender = sender;
 		}
 
 		void receivedDeviceInfo(const OCRepresentation& ocRep)
 		{
 			FN_CALL;
 			GVariant *value;
+			char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 			string contentType;
 			string dateOfManufacture;
@@ -390,19 +421,23 @@ namespace icdIotivityHandler {
 					firmwareVersion.c_str(),
 					supportUrl.c_str());
 
-			icd_dbus_emit_signal(sig_name.c_str(), value);
+			snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_DEVICE,
+					m_signalNumber);
+			icd_dbus_emit_signal(signal_name, m_sender.c_str(), value);
 		}
 	};
 
 	class presenceObject
 	{
 	private:
-		string sig_name;
+		unsigned int m_signalNumber;
+		string m_sender;
 
 	public:
-		presenceObject(const char *user_data)
+		presenceObject(unsigned int signalNumber, const char *sender)
 		{
-			sig_name = user_data;
+			m_signalNumber = signalNumber;
+			m_sender = sender;
 		}
 
 		void presenceHandler(OCStackResult result, const unsigned int nonce,
@@ -410,6 +445,7 @@ namespace icdIotivityHandler {
 		{
 			int res;
 			GVariant *value;
+			char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 			switch (result) {
 			case OC_STACK_OK:
@@ -429,7 +465,9 @@ namespace icdIotivityHandler {
 
 			value = g_variant_new("(ius)", res, nonce, hostAddress.c_str());
 
-			icd_dbus_emit_signal(sig_name.c_str(), value);
+			snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_PRESENCE,
+					m_signalNumber);
+			icd_dbus_emit_signal(signal_name, m_sender.c_str(), value);
 		}
 	};
 }
@@ -439,10 +477,10 @@ extern "C" void icd_ioty_config(const char *addr, unsigned short port)
 {
 	PlatformConfig cfg {
 		ServiceType::InProc,
-			ModeType::Both,
-			string(addr),
-			port,
-			QualityOfService::HighQos
+		ModeType::Both,
+		string(addr),
+		port,
+		QualityOfService::HighQos
 	};
 	Configure(cfg);
 	DBG("Created a platform");
@@ -547,8 +585,9 @@ static OCEntityHandlerResult _icd_ioty_request_handler(
 	g_variant_builder_unref(query);
 	g_variant_builder_unref(repr);
 
-	snprintf(sig_name, sizeof(sig_name), "reg%u", resource_handle);
-	icd_dbus_emit_signal(sig_name, value);
+	snprintf(sig_name, sizeof(sig_name), "%s_%u", IC_DBUS_SIGNAL_REQUEST_HANDLER,
+			resource_handle);
+	icd_dbus_emit_signal(sig_name, NULL, value);
 
 	return OC_EH_OK;
 }
@@ -868,9 +907,8 @@ extern "C" int icd_ioty_send_response(GVariant *resp)
 }
 
 
-
 extern "C" int icd_ioty_find_resource(const char *host_address, const char *resource_type,
-		const char *sig_name)
+		unsigned int signal_number, const char *sender)
 {
 	FN_CALL;
 	OCStackResult ret;
@@ -887,7 +925,7 @@ extern "C" int icd_ioty_find_resource(const char *host_address, const char *reso
 		resource_name << "?rt=" << resource_type;
 
 	shared_ptr<icdIotivityHandler::findObject> object
-		= make_shared<icdIotivityHandler::findObject>(sig_name);
+		= make_shared<icdIotivityHandler::findObject>(signal_number, sender);
 	FindCallback findCallback = bind(&icdIotivityHandler::findObject::foundResource,
 			object, placeholders::_1);
 
@@ -959,15 +997,15 @@ static OCResource::Ptr _icd_ioty_create_oc_resource(GVariant *client)
 }
 
 
-extern "C" int icd_ioty_get(GVariant *resource, GVariant *query, const char *sig_name)
+extern "C" int icd_ioty_get(GVariant *resource, GVariant *query,
+		unsigned int signal_number, const char *sender)
 {
 	FN_CALL;
 	OCStackResult ret;
 	OCResource::Ptr ocResource;
 	QueryParamsMap queryParams;
 	GVariantIter *queryIter;
-	char *key;
-	char *value;
+	char *key, *value;
 
 	g_variant_get(query, "a(ss)", &queryIter);
 	while (g_variant_iter_loop(queryIter, "(&s&s)", &key, &value))
@@ -977,7 +1015,7 @@ extern "C" int icd_ioty_get(GVariant *resource, GVariant *query, const char *sig
 	ocResource = _icd_ioty_create_oc_resource(resource);
 
 	shared_ptr<icdIotivityHandler::getObject> object
-		= make_shared<icdIotivityHandler::getObject>(sig_name);
+		= make_shared<icdIotivityHandler::getObject>(signal_number, sender);
 	GetCallback getCallback = bind(&icdIotivityHandler::getObject::onGet, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 	ret = ocResource->get(queryParams, getCallback);
@@ -991,7 +1029,7 @@ extern "C" int icd_ioty_get(GVariant *resource, GVariant *query, const char *sig
 
 
 extern "C" int icd_ioty_put(GVariant *resource, const char *repr, GVariant *query,
-		const char *sig_name)
+		unsigned int signal_number, const char *sender)
 {
 	FN_CALL;
 	int ret;
@@ -1000,8 +1038,7 @@ extern "C" int icd_ioty_put(GVariant *resource, const char *repr, GVariant *quer
 	QueryParamsMap queryParams;
 	OCRepresentation ocRep;
 	GVariantIter *queryIter;
-	char *key;
-	char *value;
+	char *key, *value;
 
 	g_variant_get(query, "a(ss)", &queryIter);
 	while (g_variant_iter_loop(queryIter, "(&s&s)", &key, &value))
@@ -1017,7 +1054,7 @@ extern "C" int icd_ioty_put(GVariant *resource, const char *repr, GVariant *quer
 	ocResource = _icd_ioty_create_oc_resource(resource);
 
 	shared_ptr<icdIotivityHandler::putObject> object
-		= make_shared<icdIotivityHandler::putObject>(sig_name);
+		= make_shared<icdIotivityHandler::putObject>(signal_number, sender);
 	PutCallback putCallback = bind(&icdIotivityHandler::putObject::onPut, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 
@@ -1032,7 +1069,7 @@ extern "C" int icd_ioty_put(GVariant *resource, const char *repr, GVariant *quer
 
 
 extern "C" int icd_ioty_post(GVariant *resource, const char *repr, GVariant *query,
-		const char *sig_name)
+		unsigned int signal_number, const char *sender)
 {
 	FN_CALL;
 	int ret;
@@ -1041,8 +1078,7 @@ extern "C" int icd_ioty_post(GVariant *resource, const char *repr, GVariant *que
 	QueryParamsMap queryParams;
 	OCRepresentation ocRep;
 	GVariantIter *queryIter;
-	char *key;
-	char *value;
+	char *key, *value;
 
 	g_variant_get(query, "a(ss)", &queryIter);
 	while (g_variant_iter_loop(queryIter, "(&s&s)", &key, &value))
@@ -1058,7 +1094,7 @@ extern "C" int icd_ioty_post(GVariant *resource, const char *repr, GVariant *que
 	ocResource = _icd_ioty_create_oc_resource(resource);
 
 	shared_ptr<icdIotivityHandler::postObject> object
-		= make_shared<icdIotivityHandler::postObject>(sig_name);
+		= make_shared<icdIotivityHandler::postObject>(signal_number, sender);
 	PostCallback postCallback = bind(&icdIotivityHandler::postObject::onPost, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 
@@ -1072,7 +1108,8 @@ extern "C" int icd_ioty_post(GVariant *resource, const char *repr, GVariant *que
 }
 
 
-extern "C" int icd_ioty_delete(GVariant *resource, const char *sig_name)
+extern "C" int icd_ioty_delete(GVariant *resource, unsigned int signal_number,
+		const char *sender)
 {
 	FN_CALL;
 	OCStackResult ret;
@@ -1081,7 +1118,7 @@ extern "C" int icd_ioty_delete(GVariant *resource, const char *sig_name)
 	ocResource = _icd_ioty_create_oc_resource(resource);
 
 	shared_ptr<icdIotivityHandler::deleteObject> object
-		= make_shared<icdIotivityHandler::deleteObject>(sig_name);
+		= make_shared<icdIotivityHandler::deleteObject>(signal_number, sender);
 	DeleteCallback deleteCallback = bind(&icdIotivityHandler::deleteObject::onDelete,
 			object, placeholders::_1, placeholders::_2);
 
@@ -1095,8 +1132,8 @@ extern "C" int icd_ioty_delete(GVariant *resource, const char *sig_name)
 }
 
 
-extern "C" int icd_ioty_observer_start(GVariant *resource, int observe_type, GVariant *query,
-		const char *sig_name, int *observe_h)
+extern "C" int icd_ioty_observer_start(GVariant *resource, int observe_type,
+		GVariant *query, unsigned int signal_number, const char *sender, int *observe_h)
 {
 	OCStackResult ret;
 	OCResource::Ptr ocResource;
@@ -1104,8 +1141,7 @@ extern "C" int icd_ioty_observer_start(GVariant *resource, int observe_type, GVa
 	QueryParamsMap queryParams;
 	OCRepresentation ocRep;
 	GVariantIter *queryIter;
-	char *key;
-	char *value;
+	char *key, *value;
 
 	g_variant_get(query, "a(ss)", &queryIter);
 	while (g_variant_iter_loop(queryIter, "(&s&s)", &key, &value))
@@ -1128,7 +1164,7 @@ extern "C" int icd_ioty_observer_start(GVariant *resource, int observe_type, GVa
 	*observe_h = GPOINTER_TO_INT((void*)obs_h);
 
 	shared_ptr<icdIotivityHandler::observeObject> object
-		= make_shared<icdIotivityHandler::observeObject>(sig_name);
+		= make_shared<icdIotivityHandler::observeObject>(signal_number, sender);
 	ObserveCallback observeCallback = bind(&icdIotivityHandler::observeObject::onObserve,
 			object, placeholders::_1, placeholders::_2, placeholders::_3,
 			placeholders::_4);
@@ -1193,14 +1229,14 @@ extern "C" int icd_ioty_register_device_info(GVariant *value)
 
 
 extern "C" int icd_ioty_get_device_info(const char *host_address,
-		const char *sig_name)
+		unsigned int signal_number, const char *sender)
 {
 	FN_CALL;
 	OCStackResult ret;
 	string resHost = string(ICD_COAP) + host_address + string(ICD_DEVICE_DISCOVERY);
 
 	shared_ptr<icdIotivityHandler::deviceObject> object
-		= make_shared<icdIotivityHandler::deviceObject>(sig_name);
+		= make_shared<icdIotivityHandler::deviceObject>(signal_number, sender);
 	FindDeviceCallback findDeviceCallback = bind(
 			&icdIotivityHandler::deviceObject::receivedDeviceInfo,
 			object,
@@ -1217,15 +1253,14 @@ extern "C" int icd_ioty_get_device_info(const char *host_address,
 
 
 extern "C" iotcon_presence_h icd_ioty_subscribe_presence(const char *host_address,
-		const char *resource_type,
-		const char *sig_name)
+		const char *resource_type, unsigned int signal_number, const char *sender)
 {
 	OCStackResult ret;
 	iotcon_presence_h presence_handle = NULL;
 	string host;
 
 	shared_ptr<icdIotivityHandler::presenceObject> object
-		= make_shared<icdIotivityHandler::presenceObject>(sig_name);
+		= make_shared<icdIotivityHandler::presenceObject>(signal_number, sender);
 	SubscribeCallback subscribeCallback
 		= bind(&icdIotivityHandler::presenceObject::presenceHandler, object,
 				placeholders::_1, placeholders::_2, placeholders::_3);
