@@ -25,7 +25,7 @@ void icd_ioty_config(const char *addr, unsigned short port);
 void* icd_ioty_register_resource(const char *uri, const char* const* res_types,
 		int ifaces, uint8_t properties);
 
-int icd_ioty_unregister_resource(iotcon_resource_h resource_handle);
+int icd_ioty_unregister_resource(void *resource_handle);
 
 int icd_ioty_bind_interface(void *resource_handle, iotcon_interface_e iface);
 

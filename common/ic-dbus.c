@@ -207,12 +207,24 @@ static const _ExtendedGDBusArgInfo _ic_dbus_method_info_register_resource_IN_ARG
   FALSE
 };
 
+static const _ExtendedGDBusArgInfo _ic_dbus_method_info_register_resource_IN_ARG_signal_number =
+{
+  {
+    -1,
+    (gchar *) "signal_number",
+    (gchar *) "u",
+    NULL
+  },
+  FALSE
+};
+
 static const _ExtendedGDBusArgInfo * const _ic_dbus_method_info_register_resource_IN_ARG_pointers[] =
 {
   &_ic_dbus_method_info_register_resource_IN_ARG_uri,
   &_ic_dbus_method_info_register_resource_IN_ARG_resource_types,
   &_ic_dbus_method_info_register_resource_IN_ARG_ifaces,
   &_ic_dbus_method_info_register_resource_IN_ARG_properties,
+  &_ic_dbus_method_info_register_resource_IN_ARG_signal_number,
   NULL
 };
 
@@ -1626,6 +1638,7 @@ ic_dbus_default_init (icDbusIface *iface)
    * @arg_resource_types: Argument passed by remote caller.
    * @arg_ifaces: Argument passed by remote caller.
    * @arg_properties: Argument passed by remote caller.
+   * @arg_signal_number: Argument passed by remote caller.
    *
    * Signal emitted when a remote caller is invoking the <link linkend="gdbus-method-org-tizen-iotcon-dbus.registerResource">registerResource()</link> D-Bus method.
    *
@@ -1641,8 +1654,8 @@ ic_dbus_default_init (icDbusIface *iface)
     NULL,
     g_cclosure_marshal_generic,
     G_TYPE_BOOLEAN,
-    5,
-    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_STRING, G_TYPE_STRV, G_TYPE_INT, G_TYPE_UCHAR);
+    6,
+    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_STRING, G_TYPE_STRV, G_TYPE_INT, G_TYPE_UCHAR, G_TYPE_UINT);
 
   /**
    * icDbus::handle-unregister-resource:
@@ -2158,6 +2171,7 @@ ic_dbus_default_init (icDbusIface *iface)
  * @arg_resource_types: Argument to pass with the method invocation.
  * @arg_ifaces: Argument to pass with the method invocation.
  * @arg_properties: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
@@ -2175,17 +2189,19 @@ ic_dbus_call_register_resource (
     const gchar *const *arg_resource_types,
     gint arg_ifaces,
     guchar arg_properties,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
   g_dbus_proxy_call (G_DBUS_PROXY (proxy),
     "registerResource",
-    g_variant_new ("(s^asiy)",
+    g_variant_new ("(s^asiyu)",
                    arg_uri,
                    arg_resource_types,
                    arg_ifaces,
-                   arg_properties),
+                   arg_properties,
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -2230,6 +2246,7 @@ _out:
  * @arg_resource_types: Argument to pass with the method invocation.
  * @arg_ifaces: Argument to pass with the method invocation.
  * @arg_properties: Argument to pass with the method invocation.
+ * @arg_signal_number: Argument to pass with the method invocation.
  * @out_resource: (out): Return location for return parameter or %NULL to ignore.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
@@ -2247,6 +2264,7 @@ ic_dbus_call_register_resource_sync (
     const gchar *const *arg_resource_types,
     gint arg_ifaces,
     guchar arg_properties,
+    guint arg_signal_number,
     gint *out_resource,
     GCancellable *cancellable,
     GError **error)
@@ -2254,11 +2272,12 @@ ic_dbus_call_register_resource_sync (
   GVariant *_ret;
   _ret = g_dbus_proxy_call_sync (G_DBUS_PROXY (proxy),
     "registerResource",
-    g_variant_new ("(s^asiy)",
+    g_variant_new ("(s^asiyu)",
                    arg_uri,
                    arg_resource_types,
                    arg_ifaces,
-                   arg_properties),
+                   arg_properties,
+                   arg_signal_number),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,

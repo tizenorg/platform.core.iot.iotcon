@@ -5,6 +5,7 @@
 			<arg type="as" name="resource_types" direction="in"/>
 			<arg type="i" name="ifaces" direction="in"/>
 			<arg type="y" name="properties" direction="in"/>
+			<arg type="u" name="signal_number" direction="in"/>
 			<arg type="i" name="resource" direction="out"/>
 		</method>
 		<method name="unregisterResource">

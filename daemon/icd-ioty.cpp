@@ -491,19 +491,15 @@ static OCEntityHandlerResult _icd_ioty_request_handler(
 		shared_ptr<OCResourceRequest> request)
 {
 	FN_CALL;
-	int ret;
 	int types = 0;
-	int observer_id;
-	int observe_action;
-	int request_handle;
-	int resource_handle;
+	int ret, observer_id, observe_action, request_handle, resource_handle;
+	unsigned int signal_number;
 	char sig_name[100] = {0};
+	const gchar *sender = NULL;
 	const char *uri = NULL;
 	const char *request_type = NULL;
 	GVariant *value;
-	GVariantBuilder *options;
-	GVariantBuilder *query;
-	GVariantBuilder *repr;
+	GVariantBuilder *options, *query, *repr;
 	HeaderOptions headerOptions;
 	QueryParamsMap queryParams;
 	OCRepresentation ocRep;
@@ -585,9 +581,15 @@ static OCEntityHandlerResult _icd_ioty_request_handler(
 	g_variant_builder_unref(query);
 	g_variant_builder_unref(repr);
 
+	ret = icd_dbus_bus_list_get_info(resource_handle, &signal_number, &sender);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_dbus_bus_list_get_info() Fail(%d)", ret);
+		return OC_EH_ERROR;
+	}
+
 	snprintf(sig_name, sizeof(sig_name), "%s_%u", IC_DBUS_SIGNAL_REQUEST_HANDLER,
-			resource_handle);
-	icd_dbus_emit_signal(sig_name, NULL, value);
+			signal_number);
+	icd_dbus_emit_signal(sig_name, sender, value);
 
 	return OC_EH_OK;
 }
@@ -596,7 +598,8 @@ static OCEntityHandlerResult _icd_ioty_request_handler(
 extern "C" OCResourceHandle icd_ioty_register_resource(const char *uri,
 		const char* const* res_types, int ifaces, uint8_t properties)
 {
-	OCStackResult ret;
+	FN_CALL;
+	OCStackResult ret = OC_STACK_OK;
 	string resUri;
 	string resType;
 	string resInterface;
@@ -619,10 +622,15 @@ extern "C" OCResourceHandle icd_ioty_register_resource(const char *uri,
 		ifaces ^= IOTCON_INTERFACE_GROUP;
 	}
 
-	ret = registerResource(handle, resUri, resType, resInterface,
-			_icd_ioty_request_handler, properties);
-	if (OC_STACK_OK != ret) {
-		ERR("registerResource Fail(%d)", ret);
+	try {
+		ret = registerResource(handle, resUri, resType, resInterface,
+				_icd_ioty_request_handler, properties);
+		if (OC_STACK_OK != ret) {
+			ERR("registerResource Fail(%d)", ret);
+			return NULL;
+		}
+	} catch (OCException& e) {
+		ERR("registerResource Fail(%s)", e.reason().c_str());
 		return NULL;
 	}
 
@@ -644,12 +652,17 @@ extern "C" OCResourceHandle icd_ioty_register_resource(const char *uri,
 	return handle;
 }
 
-
-extern "C" int icd_ioty_unregister_resource(iotcon_resource_h resource_handle)
+extern "C" int icd_ioty_unregister_resource(OCResourceHandle resource_handle)
 {
-	OCResourceHandle resourceHandle = resource_handle;
+	FN_CALL;
+	OCStackResult result;
+	try {
+		result = unregisterResource(resource_handle);
+	} catch (OCException& e) {
+		ERR("unregisterResource Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
 
-	OCStackResult result = unregisterResource(resourceHandle);
 	if (OC_STACK_OK != result) {
 		ERR("unregisterResource Fail(%d)", result);
 		return IOTCON_ERROR_IOTIVITY;

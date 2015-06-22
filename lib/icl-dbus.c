@@ -201,12 +201,15 @@ void* icl_dbus_register_resource(const char *uri, iotcon_resource_types_h types,
 		int ifaces, uint8_t properties, iotcon_request_handler_cb cb, void *user_data)
 {
 	int ret;
+	int signal_number;
 	int resource_handle;
 	GError *error = NULL;
 	const gchar **res_types;
 	char sig_name[IC_DBUS_SIGNAL_LENGTH];
 
 	RETV_IF(NULL == icl_dbus_object, NULL);
+
+	signal_number = _icl_dbus_generate_signal_number();
 
 	res_types = icl_dbus_resource_types_to_array(types);
 	if (NULL == res_types) {
@@ -215,7 +218,7 @@ void* icl_dbus_register_resource(const char *uri, iotcon_resource_types_h types,
 	}
 
 	ic_dbus_call_register_resource_sync(icl_dbus_object, uri, res_types,
-			ifaces, properties, &resource_handle, NULL, &error);
+			ifaces, properties, signal_number, &resource_handle, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_register_resource_sync() Fail(%s)", error->message);
 		g_error_free(error);
@@ -223,10 +226,9 @@ void* icl_dbus_register_resource(const char *uri, iotcon_resource_types_h types,
 		return NULL;
 	}
 
-	/* TODO
-	 * Change how to determine signal_number of request_handler */
 	snprintf(sig_name, sizeof(sig_name), "%s_%u", IC_DBUS_SIGNAL_REQUEST_HANDLER,
-			resource_handle);
+			signal_number);
+
 	ret = _dbus_subscribe_signal(sig_name, cb, user_data, _icl_dbus_request_handler);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_dbus_subscribe_signal() Fail");
@@ -241,6 +243,7 @@ void* icl_dbus_register_resource(const char *uri, iotcon_resource_types_h types,
 
 int icl_dbus_unregister_resource(void *resource)
 {
+	FN_CALL;
 	int ret;
 	GError *error = NULL;
 

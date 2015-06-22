@@ -124,7 +124,8 @@ struct _icDbusIface
     const gchar *arg_uri,
     const gchar *const *arg_resource_types,
     gint arg_ifaces,
-    guchar arg_properties);
+    guchar arg_properties,
+    guint arg_signal_number);
 
   gboolean (*handle_send_response) (
     icDbus *object,
@@ -292,6 +293,7 @@ void ic_dbus_call_register_resource (
     const gchar *const *arg_resource_types,
     gint arg_ifaces,
     guchar arg_properties,
+    guint arg_signal_number,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data);
@@ -308,6 +310,7 @@ gboolean ic_dbus_call_register_resource_sync (
     const gchar *const *arg_resource_types,
     gint arg_ifaces,
     guchar arg_properties,
+    guint arg_signal_number,
     gint *out_resource,
     GCancellable *cancellable,
     GError **error);
