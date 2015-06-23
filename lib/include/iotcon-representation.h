@@ -110,7 +110,7 @@ int iotcon_repr_get_nth_child(iotcon_repr_h parent, int pos, iotcon_repr_h *chil
 
 typedef int (*iotcon_repr_key_fn)(iotcon_repr_h repr, const char *key, void *user_data);
 int iotcon_repr_foreach_keys(iotcon_repr_h repr, iotcon_repr_key_fn fn, void *user_data);
-int iotcon_repr_get_keys_count(iotcon_repr_h repr);
+unsigned int iotcon_repr_get_keys_count(iotcon_repr_h repr);
 
 char* iotcon_repr_generate_json(iotcon_repr_h repr);
 

@@ -216,10 +216,10 @@ API int iotcon_repr_foreach_keys(iotcon_repr_h repr, iotcon_repr_key_fn fn,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_get_keys_count(iotcon_repr_h repr)
+API unsigned int iotcon_repr_get_keys_count(iotcon_repr_h repr)
 {
-	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == repr->hash_table, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == repr, 0);
+	RETV_IF(NULL == repr->hash_table, 0);
 
 	return g_hash_table_size(repr->hash_table);
 }

@@ -82,8 +82,8 @@ API int iotcon_list_insert_int(iotcon_list_h list, int val, int pos)
 	iotcon_value_h value;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_INT != list->type, IOTCON_ERROR_INVALID_PARAMETER,
-			"Invalid Type(%d)", list->type);
+	RETVM_IF(IOTCON_TYPE_INT != list->type, IOTCON_ERROR_INVALID_TYPE, "Invalid Type(%d)",
+			list->type);
 
 	value = icl_value_new_int(val);
 	if (NULL == value) {
@@ -100,7 +100,7 @@ API int iotcon_list_insert_bool(iotcon_list_h list, bool val, int pos)
 	iotcon_value_h value;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_BOOL != list->type, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(IOTCON_TYPE_BOOL != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 
 	value = icl_value_new_bool(val);
@@ -118,7 +118,7 @@ API int iotcon_list_insert_double(iotcon_list_h list, double val, int pos)
 	iotcon_value_h value;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_DOUBLE != list->type, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(IOTCON_TYPE_DOUBLE != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 
 	value = icl_value_new_double(val);
@@ -137,7 +137,7 @@ API int iotcon_list_insert_str(iotcon_list_h list, char *val, int pos)
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_STR != list->type, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(IOTCON_TYPE_STR != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 
 	value = icl_value_new_str(val);
@@ -156,7 +156,7 @@ API int iotcon_list_insert_list(iotcon_list_h list, iotcon_list_h val, int pos)
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_LIST != list->type, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(IOTCON_TYPE_LIST != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 
 	value = icl_value_new_list(val);
@@ -177,7 +177,7 @@ API int iotcon_list_insert_repr(iotcon_list_h list, iotcon_repr_h val, int pos)
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_REPR != list->type, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(IOTCON_TYPE_REPR != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 
 	value = icl_value_new_repr(val);
@@ -364,8 +364,8 @@ static int _icl_list_del_nth_value(iotcon_list_h list, int pos, iotcon_types_e v
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == list->list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(value_type != list->type, IOTCON_ERROR_INVALID_PARAMETER,
-			"IOTCON_ERROR_PARAMETER(%d)", list->type);
+	RETVM_IF(value_type != list->type, IOTCON_ERROR_INVALID_TYPE,
+			"Type Mismatching(list:%d, value:%d)", list->type, value_type);
 
 	value = g_list_nth_data(list->list, pos);
 	if (NULL == value) {
@@ -508,8 +508,8 @@ API int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_fn fn,
 	ic_basic_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_INT != list->type, IOTCON_ERROR_INVALID_PARAMETER,
-			"Invalid Type(%d)", list->type);
+	RETVM_IF(IOTCON_TYPE_INT != list->type, IOTCON_ERROR_INVALID_TYPE, "Invalid Type(%d)",
+			list->type);
 	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
 
 	cur = list->list;
@@ -533,7 +533,7 @@ API int iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_fn fn,
 	ic_basic_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_BOOL != list->type, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(IOTCON_TYPE_BOOL != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -558,7 +558,7 @@ API int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_fn fn,
 	ic_basic_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_DOUBLE != list->type, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(IOTCON_TYPE_DOUBLE != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -583,8 +583,8 @@ API int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_fn fn,
 	ic_basic_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_STR != list->type, IOTCON_ERROR_INVALID_PARAMETER,
-			"Invalid Type(%d)", list->type);
+	RETVM_IF(IOTCON_TYPE_STR != list->type, IOTCON_ERROR_INVALID_TYPE, "Invalid Type(%d)",
+			list->type);
 	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
 
 	cur = list->list;
@@ -608,7 +608,7 @@ API int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_fn fn,
 	ic_val_list_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_LIST != list->type, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(IOTCON_TYPE_LIST != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -632,7 +632,7 @@ API int iotcon_list_foreach_repr(iotcon_list_h list, iotcon_list_repr_fn fn, voi
 	ic_val_repr_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_REPR != list->type, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(IOTCON_TYPE_REPR != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);;
 

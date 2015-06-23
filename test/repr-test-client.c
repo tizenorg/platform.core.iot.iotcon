@@ -33,8 +33,7 @@ static int _get_int_list_fn(int pos, const int value, void *user_data)
 static void _on_get(iotcon_repr_h recv_repr, int response_result)
 {
 	int i, ret;
-	int key_count;
-	unsigned int children_count;
+	unsigned int key_count, children_count;
 	const char *uri;
 	iotcon_repr_h child_repr;
 	iotcon_list_h list;

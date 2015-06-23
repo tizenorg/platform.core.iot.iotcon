@@ -42,7 +42,7 @@ int icl_obj_del_value(iotcon_repr_h repr, const char *key,
 
 	if (value_type != value->type) {
 		ERR("Type matching Fail(input:%d, saved:%d)", value_type, value->type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+		return IOTCON_ERROR_INVALID_TYPE;
 	}
 
 	ret = g_hash_table_remove(repr->hash_table, key);
@@ -559,7 +559,7 @@ static inline int _icl_obj_to_json(const char *key, iotcon_value_h value,
 JsonObject* icl_obj_to_json(iotcon_repr_h repr)
 {
 	int ret;
-	int key_count;
+	unsigned int key_count;
 	JsonObject *json_obj = NULL;
 	JsonObject *parent_obj = NULL;
 
