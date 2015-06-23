@@ -37,6 +37,9 @@ int main()
 
 	g_main_loop_unref(loop);
 
+	/* iotcon deinitialize */
+	iotcon_deinitialize();
+
 	return 0;
 }
 

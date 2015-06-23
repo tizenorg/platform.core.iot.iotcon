@@ -342,5 +342,8 @@ int main(int argc, char **argv)
 
 	iotcon_unregister_resource(door_handle);
 
+	/* iotcon deinitialize */
+	iotcon_deinitialize();
+
 	return 0;
 }

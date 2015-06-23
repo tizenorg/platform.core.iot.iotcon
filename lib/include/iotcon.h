@@ -21,6 +21,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <iotcon-errors.h>
 #include <iotcon-struct.h>
 #include <iotcon-constant.h>
@@ -28,6 +29,25 @@ extern "C" {
 
 int iotcon_initialize();
 void iotcon_deinitialize();
+
+/**
+ * @brief Callback when iotcon connection is changed
+ *
+ * If iotcon connection is changed, registered callbacks are called in registration order.
+ * Most handles contain elements related to the handles.
+ * Even if iotcon is disconnected, it is allowed to derive elements from handles.
+ * On the other hand, using the functions related to connection are not allowed.
+ * For example, when iotcon is disconnected, it is possible to use
+ * "iotcon_resource_get_uri()", but it is impossible to use "iotcon_notify_all()".
+ * Thus, if you want to use functions related to connection, above all, you should free
+ * handles, and you should make new handles.
+ * In case of "iotcon_client_h", if the information of the resource owner are unchanged
+ * when iotcon reconnected, then it is possible to reuse handles.
+ */
+typedef void (*iotcon_connection_changed_cb)(bool is_connected, void *user_data);
+int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *user_data);
+int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
+		void *user_data);
 
 typedef void (*iotcon_request_handler_cb)(iotcon_request_h request, void *user_data);
 iotcon_resource_h iotcon_register_resource(const char *uri,

@@ -69,6 +69,39 @@ API void iotcon_deinitialize()
 }
 
 
+API int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *user_data)
+{
+	int ret;
+
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+
+	ret = icl_dbus_add_connection_changed_cb(cb, user_data);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_dbus_add_connection_changed_cb() Fail(%d)", ret);
+		return ret;
+	}
+
+	return ret;
+}
+
+
+API int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
+		void *user_data)
+{
+	int ret;
+
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+
+	ret = icl_dbus_remove_connection_changed_cb(cb, user_data);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_dbus_remove_connection_changed_cb() Fail(%d)", ret);
+		return ret;
+	}
+
+	return ret;
+}
+
+
 /* The length of uri should be less than or equal to 36. */
 API iotcon_resource_h iotcon_register_resource(const char *uri,
 		iotcon_resource_types_h res_types,

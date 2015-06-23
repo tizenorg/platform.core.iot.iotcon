@@ -27,7 +27,7 @@ struct icl_remote_resource {
 	iotcon_options_h header_options;
 	iotcon_resource_types_h types;
 	int ifaces;
-	int observe_handle;
+	icl_handle_container_s *observe_handle;
 };
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__ */

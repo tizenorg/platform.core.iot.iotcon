@@ -288,10 +288,17 @@ API int iotcon_observer_stop(iotcon_client_h resource)
 	int ret;
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	if (NULL == resource->observe_handle) {
+		ERR("It doesn't have a observe_handle");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
 
-	ret = icl_dbus_observer_stop(resource);
-	if (IOTCON_ERROR_NONE != ret)
+	ret = icl_dbus_observer_stop(resource->observe_handle);
+	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icl_dbus_observer_stop() Fail(%d)", ret);
+		return ret;
+	}
+	resource->observe_handle = NULL;
 
 	return ret;
 }

@@ -58,7 +58,7 @@ int icl_dbus_observer_start(iotcon_client_h resource,
 		iotcon_query_h query,
 		iotcon_on_observe_cb cb,
 		void *user_data);
-int icl_dbus_observer_stop(iotcon_client_h resource);
+int icl_dbus_observer_stop(icl_handle_container_s *observe);
 
 int icl_dbus_register_device_info(iotcon_device_info_s info);
 int icl_dbus_get_device_info(const char *host_address, iotcon_device_info_cb cb,
@@ -68,7 +68,11 @@ int icl_dbus_start_presence(unsigned int time_to_live);
 int icl_dbus_stop_presence();
 icl_handle_container_s* icl_dbus_subscribe_presence(const char *host_address,
 		const char *type, iotcon_presence_cb cb, void *user_data);
-int icl_dbus_unsubscribe_presence(icl_handle_container_s *presence_h);
+int icl_dbus_unsubscribe_presence(icl_handle_container_s *presence);
+
+int icl_dbus_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *user_data);
+int icl_dbus_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
+		void *user_data);
 
 unsigned int icl_dbus_start();
 void icl_dbus_stop();
