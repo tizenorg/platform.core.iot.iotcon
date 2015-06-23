@@ -625,12 +625,13 @@ extern "C" OCResourceHandle icd_ioty_register_resource(const char *uri,
 	try {
 		ret = registerResource(handle, resUri, resType, resInterface,
 				_icd_ioty_request_handler, properties);
-		if (OC_STACK_OK != ret) {
-			ERR("registerResource Fail(%d)", ret);
-			return NULL;
-		}
 	} catch (OCException& e) {
-		ERR("registerResource Fail(%s)", e.reason().c_str());
+		ERR("registerResource() Fail(%s)", e.reason().c_str());
+		return NULL;
+	}
+
+	if (OC_STACK_OK != ret) {
+		ERR("registerResource() Fail(%d)", ret);
 		return NULL;
 	}
 
@@ -659,12 +660,12 @@ extern "C" int icd_ioty_unregister_resource(OCResourceHandle resource_handle)
 	try {
 		result = unregisterResource(resource_handle);
 	} catch (OCException& e) {
-		ERR("unregisterResource Fail(%s)", e.reason().c_str());
+		ERR("unregisterResource() Fail(%s)", e.reason().c_str());
 		return IOTCON_ERROR_IOTIVITY;
 	}
 
 	if (OC_STACK_OK != result) {
-		ERR("unregisterResource Fail(%d)", result);
+		ERR("unregisterResource() Fail(%d)", result);
 		return IOTCON_ERROR_IOTIVITY;
 	}
 
@@ -709,7 +710,13 @@ extern "C" int icd_ioty_bind_interface(OCResourceHandle resourceHandle,
 		return ret;
 	}
 
-	ocRet = bindInterfaceToResource(resourceHandle, resource_interface);
+	try {
+		ocRet = bindInterfaceToResource(resourceHandle, resource_interface);
+	} catch (OCException& e) {
+		ERR("bindInterfaceToResource() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ocRet) {
 		ERR("bindInterfaceToResource() Fail(%d)", ocRet);
 		return IOTCON_ERROR_IOTIVITY;
@@ -725,7 +732,13 @@ extern "C" int icd_ioty_bind_type(OCResourceHandle resource_handle,
 	OCStackResult ret;
 	OCResourceHandle resourceHandle = resource_handle;
 
-	ret = bindTypeToResource(resourceHandle, resource_type);
+	try {
+		ret = bindTypeToResource(resourceHandle, resource_type);
+	} catch (OCException& e) {
+		ERR("bindTypeToResource() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ret) {
 		ERR("bindTypeToResource() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -739,7 +752,13 @@ extern "C" int icd_ioty_bind_resource(OCResourceHandle parent, OCResourceHandle 
 {
 	OCStackResult ret;
 
-	ret = bindResource(parent, child);
+	try {
+		ret = bindResource(parent, child);
+	} catch (OCException& e) {
+		ERR("bindResource() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ret) {
 		ERR("bindResource() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -753,7 +772,13 @@ extern "C" int icd_ioty_unbind_resource(OCResourceHandle parent, OCResourceHandl
 {
 	OCStackResult ret;
 
-	ret = unbindResource(parent, child);
+	try {
+		ret = unbindResource(parent, child);
+	} catch (OCException& e) {
+		ERR("unbindResource() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ret) {
 		ERR("unbindResource() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -811,7 +836,14 @@ extern "C" int icd_ioty_notify_list_of_observers(int resHandle, GVariant *msg,
 	}
 	g_variant_iter_free(msgIter);
 
-	ocRet = notifyListOfObservers(GINT_TO_POINTER(resHandle), obsIds, resourceResponse);
+	try {
+		ocRet = notifyListOfObservers(GINT_TO_POINTER(resHandle), obsIds,
+				resourceResponse);
+	} catch (OCException& e) {
+		ERR("notifyListOfObservers() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_NO_OBSERVERS == ocRet) {
 		WARN("No observers. Stop notifying");
 		return IOTCON_ERROR_NONE;
@@ -828,7 +860,13 @@ extern "C" int icd_ioty_notify_all(int resHandle)
 {
 	OCStackResult ocRet;
 
-	ocRet = notifyAllObservers(GINT_TO_POINTER(resHandle));
+	try {
+		ocRet = notifyAllObservers(GINT_TO_POINTER(resHandle));
+	} catch (OCException& e) {
+		ERR("notifyAllObservers() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_NO_OBSERVERS == ocRet) {
 		WARN("No observers. Stop notifying");
 		return IOTCON_ERROR_NONE;
@@ -910,7 +948,13 @@ extern "C" int icd_ioty_send_response(GVariant *resp)
 
 	pResponse->setHeaderOptions(header_options);
 
-	ocRet = sendResponse(pResponse);
+	try {
+		ocRet = sendResponse(pResponse);
+	} catch (OCException& e) {
+		ERR("sendResponse() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ocRet) {
 		ERR("sendResponse() Fail(%d)", ocRet);
 		return IOTCON_ERROR_IOTIVITY;
@@ -942,7 +986,12 @@ extern "C" int icd_ioty_find_resource(const char *host_address, const char *reso
 	FindCallback findCallback = bind(&icdIotivityHandler::findObject::foundResource,
 			object, placeholders::_1);
 
-	ret = findResource("", resource_name.str(), findCallback);
+	try {
+		ret = findResource("", resource_name.str(), findCallback);
+	} catch (OCException& e) {
+		ERR("findResource() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	if (OC_STACK_OK != ret) {
 		ERR("findResource() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -1031,7 +1080,13 @@ extern "C" int icd_ioty_get(GVariant *resource, GVariant *query,
 		= make_shared<icdIotivityHandler::getObject>(signal_number, sender);
 	GetCallback getCallback = bind(&icdIotivityHandler::getObject::onGet, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
-	ret = ocResource->get(queryParams, getCallback);
+
+	try {
+		ret = ocResource->get(queryParams, getCallback);
+	} catch (OCException& e) {
+		ERR("get() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	if (OC_STACK_OK != ret) {
 		ERR("get() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -1071,7 +1126,13 @@ extern "C" int icd_ioty_put(GVariant *resource, const char *repr, GVariant *quer
 	PutCallback putCallback = bind(&icdIotivityHandler::putObject::onPut, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 
-	ocRet = ocResource->put(ocRep, queryParams, putCallback);
+	try {
+		ocRet = ocResource->put(ocRep, queryParams, putCallback);
+	} catch (OCException& e) {
+		ERR("put() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ocRet) {
 		ERR("put() Fail(%d)", ocRet);
 		return IOTCON_ERROR_IOTIVITY;
@@ -1111,7 +1172,13 @@ extern "C" int icd_ioty_post(GVariant *resource, const char *repr, GVariant *que
 	PostCallback postCallback = bind(&icdIotivityHandler::postObject::onPost, object,
 			placeholders::_1, placeholders::_2, placeholders::_3);
 
-	ocRet = ocResource->post(ocRep, queryParams, postCallback);
+	try {
+		ocRet = ocResource->post(ocRep, queryParams, postCallback);
+	} catch (OCException& e) {
+		ERR("post() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ocRet) {
 		ERR("post() Fail(%d)", ocRet);
 		return IOTCON_ERROR_IOTIVITY;
@@ -1135,7 +1202,13 @@ extern "C" int icd_ioty_delete(GVariant *resource, unsigned int signal_number,
 	DeleteCallback deleteCallback = bind(&icdIotivityHandler::deleteObject::onDelete,
 			object, placeholders::_1, placeholders::_2);
 
-	ret = ocResource->deleteResource(deleteCallback);
+	try {
+		ret = ocResource->deleteResource(deleteCallback);
+	} catch (OCException& e) {
+		ERR("deleteResource() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ret) {
 		ERR("deleteResource() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -1181,7 +1254,14 @@ extern "C" int icd_ioty_observer_start(GVariant *resource, int observe_type,
 	ObserveCallback observeCallback = bind(&icdIotivityHandler::observeObject::onObserve,
 			object, placeholders::_1, placeholders::_2, placeholders::_3,
 			placeholders::_4);
-	ret = ocResource->observe(observeType, queryParams, observeCallback);
+
+	try {
+		ret = ocResource->observe(observeType, queryParams, observeCallback);
+	} catch (OCException& e) {
+		ERR("observe() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ret) {
 		ERR("observe() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -1200,7 +1280,13 @@ extern "C" int icd_ioty_observer_stop(void *observe_h)
 	OCResource::Ptr ocResource = resource_h->ocResource;
 	delete (resource_handle*)observe_h;
 
-	ret = ocResource->cancelObserve(QualityOfService::HighQos);
+	try {
+		ret = ocResource->cancelObserve(QualityOfService::HighQos);
+	} catch (OCException& e) {
+		ERR("cancelObserve() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ret) {
 		ERR("cancelObserve() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -1231,7 +1317,13 @@ extern "C" int icd_ioty_register_device_info(GVariant *value)
 			&info.firmwareVersion,
 			&info.supportUrl);
 
-	ret = registerDeviceInfo(info);
+	try {
+		ret = registerDeviceInfo(info);
+	} catch (OCException& e) {
+		ERR("registerDeviceInfo() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ret) {
 		ERR("registerDeviceInfo() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -1255,7 +1347,13 @@ extern "C" int icd_ioty_get_device_info(const char *host_address,
 			object,
 			placeholders::_1);
 
-	ret = getDeviceInfo("", resHost, findDeviceCallback);
+	try {
+		ret = getDeviceInfo("", resHost, findDeviceCallback);
+	} catch (OCException& e) {
+		ERR("getDeviceInfo() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ret) {
 		ERR("getDeviceInfo() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -1279,7 +1377,13 @@ extern "C" iotcon_presence_h icd_ioty_subscribe_presence(const char *host_addres
 				placeholders::_1, placeholders::_2, placeholders::_3);
 
 	host = string(ICD_COAP) + string(host_address);
-	ret = subscribePresence(presence_handle, host, resource_type, subscribeCallback);
+
+	try {
+		ret = subscribePresence(presence_handle, host, resource_type, subscribeCallback);
+	} catch (OCException& e) {
+		ERR("subscribePresence() Fail(%s)", e.reason().c_str());
+		return NULL;
+	}
 
 	if (OC_STACK_OK != ret) {
 		ERR("subscribePresence() Fail(%d)", ret);
@@ -1294,7 +1398,13 @@ extern "C" int icd_ioty_unsubscribe_presence(iotcon_presence_h presence_handle)
 {
 	OCStackResult ret;
 
-	ret = unsubscribePresence(presence_handle);
+	try {
+		ret = unsubscribePresence(presence_handle);
+	} catch (OCException& e) {
+		ERR("unsubscribePresence() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ret) {
 		ERR("unsubscribePresence() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -1308,7 +1418,13 @@ extern "C" int icd_ioty_start_presence(unsigned int time_to_live)
 {
 	OCStackResult ret;
 
-	ret = startPresence(time_to_live);
+	try {
+		ret = startPresence(time_to_live);
+	} catch (OCException& e) {
+		ERR("startPresence() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ret) {
 		ERR("startPresence() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -1322,7 +1438,13 @@ extern "C" int icd_ioty_stop_presence()
 {
 	OCStackResult ret;
 
-	ret = stopPresence();
+	try {
+		ret = stopPresence();
+	} catch (OCException& e) {
+		ERR("stopPresence() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	if (OC_STACK_OK != ret) {
 		ERR("stopPresence() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
