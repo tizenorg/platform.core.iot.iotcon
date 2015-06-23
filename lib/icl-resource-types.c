@@ -37,7 +37,7 @@ iotcon_resource_types_h icl_resource_types_ref(iotcon_resource_types_h types)
 
 API iotcon_resource_types_h iotcon_resource_types_new()
 {
-	iotcon_resource_types_h types = calloc(1, sizeof(struct ic_resource_types));
+	iotcon_resource_types_h types = calloc(1, sizeof(struct icl_resource_types));
 	if (NULL == types) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;
@@ -165,7 +165,7 @@ API iotcon_resource_types_h iotcon_resource_types_clone(iotcon_resource_types_h 
 
 	RETV_IF(NULL == types, NULL);
 
-	clone = calloc(1, sizeof(struct ic_resource_types));
+	clone = calloc(1, sizeof(struct icl_resource_types));
 	if (NULL == clone) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;

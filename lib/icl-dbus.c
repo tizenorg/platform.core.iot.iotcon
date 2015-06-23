@@ -38,6 +38,7 @@ typedef struct {
 	unsigned int id;
 } icl_cb_container_s;
 
+
 static inline unsigned int _icl_dbus_generate_signal_number()
 {
 	static unsigned int i = 0;
@@ -74,7 +75,8 @@ static inline void _icl_dbus_unref()
 }
 
 
-int _dbus_subscribe_signal(char *sig_name, void *cb, void *user_data, void *sig_handler)
+static unsigned int _icl_dbus_subscribe_signal(char *sig_name, void *cb, void *user_data,
+		GDBusSignalCallback sig_handler)
 {
 	unsigned int id;
 	icl_cb_container_s *cb_container;
@@ -82,7 +84,7 @@ int _dbus_subscribe_signal(char *sig_name, void *cb, void *user_data, void *sig_
 	cb_container = calloc(1, sizeof(icl_cb_container_s));
 	if (NULL == cb_container) {
 		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
+		return 0;
 	}
 	cb_container->cb = cb;
 	cb_container->user_data = user_data;
@@ -99,12 +101,13 @@ int _dbus_subscribe_signal(char *sig_name, void *cb, void *user_data, void *sig_
 			free);
 	if (0 == id) {
 		ERR("g_dbus_connection_signal_subscribe() Fail");
-		return IOTCON_ERROR_DBUS;
+		free(cb_container);
+		return id;
 	}
 
 	cb_container->id = id;
 
-	return IOTCON_ERROR_NONE;
+	return id;
 }
 
 
@@ -130,7 +133,7 @@ static void _icl_dbus_request_handler(GDBusConnection *connection,
 	char *repr_uri;
 	int request_handle;
 	int resource_handle;
-	struct ic_resource_request request = {0};
+	struct icl_resource_request request = {0};
 	icl_cb_container_s *cb_container = user_data;
 	iotcon_request_handler_cb cb = cb_container->cb;
 
@@ -197,23 +200,35 @@ static void _icl_dbus_request_handler(GDBusConnection *connection,
 }
 
 
-void* icl_dbus_register_resource(const char *uri, iotcon_resource_types_h types,
-		int ifaces, uint8_t properties, iotcon_request_handler_cb cb, void *user_data)
+icl_handle_container_s* icl_dbus_register_resource(const char *uri,
+		iotcon_resource_types_h types,
+		int ifaces,
+		uint8_t properties,
+		iotcon_request_handler_cb cb,
+		void *user_data)
 {
-	int ret;
 	int signal_number;
+	unsigned int subscription_id;
 	int resource_handle;
 	GError *error = NULL;
 	const gchar **res_types;
 	char sig_name[IC_DBUS_SIGNAL_LENGTH];
+	icl_handle_container_s *handle_container;
 
 	RETV_IF(NULL == icl_dbus_object, NULL);
 
 	signal_number = _icl_dbus_generate_signal_number();
 
+	handle_container = calloc(1, sizeof(icl_handle_container_s));
+	if (NULL == handle_container) {
+		ERR("calloc() Fail(%d)", errno);
+		return NULL;
+	}
+
 	res_types = icl_dbus_resource_types_to_array(types);
 	if (NULL == res_types) {
 		ERR("icl_dbus_resource_types_to_array() Fail");
+		free(handle_container);
 		return NULL;
 	}
 
@@ -223,25 +238,30 @@ void* icl_dbus_register_resource(const char *uri, iotcon_resource_types_h types,
 		ERR("ic_dbus_call_register_resource_sync() Fail(%s)", error->message);
 		g_error_free(error);
 		free(res_types);
+		free(handle_container);
 		return NULL;
 	}
+	free(res_types);
 
 	snprintf(sig_name, sizeof(sig_name), "%s_%u", IC_DBUS_SIGNAL_REQUEST_HANDLER,
 			signal_number);
 
-	ret = _dbus_subscribe_signal(sig_name, cb, user_data, _icl_dbus_request_handler);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_dbus_subscribe_signal() Fail");
-		free(res_types);
+	subscription_id = _icl_dbus_subscribe_signal(sig_name, cb, user_data,
+			_icl_dbus_request_handler);
+	if (0 == subscription_id) {
+		ERR("_icl_dbus_subscribe_signal() Fail");
+		free(handle_container);
 		return NULL;
 	}
 
-	free(res_types);
-	return GINT_TO_POINTER(resource_handle);
+	handle_container->handle = resource_handle;
+	handle_container->id = subscription_id;
+
+	return handle_container;
 }
 
 
-int icl_dbus_unregister_resource(void *resource)
+int icl_dbus_unregister_resource(icl_handle_container_s *resource)
 {
 	FN_CALL;
 	int ret;
@@ -249,27 +269,30 @@ int icl_dbus_unregister_resource(void *resource)
 
 	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
 
-	ic_dbus_call_unregister_resource_sync(icl_dbus_object,
-			GPOINTER_TO_INT(resource), &ret, NULL, &error);
+	ic_dbus_call_unregister_resource_sync(icl_dbus_object, resource->handle, &ret,
+			NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_unregister_resource_sync() Fail(%s)", error->message);
 		g_error_free(error);
 		return IOTCON_ERROR_DBUS;
 	}
 
+	g_dbus_connection_signal_unsubscribe(icl_dbus_conn, resource->id);
+	free(resource);
+
 	return ret;
 }
 
 
-int icl_dbus_bind_interface(void *resource, int iface)
+int icl_dbus_bind_interface(icl_handle_container_s *resource, int iface)
 {
 	int ret;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
 
-	ic_dbus_call_bind_interface_sync(icl_dbus_object, GPOINTER_TO_INT(resource),
-			iface, &ret, NULL, &error);
+	ic_dbus_call_bind_interface_sync(icl_dbus_object, resource->handle, iface, &ret,
+			NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_bind_interface_sync() Fail(%s)", error->message);
 		g_error_free(error);
@@ -280,15 +303,15 @@ int icl_dbus_bind_interface(void *resource, int iface)
 }
 
 
-int icl_dbus_bind_type(void *resource, const char *type)
+int icl_dbus_bind_type(icl_handle_container_s *resource, const char *type)
 {
 	int ret;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
 
-	ic_dbus_call_bind_type_sync(icl_dbus_object, GPOINTER_TO_INT(resource),
-			type, &ret, NULL, &error);
+	ic_dbus_call_bind_type_sync(icl_dbus_object, resource->handle, type, &ret, NULL,
+			&error);
 	if (error) {
 		ERR("ic_dbus_call_bind_type_sync() Fail(%s)", error->message);
 		g_error_free(error);
@@ -299,15 +322,15 @@ int icl_dbus_bind_type(void *resource, const char *type)
 }
 
 
-int icl_dbus_bind_resource(void *parent, void *child)
+int icl_dbus_bind_resource(icl_handle_container_s *parent, icl_handle_container_s *child)
 {
 	int ret;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
 
-	ic_dbus_call_bind_resource_sync(icl_dbus_object, GPOINTER_TO_INT(parent),
-			GPOINTER_TO_INT(child), &ret, NULL, &error);
+	ic_dbus_call_bind_resource_sync(icl_dbus_object, parent->handle, child->handle,
+			&ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_bind_resource_sync() Fail(%s)", error->message);
 		g_error_free(error);
@@ -318,15 +341,16 @@ int icl_dbus_bind_resource(void *parent, void *child)
 }
 
 
-int icl_dbus_unbind_resource(void *parent, void *child)
+int icl_dbus_unbind_resource(icl_handle_container_s *parent,
+		icl_handle_container_s *child)
 {
 	int ret;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
 
-	ic_dbus_call_unbind_resource_sync(icl_dbus_object, GPOINTER_TO_INT(parent),
-			GPOINTER_TO_INT(child), &ret, NULL, &error);
+	ic_dbus_call_unbind_resource_sync(icl_dbus_object, parent->handle, child->handle,
+			&ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_unbind_resource_sync() Fail(%s)", error->message);
 		g_error_free(error);
@@ -337,8 +361,8 @@ int icl_dbus_unbind_resource(void *parent, void *child)
 }
 
 
-int icl_dbus_notify_list_of_observers(void *resource, struct ic_notify_msg *msg,
-		iotcon_observers_h observers)
+int icl_dbus_notify_list_of_observers(icl_handle_container_s *resource,
+		struct icl_notify_msg *msg, iotcon_observers_h observers)
 {
 	int ret;
 	GError *error = NULL;
@@ -354,7 +378,7 @@ int icl_dbus_notify_list_of_observers(void *resource, struct ic_notify_msg *msg,
 	}
 	obs = icl_dbus_observers_to_gvariant(observers);
 
-	ic_dbus_call_notify_list_of_observers_sync(icl_dbus_object, GPOINTER_TO_INT(resource),
+	ic_dbus_call_notify_list_of_observers_sync(icl_dbus_object, resource->handle,
 			noti_msg, obs, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_notify_list_of_observers_sync() Fail(%s)", error->message);
@@ -368,15 +392,14 @@ int icl_dbus_notify_list_of_observers(void *resource, struct ic_notify_msg *msg,
 }
 
 
-int icl_dbus_notify_all(void *resource)
+int icl_dbus_notify_all(icl_handle_container_s *resource)
 {
 	int ret;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
 
-	ic_dbus_call_notify_all_sync(icl_dbus_object, GPOINTER_TO_INT(resource), &ret, NULL,
-			&error);
+	ic_dbus_call_notify_all_sync(icl_dbus_object, resource->handle, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_notify_all_sync() Fail(%s)", error->message);
 		g_error_free(error);
@@ -387,7 +410,7 @@ int icl_dbus_notify_all(void *resource)
 }
 
 
-int icl_dbus_send_response(struct ic_resource_response *response)
+int icl_dbus_send_response(struct icl_resource_response *response)
 {
 	int ret;
 	GError *error = NULL;
@@ -424,7 +447,7 @@ static void _icl_dbus_found_resource(GDBusConnection *connection,
 	icl_cb_container_s *cb_container = user_data;
 	iotcon_found_resource_cb cb = cb_container->cb;
 
-	struct ic_remote_resource resource = {0};
+	struct icl_remote_resource resource = {0};
 
 	g_variant_get(parameters, "(&s&siasi)",
 			&resource.uri,
@@ -452,6 +475,7 @@ int icl_dbus_find_resource(const char *host_address, const char *resource_type,
 		iotcon_found_resource_cb cb, void *user_data)
 {
 	int ret;
+	unsigned int subscription_id;
 	int signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	GError *error = NULL;
@@ -460,8 +484,8 @@ int icl_dbus_find_resource(const char *host_address, const char *resource_type,
 
 	signal_number = _icl_dbus_generate_signal_number();
 
-	ic_dbus_call_find_resource_sync(icl_dbus_object, host_address, resource_type,
-			signal_number, &ret, NULL, &error);
+	ic_dbus_call_find_resource_sync(icl_dbus_object, host_address,
+			ic_utils_dbus_encode_str(resource_type), signal_number, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_find_resource_sync() Fail(%s)", error->message);
 		g_error_free(error);
@@ -471,9 +495,10 @@ int icl_dbus_find_resource(const char *host_address, const char *resource_type,
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_FOUND_RESOURCE,
 			signal_number);
 
-	ret = _dbus_subscribe_signal(signal_name, cb, user_data, _icl_dbus_found_resource);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_dbus_subscribe_signal() Fail");
+	subscription_id = _icl_dbus_subscribe_signal(signal_name, cb, user_data,
+			_icl_dbus_found_resource);
+	if (0 == subscription_id) {
+		ERR("_icl_dbus_subscribe_signal() Fail");
 		return IOTCON_ERROR_DBUS;
 	}
 
@@ -551,6 +576,7 @@ int icl_dbus_get(iotcon_client_h resource, iotcon_query_h query,
 {
 	int ret;
 	GError *error = NULL;
+	unsigned int subscription_id;
 	int signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	GVariant *arg_client;
@@ -575,9 +601,9 @@ int icl_dbus_get(iotcon_client_h resource, iotcon_query_h query,
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_GET,
 			signal_number);
 
-	ret = _dbus_subscribe_signal(signal_name, cb, user_data, _icl_dbus_on_cru);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_dbus_subscribe_signal() Fail");
+	subscription_id = _icl_dbus_subscribe_signal(signal_name, cb, user_data, _icl_dbus_on_cru);
+	if (0 == subscription_id) {
+		ERR("_icl_dbus_subscribe_signal() Fail");
 		return IOTCON_ERROR_DBUS;
 	}
 
@@ -590,6 +616,7 @@ int icl_dbus_put(iotcon_client_h resource, iotcon_repr_h repr,
 {
 	int ret;
 	GError *error = NULL;
+	unsigned int subscription_id;
 	int signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	char *arg_repr;
@@ -623,9 +650,10 @@ int icl_dbus_put(iotcon_client_h resource, iotcon_repr_h repr,
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_PUT,
 			signal_number);
 
-	ret = _dbus_subscribe_signal(signal_name, cb, user_data, _icl_dbus_on_cru);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_dbus_subscribe_signal() Fail");
+	subscription_id = _icl_dbus_subscribe_signal(signal_name, cb, user_data,
+			_icl_dbus_on_cru);
+	if (0 == subscription_id) {
+		ERR("_icl_dbus_subscribe_signal() Fail");
 		free(arg_repr);
 		return IOTCON_ERROR_DBUS;
 	}
@@ -641,6 +669,7 @@ int icl_dbus_post(iotcon_client_h resource, iotcon_repr_h repr,
 {
 	int ret;
 	GError *error = NULL;
+	unsigned int subscription_id;
 	int signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	char *arg_repr;
@@ -674,9 +703,10 @@ int icl_dbus_post(iotcon_client_h resource, iotcon_repr_h repr,
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_POST,
 			signal_number);
 
-	ret = _dbus_subscribe_signal(signal_name, cb, user_data, _icl_dbus_on_cru);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_dbus_subscribe_signal() Fail");
+	subscription_id = _icl_dbus_subscribe_signal(signal_name, cb, user_data,
+			_icl_dbus_on_cru);
+	if (0 == subscription_id) {
+		ERR("_icl_dbus_subscribe_signal() Fail");
 		free(arg_repr);
 		return IOTCON_ERROR_DBUS;
 	}
@@ -728,6 +758,7 @@ int icl_dbus_delete(iotcon_client_h resource, iotcon_on_delete_cb cb,
 {
 	int ret;
 	GError *error = NULL;
+	unsigned int subscription_id;
 	int signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	GVariant *arg_client;
@@ -750,9 +781,10 @@ int icl_dbus_delete(iotcon_client_h resource, iotcon_on_delete_cb cb,
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_DELETE,
 			signal_number);
 
-	ret = _dbus_subscribe_signal(signal_name, cb, user_data, _icl_dbus_on_delete);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_dbus_subscribe_signal() Fail");
+	subscription_id = _icl_dbus_subscribe_signal(signal_name, cb, user_data,
+			_icl_dbus_on_delete);
+	if (0 == subscription_id) {
+		ERR("_icl_dbus_subscribe_signal() Fail");
 		return IOTCON_ERROR_DBUS;
 	}
 
@@ -833,6 +865,7 @@ int icl_dbus_observer_start(iotcon_client_h resource,
 	int ret;
 	int observe_h;
 	GError *error = NULL;
+	unsigned int subscription_id;
 	int signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	GVariant *arg_client;
@@ -860,9 +893,10 @@ int icl_dbus_observer_start(iotcon_client_h resource,
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_OBSERVE,
 			signal_number);
 
-	ret = _dbus_subscribe_signal(signal_name, cb, user_data, _icl_dbus_on_observe);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_dbus_subscribe_signal() Fail");
+	subscription_id = _icl_dbus_subscribe_signal(signal_name, cb, user_data,
+			_icl_dbus_on_observe);
+	if (0 == subscription_id) {
+		ERR("_icl_dbus_subscribe_signal() Fail");
 		return IOTCON_ERROR_DBUS;
 	}
 
@@ -963,6 +997,7 @@ int icl_dbus_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 {
 	int ret;
 	GError *error = NULL;
+	unsigned int subscription_id;
 	int signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
@@ -981,10 +1016,10 @@ int icl_dbus_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_DEVICE,
 			signal_number);
 
-	ret = _dbus_subscribe_signal(signal_name, cb, user_data,
+	subscription_id = _icl_dbus_subscribe_signal(signal_name, cb, user_data,
 			_icl_dbus_received_device_info);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_dbus_subscribe_signal() Fail");
+	if (0 == subscription_id) {
+		ERR("_icl_dbus_subscribe_signal() Fail");
 		return IOTCON_ERROR_DBUS;
 	}
 
@@ -1051,48 +1086,61 @@ static void _icl_dbus_presence_handler(GDBusConnection *connection,
 }
 
 
-void* icl_dbus_subscribe_presence(const char *host_address,
+icl_handle_container_s* icl_dbus_subscribe_presence(const char *host_address,
 		const char *type, iotcon_presence_cb cb, void *user_data)
 {
-	int ret;
 	int presence_h;
 	GError *error = NULL;
+	unsigned int subscription_id;
 	int signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
+	icl_handle_container_s *handle_container;
 
 	RETV_IF(NULL == icl_dbus_object, NULL);
 
 	signal_number = _icl_dbus_generate_signal_number();
+
+	handle_container = calloc(1, sizeof(icl_handle_container_s));
+	if (NULL == handle_container) {
+		ERR("calloc() Fail(%d)", errno);
+		return NULL;
+	}
 
 	ic_dbus_call_subscribe_presence_sync(icl_dbus_object, host_address, type,
 			signal_number, &presence_h, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_subscribe_presence_sync() Fail(%s)", error->message);
 		g_error_free(error);
+		free(handle_container);
 		return NULL;
 	}
 
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_PRESENCE,
 			signal_number);
 
-	ret = _dbus_subscribe_signal(signal_name, cb, user_data, _icl_dbus_presence_handler);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_dbus_subscribe_signal() Fail");
+	subscription_id = _icl_dbus_subscribe_signal(signal_name, cb, user_data,
+			_icl_dbus_presence_handler);
+	if (0 == subscription_id) {
+		ERR("_icl_dbus_subscribe_signal() Fail");
+		free(handle_container);
 		return NULL;
 	}
 
-	return GINT_TO_POINTER(presence_h);
+	handle_container->handle = presence_h;
+	handle_container->id = subscription_id;
+
+	return handle_container;
 }
 
 
-int icl_dbus_unsubscribe_presence(void *presence_h)
+int icl_dbus_unsubscribe_presence(icl_handle_container_s *presence_h)
 {
 	int ret;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
 
-	ic_dbus_call_unsubscribe_presence_sync(icl_dbus_object, GPOINTER_TO_INT(presence_h),
+	ic_dbus_call_unsubscribe_presence_sync(icl_dbus_object, presence_h->handle,
 			&ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_unsubscribe_presence_sync() Fail(%s)", error->message);
@@ -1100,9 +1148,8 @@ int icl_dbus_unsubscribe_presence(void *presence_h)
 		return IOTCON_ERROR_DBUS;
 	}
 
-	/* how to unsubscribe
-	 * g_dbus_connection_signal_unsubscribe(icl_dbus_conn, );
-	 */
+	g_dbus_connection_signal_unsubscribe(icl_dbus_conn, presence_h->id);
+	free(presence_h);
 
 	return ret;
 }

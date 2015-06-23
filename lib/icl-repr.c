@@ -61,7 +61,7 @@ API iotcon_repr_h iotcon_repr_new()
 	iotcon_repr_h ret_val;
 	errno = 0;
 
-	ret_val = calloc(1, sizeof(struct ic_repr_s));
+	ret_val = calloc(1, sizeof(struct icl_repr_s));
 	if (NULL == ret_val) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;

@@ -19,7 +19,7 @@
 #include "iotcon-struct.h"
 #include "icl-options.h"
 
-struct ic_remote_resource {
+struct icl_remote_resource {
 	char *uri;
 	char *host;
 	bool is_observable;

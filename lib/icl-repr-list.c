@@ -55,7 +55,7 @@ static iotcon_list_h _icl_list_new(iotcon_types_e type)
 {
 	iotcon_list_h list;
 
-	list = calloc(1, sizeof(struct ic_list_s));
+	list = calloc(1, sizeof(struct icl_list_s));
 	if (NULL == list) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;
@@ -374,13 +374,13 @@ static int _icl_list_del_nth_value(iotcon_list_h list, int pos, iotcon_types_e v
 	}
 
 	if (IOTCON_TYPE_STR == value->type) {
-		ic_basic_s *real = (ic_basic_s*)value;
+		icl_basic_s *real = (icl_basic_s*)value;
 		free(real->val.s);
 	} else if (IOTCON_TYPE_LIST == value->type) {
-		ic_val_list_s *real = (ic_val_list_s*)value;
+		icl_val_list_s *real = (icl_val_list_s*)value;
 		iotcon_list_free(real->list);
 	} else if (IOTCON_TYPE_REPR == value->type) {
-		ic_val_repr_s *real = (ic_val_repr_s*)value;
+		icl_val_repr_s *real = (icl_val_repr_s*)value;
 		iotcon_repr_free(real->repr);
 	}
 
@@ -505,7 +505,7 @@ API int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_fn fn,
 {
 	GList *cur;
 	int index = 0;
-	ic_basic_s *real = NULL;
+	icl_basic_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_INT != list->type, IOTCON_ERROR_INVALID_TYPE, "Invalid Type(%d)",
@@ -530,7 +530,7 @@ API int iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_fn fn,
 {
 	GList *cur;
 	int index = 0;
-	ic_basic_s *real = NULL;
+	icl_basic_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_BOOL != list->type, IOTCON_ERROR_INVALID_TYPE,
@@ -555,7 +555,7 @@ API int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_fn fn,
 {
 	GList *cur;
 	int index = 0;
-	ic_basic_s *real = NULL;
+	icl_basic_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_DOUBLE != list->type, IOTCON_ERROR_INVALID_TYPE,
@@ -580,7 +580,7 @@ API int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_fn fn,
 {
 	GList *cur;
 	int index = 0;
-	ic_basic_s *real = NULL;
+	icl_basic_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_STR != list->type, IOTCON_ERROR_INVALID_TYPE, "Invalid Type(%d)",
@@ -605,7 +605,7 @@ API int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_fn fn,
 {
 	int index = 0;
 	GList *cur = NULL;
-	ic_val_list_s *real = NULL;
+	icl_val_list_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_LIST != list->type, IOTCON_ERROR_INVALID_TYPE,
@@ -629,7 +629,7 @@ API int iotcon_list_foreach_repr(iotcon_list_h list, iotcon_list_repr_fn fn, voi
 {
 	int index = 0;
 	GList *cur = NULL;
-	ic_val_repr_s *real = NULL;
+	icl_val_repr_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_REPR != list->type, IOTCON_ERROR_INVALID_TYPE,
@@ -763,7 +763,7 @@ iotcon_list_h icl_list_from_json(JsonArray *parray)
 				return NULL;
 			}
 
-			ic_basic_s *real = (ic_basic_s*)value;
+			icl_basic_s *real = (icl_basic_s*)value;
 			if (IOTCON_TYPE_NONE != list->type && list->type != real->type) {
 				ERR("Type matching Fail(list:%d,value:%d)", list->type, real->type);
 				icl_value_free(value);

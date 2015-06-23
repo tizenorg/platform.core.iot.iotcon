@@ -934,7 +934,7 @@ extern "C" int icd_ioty_find_resource(const char *host_address, const char *reso
 	else
 		resource_name << host_address << ICD_UNICAST_RESOURCE_DISCOVERY;
 
-	if (resource_type)
+	if (IC_STR_EQUAL != strcmp(resource_type, IC_STR_NULL))
 		resource_name << "?rt=" << resource_type;
 
 	shared_ptr<icdIotivityHandler::findObject> object

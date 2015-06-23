@@ -20,7 +20,7 @@
 #include "iotcon-constant.h"
 #include "icl-request.h"
 
-struct ic_resource_response {
+struct icl_resource_response {
 	char *new_uri;
 	int error_code;
 	iotcon_options_h header_options;

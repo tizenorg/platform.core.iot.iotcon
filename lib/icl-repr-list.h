@@ -21,7 +21,7 @@
 
 #include "iotcon-struct.h"
 
-struct ic_list_s {
+struct icl_list_s {
 	int type;
 	int ref_count;
 	GList *list;

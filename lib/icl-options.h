@@ -18,7 +18,7 @@
 
 #include "iotcon-struct.h"
 
-struct ic_options {
+struct icl_options {
 	int ref_count;
 	GHashTable *hash;
 };

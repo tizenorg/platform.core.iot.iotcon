@@ -29,7 +29,7 @@
 #define IOTCON_KEY_PROPERTY "prop"
 #define IOTCON_KEY_REP "rep"
 
-struct ic_repr_s {
+struct icl_repr_s {
 	char *uri;
 	int ref_count;
 	int interfaces;

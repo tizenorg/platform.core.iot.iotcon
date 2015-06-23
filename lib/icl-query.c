@@ -26,7 +26,7 @@
 
 API iotcon_query_h iotcon_query_new()
 {
-	iotcon_query_h query = calloc(1, sizeof(struct ic_query));
+	iotcon_query_h query = calloc(1, sizeof(struct icl_query));
 	if (NULL == query) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;

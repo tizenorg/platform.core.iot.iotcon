@@ -18,7 +18,7 @@
 
 #include "iotcon-struct.h"
 
-struct ic_resource_types {
+struct icl_resource_types {
 	int ref_count;
 	GList *type_list;
 };

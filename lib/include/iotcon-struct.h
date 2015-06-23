@@ -20,11 +20,11 @@
 
 #include "iotcon-constant.h"
 
-typedef struct ic_value_s* iotcon_value_h;
-typedef struct ic_list_s* iotcon_list_h;
-typedef struct ic_repr_s* iotcon_repr_h;
+typedef struct icl_value_s* iotcon_value_h;
+typedef struct icl_list_s* iotcon_list_h;
+typedef struct icl_repr_s* iotcon_repr_h;
 
-typedef struct ic_notify_msg* iotcon_notimsg_h;
+typedef struct icl_notify_msg* iotcon_notimsg_h;
 
 typedef void* iotcon_presence_h;
 
@@ -44,7 +44,7 @@ typedef struct _device_info {
 } iotcon_device_info_s;
 
 
-typedef struct ic_options* iotcon_options_h;
+typedef struct icl_options* iotcon_options_h;
 iotcon_options_h iotcon_options_new();
 void iotcon_options_free(iotcon_options_h options);
 int iotcon_options_insert(iotcon_options_h options, unsigned short id,
@@ -57,7 +57,7 @@ int iotcon_options_foreach(iotcon_options_h options, iotcon_options_foreach_cb c
 		void *user_data);
 
 
-typedef struct ic_query* iotcon_query_h;
+typedef struct icl_query* iotcon_query_h;
 iotcon_query_h iotcon_query_new();
 void iotcon_query_free(iotcon_query_h query);
 int iotcon_query_insert(iotcon_query_h query, const char *key, const char *value);
@@ -80,7 +80,7 @@ int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
  *
  * @return the (possibly changed) start of the list, otherwise a null pointer on failure
  */
-typedef struct ic_resource_types* iotcon_resource_types_h;
+typedef struct icl_resource_types* iotcon_resource_types_h;
 iotcon_resource_types_h iotcon_resource_types_new();
 void iotcon_resource_types_free(iotcon_resource_types_h types);
 int iotcon_resource_types_insert(iotcon_resource_types_h types, const char *type);
@@ -96,7 +96,7 @@ void iotcon_observers_free(iotcon_observers_h observers);
 iotcon_observers_h iotcon_observers_append(iotcon_observers_h observers, int obs_id);
 iotcon_observers_h iotcon_observers_remove(iotcon_observers_h observers, int obs_id);
 
-typedef struct ic_resource* iotcon_resource_h;
+typedef struct icl_resource* iotcon_resource_h;
 int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *number);
 int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 		iotcon_resource_h *child);
@@ -105,7 +105,7 @@ int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_
 int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces);
 int iotcon_resource_is_observable(iotcon_resource_h resource, bool *observable);
 
-typedef struct ic_remote_resource* iotcon_client_h;
+typedef struct icl_remote_resource* iotcon_client_h;
 int iotcon_client_get_uri(iotcon_client_h resource, char **uri);
 int iotcon_client_get_host(iotcon_client_h resource, char **host);
 int iotcon_client_get_types(iotcon_client_h resource, iotcon_resource_types_h *types);
@@ -113,7 +113,7 @@ int iotcon_client_get_interfaces(iotcon_client_h resource, int *ifaces);
 int iotcon_client_is_observable(iotcon_client_h resource, bool *observable);
 int iotcon_client_set_options(iotcon_client_h resource, iotcon_options_h header_options);
 
-typedef struct ic_resource_request* iotcon_request_h;
+typedef struct icl_resource_request* iotcon_request_h;
 int iotcon_request_get_uri(iotcon_request_h request, char **uri);
 int iotcon_request_get_representation(iotcon_request_h request, iotcon_repr_h *repr);
 int iotcon_request_get_types(iotcon_request_h request, int *types);
@@ -123,7 +123,7 @@ int iotcon_request_get_observer_action(iotcon_request_h request,
 		iotcon_observe_action_e *action);
 int iotcon_request_get_observer_id(iotcon_request_h request, int *observer_id);
 
-typedef struct ic_resource_response* iotcon_response_h;
+typedef struct icl_resource_response* iotcon_response_h;
 iotcon_response_h iotcon_response_new(iotcon_request_h request_h);
 void iotcon_response_free(iotcon_response_h resp);
 int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e prop, ...);

@@ -62,7 +62,7 @@ API iotcon_client_h iotcon_client_new(const char *host, const char *uri,
 	RETV_IF(NULL == uri, NULL);
 	RETV_IF(NULL == resource_types, NULL);
 
-	resource = calloc(1, sizeof(struct ic_remote_resource));
+	resource = calloc(1, sizeof(struct icl_remote_resource));
 	if (NULL == resource) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;

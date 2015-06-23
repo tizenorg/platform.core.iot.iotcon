@@ -36,7 +36,7 @@ iotcon_options_h icl_options_ref(iotcon_options_h options)
 
 API iotcon_options_h iotcon_options_new()
 {
-	iotcon_options_h options = calloc(1, sizeof(struct ic_options));
+	iotcon_options_h options = calloc(1, sizeof(struct icl_options));
 	if (NULL == options) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;

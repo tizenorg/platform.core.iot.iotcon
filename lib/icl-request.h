@@ -22,17 +22,17 @@
 typedef void* oc_request_h;
 typedef void* oc_resource_h;
 
-struct ic_observe_info {
+struct icl_observe_info {
 	iotcon_observe_action_e action;
 	int observer_id;
 };
 
-struct ic_resource_request {
+struct icl_resource_request {
 	int types;
 	char *uri;
 	iotcon_options_h header_options;
 	iotcon_query_h query;
-	struct ic_observe_info observation_info;
+	struct icl_observe_info observation_info;
 	iotcon_repr_h repr;
 	oc_request_h request_handle;
 	oc_resource_h resource_handle;

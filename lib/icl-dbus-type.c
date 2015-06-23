@@ -51,7 +51,7 @@ const char** icl_dbus_resource_types_to_array(iotcon_resource_types_h types)
 }
 
 
-GVariant* icl_dbus_notimsg_to_gvariant(struct ic_notify_msg *msg)
+GVariant* icl_dbus_notimsg_to_gvariant(struct icl_notify_msg *msg)
 {
 	char *repr_json = NULL;
 	GVariant *value;
@@ -77,7 +77,7 @@ GVariant* icl_dbus_notimsg_to_gvariant(struct ic_notify_msg *msg)
 }
 
 
-GVariant* icl_dbus_response_to_gvariant(struct ic_resource_response *response)
+GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 {
 	GHashTableIter iter;
 	GVariantBuilder *options;
@@ -108,7 +108,7 @@ GVariant* icl_dbus_response_to_gvariant(struct ic_resource_response *response)
 }
 
 
-GVariant* icl_dbus_client_to_gvariant(struct ic_remote_resource *resource)
+GVariant* icl_dbus_client_to_gvariant(struct icl_remote_resource *resource)
 {
 	FN_CALL;
 	GVariant *value;

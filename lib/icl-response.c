@@ -33,7 +33,7 @@ API iotcon_response_h iotcon_response_new(iotcon_request_h request_h)
 
 	RETV_IF(NULL == request_h, NULL);
 
-	iotcon_response_h resp = calloc(1, sizeof(struct ic_resource_response));
+	iotcon_response_h resp = calloc(1, sizeof(struct icl_resource_response));
 	if (NULL == resp) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;

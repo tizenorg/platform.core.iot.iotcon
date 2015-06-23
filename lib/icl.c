@@ -121,7 +121,7 @@ API iotcon_resource_h iotcon_register_resource(const char *uri,
 	RETV_IF(NULL == res_types, NULL);
 	RETV_IF(NULL == cb, NULL);
 
-	resource = calloc(1, sizeof(struct ic_resource));
+	resource = calloc(1, sizeof(struct icl_resource));
 	if (NULL == resource) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;
@@ -412,7 +412,7 @@ API iotcon_notimsg_h iotcon_notimsg_new(iotcon_repr_h repr, iotcon_interface_e i
 
 	RETV_IF(NULL == repr, NULL);
 
-	msg = calloc(1, sizeof(struct ic_notify_msg));
+	msg = calloc(1, sizeof(struct icl_notify_msg));
 	if (NULL == msg) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;

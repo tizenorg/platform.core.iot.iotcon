@@ -18,7 +18,7 @@
 
 #include "iotcon-struct.h"
 
-struct ic_query {
+struct icl_query {
 	int len;
 	GHashTable *hash;
 };

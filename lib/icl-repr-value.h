@@ -21,7 +21,7 @@
 
 #include "iotcon-struct.h"
 
-struct ic_value_s {
+struct icl_value_s {
 	int type;
 };
 
@@ -33,17 +33,17 @@ typedef struct {
 		double d;
 		char *s;
 	} val;
-} ic_basic_s;
+} icl_basic_s;
 
 typedef struct {
 	int type;
-	struct ic_list_s *list;
-} ic_val_list_s;
+	struct icl_list_s *list;
+} icl_val_list_s;
 
 typedef struct {
 	int type;
-	struct ic_repr_s *repr;
-} ic_val_repr_s;
+	struct icl_repr_s *repr;
+} icl_val_repr_s;
 
 iotcon_value_h icl_value_new_null();
 iotcon_value_h icl_value_new_int(int val);

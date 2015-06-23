@@ -17,20 +17,21 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_H__
 
 #include "iotcon.h"
+#include "icl-dbus.h"
 
-struct ic_notify_msg {
+struct icl_notify_msg {
 	int error_code;
 	iotcon_interface_e iface;
 	iotcon_repr_h repr;
 };
 
-struct ic_resource {
+struct icl_resource {
 	char *uri;
 	char *host;
 	bool is_observable;
 	iotcon_resource_types_h types;
 	int ifaces;
-	void *handle;
+	icl_handle_container_s *handle;
 	iotcon_request_handler_cb cb;
 	void *user_data;
 	iotcon_resource_h children[IOTCON_CONTAINED_RESOURCES_MAX];
