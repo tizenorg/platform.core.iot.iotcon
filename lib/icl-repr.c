@@ -414,6 +414,9 @@ char* icl_repr_generate_json(iotcon_repr_h repr, bool set_pretty)
 	json_data = json_generator_to_data(gen, NULL);
 	DBG("result : %s", json_data);
 
+	json_node_free(root_node);
+	g_object_unref(gen);
+
 	return json_data;
 }
 
