@@ -27,7 +27,6 @@ struct icl_notify_msg {
 
 struct icl_resource {
 	char *uri;
-	char *host;
 	bool is_observable;
 	iotcon_resource_types_h types;
 	int ifaces;
@@ -39,6 +38,5 @@ struct icl_resource {
 
 int icl_ioty_convert_interface_flag(iotcon_interface_e src, char **dest);
 int icl_ioty_convert_interface_string(const char *src, iotcon_interface_e *dest);
-
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_H__*/

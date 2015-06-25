@@ -32,31 +32,18 @@
 /**
  * @brief global context
  */
-static GHashTable *icl_request_cb_hash;
 static bool icl_is_init = false;
 
-static void _free_resource(gpointer data)
-{
-	int ret;
-	iotcon_resource_h resource = data;
-
-	RET_IF(NULL == data);
-
-	ret = icl_dbus_unregister_resource(resource->handle);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icl_dbus_unregister_resource() Fail(%d)", ret);
-
-	free(resource);
-}
-
-
-API int iotcon_initialize(const char *addr, unsigned short port)
+API int iotcon_initialize()
 {
 	FN_CALL;
 	int ret;
 
 	RETVM_IF(true == icl_is_init, IOTCON_ERROR_INVALID_PARAMETER,  "already initialized");
-	RETV_IF(NULL == addr, IOTCON_ERROR_INVALID_PARAMETER);
+
+#if !GLIB_CHECK_VERSION(2, 35, 0)
+	g_type_init();
+#endif
 
 	ret = icl_dbus_start();
 	if (IOTCON_ERROR_NONE != ret) {
@@ -64,13 +51,6 @@ API int iotcon_initialize(const char *addr, unsigned short port)
 		return ret;
 	}
 
-
-	icl_request_cb_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL,
-			_free_resource);
-
-#if !GLIB_CHECK_VERSION(2, 35, 0)
-	g_type_init();
-#endif
 	icl_is_init = true;
 
 	return IOTCON_ERROR_NONE;
@@ -85,22 +65,7 @@ API void iotcon_deinitialize()
 
 	icl_dbus_stop();
 
-	g_hash_table_destroy(icl_request_cb_hash);
-	icl_request_cb_hash = NULL;
-
 	icl_is_init = false;
-}
-
-
-static gboolean _find_valid_resource(gpointer key, gpointer value, gpointer user_data)
-{
-	return (key == user_data);
-}
-
-
-iotcon_resource_h icl_get_resource_handler_data(void *handle)
-{
-	return g_hash_table_find(icl_request_cb_hash, _find_valid_resource, handle);
 }
 
 
@@ -143,8 +108,6 @@ API iotcon_resource_h iotcon_register_resource(const char *uri,
 	resource->ifaces = ifaces;
 	resource->is_observable = properties & IOTCON_OBSERVABLE;
 
-	g_hash_table_insert(icl_request_cb_hash, resource->handle, resource);
-
 	return resource;
 }
 
@@ -152,10 +115,23 @@ API iotcon_resource_h iotcon_register_resource(const char *uri,
 API void iotcon_unregister_resource(iotcon_resource_h resource)
 {
 	FN_CALL;
+	int ret;
 
 	RET_IF(NULL == resource);
 
-	g_hash_table_remove(icl_request_cb_hash, resource->handle);
+	ret = icl_dbus_unregister_resource(resource->handle);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_dbus_unregister_resource() Fail(%d)", ret);
+		return;
+	}
+	resource->handle = NULL;
+
+	free(resource->uri);
+	resource->uri = NULL;
+	free(resource->types);
+	resource->types = NULL;
+
+	free(resource);
 }
 
 

@@ -311,8 +311,8 @@ int main(int argc, char **argv)
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* initialize address and port */
-	iotcon_initialize(IOTCON_ALL_INTERFACES, IOTCON_RANDOM_PORT);
+	/* iotcon initialize */
+	iotcon_initialize();
 
 	/* set local door resource */
 	iotcon_error = _set_door_resource();

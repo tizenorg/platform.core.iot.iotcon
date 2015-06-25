@@ -24,7 +24,8 @@ int main()
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	iotcon_initialize(IOTCON_ALL_INTERFACES, IOTCON_RANDOM_PORT);
+	/* iotcon initialize */
+	iotcon_initialize();
 
 	iotcon_get_device_info(IOTCON_MULTICAST_ADDRESS, _get_device_info, NULL);
 

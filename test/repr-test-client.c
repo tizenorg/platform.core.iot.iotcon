@@ -195,8 +195,8 @@ int main(int argc, char **argv)
 	GMainLoop *loop;
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* initialize address and port */
-	iotcon_initialize(IOTCON_ALL_INTERFACES, IOTCON_RANDOM_PORT);
+	/* iotcon initialize */
+	iotcon_initialize();
 
 	/* find room typed resources */
 	iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, "core.room", &_found_resource, NULL);

@@ -26,7 +26,7 @@ extern "C" {
 #include <iotcon-constant.h>
 #include <iotcon-representation.h>
 
-int iotcon_initialize(const char *addr, unsigned short port);
+int iotcon_initialize();
 void iotcon_deinitialize();
 
 typedef void (*iotcon_request_handler_cb)(iotcon_request_h request, void *user_data);
