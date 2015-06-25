@@ -11,7 +11,7 @@
 		</request>
 	</define>
 	<assign>
-		<filesystem path="/usr/lib/libiotcon.so*" label="_" exec_label="_"/>
+		<filesystem path="/usr/lib/libiotcon.so*" label="_" exec_label="none"/>
 	</assign>
 	<request>
 		<domain name="libiotcon" />
