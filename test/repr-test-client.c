@@ -19,9 +19,10 @@
 #include <iotcon.h>
 #include "test.h"
 
-const char* const room_uri = "/a/room";
+static const char* const room_uri = "/a/room";
+static char *room_resource_sid;
 
-iotcon_client_h room_resource = NULL;
+static iotcon_client_h room_resource = NULL;
 
 static int _get_int_list_fn(int pos, const int value, void *user_data)
 {
@@ -134,6 +135,7 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 	int ret;
 	char *resource_uri;
 	char *resource_host;
+	char *resource_sid = NULL;
 	iotcon_resource_types_h resource_types = NULL;
 	int resource_interfaces = 0;
 
@@ -148,6 +150,21 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		ERR("iotcon_client_get_uri() Fail(%d)", ret);
 		return;
 	}
+
+	/* get the resource server id */
+	ret = iotcon_client_get_server_id(resource, &resource_sid);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_server_id() Fail(%d)", ret);
+		return;
+	}
+	DBG("[%s] resource server id : %s", resource_uri, resource_sid);
+
+	if (room_resource_sid && TEST_STR_EQUAL == strcmp(room_resource_sid, resource_sid)) {
+		DBG("sid \"%s\" already found. skip !", resource_sid);
+		return;
+	}
+
+	room_resource_sid = strdup(resource_sid);
 
 	/* get the resource host address */
 	ret = iotcon_client_get_host(resource, &resource_host);

@@ -634,7 +634,7 @@ static gboolean _dbus_handle_send_response(icDbus *object,
 	return TRUE;
 }
 
-
+#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 static gboolean _dbus_handle_register_device_info(icDbus *object,
 		GDBusMethodInvocation *invocation, GVariant *device_info)
 {
@@ -664,6 +664,40 @@ static gboolean _dbus_handle_get_device_info(icDbus *object,
 		ERR("icd_ioty_get_device_info() Fail(%d)", ret);
 
 	ic_dbus_complete_get_device_info(object, invocation, ret);
+
+	return TRUE;
+}
+#endif
+
+static gboolean _dbus_handle_register_platform_info(icDbus *object,
+		GDBusMethodInvocation *invocation, GVariant *platform_info)
+{
+	int ret;
+
+	ret = icd_ioty_register_platform_info(platform_info);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_register_platform_info() Fail(%d)", ret);
+
+	ic_dbus_complete_register_platform_info(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_get_platform_info(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		const gchar *host_address,
+		guint signal_number)
+{
+	int ret;
+	const gchar *sender;
+
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	ret = icd_ioty_get_platform_info(host_address, signal_number, sender);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_get_platform_info() Fail(%d)", ret);
+
+	ic_dbus_complete_get_platform_info(object, invocation, ret);
 
 	return TRUE;
 }
@@ -785,10 +819,16 @@ static void _dbus_on_bus_acquired(GDBusConnection *conn, const gchar *name,
 			G_CALLBACK(_dbus_handle_notify_all), NULL);
 	g_signal_connect(dbus_object, "handle-send-response",
 			G_CALLBACK(_dbus_handle_send_response), NULL);
+#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 	g_signal_connect(dbus_object, "handle-register-device-info",
 			G_CALLBACK(_dbus_handle_register_device_info), NULL);
 	g_signal_connect(dbus_object, "handle-get-device-info",
 			G_CALLBACK(_dbus_handle_get_device_info), NULL);
+#endif
+	g_signal_connect(dbus_object, "handle-register-platform-info",
+			G_CALLBACK(_dbus_handle_register_platform_info), NULL);
+	g_signal_connect(dbus_object, "handle-get-platform-info",
+			G_CALLBACK(_dbus_handle_get_platform_info), NULL);
 	g_signal_connect(dbus_object, "handle-start-presence",
 			G_CALLBACK(_dbus_handle_start_presence), NULL);
 	g_signal_connect(dbus_object, "handle-stop-presence",

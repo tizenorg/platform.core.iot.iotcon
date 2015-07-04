@@ -98,6 +98,15 @@
 			<arg type="u" name="signal_number" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
+		<method name="registerPlatformInfo">
+			<arg type="(sssssssssss)" name="platform_info" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
+		<method name="getPlatformInfo">
+			<arg type="s" name="host_address" direction="in"/>
+			<arg type="u" name="signal_number" direction="in"/>
+			<arg type="i" name="ret" direction="out"/>
+		</method>
 		<method name="subscribePresence">
 			<arg type="s" name="host_address" direction="in"/>
 			<arg type="s" name="type" direction="in"/>

@@ -20,9 +20,10 @@
 #include <iotcon.h>
 #include "test.h"
 
-const char* const door_uri = "/a/door";
+static const char* const door_uri = "/a/door";
+static char *door_resource_sid;
 
-iotcon_client_h door_resource = NULL;
+static iotcon_client_h door_resource = NULL;
 
 void _print_repr_info(iotcon_repr_h repr)
 {
@@ -164,6 +165,7 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 	int ret;
 	char *resource_uri = NULL;
 	char *resource_host = NULL;
+	char *resource_sid = NULL;
 	iotcon_resource_types_h resource_types = NULL;
 	int resource_interfaces = 0;
 
@@ -178,6 +180,22 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		ERR("iotcon_client_get_uri() Fail(%d)", ret);
 		return;
 	}
+
+	/* get the resource unique id.
+	 * this is unique per-server independent on how it was discovered. */
+	ret = iotcon_client_get_server_id(resource, &resource_sid);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_get_server_id() Fail(%d)", ret);
+		return;
+	}
+	DBG("[%s] resource server id : %s", resource_uri, resource_sid);
+
+	if (door_resource_sid && TEST_STR_EQUAL == strcmp(door_resource_sid, resource_sid)) {
+		DBG("sid \"%s\" already found. skip !", resource_sid);
+		return;
+	}
+
+	door_resource_sid = strdup(resource_sid);
 
 	/* get the resource host address */
 	ret = iotcon_client_get_host(resource, &resource_host);
@@ -222,7 +240,6 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		door_resource = iotcon_client_clone(resource);
 
 		iotcon_query_h query = iotcon_query_new();
-		iotcon_query_insert(query, "key", "value");
 
 		/* send GET Request */
 		iotcon_get(resource, query, _on_get, NULL);

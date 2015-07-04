@@ -144,7 +144,7 @@ GVariant* icl_dbus_client_to_gvariant(struct icl_remote_resource *resource)
 	return value;
 }
 
-
+#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 GVariant* icl_dbus_device_info_to_gvariant(iotcon_device_info_s *device_info)
 {
 	GVariant *value;
@@ -162,6 +162,27 @@ GVariant* icl_dbus_device_info_to_gvariant(iotcon_device_info_s *device_info)
 			ic_utils_dbus_encode_str(device_info->platform_ver),
 			ic_utils_dbus_encode_str(device_info->firmware_ver),
 			ic_utils_dbus_encode_str(device_info->support_url));
+
+	return value;
+}
+#endif
+
+GVariant* icl_dbus_platform_info_to_gvariant(iotcon_platform_info_s *platform_info)
+{
+	GVariant *value;
+
+	value = g_variant_new("(sssssssssss)",
+			ic_utils_dbus_encode_str(platform_info->platform_id),
+			ic_utils_dbus_encode_str(platform_info->manuf_name),
+			ic_utils_dbus_encode_str(platform_info->manuf_url),
+			ic_utils_dbus_encode_str(platform_info->model_number),
+			ic_utils_dbus_encode_str(platform_info->date_of_manufacture),
+			ic_utils_dbus_encode_str(platform_info->platform_ver),
+			ic_utils_dbus_encode_str(platform_info->os_ver),
+			ic_utils_dbus_encode_str(platform_info->hardware_ver),
+			ic_utils_dbus_encode_str(platform_info->firmware_ver),
+			ic_utils_dbus_encode_str(platform_info->support_url),
+			ic_utils_dbus_encode_str(platform_info->system_time));
 
 	return value;
 }

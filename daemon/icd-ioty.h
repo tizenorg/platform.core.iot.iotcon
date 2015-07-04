@@ -60,9 +60,16 @@ int icd_ioty_observer_start(GVariant *resource, int observe_type, GVariant *quer
 
 int icd_ioty_observer_stop(void *observe_h);
 
+#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 int icd_ioty_register_device_info(GVariant *value);
 
 int icd_ioty_get_device_info(const char *host_address, unsigned int signal_number,
+		const char *sender);
+#endif
+
+int icd_ioty_register_platform_info(GVariant *value);
+
+int icd_ioty_get_platform_info(const char *host_address, unsigned int signal_number,
 		const char *sender);
 
 iotcon_presence_h icd_ioty_subscribe_presence(const char *host_address,

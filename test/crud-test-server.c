@@ -32,10 +32,10 @@ typedef struct _door_resource_s {
 static door_resource_s my_door;
 static bool resource_created = false;
 
-iotcon_resource_h door_handle;
-iotcon_resource_h new_door_handle;
+static iotcon_resource_h door_handle;
+static iotcon_resource_h new_door_handle;
 
-iotcon_observers_h observers = NULL;
+static iotcon_observers_h observers = NULL;
 
 static void _request_handler(iotcon_request_h request, void *user_data);
 
@@ -185,6 +185,7 @@ static gboolean _notifier(gpointer user_data)
 	iotcon_notimsg_h msg = iotcon_notimsg_new(repr, IOTCON_INTERFACE_DEFAULT);
 	iotcon_notify_list_of_observers(user_data, msg, observers);
 
+	iotcon_notimsg_free(msg);
 	iotcon_repr_free(repr);
 
 	return TRUE;

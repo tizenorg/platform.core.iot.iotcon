@@ -22,6 +22,7 @@
 struct icl_remote_resource {
 	char *uri;
 	char *host;
+	char *sid;
 	bool is_observable;
 	bool is_collection;
 	iotcon_options_h header_options;

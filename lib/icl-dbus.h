@@ -60,8 +60,14 @@ int icl_dbus_observer_start(iotcon_client_h resource,
 		void *user_data);
 int icl_dbus_observer_stop(icl_handle_container_s *observe);
 
+#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 int icl_dbus_register_device_info(iotcon_device_info_s info);
 int icl_dbus_get_device_info(const char *host_address, iotcon_device_info_cb cb,
+		void *user_data);
+#endif
+
+int icl_dbus_register_platform_info(iotcon_platform_info_s info);
+int icl_dbus_get_platform_info(const char *host_address, iotcon_platform_info_cb cb,
 		void *user_data);
 
 int icl_dbus_start_presence(unsigned int time_to_live);

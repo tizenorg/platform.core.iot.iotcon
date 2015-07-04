@@ -16,7 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_CONSTANT_H__
 #define __IOT_CONNECTIVITY_MANAGER_CONSTANT_H__
 
-#define IOTCON_MULTICAST_ADDRESS "224.0.1.187"
+#define IOTCON_MULTICAST_ADDRESS "224.0.1.187" /**< Multicast IP Address */
 
 /**
  * @brief HeaderOption range from 2048 to 3000

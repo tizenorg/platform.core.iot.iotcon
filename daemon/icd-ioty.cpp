@@ -31,9 +31,6 @@ extern "C" {
 }
 
 #define ICD_COAP "coap://"
-#define ICD_UNICAST_RESOURCE_DISCOVERY "/oc/core"
-#define ICD_MULTICAST_RESOURCE_DISCOVERY "/oc/core"
-#define ICD_DEVICE_DISCOVERY "/oc/core/d"
 
 using namespace std;
 using namespace OC;
@@ -348,9 +345,10 @@ namespace icdIotivityHandler {
 			resource_host = resource->host();
 			resource_host.erase(0, strlen(ICD_COAP));
 
-			value = g_variant_new("(ssiasi)",
+			value = g_variant_new("(sssiasi)",
 					resource->uri().c_str(),
 					resource_host.c_str(),
+					resource->sid().c_str(),
 					resource->isObservable(),
 					builder,
 					ifaces);
@@ -362,6 +360,7 @@ namespace icdIotivityHandler {
 		}
 	};
 
+#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 	class deviceObject
 	{
 	private:
@@ -422,6 +421,69 @@ namespace icdIotivityHandler {
 					supportUrl.c_str());
 
 			snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_DEVICE,
+					m_signalNumber);
+			icd_dbus_emit_signal(signal_name, m_sender.c_str(), value);
+		}
+	};
+#endif
+
+	class platformObject
+	{
+	private:
+		unsigned int m_signalNumber;
+		string m_sender;
+
+	public:
+		platformObject(unsigned int signalNumber, const char *sender)
+		{
+			m_signalNumber = signalNumber;
+			m_sender = sender;
+		}
+
+		void receivedPlatformInfo(const OCRepresentation& ocRep)
+		{
+			FN_CALL;
+			GVariant *value;
+			char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
+
+			string platformId;;
+			string manufacturerName;
+			string manufacturerUrl;
+			string modelNumber;
+			string dateOfManufacture;
+			string platformVersion;
+			string osVersion;
+			string hardwardVersion;
+			string firmwareVersion;
+			string supportUrl;
+			string systemTime;
+
+			ocRep.getValue("pi", platformId);
+			ocRep.getValue("mnmn", manufacturerName);
+			ocRep.getValue("mnml", manufacturerUrl);
+			ocRep.getValue("mnmo", modelNumber);
+			ocRep.getValue("mndt", dateOfManufacture);
+			ocRep.getValue("mnpv", platformVersion);
+			ocRep.getValue("mnos", osVersion);
+			ocRep.getValue("mnhw", hardwardVersion);
+			ocRep.getValue("mnfv", firmwareVersion);
+			ocRep.getValue("mnsl", supportUrl);
+			ocRep.getValue("st", systemTime);
+
+			value = g_variant_new("(sssssssssss)",
+					platformId.c_str(),
+					manufacturerName.c_str(),
+					manufacturerUrl.c_str(),
+					modelNumber.c_str(),
+					dateOfManufacture.c_str(),
+					platformVersion.c_str(),
+					osVersion.c_str(),
+					hardwardVersion.c_str(),
+					firmwareVersion.c_str(),
+					supportUrl.c_str(),
+					systemTime.c_str());
+
+			snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_PLATFORM,
 					m_signalNumber);
 			icd_dbus_emit_signal(signal_name, m_sender.c_str(), value);
 		}
@@ -598,7 +660,6 @@ static OCEntityHandlerResult _icd_ioty_request_handler(
 extern "C" OCResourceHandle icd_ioty_register_resource(const char *uri,
 		const char* const* res_types, int ifaces, uint8_t properties)
 {
-	FN_CALL;
 	OCStackResult ret = OC_STACK_OK;
 	string resUri;
 	string resType;
@@ -655,7 +716,6 @@ extern "C" OCResourceHandle icd_ioty_register_resource(const char *uri,
 
 extern "C" int icd_ioty_unregister_resource(OCResourceHandle resource_handle)
 {
-	FN_CALL;
 	OCStackResult result;
 	try {
 		result = unregisterResource(resource_handle);
@@ -881,7 +941,6 @@ extern "C" int icd_ioty_notify_all(int resHandle)
 
 extern "C" int icd_ioty_send_response(GVariant *resp)
 {
-	FN_CALL;
 	int ret;
 	int result;
 	int error_code;
@@ -967,19 +1026,19 @@ extern "C" int icd_ioty_send_response(GVariant *resp)
 extern "C" int icd_ioty_find_resource(const char *host_address, const char *resource_type,
 		unsigned int signal_number, const char *sender)
 {
-	FN_CALL;
+	OCConnectivityType conn_type = OC_IPV4;
 	OCStackResult ret;
-	ostringstream resource_name;
+	ostringstream requestHost;
 
-	resource_name << ICD_COAP;
+	if (IC_STR_EQUAL == strcmp(IOTCON_MULTICAST_ADDRESS, host_address)) {
+		requestHost << OC_MULTICAST_DISCOVERY_URI;
+		conn_type = OC_ALL;
+	} else {
+		requestHost << ICD_COAP << host_address << OC_MULTICAST_DISCOVERY_URI;
+	}
 
-	if (IC_STR_EQUAL == strcmp(IOTCON_MULTICAST_ADDRESS, host_address))
-		resource_name << host_address << ICD_MULTICAST_RESOURCE_DISCOVERY;
-	else
-		resource_name << host_address << ICD_UNICAST_RESOURCE_DISCOVERY;
-
-	if (IC_STR_EQUAL != strcmp(resource_type, IC_STR_NULL))
-		resource_name << "?rt=" << resource_type;
+	if (IC_STR_EQUAL != strcmp(IC_STR_NULL, resource_type))
+		requestHost << "?rt=" << resource_type;
 
 	shared_ptr<icdIotivityHandler::findObject> object
 		= make_shared<icdIotivityHandler::findObject>(signal_number, sender);
@@ -987,7 +1046,7 @@ extern "C" int icd_ioty_find_resource(const char *host_address, const char *reso
 			object, placeholders::_1);
 
 	try {
-		ret = findResource("", resource_name.str(), findCallback);
+		ret = findResource("", requestHost.str(), conn_type, findCallback);
 	} catch (OCException& e) {
 		ERR("findResource() Fail(%s)", e.reason().c_str());
 		return IOTCON_ERROR_IOTIVITY;
@@ -1050,7 +1109,10 @@ static OCResource::Ptr _icd_ioty_create_oc_resource(GVariant *client)
 			resource_ifs.push_back(GROUP_INTERFACE);
 	}
 
-	OCResource::Ptr ocResource = constructResourceObject(resource_host, uri,
+	/* TODO : OC_ALL has wrong behaviour in iotivity version 0.9.1.
+	 * Therefore, OC_IPV4 SHOULD be changed to OC_ALL later.
+	 */
+	OCResource::Ptr ocResource = constructResourceObject(resource_host, uri, OC_IPV4,
 			is_observable, resource_types, resource_ifs);
 
 	ocResource->setHeaderOptions(header_options);
@@ -1062,7 +1124,6 @@ static OCResource::Ptr _icd_ioty_create_oc_resource(GVariant *client)
 extern "C" int icd_ioty_get(GVariant *resource, GVariant *query,
 		unsigned int signal_number, const char *sender)
 {
-	FN_CALL;
 	OCStackResult ret;
 	OCResource::Ptr ocResource;
 	QueryParamsMap queryParams;
@@ -1099,7 +1160,6 @@ extern "C" int icd_ioty_get(GVariant *resource, GVariant *query,
 extern "C" int icd_ioty_put(GVariant *resource, const char *repr, GVariant *query,
 		unsigned int signal_number, const char *sender)
 {
-	FN_CALL;
 	int ret;
 	OCStackResult ocRet;
 	OCResource::Ptr ocResource;
@@ -1145,7 +1205,6 @@ extern "C" int icd_ioty_put(GVariant *resource, const char *repr, GVariant *quer
 extern "C" int icd_ioty_post(GVariant *resource, const char *repr, GVariant *query,
 		unsigned int signal_number, const char *sender)
 {
-	FN_CALL;
 	int ret;
 	OCStackResult ocRet;
 	OCResource::Ptr ocResource;
@@ -1191,7 +1250,6 @@ extern "C" int icd_ioty_post(GVariant *resource, const char *repr, GVariant *que
 extern "C" int icd_ioty_delete(GVariant *resource, unsigned int signal_number,
 		const char *sender)
 {
-	FN_CALL;
 	OCStackResult ret;
 	OCResource::Ptr ocResource;
 
@@ -1295,10 +1353,9 @@ extern "C" int icd_ioty_observer_stop(void *observe_h)
 	return IOTCON_ERROR_NONE;
 }
 
-
+#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 extern "C" int icd_ioty_register_device_info(GVariant *value)
 {
-	FN_CALL;
 	OCStackResult ret;
 
 	OCDeviceInfo info = {0};
@@ -1336,9 +1393,14 @@ extern "C" int icd_ioty_register_device_info(GVariant *value)
 extern "C" int icd_ioty_get_device_info(const char *host_address,
 		unsigned int signal_number, const char *sender)
 {
-	FN_CALL;
 	OCStackResult ret;
-	string resHost = string(ICD_COAP) + host_address + string(ICD_DEVICE_DISCOVERY);
+	ostringstream requestHost;
+	std::string deviceDiscoveryURI = "/oic/d";
+
+	if (IC_STR_EQUAL == strcmp(IOTCON_MULTICAST_ADDRESS, host_address))
+		requestHost << host_address << ":" << OC_MULTICAST_PORT << deviceDiscoveryURI;
+	else
+		requestHost << ICD_COAP << host_address << deviceDiscoveryURI;
 
 	shared_ptr<icdIotivityHandler::deviceObject> object
 		= make_shared<icdIotivityHandler::deviceObject>(signal_number, sender);
@@ -1348,7 +1410,10 @@ extern "C" int icd_ioty_get_device_info(const char *host_address,
 			placeholders::_1);
 
 	try {
-		ret = getDeviceInfo("", resHost, findDeviceCallback);
+		/* TODO : OC_ALL has wrong behaviour in iotivity version 0.9.1.
+		 * Therefore, OC_IPV4 SHOULD be changed to OC_ALL later.
+		 */
+		ret = getDeviceInfo("", requestHost, OC_IPV4, findDeviceCallback);
 	} catch (OCException& e) {
 		ERR("getDeviceInfo() Fail(%s)", e.reason().c_str());
 		return IOTCON_ERROR_IOTIVITY;
@@ -1356,6 +1421,78 @@ extern "C" int icd_ioty_get_device_info(const char *host_address,
 
 	if (OC_STACK_OK != ret) {
 		ERR("getDeviceInfo() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+#endif
+
+extern "C" int icd_ioty_register_platform_info(GVariant *value)
+{
+	OCStackResult ret;
+	OCPlatformInfo info = {0};
+
+	g_variant_get(value, "(&s&s&s&s&s&s&s&s&s&s&s)",
+			&info.platformID,
+			&info.manufacturerName,
+			&info.manufacturerUrl,
+			&info.modelNumber,
+			&info.dateOfManufacture,
+			&info.platformVersion,
+			&info.operatingSystemVersion,
+			&info.hardwareVersion,
+			&info.firmwareVersion,
+			&info.supportUrl,
+			&info.systemTime);
+
+	try {
+		ret = registerPlatformInfo(info);
+	} catch (OCException& e) {
+		ERR("registerPlatformInfo() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
+	if (OC_STACK_OK != ret) {
+		ERR("registerPlatformInfo() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+extern "C" int icd_ioty_get_platform_info(const char *host_address,
+		unsigned int signal_number, const char *sender)
+{
+	OCStackResult ret;
+	ostringstream requestHost;
+	std::string platformDiscoveryURI = "/oic/p";
+
+	if (IC_STR_EQUAL == strcmp(IOTCON_MULTICAST_ADDRESS, host_address))
+		requestHost << host_address << ":" << OC_MULTICAST_PORT << platformDiscoveryURI;
+	else
+		requestHost << ICD_COAP << host_address << platformDiscoveryURI;
+
+	shared_ptr<icdIotivityHandler::platformObject> object
+		= make_shared<icdIotivityHandler::platformObject>(signal_number, sender);
+	FindPlatformCallback findPlatformCallback = bind(
+			&icdIotivityHandler::platformObject::receivedPlatformInfo,
+			object,
+			placeholders::_1);
+
+	try {
+		/* TODO : OC_ALL has wrong behaviour in iotivity version 0.9.1.
+		 * Therefore, OC_IPV4 SHOULD be changed to OC_ALL later.
+		 */
+		ret = getPlatformInfo("", requestHost.str(), OC_IPV4, findPlatformCallback);
+	} catch (OCException& e) {
+		ERR("getPlatformInfo() Fail(%s)", e.reason().c_str());
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
+	if (OC_STACK_OK != ret) {
+		ERR("getPlatformInfo() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
 	}
 
@@ -1379,7 +1516,11 @@ extern "C" iotcon_presence_h icd_ioty_subscribe_presence(const char *host_addres
 	host = string(ICD_COAP) + string(host_address);
 
 	try {
-		ret = subscribePresence(presence_handle, host, resource_type, subscribeCallback);
+		/* TODO : OC_ALL has wrong behaviour in iotivity version 0.9.1.
+		 * Therefore, OC_IPV4 SHOULD be changed to OC_ALL later.
+		 */
+		ret = subscribePresence(presence_handle, host, resource_type, OC_IPV4,
+				subscribeCallback);
 	} catch (OCException& e) {
 		ERR("subscribePresence() Fail(%s)", e.reason().c_str());
 		return NULL;

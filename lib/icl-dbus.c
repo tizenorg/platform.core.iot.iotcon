@@ -493,9 +493,10 @@ static void _icl_dbus_found_resource(GDBusConnection *connection,
 
 	struct icl_remote_resource resource = {0};
 
-	g_variant_get(parameters, "(&s&siasi)",
+	g_variant_get(parameters, "(&s&s&siasi)",
 			&resource.uri,
 			&resource.host,
+			&resource.sid,
 			&resource.is_observable,
 			&types,
 			&resource.ifaces);
@@ -993,7 +994,7 @@ int icl_dbus_observer_stop(icl_handle_container_s *observe)
 	return ret;
 }
 
-
+#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 int icl_dbus_register_device_info(iotcon_device_info_s info)
 {
 	int ret;
@@ -1095,6 +1096,108 @@ int icl_dbus_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 
 	return ret;
 }
+#endif
+
+int icl_dbus_register_platform_info(iotcon_platform_info_s info)
+{
+	int ret;
+	GError *error = NULL;
+	GVariant *arg_info;
+
+	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
+
+	arg_info = icl_dbus_platform_info_to_gvariant(&info);
+	ic_dbus_call_register_platform_info_sync(icl_dbus_object, arg_info, &ret,
+			NULL, &error);
+	if (error) {
+		ERR("ic_dbus_call_register_platform_info_sync() Fail(%s)", error->message);
+		g_error_free(error);
+		g_variant_unref(arg_info);
+		return IOTCON_ERROR_DBUS;
+	}
+
+	return ret;
+}
+
+
+static void _icl_dbus_received_platform_info(GDBusConnection *connection,
+		const gchar *sender_name,
+		const gchar *object_path,
+		const gchar *interface_name,
+		const gchar *signal_name,
+		GVariant *parameters,
+		gpointer user_data)
+{
+	icl_cb_container_s *cb_container = user_data;
+	iotcon_platform_info_cb cb = cb_container->cb;
+
+	iotcon_platform_info_s info = {0};
+
+	g_variant_get(parameters, "(&s&s&s&s&s&s&s&s&s&s&s)",
+			&info.platform_id,
+			&info.manuf_name,
+			&info.manuf_url,
+			&info.model_number,
+			&info.date_of_manufacture,
+			&info.platform_ver,
+			&info.os_ver,
+			&info.hardware_ver,
+			&info.firmware_ver,
+			&info.support_url,
+			&info.system_time);
+
+	info.platform_id = ic_utils_dbus_decode_str(info.platform_id);
+	info.manuf_name = ic_utils_dbus_decode_str(info.manuf_name);
+	info.manuf_url = ic_utils_dbus_decode_str(info.manuf_url);
+	info.model_number = ic_utils_dbus_decode_str(info.model_number);
+	info.date_of_manufacture = ic_utils_dbus_decode_str(info.date_of_manufacture);
+	info.platform_ver = ic_utils_dbus_decode_str(info.platform_ver);
+	info.os_ver = ic_utils_dbus_decode_str(info.os_ver);
+	info.hardware_ver = ic_utils_dbus_decode_str(info.hardware_ver);
+	info.firmware_ver = ic_utils_dbus_decode_str(info.firmware_ver);
+	info.support_url = ic_utils_dbus_decode_str(info.support_url);
+	info.system_time = ic_utils_dbus_decode_str(info.system_time);
+
+	if (cb)
+		cb(info, cb_container->user_data);
+}
+
+
+int icl_dbus_get_platform_info(const char *host_address, iotcon_platform_info_cb cb,
+		void *user_data)
+{
+	int ret;
+	GError *error = NULL;
+	unsigned int sub_id;
+	int signal_number;
+	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
+
+	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
+
+	signal_number = _icl_dbus_generate_signal_number();
+
+	ic_dbus_call_get_platform_info_sync(icl_dbus_object, host_address,
+			signal_number, &ret, NULL, &error);
+	if (error) {
+		ERR("ic_dbus_call_get_platform_info_sync() Fail(%s)", error->message);
+		g_error_free(error);
+		return IOTCON_ERROR_DBUS;
+	}
+
+	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_PLATFORM,
+			signal_number);
+
+	sub_id = _icl_dbus_subscribe_signal(signal_name, cb, user_data,
+			_icl_dbus_received_platform_info);
+	if (0 == sub_id) {
+		ERR("_icl_dbus_subscribe_signal() Fail");
+		return IOTCON_ERROR_DBUS;
+	}
+	icl_dbus_sub_ids = g_list_append(icl_dbus_sub_ids, GUINT_TO_POINTER(sub_id));
+
+	return ret;
+}
+
 
 
 int icl_dbus_start_presence(unsigned int time_to_live)

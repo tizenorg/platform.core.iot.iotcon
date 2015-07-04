@@ -23,9 +23,10 @@
 #include "icl-ioty.h"
 #include "icl-dbus.h"
 
+#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 /* The length of manufacturer_name should be less than and equal to 16.
  * The length of manufacturer_url should be less than and equal to 32. */
-API int iotcon_register_device_info(iotcon_device_info_s device_info)
+int iotcon_register_device_info(iotcon_device_info_s device_info)
 {
 	int ret;
 
@@ -48,11 +49,9 @@ API int iotcon_register_device_info(iotcon_device_info_s device_info)
 	return ret;
 }
 
-
-API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
+int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 		void *user_data)
 {
-	FN_CALL;
 	int ret = IOTCON_ERROR_NONE;
 
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
@@ -61,6 +60,35 @@ API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb c
 	ret = icl_dbus_get_device_info(host_address, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icl_dbus_get_device_info() Fail(%d)", ret);
+		return ret;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+#endif
+
+API int iotcon_register_platform_info(iotcon_platform_info_s platform_info)
+{
+	int ret;
+
+	ret = icl_dbus_register_platform_info(platform_info);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("ic_ioty_register_platform_info() Fail(%d)", ret);
+
+	return ret;
+}
+
+
+API int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_cb cb,
+		void *user_data)
+{
+	int ret = IOTCON_ERROR_NONE;
+
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+
+	ret = icl_dbus_get_platform_info(host_address, cb, user_data);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("ic_ioty_get_platform_info() Fail(%d)", ret);
 		return ret;
 	}
 

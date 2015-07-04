@@ -86,6 +86,7 @@ API void iotcon_client_free(iotcon_client_h resource)
 
 	free(resource->uri);
 	free(resource->host);
+	free(resource->sid);
 
 	/* null COULD be allowed */
 	if (resource->header_options)
@@ -111,6 +112,7 @@ API iotcon_client_h iotcon_client_clone(iotcon_client_h resource)
 		return clone;
 	}
 
+	clone->sid = resource->sid;
 	clone->observe_handle = resource->observe_handle;
 
 	return clone;
@@ -136,6 +138,17 @@ API int iotcon_client_get_host(iotcon_client_h resource, char **host)
 	RETV_IF(NULL == host, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*host = resource->host;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_client_get_server_id(iotcon_client_h resource, char **sid)
+{
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == sid, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*sid = resource->sid;
 
 	return IOTCON_ERROR_NONE;
 }

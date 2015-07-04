@@ -28,6 +28,7 @@ typedef struct icl_notify_msg* iotcon_notimsg_h;
 
 typedef void* iotcon_presence_h;
 
+#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 typedef struct _device_info {
 	char *name;
 	char *host_name;
@@ -42,6 +43,21 @@ typedef struct _device_info {
 	char *firmware_ver;
 	char *support_url;
 } iotcon_device_info_s;
+#endif
+
+typedef struct _platform_info {
+	char *platform_id;
+	char *manuf_name;
+	char *manuf_url;
+	char *model_number;
+	char *date_of_manufacture;
+	char *platform_ver;
+	char *os_ver;
+	char *hardware_ver;
+	char *firmware_ver;
+	char *support_url;
+	char *system_time;
+} iotcon_platform_info_s;
 
 
 typedef struct icl_options* iotcon_options_h;
@@ -108,6 +124,7 @@ int iotcon_resource_is_observable(iotcon_resource_h resource, bool *observable);
 typedef struct icl_remote_resource* iotcon_client_h;
 int iotcon_client_get_uri(iotcon_client_h resource, char **uri);
 int iotcon_client_get_host(iotcon_client_h resource, char **host);
+int iotcon_client_get_server_id(iotcon_client_h resource, char **sid);
 int iotcon_client_get_types(iotcon_client_h resource, iotcon_resource_types_h *types);
 int iotcon_client_get_interfaces(iotcon_client_h resource, int *ifaces);
 int iotcon_client_is_observable(iotcon_client_h resource, bool *observable);

@@ -3,12 +3,14 @@
 		<domain name="iotcon" />
 		<permit>
 			<smack permit="_" type="rw" />
+			<smack permit="net-config" type="rwx"/>
 			<smack permit="dbus" type="rwx" />
 			<smack permit="system::use_internet" type="rw" />
 			<smack permit="connman::get" type="rw" />
 			<smack permit="libiotcon" type="rwx" />
 		</permit>
 		<request>
+			<smack request="net-config" type="rwx"/>
 			<smack request="connman::get" type="rw" />
 			<smack request="dbus" type="rwx" />
 			<smack request="libiotcon" type="rwxt" />
