@@ -198,8 +198,7 @@ API int iotcon_repr_get_nth_child(iotcon_repr_h parent, int pos, iotcon_repr_h *
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_foreach_keys(iotcon_repr_h repr, iotcon_repr_key_fn fn,
-		void *user_data)
+API int iotcon_repr_foreach(iotcon_repr_h repr, iotcon_repr_fn fn, void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key, value;

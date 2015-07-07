@@ -46,7 +46,7 @@ static void _light_request_handler_get(iotcon_response_h response)
 	iotcon_repr_free(resp_repr);
 }
 
-static int _query_foreach_cb(const char *key, const char *value, void *user_data)
+static int _query_foreach_fn(const char *key, const char *value, void *user_data)
 {
 	char **interface_str = user_data;
 
@@ -110,7 +110,7 @@ static void _room_request_handler_get(iotcon_request_h request,
 		return;
 	}
 	if (query)
-		iotcon_query_foreach(query, _query_foreach_cb, &query_str);
+		iotcon_query_foreach(query, _query_foreach_fn, &query_str);
 
 	if (query_str && (TEST_STR_EQUAL == strcmp("oc.mi.b", query_str))) {
 		DBG("operation for BATCH interface");

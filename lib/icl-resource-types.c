@@ -141,15 +141,15 @@ API int iotcon_resource_types_delete(iotcon_resource_types_h types, const char *
 
 
 API int iotcon_resource_types_foreach(iotcon_resource_types_h types,
-		iotcon_resource_types_foreach_cb cb, void *user_data)
+		iotcon_resource_types_foreach_fn fn, void *user_data)
 {
 	GList *node;
 
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
 
 	for (node = types->type_list; node; node = node->next) {
-		if (IOTCON_FUNC_STOP == cb((const char*)node->data, user_data))
+		if (IOTCON_FUNC_STOP == fn((const char*)node->data, user_data))
 			break;
 	}
 

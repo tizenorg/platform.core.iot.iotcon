@@ -67,9 +67,9 @@ int iotcon_options_insert(iotcon_options_h options, unsigned short id,
 		const char *data);
 int iotcon_options_delete(iotcon_options_h options, unsigned short id);
 const char* iotcon_options_lookup(iotcon_options_h options, unsigned short id);
-typedef int (*iotcon_options_foreach_cb)(unsigned short id, const char *data,
+typedef int (*iotcon_options_foreach_fn)(unsigned short id, const char *data,
 		void *user_data);
-int iotcon_options_foreach(iotcon_options_h options, iotcon_options_foreach_cb cb,
+int iotcon_options_foreach(iotcon_options_h options, iotcon_options_foreach_fn fn,
 		void *user_data);
 
 
@@ -79,9 +79,9 @@ void iotcon_query_free(iotcon_query_h query);
 int iotcon_query_insert(iotcon_query_h query, const char *key, const char *value);
 int iotcon_query_delete(iotcon_query_h query, const char *key);
 const char* iotcon_query_lookup(iotcon_query_h query, const char *key);
-typedef int (*iotcon_query_foreach_cb)(const char *key, const char *value,
+typedef int (*iotcon_query_foreach_fn)(const char *key, const char *value,
 		void *user_data);
-int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
+int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_fn fn,
 		void *user_data);
 
 
@@ -101,9 +101,9 @@ iotcon_resource_types_h iotcon_resource_types_new();
 void iotcon_resource_types_free(iotcon_resource_types_h types);
 int iotcon_resource_types_insert(iotcon_resource_types_h types, const char *type);
 int iotcon_resource_types_delete(iotcon_resource_types_h types, const char *type);
-typedef int (*iotcon_resource_types_foreach_cb)(const char *type, void *user_data);
+typedef int (*iotcon_resource_types_foreach_fn)(const char *type, void *user_data);
 int iotcon_resource_types_foreach(iotcon_resource_types_h types,
-		iotcon_resource_types_foreach_cb cb, void *user_data);
+		iotcon_resource_types_foreach_fn fn, void *user_data);
 iotcon_resource_types_h iotcon_resource_types_clone(iotcon_resource_types_h types);
 
 

@@ -39,7 +39,7 @@ API int iotcon_initialize()
 	FN_CALL;
 	int ret;
 
-	RETVM_IF(true == icl_is_init, IOTCON_ERROR_INVALID_PARAMETER,  "already initialized");
+	RETVM_IF(true == icl_is_init, IOTCON_ERROR_ALREADY,  "already initialized");
 
 #if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
@@ -126,7 +126,7 @@ API iotcon_resource_h iotcon_register_resource(const char *uri,
 	}
 
 	resource->handle = icl_dbus_register_resource(uri, res_types, ifaces,
-			properties, cb, NULL);
+			properties, cb, user_data);
 	if (NULL == resource->handle) {
 		ERR("icl_dbus_register_resource() Fail");
 		free(resource);

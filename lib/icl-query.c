@@ -112,18 +112,18 @@ API const char* iotcon_query_lookup(iotcon_query_h query, const char *key)
 	return ret;
 }
 
-API int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
+API int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_fn fn,
 		void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key, value;
 
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
 
 	g_hash_table_iter_init(&iter, query->hash);
 	while (g_hash_table_iter_next(&iter, &key, &value)) {
-		if (false == cb(key, value, user_data))
+		if (false == fn(key, value, user_data))
 			break;
 	}
 

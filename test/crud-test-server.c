@@ -209,7 +209,7 @@ static void _request_handler_delete(iotcon_response_h response)
 	iotcon_repr_free(resp_repr);
 }
 
-static int _query_cb(const char *key, const char *value, void *user_data)
+static int _query_fn(const char *key, const char *value, void *user_data)
 {
 	INFO("key : %s", key);
 	INFO("value : %s", value);
@@ -234,7 +234,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 		return;
 	}
 	if (query)
-		iotcon_query_foreach(query, _query_cb, NULL);
+		iotcon_query_foreach(query, _query_fn, NULL);
 
 	ret = iotcon_request_get_types(request, &types);
 	if (IOTCON_ERROR_NONE != ret) {
