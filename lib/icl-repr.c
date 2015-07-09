@@ -201,14 +201,14 @@ API int iotcon_repr_get_nth_child(iotcon_repr_h parent, int pos, iotcon_repr_h *
 API int iotcon_repr_foreach(iotcon_repr_h repr, iotcon_repr_fn fn, void *user_data)
 {
 	GHashTableIter iter;
-	gpointer key, value;
+	gpointer key;
 
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
 
 	g_hash_table_iter_init(&iter, repr->hash_table);
-	while (g_hash_table_iter_next(&iter, &key, &value)) {
-		if (IOTCON_FUNC_STOP == fn(key, value, user_data))
+	while (g_hash_table_iter_next(&iter, &key, NULL)) {
+		if (IOTCON_FUNC_STOP == fn(repr, key, user_data))
 			break;
 	}
 
