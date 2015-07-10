@@ -22,15 +22,8 @@
 
 #include "iotcon-struct.h"
 
-#define IOTCON_KEY_OC "oc"
-#define IOTCON_KEY_URI "href"
-#define IOTCON_KEY_RESOURCETYPES "rt"
-#define IOTCON_KEY_INTERFACES "if"
-#define IOTCON_KEY_PROPERTY "prop"
-#define IOTCON_KEY_REP "rep"
-
 struct icl_repr_s {
-	char *uri;
+	char *uri_path;
 	int ref_count;
 	int interfaces;
 	GHashTable *hash_table;
@@ -51,10 +44,14 @@ struct icl_repr_s {
  */
 char* icl_repr_generate_json(iotcon_repr_h repr, bool set_pretty);
 
-char* icl_repr_json_get_uri(const char *json_string);
+char* icl_repr_json_get_uri_path(const char *json_string);
 
+iotcon_repr_h icl_repr_create_repr(const char *json_string);
 iotcon_repr_h icl_repr_parse_json(const char *json_string);
 
 void icl_repr_inc_ref_count(iotcon_repr_h val);
+
+int icl_repr_parse_resource_property(JsonObject *prop_obj,
+		iotcon_resource_types_h *types, int *ifaces);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__ */

@@ -93,7 +93,7 @@ GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 	}
 
 	value = g_variant_new("(sia(qs)iisii)",
-			ic_utils_dbus_encode_str(response->new_uri),
+			ic_utils_dbus_encode_str(response->new_uri_path),
 			response->error_code,
 			options,
 			response->iface,
@@ -115,8 +115,6 @@ GVariant* icl_dbus_client_to_gvariant(struct icl_remote_resource *resource)
 	GVariantBuilder *options;
 	GHashTableIter iter;
 	gpointer option_id, option_data;
-	GVariantBuilder *types;
-	GList *node;
 
 	options = g_variant_builder_new(G_VARIANT_TYPE("a(qs)"));
 	if (resource->header_options) {
@@ -125,21 +123,16 @@ GVariant* icl_dbus_client_to_gvariant(struct icl_remote_resource *resource)
 			g_variant_builder_add(options, "(qs)", GPOINTER_TO_INT(option_id), option_data);
 	}
 
-	types = g_variant_builder_new(G_VARIANT_TYPE("as"));
-	for (node = resource->types->type_list; node; node = node->next)
-		g_variant_builder_add(types, "s", node->data);
-
-	value = g_variant_new("(ssba(qs)asii)",
-			resource->uri,
+	value = g_variant_new("(ssba(qs)iii)",
+			resource->uri_path,
 			resource->host,
 			resource->is_observable,
 			options,
-			types,
 			resource->ifaces,
+			resource->conn_type,
 			GPOINTER_TO_INT(resource->observe_handle));
 
 	g_variant_builder_unref(options);
-	g_variant_builder_unref(types);
 
 	return value;
 }
@@ -204,6 +197,7 @@ GVariant* icl_dbus_query_to_gvariant(iotcon_query_h query)
 	}
 
 	query_value = g_variant_new("a(ss)", builder);
+
 	g_variant_builder_unref(builder);
 
 	return query_value;
@@ -221,6 +215,7 @@ GVariant* icl_dbus_observers_to_gvariant(iotcon_observers_h observers)
 		g_variant_builder_add(builder, "i", GPOINTER_TO_INT(node->data));
 
 	obs = g_variant_new("ai", builder);
+
 	g_variant_builder_unref(builder);
 
 	return obs;

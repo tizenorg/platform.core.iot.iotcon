@@ -16,13 +16,30 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_H__
 #define __IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_H__
 
+#include <stdio.h>
 #include <stdint.h>
+#include <glib.h>
 
 #include "iotcon.h"
 
-void icd_ioty_config(const char *addr, unsigned short port);
+#define ICD_IOTY_COAP "coap://"
+#define ICD_IOTY_COAPS "coaps://"
 
-void* icd_ioty_register_resource(const char *uri, const char* const* res_types,
+typedef struct {
+	unsigned int signum;
+	char *sender;
+} icd_sig_ctx_s;
+
+
+void icd_ioty_csdk_lock();
+
+void icd_ioty_csdk_unlock();
+
+GThread* icd_ioty_init(const char *addr, unsigned short port);
+
+void icd_ioty_deinit();
+
+void* icd_ioty_register_resource(const char *uri_path, const char* const* res_types,
 		int ifaces, uint8_t properties);
 
 int icd_ioty_unregister_resource(void *resource_handle);

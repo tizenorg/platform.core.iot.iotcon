@@ -102,8 +102,8 @@ API int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
 }
 
 
-/* The length of uri should be less than or equal to 36. */
-API iotcon_resource_h iotcon_register_resource(const char *uri,
+/* The length of uri_path should be less than or equal to 36. */
+API iotcon_resource_h iotcon_register_resource(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int ifaces,
 		uint8_t properties,
@@ -113,11 +113,11 @@ API iotcon_resource_h iotcon_register_resource(const char *uri,
 	FN_CALL;
 	iotcon_resource_h resource;
 
-	RETV_IF(NULL == uri, NULL);
-	RETVM_IF(IOTCON_URI_LENGTH_MAX < strlen(uri), NULL,
-			"The length of uri(%s) is invalid", uri);
+	RETV_IF(NULL == uri_path, NULL);
 	RETV_IF(NULL == res_types, NULL);
 	RETV_IF(NULL == cb, NULL);
+	RETVM_IF(IOTCON_URI_LENGTH_MAX < strlen(uri_path), NULL, "Invalid uri_path(%s)",
+			uri_path);
 
 	resource = calloc(1, sizeof(struct icl_resource));
 	if (NULL == resource) {
@@ -125,8 +125,8 @@ API iotcon_resource_h iotcon_register_resource(const char *uri,
 		return NULL;
 	}
 
-	resource->handle = icl_dbus_register_resource(uri, res_types, ifaces,
-			properties, cb, user_data);
+	resource->handle = icl_dbus_register_resource(uri_path, res_types, ifaces, properties, cb,
+			user_data);
 	if (NULL == resource->handle) {
 		ERR("icl_dbus_register_resource() Fail");
 		free(resource);
@@ -136,7 +136,7 @@ API iotcon_resource_h iotcon_register_resource(const char *uri,
 	resource->cb = cb;
 	resource->user_data = user_data;
 
-	resource->uri = ic_utils_strdup(uri);
+	resource->uri_path = ic_utils_strdup(uri_path);
 	resource->types = icl_resource_types_ref(res_types);
 	resource->ifaces = ifaces;
 	resource->is_observable = properties & IOTCON_OBSERVABLE;
@@ -159,8 +159,8 @@ API void iotcon_unregister_resource(iotcon_resource_h resource)
 	}
 	resource->handle = NULL;
 
-	free(resource->uri);
-	resource->uri = NULL;
+	free(resource->uri_path);
+	resource->uri_path = NULL;
 	free(resource->types);
 	resource->types = NULL;
 
@@ -307,12 +307,12 @@ API int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 
 
 /* The content of the resource should not be freed by user. */
-API int iotcon_resource_get_uri(iotcon_resource_h resource, char **uri)
+API int iotcon_resource_get_uri(iotcon_resource_h resource, char **uri_path)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == uri, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*uri = resource->uri;
+	*uri_path = resource->uri_path;
 
 	return IOTCON_ERROR_NONE;
 }

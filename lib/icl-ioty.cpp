@@ -54,15 +54,13 @@ extern "C" int icl_ioty_convert_interface_string(const char *src, iotcon_interfa
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
 
-	string interface_str(src);
-
-	if (IC_STR_EQUAL == DEFAULT_INTERFACE.compare(interface_str)) {
+	if (IC_STR_EQUAL == strcmp(DEFAULT_INTERFACE.c_str(), src)) {
 		*dest = IOTCON_INTERFACE_DEFAULT;
-	} else if (IC_STR_EQUAL == LINK_INTERFACE.compare(interface_str)) {
+	} else if (IC_STR_EQUAL == strcmp(LINK_INTERFACE.c_str(), src)) {
 		*dest = IOTCON_INTERFACE_LINK;
-	} else if (IC_STR_EQUAL == BATCH_INTERFACE.compare(interface_str)) {
+	} else if (IC_STR_EQUAL == strcmp(BATCH_INTERFACE.c_str(), src)) {
 		*dest = IOTCON_INTERFACE_BATCH;
-	} else if (IC_STR_EQUAL == GROUP_INTERFACE.compare(interface_str)) {
+	} else if (IC_STR_EQUAL == strcmp(GROUP_INTERFACE.c_str(), src)) {
 		*dest = IOTCON_INTERFACE_GROUP;
 	} else {
 		ERR("Invalid interface");

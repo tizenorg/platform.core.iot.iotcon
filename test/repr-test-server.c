@@ -74,7 +74,7 @@ static void _room_request_handler_get(iotcon_request_h request,
 
 	/* create a room Representation */
 	room_repr = iotcon_repr_new();
-	iotcon_repr_set_uri(room_repr, "/a/room");
+	iotcon_repr_set_uri_path(room_repr, "/a/room");
 	iotcon_repr_set_str(room_repr, "name", "Michael's Room");
 
 	/* set null */
@@ -91,14 +91,14 @@ static void _room_request_handler_get(iotcon_request_h request,
 
 	/* create a light Representation */
 	light_repr = iotcon_repr_new();
-	iotcon_repr_set_uri(light_repr, "/a/light");
+	iotcon_repr_set_uri_path(light_repr, "/a/light");
 	iotcon_repr_set_int(light_repr, "brightness", 50);
 	iotcon_repr_append_child(room_repr, light_repr);
 	iotcon_repr_free(light_repr);
 
 	/* create a switch Representation */
 	switch_repr = iotcon_repr_new();
-	iotcon_repr_set_uri(switch_repr, "/a/switch");
+	iotcon_repr_set_uri_path(switch_repr, "/a/switch");
 	iotcon_repr_set_bool(switch_repr, "switch", false);
 	iotcon_repr_append_child(room_repr, switch_repr);
 	iotcon_repr_free(switch_repr);
@@ -122,8 +122,6 @@ static void _room_request_handler_get(iotcon_request_h request,
 
 	_send_response(response, room_repr, interface);
 	iotcon_repr_free(room_repr);
-
-	FN_END;
 }
 
 static void _request_handler_put(iotcon_request_h request, iotcon_response_h response)
@@ -183,7 +181,7 @@ static void _light_request_handler(iotcon_request_h request, void *user_data)
 	if (NULL == response) {
 		ERR("iotcon_response_new() Fail");
 		return;
-		}
+	}
 
 	if (IOTCON_REQUEST_GET & types)
 		_light_request_handler_get(response);
@@ -219,7 +217,7 @@ static void _room_request_handler(iotcon_request_h request, void *user_data)
 	if (NULL == response) {
 		ERR("iotcon_response_new() Fail");
 		return;
-		}
+	}
 
 	if (IOTCON_REQUEST_GET & types)
 		_room_request_handler_get(request, response);

@@ -19,7 +19,7 @@
 #include <iotcon.h>
 #include "test.h"
 
-static const char* const room_uri = "/a/room";
+static const char* const room_uri_path = "/a/room";
 static char *room_resource_sid;
 
 static iotcon_client_h room_resource = NULL;
@@ -35,7 +35,7 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 {
 	int i, ret;
 	unsigned int key_count, children_count;
-	const char *uri;
+	const char *uri_path;
 	iotcon_repr_h child_repr;
 	iotcon_list_h list;
 
@@ -44,9 +44,9 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 	INFO("GET request was successful");
 
 	DBG("[ parent representation ]");
-	iotcon_repr_get_uri(recv_repr, &uri);
-	if (uri)
-		DBG("uri : %s", uri);
+	iotcon_repr_get_uri_path(recv_repr, &uri_path);
+	if (uri_path)
+		DBG("uri_path : %s", uri_path);
 	key_count = iotcon_repr_get_keys_count(recv_repr);
 	if (key_count) {
 		char *str;
@@ -67,7 +67,7 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 
 	for (i = 0; i < children_count; i++) {
 		DBG("[ child representation ]");
-		const char *uri;
+		const char *uri_path;
 
 		ret = iotcon_repr_get_nth_child(recv_repr, i, &child_repr);
 		if (IOTCON_ERROR_NONE != ret) {
@@ -75,20 +75,20 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 			continue;
 		}
 
-		iotcon_repr_get_uri(child_repr, &uri);
-		if (NULL == uri)
+		iotcon_repr_get_uri_path(child_repr, &uri_path);
+		if (NULL == uri_path)
 			continue;
 
-		DBG("uri : %s", uri);
+		DBG("uri_path : %s", uri_path);
 
-		if (TEST_STR_EQUAL == strcmp("/a/light", uri)) {
+		if (TEST_STR_EQUAL == strcmp("/a/light", uri_path)) {
 			key_count = iotcon_repr_get_keys_count(child_repr);
 			if (key_count) {
 				int brightness;
 				iotcon_repr_get_int(child_repr, "brightness", &brightness);
 				DBG("brightness : %d", brightness);
 			}
-		} else if (TEST_STR_EQUAL == strcmp("/a/switch", uri)) {
+		} else if (TEST_STR_EQUAL == strcmp("/a/switch", uri_path)) {
 			key_count = iotcon_repr_get_keys_count(child_repr);
 			if (key_count) {
 				bool bswitch;
@@ -99,13 +99,13 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 	}
 }
 
-static void _on_get_2nd(iotcon_options_h header_options, iotcon_repr_h recv_repr,
+static void _on_get_2nd(iotcon_repr_h recv_repr, iotcon_options_h header_options,
 		int response_result, void *user_data)
 {
 	_on_get(recv_repr, response_result);
 }
 
-static void _on_get_1st(iotcon_options_h header_options, iotcon_repr_h recv_repr,
+static void _on_get_1st(iotcon_repr_h recv_repr, iotcon_options_h header_options,
 		int response_result, void *user_data)
 {
 	iotcon_query_h query_params;
@@ -123,9 +123,9 @@ static void _on_get_1st(iotcon_options_h header_options, iotcon_repr_h recv_repr
 
 static int _get_res_type_fn(const char *string, void *user_data)
 {
-	char *resource_uri = user_data;
+	char *resource_uri_path = user_data;
 
-	DBG("[%s] resource type : %s", resource_uri, string);
+	DBG("[%s] resource type : %s", resource_uri_path, string);
 
 	return IOTCON_FUNC_CONTINUE;
 }
@@ -133,7 +133,7 @@ static int _get_res_type_fn(const char *string, void *user_data)
 static void _found_resource(iotcon_client_h resource, void *user_data)
 {
 	int ret;
-	char *resource_uri;
+	char *resource_uri_path;
 	char *resource_host;
 	char *resource_sid = NULL;
 	iotcon_resource_types_h resource_types = NULL;
@@ -145,9 +145,9 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 	INFO("===== resource found =====");
 
 	/* get the resource URI */
-	ret = iotcon_client_get_uri(resource, &resource_uri);
+	ret = iotcon_client_get_uri_path(resource, &resource_uri_path);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_get_uri() Fail(%d)", ret);
+		ERR("iotcon_client_get_uri_path() Fail(%d)", ret);
 		return;
 	}
 
@@ -157,10 +157,11 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		ERR("iotcon_client_get_server_id() Fail(%d)", ret);
 		return;
 	}
-	DBG("[%s] resource server id : %s", resource_uri, resource_sid);
+	DBG("[%s] resource server id : %s", resource_uri_path, resource_sid);
 
-	if (room_resource_sid && TEST_STR_EQUAL == strcmp(room_resource_sid, resource_sid)) {
-		DBG("sid \"%s\" already found. skip !", resource_sid);
+	if (room_resource_sid && TEST_STR_EQUAL == strcmp(room_resource_sid, resource_sid)
+			&& TEST_STR_EQUAL == strcmp(room_uri_path, resource_uri_path)) {
+		DBG("uri_path \"%s\" already found. skip !", resource_uri_path);
 		return;
 	}
 
@@ -172,7 +173,7 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		ERR("iotcon_client_get_host() Fail(%d)", ret);
 		return;
 	}
-	DBG("[%s] resource host : %s", resource_uri, resource_host);
+	DBG("[%s] resource host : %s", resource_uri_path, resource_host);
 
 	/* get the resource interfaces */
 	ret = iotcon_client_get_interfaces(resource, &resource_interfaces);
@@ -181,13 +182,13 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		return;
 	}
 	if (IOTCON_INTERFACE_DEFAULT & resource_interfaces)
-		DBG("[%s] resource interface : DEFAULT_INTERFACE", resource_uri);
+		DBG("[%s] resource interface : DEFAULT_INTERFACE", resource_uri_path);
 	if (IOTCON_INTERFACE_LINK & resource_interfaces)
-		DBG("[%s] resource interface : LINK_INTERFACE", resource_uri);
+		DBG("[%s] resource interface : LINK_INTERFACE", resource_uri_path);
 	if (IOTCON_INTERFACE_BATCH & resource_interfaces)
-		DBG("[%s] resource interface : BATCH_INTERFACE", resource_uri);
+		DBG("[%s] resource interface : BATCH_INTERFACE", resource_uri_path);
 	if (IOTCON_INTERFACE_GROUP & resource_interfaces)
-		DBG("[%s] resource interface : GROUP_INTERFACE", resource_uri);
+		DBG("[%s] resource interface : GROUP_INTERFACE", resource_uri_path);
 
 	/* get the resource types */
 	ret = iotcon_client_get_types(resource, &resource_types);
@@ -195,9 +196,9 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		ERR("iotcon_client_get_types() Fail(%d)", ret);
 		return;
 	}
-	iotcon_resource_types_foreach(resource_types, _get_res_type_fn, (void*)resource_uri);
+	iotcon_resource_types_foreach(resource_types, _get_res_type_fn, resource_uri_path);
 
-	if (TEST_STR_EQUAL == strcmp(room_uri, resource_uri)) {
+	if (TEST_STR_EQUAL == strcmp(room_uri_path, resource_uri_path)) {
 		/* copy resource to use elsewhere */
 		room_resource = iotcon_client_clone(resource);
 

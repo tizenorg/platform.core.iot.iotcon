@@ -29,7 +29,7 @@ struct icl_observe_info {
 
 struct icl_resource_request {
 	int types;
-	char *uri;
+	char *uri_path;
 	iotcon_options_h header_options;
 	iotcon_query_h query;
 	struct icl_observe_info observation_info;

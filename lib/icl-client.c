@@ -18,6 +18,7 @@
 #include <string.h>
 #include <errno.h>
 #include <glib.h>
+#include <json-glib/json-glib.h>
 
 #include "iotcon-struct.h"
 #include "ic-utils.h"
@@ -26,24 +27,25 @@
 #include "icl-options.h"
 #include "icl-resource-types.h"
 #include "icl-dbus.h"
+#include "icl-repr.h"
 #include "icl-client.h"
 
 /* The length of resource_type should be less than or equal to 61.
  * If resource_type is NULL, then All resources in host are discovered. */
-API int iotcon_find_resource(const char *host_addr, const char *resource_type,
+API int iotcon_find_resource(const char *host_address, const char *resource_type,
 		iotcon_found_resource_cb cb, void *user_data)
 {
 	FN_CALL;
 	int ret;
 
-	RETV_IF(NULL == host_addr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	if (resource_type && (IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
 		ERR("The length of resource_type(%s) is invalid", resource_type);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	ret = icl_dbus_find_resource(host_addr, resource_type, cb, user_data);
+	ret = icl_dbus_find_resource(host_address, resource_type, cb, user_data);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icl_dbus_find_resource() Fail(%d)", ret);
 
@@ -52,14 +54,14 @@ API int iotcon_find_resource(const char *host_addr, const char *resource_type,
 
 
 /* If you know the information of resource, then you can make a proxy of the resource. */
-API iotcon_client_h iotcon_client_new(const char *host, const char *uri,
+API iotcon_client_h iotcon_client_new(const char *host, const char *uri_path,
 		bool is_observable, iotcon_resource_types_h resource_types, int resource_ifs)
 {
 	FN_CALL;
 	iotcon_client_h resource = NULL;
 
 	RETV_IF(NULL == host, NULL);
-	RETV_IF(NULL == uri, NULL);
+	RETV_IF(NULL == uri_path, NULL);
 	RETV_IF(NULL == resource_types, NULL);
 
 	resource = calloc(1, sizeof(struct icl_remote_resource));
@@ -69,7 +71,7 @@ API iotcon_client_h iotcon_client_new(const char *host, const char *uri,
 	}
 
 	resource->host = ic_utils_strdup(host);
-	resource->uri = ic_utils_strdup(uri);
+	resource->uri_path = ic_utils_strdup(uri_path);
 	resource->is_observable = is_observable;
 	resource->types = icl_resource_types_ref(resource_types);
 	resource->ifaces = resource_ifs;
@@ -84,7 +86,7 @@ API void iotcon_client_free(iotcon_client_h resource)
 
 	RET_IF(NULL == resource);
 
-	free(resource->uri);
+	free(resource->uri_path);
 	free(resource->host);
 	free(resource->sid);
 
@@ -103,7 +105,7 @@ API iotcon_client_h iotcon_client_clone(iotcon_client_h resource)
 	RETV_IF(NULL == resource, NULL);
 
 	clone = iotcon_client_new(resource->host,
-			resource->uri,
+			resource->uri_path,
 			resource->is_observable,
 			iotcon_resource_types_clone(resource->types),
 			resource->ifaces);
@@ -120,12 +122,12 @@ API iotcon_client_h iotcon_client_clone(iotcon_client_h resource)
 
 
 /* The content of the resource should not be freed by user. */
-API int iotcon_client_get_uri(iotcon_client_h resource, char **uri)
+API int iotcon_client_get_uri_path(iotcon_client_h resource, char **uri_path)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == uri, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*uri = resource->uri;
+	*uri_path = resource->uri_path;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -142,7 +144,6 @@ API int iotcon_client_get_host(iotcon_client_h resource, char **host)
 	return IOTCON_ERROR_NONE;
 }
 
-
 API int iotcon_client_get_server_id(iotcon_client_h resource, char **sid)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
@@ -152,7 +153,6 @@ API int iotcon_client_get_server_id(iotcon_client_h resource, char **sid)
 
 	return IOTCON_ERROR_NONE;
 }
-
 
 /* The content of the resource should not be freed by user. */
 API int iotcon_client_get_types(iotcon_client_h resource, iotcon_resource_types_h *types)
@@ -314,4 +314,68 @@ API int iotcon_observer_stop(iotcon_client_h resource)
 	resource->observe_handle = NULL;
 
 	return ret;
+}
+
+
+iotcon_client_h icl_client_parse_resource_object(JsonParser *parser, char *json_string,
+		const char *host, iotcon_connectivity_type_e conn_type)
+{
+	FN_CALL;
+	int ret, observable;
+	GError *error = NULL;
+	iotcon_client_h client;
+	const char *uri_path, *server_id;
+	int ifaces = IOTCON_INTERFACE_NONE;
+	JsonObject *rsrc_obj, *property_obj;
+	iotcon_resource_types_h res_types = NULL;
+
+	DBG("input str : %s", json_string);
+
+	ret = json_parser_load_from_data(parser, json_string, strlen(json_string), &error);
+	if (FALSE == ret) {
+		ERR("json_parser_load_from_data() Fail(%s)", error->message);
+		g_error_free(error);
+		return NULL;
+	}
+
+	rsrc_obj = json_node_get_object(json_parser_get_root(parser));
+
+	uri_path = json_object_get_string_member(rsrc_obj, IC_JSON_KEY_URI_PATH);
+	server_id = json_object_get_string_member(rsrc_obj, IC_JSON_KEY_SERVERID);
+	if (NULL == server_id) {
+		ERR("Invalid Server ID");
+		return NULL;
+	}
+
+	/* parse resources type and interfaces */
+	property_obj = json_object_get_object_member(rsrc_obj, IC_JSON_KEY_PROPERTY);
+	if (property_obj) {
+		ret = icl_repr_parse_resource_property(property_obj, &res_types, &ifaces);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_repr_parse_resource_property() Fail(%d)", ret);
+			return NULL;
+		}
+	}
+
+	/* parse observable */
+	observable = json_object_get_int_member(rsrc_obj, IC_JSON_KEY_OBSERVABLE);
+
+	client = iotcon_client_new(host, uri_path, !!observable, res_types, ifaces);
+	if (res_types)
+		iotcon_resource_types_free(res_types);
+
+	if (NULL == client) {
+		ERR("iotcon_client_new() Fail");
+		return NULL;
+	}
+
+	client->sid = strdup(server_id);
+	if (NULL == client->sid) {
+		ERR("strdup(sid) Fail(%d)", errno);
+		iotcon_client_free(client);
+		return NULL;
+	}
+	client->conn_type = conn_type;
+
+	return client;
 }

@@ -1,7 +1,7 @@
 <node>
 	<interface name="org.tizen.iotcon.dbus">
 		<method name="registerResource">
-			<arg type="s" name="uri" direction="in"/>
+			<arg type="s" name="uri_path" direction="in"/>
 			<arg type="as" name="resource_types" direction="in"/>
 			<arg type="i" name="ifaces" direction="in"/>
 			<arg type="y" name="properties" direction="in"/>
@@ -53,7 +53,7 @@
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="get">
-			<arg type="(ssba(qs)asii)" name="client" direction="in"/>
+			<arg type="(ssba(qs)iii)" name="client" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
 			<arg type="u" name="signal_number" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>

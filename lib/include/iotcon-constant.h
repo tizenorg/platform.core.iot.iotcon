@@ -69,8 +69,21 @@ typedef enum {
 	IOTCON_INTERFACE_DEFAULT = (1 << 0), /* default interface */
 	IOTCON_INTERFACE_LINK = (1 << 1), /* discovers children of the parent resource */
 	IOTCON_INTERFACE_BATCH = (1 << 2), /* requests CRUD to children of the parent resource */
-	IOTCON_INTERFACE_GROUP = (1 << 3), /* requests CRUD to remote resources of a group. */
+	IOTCON_INTERFACE_GROUP = (1 << 3), /* requests CRUD to remote resources of a group */
 } iotcon_interface_e;
+
+/**
+ * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
+ * @brief Enumerations of Iotcon connectivity types.
+ * @since_tizen 3.0
+ */
+typedef enum {
+	IOTCON_CONNECTIVITY_IPV4 = 0,
+	IOTCON_CONNECTIVITY_IPV6,
+	IOTCON_CONNECTIVITY_EDR,
+	IOTCON_CONNECTIVITY_LE,
+	IOTCON_CONNECTIVITY_ALL, /* sends over all the interfaces */
+} iotcon_connectivity_type_e;
 
 typedef enum {
 	IOTCON_HIDDEN = 0,
@@ -82,7 +95,7 @@ typedef enum {
 } iotcon_resource_property_e;
 
 typedef enum {
-	IOTCON_RESPONSE_RESOURCE_URI = 1,
+	IOTCON_RESPONSE_NEW_URI_PATH = 1,
 	IOTCON_RESPONSE_RESULT = 2,
 	IOTCON_RESPONSE_REPRESENTATION = 3,
 	IOTCON_RESPONSE_HEADER_OPTIONS = 4,

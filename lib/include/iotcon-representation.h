@@ -28,19 +28,19 @@ iotcon_repr_h iotcon_repr_clone(const iotcon_repr_h src);
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
  * @brief Appends resource type name.
  * @since_tizen 3.0
- * @remarks Stored string is replaced with @a uri. If @a uri is NULL, stored string is set
+ * @remarks Stored string is replaced with @a uri_path. If @a uri_path is NULL, stored string is set
  * by NULL.
  *
  * @param[in] repr The handle to the Representation
- * @param[in] uri The URI of resource
+ * @param[in] uri_path The URI of resource
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_set_uri(iotcon_repr_h repr, const char *uri);
-int iotcon_repr_get_uri(iotcon_repr_h repr, const char **uri);
+int iotcon_repr_set_uri_path(iotcon_repr_h repr, const char *uri_path);
+int iotcon_repr_get_uri_path(iotcon_repr_h repr, const char **uri_path);
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE

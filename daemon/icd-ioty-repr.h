@@ -16,13 +16,5 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_REPRESENTATION_H__
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_REPRESENTATION_H__
 
-#include <OCRepresentation.h>
-#include <glib.h>
-#include "iotcon-struct.h"
-
-int icd_ioty_repr_parse_json(const char *repr_json, OC::OCRepresentation &ocRep);
-int icd_ioty_repr_generate_gvariant_builder(const OC::OCRepresentation &ocRep,
-		GVariantBuilder **builder);
-
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_REPRESENTATION_H__ */
 

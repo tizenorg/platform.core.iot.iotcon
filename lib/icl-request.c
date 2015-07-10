@@ -19,12 +19,12 @@
 #include "icl-request.h"
 
 /* The content of the request should not be freed by user. */
-API int iotcon_request_get_uri(iotcon_request_h request, char **uri)
+API int iotcon_request_get_uri(iotcon_request_h request, char **uri_path)
 {
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == uri, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*uri = request->uri;
+	*uri_path = request->uri_path;
 
 	return IOTCON_ERROR_NONE;
 }

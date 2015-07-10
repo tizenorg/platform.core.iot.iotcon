@@ -22,7 +22,7 @@ typedef struct {
 } icl_handle_container_s;
 
 int icl_dbus_config(const char *address, unsigned short port);
-icl_handle_container_s* icl_dbus_register_resource(const char *uri,
+icl_handle_container_s* icl_dbus_register_resource(const char *uri_path,
 		iotcon_resource_types_h types,
 		int ifaces,
 		uint8_t properties,
@@ -43,7 +43,7 @@ int icl_dbus_notify_all(icl_handle_container_s *resource);
 int icl_dbus_send_response(struct icl_resource_response *response);
 
 int icl_dbus_find_resource(const char *host_address, const char *resource_type,
-		iotcon_found_resource_cb found_resource_cb, void *user_data);
+		iotcon_found_resource_cb cb, void *user_data);
 
 int icl_dbus_get(iotcon_client_h resource, iotcon_query_h query,
 		iotcon_on_cru_cb cb, void *user_data);

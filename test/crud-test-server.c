@@ -24,7 +24,7 @@
 /* Door Resource */
 typedef struct _door_resource_s {
 	bool state;
-	char *uri;
+	char *uri_path;
 	char *type;
 	iotcon_repr_h repr;
 } door_resource_s;
@@ -48,8 +48,8 @@ static iotcon_error_e _set_door_resource()
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	my_door.uri = strdup("/a/door");
-	if (NULL == my_door.uri) {
+	my_door.uri_path = strdup("/a/door");
+	if (NULL == my_door.uri_path) {
 		ERR("strdup(/a/door) Fail");
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
@@ -65,7 +65,7 @@ static void _check_door_state()
 		INFO("[Door] opened.");
 }
 
-static iotcon_resource_h _create_door_resource(char *uri, iotcon_interface_e interfaces,
+static iotcon_resource_h _create_door_resource(char *uri_path, iotcon_interface_e interfaces,
 		iotcon_resource_property_e properties)
 {
 	iotcon_resource_types_h resource_types = iotcon_resource_types_new();
@@ -82,7 +82,7 @@ static iotcon_resource_h _create_door_resource(char *uri, iotcon_interface_e int
 	}
 
 	/* register door resource */
-	iotcon_resource_h handle = iotcon_register_resource(uri, resource_types,
+	iotcon_resource_h handle = iotcon_register_resource(uri_path, resource_types,
 			interfaces, properties, _request_handler, NULL);
 	if (NULL == handle) {
 		iotcon_resource_types_free(resource_types);
@@ -112,7 +112,7 @@ static void _request_handler_get(iotcon_response_h response)
 
 	/* create a door Representation */
 	resp_repr = iotcon_repr_new();
-	iotcon_repr_set_uri(resp_repr, my_door.uri);
+	iotcon_repr_set_uri_path(resp_repr, my_door.uri_path);
 	iotcon_repr_set_bool(resp_repr, "opened", my_door.state);
 
 	_send_response(response, resp_repr, IOTCON_RESPONSE_RESULT_OK);
@@ -139,7 +139,7 @@ static void _request_handler_put(iotcon_request_h request, iotcon_response_h res
 	_check_door_state();
 
 	resp_repr = iotcon_repr_new();
-	iotcon_repr_set_uri(resp_repr, my_door.uri);
+	iotcon_repr_set_uri_path(resp_repr, my_door.uri_path);
 	iotcon_repr_set_bool(resp_repr, "opened", my_door.state);
 
 	_send_response(response, resp_repr, IOTCON_RESPONSE_RESULT_OK);
@@ -167,7 +167,7 @@ static void _request_handler_post(iotcon_response_h response)
 
 	/* send information that new resource was created */
 	resp_repr = iotcon_repr_new();
-	iotcon_repr_set_str(resp_repr, "createduri", "/a/door1");
+	iotcon_repr_set_str(resp_repr, "createduripath", "/a/door1");
 
 	_send_response(response, resp_repr, IOTCON_RESPONSE_RESULT_RESOURCE_CREATED);
 

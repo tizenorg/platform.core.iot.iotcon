@@ -55,8 +55,8 @@ API void iotcon_response_free(iotcon_response_h resp)
 
 	if (resp->repr)
 		iotcon_repr_free(resp->repr);
-	if (resp->new_uri)
-		free(resp->new_uri);
+	if (resp->new_uri_path)
+		free(resp->new_uri_path);
 	if (resp->header_options)
 		iotcon_options_free(resp->header_options);
 	free(resp);
@@ -67,7 +67,7 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 {
 	int value;
 	va_list args;
-	char *new_resource_uri = NULL;
+	char *new_uri_path = NULL;
 	iotcon_options_h options = NULL;
 
 	va_start(args, prop);
@@ -89,20 +89,20 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 		}
 		resp->result = value;
 		break;
-	case IOTCON_RESPONSE_RESOURCE_URI:
-		new_resource_uri = va_arg(args, char*);
-		if (resp->new_uri)
-			free(resp->new_uri);
+	case IOTCON_RESPONSE_NEW_URI_PATH:
+		new_uri_path = va_arg(args, char*);
+		if (resp->new_uri_path)
+			free(resp->new_uri_path);
 
-		if (new_resource_uri) {
-			resp->new_uri = strdup(new_resource_uri);
-			if (NULL == resp->new_uri) {
+		if (new_uri_path) {
+			resp->new_uri_path = strdup(new_uri_path);
+			if (NULL == resp->new_uri_path) {
 				ERR("strdup() Fail(%d)", errno);
 				va_end(args);
 				return IOTCON_ERROR_OUT_OF_MEMORY;
 			}
 		} else {
-			resp->new_uri = NULL;
+			resp->new_uri_path = NULL;
 		}
 		break;
 	case IOTCON_RESPONSE_HEADER_OPTIONS:

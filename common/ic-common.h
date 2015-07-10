@@ -38,4 +38,20 @@
 #define IC_DBUS_SIGNAL_PLATFORM "PLATFORM"
 #define IC_DBUS_SIGNAL_PRESENCE "PRESENCE"
 
+#define IC_INTERFACE_DEFAULT "oic.if.baseline";
+#define IC_INTERFACE_LINK "oic.if.ll";
+#define IC_INTERFACE_BATCH "oic.if.b";
+#define IC_INTERFACE_GROUP "oc.mi.grp";
+
+#define IC_JSON_KEY_OC "oc"
+#define IC_JSON_KEY_URI_PATH "href"
+#define IC_JSON_KEY_OBSERVABLE "obs"
+#define IC_JSON_KEY_RESOURCETYPES "rt"
+#define IC_JSON_KEY_INTERFACES "if"
+#define IC_JSON_KEY_PROPERTY "prop"
+#define IC_JSON_KEY_REP "rep"
+#define IC_JSON_KEY_SECURE "sec"
+#define IC_JSON_KEY_PORT "port"
+#define IC_JSON_KEY_SERVERID "sid"
+
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__ */

@@ -21,7 +21,7 @@
 #include "icl-request.h"
 
 struct icl_resource_response {
-	char *new_uri;
+	char *new_uri_path;
 	int error_code;
 	iotcon_options_h header_options;
 	iotcon_interface_e iface;

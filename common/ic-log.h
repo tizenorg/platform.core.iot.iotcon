@@ -128,10 +128,10 @@
 		} \
 	} while (0)
 
-#define WARN_IF(expr) \
+#define WARN_IF(expr, fmt, arg...) \
 	do { \
 		if (expr) { \
-			WARN("(%s)", #expr); \
+			WARN(fmt, ##arg); \
 		} \
 	} while (0)
 

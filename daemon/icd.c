@@ -18,6 +18,7 @@
 #include "icd.h"
 #include "icd-dbus.h"
 #include "icd-ioty.h"
+#include "icd-ioty-ocprocess.h"
 
 #define ICD_ALL_INTERFACES "0.0.0.0"
 #define ICD_RANDOM_PORT 0
@@ -25,6 +26,7 @@
 int main(int argc, char **argv)
 {
 	guint id;
+	GThread *thread;
 	GMainLoop *loop;
 
 #if !GLIB_CHECK_VERSION(2,35,0)
@@ -34,10 +36,16 @@ int main(int argc, char **argv)
 	loop = g_main_loop_new(NULL, FALSE);
 
 	id = icd_dbus_init();
-	icd_ioty_config(ICD_ALL_INTERFACES, ICD_RANDOM_PORT);
+	thread = icd_ioty_init(ICD_ALL_INTERFACES, ICD_RANDOM_PORT);
+	if (NULL == thread) {
+		ERR("icd_ioty_init() Fail");
+		icd_dbus_deinit(id);
+		return -1;
+	}
 
 	g_main_loop_run(loop);
 
+	icd_ioty_deinit(thread);
 	icd_dbus_deinit(id);
 	g_main_loop_unref(loop);
 

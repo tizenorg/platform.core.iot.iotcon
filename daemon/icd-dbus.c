@@ -107,7 +107,7 @@ int icd_dbus_bus_list_get_info(int handle, unsigned int *sig_num, const gchar **
 	return IOTCON_ERROR_NO_DATA;
 }
 
-int icd_dbus_emit_signal(const char *signal_name, const char *sender, GVariant *value)
+int icd_dbus_emit_signal(const char *dest, const char *signal_name, GVariant *value)
 {
 	gboolean ret;
 	GError *error = NULL;
@@ -115,7 +115,7 @@ int icd_dbus_emit_signal(const char *signal_name, const char *sender, GVariant *
 	DBG("SIG : %s, %s", signal_name, g_variant_print(value, FALSE));
 
 	ret = g_dbus_connection_emit_signal(icd_dbus_conn,
-			sender,
+			dest,
 			IOTCON_DBUS_OBJPATH,
 			IOTCON_DBUS_INTERFACE,
 			signal_name,
@@ -341,7 +341,7 @@ static int _icd_dbus_resource_list_append_handle(const gchar *sender, void *hand
 
 static gboolean _dbus_handle_register_resource(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		const gchar *uri,
+		const gchar *uri_path,
 		const gchar* const *resource_types,
 		gint ifaces,
 		guchar properties,
@@ -352,7 +352,7 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 	const gchar *sender;
 	void *handle = NULL;
 
-	handle = icd_ioty_register_resource(uri, resource_types, ifaces, properties);
+	handle = icd_ioty_register_resource(uri_path, resource_types, ifaces, properties);
 	if (handle) {
 		sender = g_dbus_method_invocation_get_sender(invocation);
 		ret = _icd_dbus_resource_list_append_handle(sender, handle, signal_number);

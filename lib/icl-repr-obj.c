@@ -554,8 +554,8 @@ static inline int _icl_obj_to_json(const char *key, iotcon_value_h value,
 }
 
 /*
-* A general result : {"rep":{"string":"Hello","intlist":[1,2,3]}}
-*/
+ * A general result : {"rep":{"string":"Hello","intlist":[1,2,3]}}
+ */
 JsonObject* icl_obj_to_json(iotcon_repr_h repr)
 {
 	int ret;
@@ -587,7 +587,7 @@ JsonObject* icl_obj_to_json(iotcon_repr_h repr)
 	parent_obj = json_object_new();
 
 	if (json_obj)
-		json_object_set_object_member(parent_obj, IOTCON_KEY_REP, json_obj);
+		json_object_set_object_member(parent_obj, IC_JSON_KEY_REP, json_obj);
 
 	return parent_obj;
 }
@@ -661,8 +661,8 @@ static inline int _icl_obj_from_json(JsonObject *obj, GList *key_list, unsigned 
 }
 
 /*
-* A general input : {"rep:"{"string":"Hello","intlist":[1,2,3]}}
-*/
+ * A general input : {"rep:"{"string":"Hello","intlist":[1,2,3]}}
+ */
 iotcon_repr_h icl_obj_from_json(JsonObject *json_repr)
 {
 	int ret;
@@ -673,7 +673,7 @@ iotcon_repr_h icl_obj_from_json(JsonObject *json_repr)
 
 	RETV_IF(NULL == json_repr, NULL);
 
-	obj = json_object_get_object_member(json_repr, IOTCON_KEY_REP);
+	obj = json_object_get_object_member(json_repr, IC_JSON_KEY_REP);
 
 	key_list = json_object_get_members(obj);
 

@@ -134,7 +134,7 @@ static void _icl_dbus_request_handler(GDBusConnection *connection,
 	char *value = NULL;
 	GVariantIter *repr;
 	char *repr_json;
-	char *repr_uri;
+	char *repr_uri_path;
 	int request_handle;
 	int resource_handle;
 	struct icl_resource_request request = {0};
@@ -143,7 +143,7 @@ static void _icl_dbus_request_handler(GDBusConnection *connection,
 
 	g_variant_get(parameters, "(i&sa(qs)a(ss)iiasii)",
 			&request.types,
-			&request.uri,
+			&request.uri_path,
 			&options,
 			&query,
 			&request.observation_info.action,
@@ -180,9 +180,9 @@ static void _icl_dbus_request_handler(GDBusConnection *connection,
 			g_variant_iter_free(repr);
 			return;
 		}
-		repr_uri = icl_repr_json_get_uri(repr_json);
-		iotcon_repr_set_uri(cur_repr, repr_uri);
-		free(repr_uri);
+		repr_uri_path = icl_repr_json_get_uri_path(repr_json);
+		iotcon_repr_set_uri_path(cur_repr, repr_uri_path);
+		free(repr_uri_path);
 
 		if (0 == index)
 			request.repr = cur_repr;
@@ -204,7 +204,7 @@ static void _icl_dbus_request_handler(GDBusConnection *connection,
 }
 
 
-icl_handle_container_s* icl_dbus_register_resource(const char *uri,
+icl_handle_container_s* icl_dbus_register_resource(const char *uri_path,
 		iotcon_resource_types_h types,
 		int ifaces,
 		uint8_t properties,
@@ -236,7 +236,7 @@ icl_handle_container_s* icl_dbus_register_resource(const char *uri,
 		return NULL;
 	}
 
-	ic_dbus_call_register_resource_sync(icl_dbus_object, uri, res_types,
+	ic_dbus_call_register_resource_sync(icl_dbus_object, uri_path, res_types,
 			ifaces, properties, signal_number, &resource_handle, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_register_resource_sync() Fail(%s)", error->message);
@@ -464,7 +464,8 @@ int icl_dbus_send_response(struct icl_resource_response *response)
 	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
 
 	arg_response = icl_dbus_response_to_gvariant(response);
-	ic_dbus_call_send_response_sync(icl_dbus_object, arg_response, &ret, NULL, &error);
+	ic_dbus_call_send_response_sync(icl_dbus_object, arg_response,
+			&ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_send_response_sync() Fail(%s)", error->message);
 		g_error_free(error);
@@ -485,34 +486,33 @@ static void _icl_dbus_found_resource(GDBusConnection *connection,
 		gpointer user_data)
 {
 	FN_CALL;
-	char *type;
-	GVariantIter *types;
-
+	int conn_type;
+	JsonParser *parser;
+	iotcon_client_h client;
+	char *payload, *host;
 	icl_cb_container_s *cb_container = user_data;
 	iotcon_found_resource_cb cb = cb_container->cb;
 
-	struct icl_remote_resource resource = {0};
+	g_variant_get(parameters, "(&s&si)", &payload, &host, &conn_type);
 
-	g_variant_get(parameters, "(&s&s&siasi)",
-			&resource.uri,
-			&resource.host,
-			&resource.sid,
-			&resource.is_observable,
-			&types,
-			&resource.ifaces);
+	RET_IF(NULL == payload);
+	RET_IF(NULL == host);
 
-	if (g_variant_iter_n_children(types)) {
-		resource.types = iotcon_resource_types_new();
-		while (g_variant_iter_loop(types, "&s", &type))
-			iotcon_resource_types_insert(resource.types, type);
+	parser = json_parser_new();
+
+	client = icl_client_parse_resource_object(parser, payload, host, conn_type);
+	if (NULL == client) {
+		ERR("icl_client_parse_resource_object() Fail");
+		g_object_unref(parser);
+		return;
 	}
-	g_variant_iter_free(types);
 
 	if (cb)
-		cb(&resource, cb_container->user_data);
+		cb(client, cb_container->user_data);
 
-	if (resource.types)
-		iotcon_resource_types_free(resource.types);
+	iotcon_client_free(client);
+
+	g_object_unref(parser);
 }
 
 
@@ -552,6 +552,19 @@ int icl_dbus_find_resource(const char *host_address, const char *resource_type,
 }
 
 
+static inline int _icl_dbus_convert_daemon_error(int error)
+{
+	int ret;
+
+	if (IOTCON_ERROR_INVALID_PARAMETER == error)
+		ret = IOTCON_ERROR_SYSTEM;
+	else
+		ret = error;
+
+	return ret;
+}
+
+
 static void _icl_dbus_on_cru(GDBusConnection *connection,
 		const gchar *sender_name,
 		const gchar *object_path,
@@ -561,16 +574,13 @@ static void _icl_dbus_on_cru(GDBusConnection *connection,
 		gpointer user_data)
 {
 	FN_CALL;
-	int index;
+	int res;
 	GVariantIter *options;
 	unsigned short option_id;
 	char *option_data;
 	iotcon_options_h header_options = NULL;
 	iotcon_repr_h repr = NULL;
-	GVariantIter *reprIter;
-	char *repr_json;
-	char *repr_uri;
-	int res;
+	char *repr_json = NULL;
 
 	icl_cb_container_s *cb_container = user_data;
 	iotcon_on_cru_cb cb = cb_container->cb;
@@ -579,38 +589,29 @@ static void _icl_dbus_on_cru(GDBusConnection *connection,
 	icl_dbus_sub_ids = g_list_remove(icl_dbus_sub_ids,
 			GUINT_TO_POINTER(cb_container->id));
 
-	g_variant_get(parameters, "(a(qs)asi)", &options, &reprIter, &res);
+	g_variant_get(parameters, "(a(qs)si)", &options, &repr_json, &res);
 
-	if (g_variant_iter_n_children(options)) {
+	if (IOTCON_ERROR_NONE == res && g_variant_iter_n_children(options)) {
 		header_options = iotcon_options_new();
 		while (g_variant_iter_loop(options, "(q&s)", &option_id, &option_data))
 			iotcon_options_insert(header_options, option_id, option_data);
+		g_variant_iter_free(options);
 	}
-	g_variant_iter_free(options);
 
-	for (index = 0; g_variant_iter_loop(reprIter, "&s", &repr_json); index++) {
-		iotcon_repr_h cur_repr = icl_repr_parse_json(repr_json);
-		if (NULL == cur_repr) {
-			ERR("icl_repr_parse_json() Fail");
-			iotcon_options_free(header_options);
-			if (repr)
-				iotcon_repr_free(repr);
-			g_variant_iter_free(reprIter);
+	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, repr_json))
+		repr = iotcon_repr_new();
+	else {
+		repr = icl_repr_create_repr(repr_json);
+		if (NULL == repr) {
+			ERR("icl_repr_create_repr() Fail");
 			return;
 		}
-		repr_uri = icl_repr_json_get_uri(repr_json);
-		iotcon_repr_set_uri(cur_repr, repr_uri);
-		free(repr_uri);
-
-		if (0 == index)
-			repr = cur_repr;
-		else
-			repr->children = g_list_append(repr->children, cur_repr);
 	}
-	g_variant_iter_free(reprIter);
+
+	res = _icl_dbus_convert_daemon_error(res);
 
 	if (cb)
-		cb(header_options, repr, res, cb_container->user_data);
+		cb(repr, header_options, res, cb_container->user_data);
 
 	if (repr)
 		iotcon_repr_free(repr);
@@ -860,7 +861,7 @@ static void _icl_dbus_on_observe(GDBusConnection *connection,
 	iotcon_repr_h repr = NULL;
 	GVariantIter *reprIter;
 	char *repr_json;
-	char *repr_uri;
+	char *repr_uri_path;
 	int res;
 	int seq_num;
 
@@ -886,9 +887,9 @@ static void _icl_dbus_on_observe(GDBusConnection *connection,
 			g_variant_iter_free(reprIter);
 			return;
 		}
-		repr_uri = icl_repr_json_get_uri(repr_json);
-		iotcon_repr_set_uri(cur_repr, repr_uri);
-		free(repr_uri);
+		repr_uri_path = icl_repr_json_get_uri_path(repr_json);
+		iotcon_repr_set_uri_path(cur_repr, repr_uri_path);
+		free(repr_uri_path);
 
 		if (0 == index)
 			repr = cur_repr;
