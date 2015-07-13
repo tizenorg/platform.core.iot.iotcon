@@ -315,7 +315,20 @@ static int _icd_dbus_resource_list_append_handle(const gchar *sender, void *hand
 		cur_bus = cur_bus->next;
 	}
 
-	if (false == sender_exist) {
+	if (true == sender_exist) {
+		cur_hd = bus->hdlist;
+		while (cur_hd) {
+			rsrc_handle = cur_hd->data;
+
+			if (rsrc_handle->handle == handle) {
+				ERR("resource handle(%u, %u) already exist", rsrc_handle->handle,
+						rsrc_handle->number);
+				_icd_dbus_client_list_unlock();
+				return IOTCON_ERROR_ALREADY;
+			}
+			cur_hd = cur_hd->next;
+		}
+	} else {
 		DBG("sender(%s) not exist. make new one.", sender);
 
 		new_bus = calloc(1, sizeof(icd_dbus_client_s));
@@ -336,20 +349,6 @@ static int _icd_dbus_resource_list_append_handle(const gchar *sender, void *hand
 		new_bus->sender = sender_dup;
 		DBG("new bus(%s, %d) added", sender, signal_number);
 		bus = new_bus;
-	}
-
-	cur_hd = bus->hdlist;
-	while (cur_hd) {
-		rsrc_handle = cur_hd->data;
-
-		if (rsrc_handle->handle == handle) {
-			ERR("resource handle(%u, %u) already exist", rsrc_handle->handle,
-					rsrc_handle->number);
-			_icd_dbus_client_list_unlock();
-			return IOTCON_ERROR_ALREADY;
-		}
-
-		cur_hd = cur_hd->next;
 	}
 
 	rsrc_handle = calloc(1, sizeof(icd_resource_handle_s));
@@ -606,6 +605,7 @@ static gboolean _dbus_handle_observer_start(icDbus *object,
 
 	ic_dbus_complete_observer_start(object, invocation, observe_h, ret);
 
+	/* observe_h will be freed in _dbus_handle_observer_stop() */
 	return TRUE;
 }
 

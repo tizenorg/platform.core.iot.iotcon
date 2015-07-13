@@ -747,7 +747,6 @@ static void _icl_repr_obj_clone(char *key, iotcon_value_h src_val, iotcon_repr_h
 {
 	FN_CALL;
 	int type, ret;
-	char *dup_key;
 	iotcon_value_h value, copied_val;
 	iotcon_list_h child_list, copied_list;
 	iotcon_repr_h child_repr, copied_repr;
@@ -765,13 +764,7 @@ static void _icl_repr_obj_clone(char *key, iotcon_value_h src_val, iotcon_repr_h
 			return;
 		}
 
-		dup_key = ic_utils_strdup(key);
-		if (NULL == dup_key) {
-			ERR("dupic_utils_strdup() Fail");
-			return;
-		}
-
-		icl_obj_set_value(dest_repr, dup_key, copied_val);
+		icl_obj_set_value(dest_repr, key, copied_val);
 		break;
 	case IOTCON_TYPE_LIST:
 		ret = icl_value_get_list(src_val, &child_list);
