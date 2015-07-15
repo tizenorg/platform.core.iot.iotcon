@@ -231,6 +231,9 @@ API int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child)
 			ERR("Child resource was already bound to parent resource.");
 			return IOTCON_ERROR_ALREADY;
 		}
+	}
+
+	for (i = 0; i < IOTCON_CONTAINED_RESOURCES_MAX; i++) {
 		if (NULL == parent->children[i]) {
 			ret = icl_dbus_bind_resource(parent->handle, child->handle);
 			if (IOTCON_ERROR_NONE == ret)
