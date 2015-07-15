@@ -20,7 +20,8 @@
 #include <iotcon.h>
 #include "test.h"
 
-static void _room_request_handler(iotcon_request_h request, void *user_data);
+static void _room_request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data);
 
 static void _send_response(iotcon_response_h response, iotcon_repr_h repr,
 		iotcon_interface_e interface)
@@ -162,7 +163,8 @@ static void _request_handler_delete(iotcon_response_h response)
 
 }
 
-static void _light_request_handler(iotcon_request_h request, void *user_data)
+static void _light_request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data)
 {
 	int ret;
 	int types;
@@ -198,7 +200,8 @@ static void _light_request_handler(iotcon_request_h request, void *user_data)
 	iotcon_response_free(response);
 }
 
-static void _room_request_handler(iotcon_request_h request, void *user_data)
+static void _room_request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data)
 {
 	int ret;
 	int types;
@@ -240,7 +243,7 @@ int main(int argc, char **argv)
 	GMainLoop *loop;
 	iotcon_resource_types_h room_rtypes = NULL;
 	iotcon_resource_types_h light_rtypes = NULL;
-	iotcon_error_e iotcon_error = IOTCON_ERROR_NONE;
+	int ret = IOTCON_ERROR_NONE;
 
 	loop = g_main_loop_new(NULL, FALSE);
 
@@ -276,8 +279,8 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	iotcon_error = iotcon_bind_resource(room_handle, light_handle);
-	if (IOTCON_ERROR_NONE != iotcon_error) {
+	ret = iotcon_bind_resource(room_handle, light_handle);
+	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_bind_resource() Fail");
 		return -1;
 	}

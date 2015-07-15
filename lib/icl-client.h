@@ -21,6 +21,7 @@
 #include <json-glib/json-glib.h>
 
 struct icl_remote_resource {
+	int ref_count;
 	char *uri_path;
 	char *host;
 	char *sid;
@@ -30,7 +31,8 @@ struct icl_remote_resource {
 	iotcon_resource_types_h types;
 	int ifaces;
 	iotcon_connectivity_type_e conn_type;
-	icl_handle_container_s *observe_handle;
+	int observe_handle;
+	unsigned int observe_sub_id;
 };
 
 iotcon_client_h icl_client_parse_resource_object(JsonParser *parser, char *json_string,

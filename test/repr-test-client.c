@@ -22,8 +22,6 @@
 static const char* const room_uri_path = "/a/room";
 static char *room_resource_sid;
 
-static iotcon_client_h room_resource = NULL;
-
 static int _get_int_list_fn(int pos, const int value, void *user_data)
 {
 	DBG("%d°C", value);
@@ -99,14 +97,14 @@ static void _on_get(iotcon_repr_h recv_repr, int response_result)
 	}
 }
 
-static void _on_get_2nd(iotcon_repr_h recv_repr, iotcon_options_h header_options,
-		int response_result, void *user_data)
+static void _on_get_2nd(iotcon_client_h resource, iotcon_repr_h recv_repr,
+		iotcon_options_h header_options, int response_result, void *user_data)
 {
 	_on_get(recv_repr, response_result);
 }
 
-static void _on_get_1st(iotcon_repr_h recv_repr, iotcon_options_h header_options,
-		int response_result, void *user_data)
+static void _on_get_1st(iotcon_client_h resource, iotcon_repr_h recv_repr,
+		iotcon_options_h header_options, int response_result, void *user_data)
 {
 	iotcon_query_h query_params;
 
@@ -116,7 +114,7 @@ static void _on_get_1st(iotcon_repr_h recv_repr, iotcon_options_h header_options
 	iotcon_query_insert(query_params, "if", "oc.mi.b");
 
 	/* send GET request again with BATCH interface */
-	iotcon_get(room_resource, query_params, _on_get_2nd, NULL);
+	iotcon_get(resource, query_params, _on_get_2nd, NULL);
 
 	iotcon_query_free(query_params);
 }
@@ -199,9 +197,6 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 	iotcon_resource_types_foreach(resource_types, _get_res_type_fn, resource_uri_path);
 
 	if (TEST_STR_EQUAL == strcmp(room_uri_path, resource_uri_path)) {
-		/* copy resource to use elsewhere */
-		room_resource = iotcon_client_clone(resource);
-
 		/* send GET request */
 		iotcon_get(resource, NULL, _on_get_1st, NULL);
 	}

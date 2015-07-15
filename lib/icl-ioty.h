@@ -30,9 +30,10 @@ struct icl_resource {
 	bool is_observable;
 	iotcon_resource_types_h types;
 	int ifaces;
-	icl_handle_container_s *handle;
 	iotcon_request_handler_cb cb;
 	void *user_data;
+	unsigned int sub_id;
+	int handle;
 	iotcon_resource_h children[IOTCON_CONTAINED_RESOURCES_MAX];
 };
 

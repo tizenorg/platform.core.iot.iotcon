@@ -89,10 +89,10 @@ int icd_ioty_register_platform_info(GVariant *value);
 int icd_ioty_get_platform_info(const char *host_address, unsigned int signal_number,
 		const char *sender);
 
-iotcon_presence_h icd_ioty_subscribe_presence(const char *host_address,
-		const char *resource_type, unsigned int signal_number, const char *sender);
+void* icd_ioty_subscribe_presence(const char *host_address, const char *resource_type,
+		unsigned int signal_number, const char *sender);
 
-int icd_ioty_unsubscribe_presence(iotcon_presence_h presence_handle);
+int icd_ioty_unsubscribe_presence(void *presence_handle);
 
 int icd_ioty_start_presence(unsigned int time_to_live);
 

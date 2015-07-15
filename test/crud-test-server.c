@@ -32,14 +32,12 @@ typedef struct _door_resource_s {
 static door_resource_s my_door;
 static bool resource_created = false;
 
-static iotcon_resource_h door_handle;
-static iotcon_resource_h new_door_handle;
-
 static iotcon_observers_h observers = NULL;
 
-static void _request_handler(iotcon_request_h request, void *user_data);
+static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data);
 
-static iotcon_error_e _set_door_resource()
+static int _set_door_resource()
 {
 	my_door.state = false;
 	my_door.type = strdup("core.door");
@@ -147,8 +145,26 @@ static void _request_handler_put(iotcon_request_h request, iotcon_response_h res
 	iotcon_repr_free(resp_repr);
 }
 
-static void _request_handler_post(iotcon_response_h response)
+static gboolean _notifier(gpointer user_data)
 {
+	static int i = 0;
+	if ((5 == i++) || !(observers))
+		return FALSE;
+
+	INFO("NOTIFY!");
+	iotcon_repr_h repr = iotcon_repr_new();
+	iotcon_notimsg_h msg = iotcon_notimsg_new(repr, IOTCON_INTERFACE_DEFAULT);
+	iotcon_notify_list_of_observers(user_data, msg, observers);
+
+	iotcon_notimsg_free(msg);
+	iotcon_repr_free(repr);
+
+	return TRUE;
+}
+
+static void _request_handler_post(iotcon_resource_h resource, iotcon_response_h response)
+{
+	iotcon_resource_h new_door_handle;
 	iotcon_repr_h resp_repr = NULL;
 	INFO("POST request");
 
@@ -172,39 +188,23 @@ static void _request_handler_post(iotcon_response_h response)
 	_send_response(response, resp_repr, IOTCON_RESPONSE_RESULT_RESOURCE_CREATED);
 
 	iotcon_repr_free(resp_repr);
+
+	/* add observe */
+	g_timeout_add_seconds(5, _notifier, resource);
 }
 
-static gboolean _notifier(gpointer user_data)
-{
-	static int i = 0;
-	if ((5 == i++) || !(observers))
-		return FALSE;
-
-	INFO("NOTIFY!");
-	iotcon_repr_h repr = iotcon_repr_new();
-	iotcon_notimsg_h msg = iotcon_notimsg_new(repr, IOTCON_INTERFACE_DEFAULT);
-	iotcon_notify_list_of_observers(user_data, msg, observers);
-
-	iotcon_notimsg_free(msg);
-	iotcon_repr_free(repr);
-
-	return TRUE;
-}
-
-static void _request_handler_delete(iotcon_response_h response)
+static void _request_handler_delete(iotcon_resource_h resource,
+		iotcon_response_h response)
 {
 	iotcon_repr_h resp_repr = NULL;
 	iotcon_response_result_e result = IOTCON_RESPONSE_RESULT_OK;
 	INFO("DELETE request");
 
-	iotcon_unregister_resource(new_door_handle);
+	iotcon_unregister_resource(resource);
 	resp_repr = iotcon_repr_new();
 	result = IOTCON_RESPONSE_RESULT_RESOURCE_DELETED;
 
 	_send_response(response, resp_repr, result);
-
-	/* add observe */
-	g_timeout_add_seconds(5, _notifier, door_handle);
 
 	iotcon_repr_free(resp_repr);
 }
@@ -217,7 +217,8 @@ static int _query_fn(const char *key, const char *value, void *user_data)
 	return IOTCON_FUNC_CONTINUE;
 }
 
-static void _request_handler(iotcon_request_h request, void *user_data)
+static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data)
 {
 	int ret;
 	int types;
@@ -255,10 +256,10 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 		_request_handler_put(request, response);
 
 	else if (IOTCON_REQUEST_POST & types)
-		_request_handler_post(response);
+		_request_handler_post(resource, response);
 
 	else if (IOTCON_REQUEST_DELETE & types)
-		_request_handler_delete(response);
+		_request_handler_delete(resource, response);
 
 	iotcon_response_free(response);
 
@@ -306,9 +307,10 @@ int main(int argc, char **argv)
 {
 	FN_CALL;
 	GMainLoop *loop;
+	iotcon_resource_h door_handle;
 	iotcon_interface_e door_interfaces = IOTCON_INTERFACE_DEFAULT;
 	iotcon_resource_property_e resource_properties = IOTCON_DISCOVERABLE;
-	iotcon_error_e iotcon_error = IOTCON_ERROR_NONE;
+	int ret = IOTCON_ERROR_NONE;
 
 	loop = g_main_loop_new(NULL, FALSE);
 
@@ -316,8 +318,8 @@ int main(int argc, char **argv)
 	iotcon_initialize();
 
 	/* set local door resource */
-	iotcon_error = _set_door_resource();
-	if (IOTCON_ERROR_NONE != iotcon_error) {
+	ret = _set_door_resource();
+	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_set_door_resource() Fail");
 		return -1;
 	}

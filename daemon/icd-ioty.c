@@ -633,7 +633,7 @@ int icd_ioty_get_platform_info(const char *host_address, unsigned int signal_num
 }
 
 
-iotcon_presence_h icd_ioty_subscribe_presence(const char *host_address,
+OCDoHandle icd_ioty_subscribe_presence(const char *host_address,
 		const char *resource_type, unsigned int signal_number, const char *sender)
 {
 	// TODO : To be implemented
@@ -641,7 +641,7 @@ iotcon_presence_h icd_ioty_subscribe_presence(const char *host_address,
 }
 
 
-int icd_ioty_unsubscribe_presence(iotcon_presence_h presence_handle)
+int icd_ioty_unsubscribe_presence(OCDoHandle presence_handle)
 {
 	// TODO : To be implemented
 	return IOTCON_ERROR_NONE;

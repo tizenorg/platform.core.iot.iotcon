@@ -26,7 +26,7 @@ typedef struct icl_repr_s* iotcon_repr_h;
 
 typedef struct icl_notify_msg* iotcon_notimsg_h;
 
-typedef void* iotcon_presence_h;
+typedef struct icl_presence* iotcon_presence_h;
 
 #ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 typedef struct _device_info {

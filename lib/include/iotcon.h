@@ -49,14 +49,15 @@ int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *user
 int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
 		void *user_data);
 
-typedef void (*iotcon_request_handler_cb)(iotcon_request_h request, void *user_data);
+typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
+		iotcon_request_h request, void *user_data);
 iotcon_resource_h iotcon_register_resource(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int ifaces,
 		uint8_t properties,
 		iotcon_request_handler_cb cb,
 		void *user_data);
-void iotcon_unregister_resource(iotcon_resource_h resource_handle);
+int iotcon_unregister_resource(iotcon_resource_h resource_handle);
 
 int iotcon_bind_interface(iotcon_resource_h resource,
 		iotcon_interface_e iface);
@@ -94,10 +95,14 @@ int iotcon_find_resource(const char *host_address, const char *resource_type,
 iotcon_client_h iotcon_client_new(const char *host, const char *uri_path, bool is_observable,
 		iotcon_resource_types_h resource_types, int resource_interfaces);
 void iotcon_client_free(iotcon_client_h resource);
-iotcon_client_h iotcon_client_clone(iotcon_client_h resource);
+iotcon_client_h iotcon_client_ref(iotcon_client_h resource);
 
-typedef void (*iotcon_on_observe_cb)(iotcon_options_h header_options, iotcon_repr_h repr,
-		int response_result, int sequence_number, void *user_data);
+typedef void (*iotcon_on_observe_cb)(iotcon_client_h resource,
+		iotcon_repr_h repr,
+		iotcon_options_h header_options,
+		int response_result,
+		int sequence_number,
+		void *user_data);
 int iotcon_observer_start(iotcon_client_h resource,
 		iotcon_observe_type_e observe_type,
 		iotcon_query_h query,
@@ -113,8 +118,8 @@ int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notimsg_h
 		iotcon_observers_h observers);
 int iotcon_notify_all(iotcon_resource_h resource);
 
-typedef void (*iotcon_on_cru_cb)(iotcon_repr_h repr, iotcon_options_h header_options,
-		int response_result, void *user_data);
+typedef void (*iotcon_on_cru_cb)(iotcon_client_h resource, iotcon_repr_h repr,
+		iotcon_options_h options, int response_result, void *user_data);
 int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
 		iotcon_on_cru_cb cb, void *user_data);
 
@@ -124,8 +129,8 @@ int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h quer
 int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
 		iotcon_on_cru_cb cb, void *user_data);
 
-typedef void (*iotcon_on_delete_cb)(iotcon_options_h header_options, int response_result,
-		void *user_data);
+typedef void (*iotcon_on_delete_cb)(iotcon_client_h resource, iotcon_options_h options,
+		int response_result, void *user_data);
 int iotcon_delete(iotcon_client_h resource, iotcon_on_delete_cb cb,
 		void *user_data);
 

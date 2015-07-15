@@ -21,6 +21,7 @@
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-dbus.h"
+#include "icl-dbus-type.h"
 #include "icl-ioty.h"
 #include "icl-repr.h"
 #include "icl-options.h"
@@ -130,14 +131,28 @@ API int iotcon_response_send(iotcon_response_h resp)
 {
 	FN_CALL;
 	int ret;
+	GError *error = NULL;
+	GVariant *arg_response;
 
+	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resp->repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = icl_dbus_send_response(resp);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icl_dbus_send_response() Fail(%d)", ret);
+	arg_response = icl_dbus_response_to_gvariant(resp);
+	ic_dbus_call_send_response_sync(icl_dbus_get_object(), arg_response, &ret, NULL,
+			&error);
+	if (error) {
+		ERR("ic_dbus_call_send_response_sync() Fail(%s)", error->message);
+		g_error_free(error);
+		g_variant_unref(arg_response);
+		return IOTCON_ERROR_DBUS;
+	}
 
-	return ret;
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon-daemon Fail(%d)", ret);
+		return icl_dbus_convert_daemon_error(ret);
+	}
+
+	return IOTCON_ERROR_NONE;
 }
 
