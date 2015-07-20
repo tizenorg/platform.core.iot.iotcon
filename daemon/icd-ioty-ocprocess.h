@@ -21,15 +21,15 @@
 
 void icd_ioty_ocprocess_stop();
 
-OCEntityHandlerResult EntityHandlerWrapper(OCEntityHandlerFlag flag,
-		OCEntityHandlerRequest *entityHandlerRequest);
-
 gpointer icd_ioty_ocprocess_thread(gpointer data);
 
+OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
+		OCEntityHandlerRequest *request);
+
 OCStackApplicationResult icd_ioty_ocprocess_find_cb(void* ctx, OCDoHandle handle,
-		OCClientResponse* clientResponse);
+		OCClientResponse* resp);
 
 OCStackApplicationResult icd_ioty_ocprocess_get_cb(void* ctx, OCDoHandle handle,
-		OCClientResponse* clientResponse);
+		OCClientResponse* resp);
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_THREAD_H__*/

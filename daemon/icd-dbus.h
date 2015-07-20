@@ -16,10 +16,11 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__
 #define __IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__
 
-int icd_dbus_bus_list_get_info(int handle, unsigned int *sig_num, const gchar **sender);
+#include <glib.h>
+
+int icd_dbus_bus_list_get_info(void *handle, unsigned int *sig_num, gchar **sender);
 int icd_dbus_emit_signal(const char *dest, const char *sig_name, GVariant *value);
 unsigned int icd_dbus_init();
 void icd_dbus_deinit(unsigned int id);
-
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__*/

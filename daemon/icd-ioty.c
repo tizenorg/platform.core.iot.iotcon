@@ -32,9 +32,7 @@
 #include "icd-ioty.h"
 #include "icd-ioty-ocprocess.h"
 
-GHashTable *icd_worker_table;
-
-GMutex icd_csdk_mutex;
+static GMutex icd_csdk_mutex;
 
 void icd_ioty_csdk_lock()
 {
@@ -72,6 +70,7 @@ GThread* icd_ioty_init(const char *addr, unsigned short port)
 
 	return thread;
 }
+
 
 void icd_ioty_deinit(GThread *thread)
 {
@@ -113,8 +112,8 @@ OCResourceHandle icd_ioty_register_resource(const char *uri_path,
 	}
 
 	icd_ioty_csdk_lock();
-	ret = OCCreateResource(&handle, res_types[0], resInterface, uri_path, EntityHandlerWrapper,
-			properties);
+	ret = OCCreateResource(&handle, res_types[0], resInterface, uri_path,
+			icd_ioty_ocprocess_req_handler, properties);
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCCreateResource() Fail(%d)", ret);
@@ -139,7 +138,16 @@ OCResourceHandle icd_ioty_register_resource(const char *uri_path,
 
 int icd_ioty_unregister_resource(OCResourceHandle resource_handle)
 {
-	// TODO : To be implemented
+	OCStackResult ret;
+
+	icd_ioty_csdk_lock();
+	ret = OCDeleteResource(resource_handle);
+	icd_ioty_csdk_unlock();
+	if (OC_STACK_OK != ret) {
+		ERR("OCDeleteResource() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	return IOTCON_ERROR_NONE;
 }
 
@@ -180,7 +188,9 @@ int icd_ioty_bind_interface(OCResourceHandle resourceHandle, iotcon_interface_e 
 		return ret;
 	}
 
+	icd_ioty_csdk_lock();
 	result = OCBindResourceInterfaceToResource(resourceHandle, resource_interface);
+	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != result) {
 		ERR("OCBindResourceInterfaceToResource() Fail(%d)", result);
 		return IOTCON_ERROR_IOTIVITY;
@@ -193,7 +203,9 @@ int icd_ioty_bind_type(OCResourceHandle resource_handle, const char *resource_ty
 {
 	OCStackResult ret;
 
+	icd_ioty_csdk_lock();
 	ret = OCBindResourceTypeToResource(resource_handle, resource_type);
+	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCBindResourceTypeToResource() Fail(%d)", ret);
 		return IOTCON_ERROR_IOTIVITY;
@@ -205,40 +217,180 @@ int icd_ioty_bind_type(OCResourceHandle resource_handle, const char *resource_ty
 
 int icd_ioty_bind_resource(OCResourceHandle parent, OCResourceHandle child)
 {
-	// TODO : To be implemented
+	OCStackResult ret;
+
+	icd_ioty_csdk_lock();
+	ret = OCBindResource(parent, child);
+	icd_ioty_csdk_unlock();
+	if (OC_STACK_OK != ret) {
+		ERR("OCBindResource() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	return IOTCON_ERROR_NONE;
 }
 
 
 int icd_ioty_unbind_resource(OCResourceHandle parent, OCResourceHandle child)
 {
-	// TODO : To be implemented
+	OCStackResult ret;
+
+	icd_ioty_csdk_lock();
+	ret = OCUnBindResource(parent, child);
+	icd_ioty_csdk_unlock();
+	if (OC_STACK_OK != ret) {
+		ERR("OCUnBindResource() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	return IOTCON_ERROR_NONE;
 }
 
 
-int icd_ioty_notify_list_of_observers(int resHandle, GVariant *msg, GVariant *observers)
+int icd_ioty_notify_list_of_observers(void *handle, GVariant *msg, GVariant *observers)
 {
-	// TODO : To be implemented
+	int i, error_code, obs_length;
+	char *repr_json = NULL;
+	GVariantIter obs_iter, msg_iter;
+	OCStackResult ret;
+
+	g_variant_iter_init(&obs_iter, observers);
+	obs_length = g_variant_iter_n_children(&obs_iter);
+
+	/* Variable-length Array */
+	OCObservationId obs_ids[obs_length];
+
+	for (i = 0; i < obs_length; i++)
+		g_variant_iter_loop(&obs_iter, "i", &obs_ids[i]);
+
+	g_variant_iter_init(&msg_iter, msg);
+	g_variant_iter_loop(&msg_iter, "(i&s)", &error_code, &repr_json);
+	/* TODO : How to use error_code. */
+
+	icd_ioty_csdk_lock();
+	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
+	ret = OCNotifyListOfObservers(handle, obs_ids, obs_length, repr_json, OC_HIGH_QOS);
+	icd_ioty_csdk_unlock();
+
+	if (OC_STACK_NO_OBSERVERS == ret) {
+		WARN("No Observers. Stop Notifying");
+		return IOTCON_ERROR_NONE;
+	} else if (OC_STACK_OK != ret) {
+		ERR("OCNotifyListOfObservers() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	return IOTCON_ERROR_NONE;
 }
 
 
-int icd_ioty_notify_all(int resHandle)
+int icd_ioty_notify_all(void *handle)
 {
-	// TODO : To be implemented
+	OCStackResult ret;
+
+	icd_ioty_csdk_lock();
+	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
+	ret = OCNotifyAllObservers(handle, OC_HIGH_QOS);
+	icd_ioty_csdk_unlock();
+
+	if (OC_STACK_NO_OBSERVERS == ret) {
+		WARN("No Observers. Stop Notifying");
+		return IOTCON_ERROR_NONE;
+	} else if (OC_STACK_OK != ret) {
+		ERR("OCNotifyAllObservers() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+static int _ioty_get_header_options(GVariantIter *src, int src_size,
+		OCHeaderOption dest[], int dest_size)
+{
+	int i = 0;
+	char *option_data;
+	unsigned short option_id;
+
+	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (dest_size < src_size) {
+		ERR("Exceed Size(%d)", src_size);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	while (g_variant_iter_loop(src, "(q&s)", &option_id, &option_data)) {
+		dest[i].protocolID = OC_COAP_ID;
+		dest[i].optionID = option_id;
+		dest[i].optionLength = strlen(option_data) + 1;
+		memcpy(dest[i].optionData, option_data, dest[i].optionLength);
+		i++;
+	}
+
 	return IOTCON_ERROR_NONE;
 }
 
 
 int icd_ioty_send_response(GVariant *resp)
 {
-	// TODO : To be implemented
+	int result, error_code, options_size;
+	int request_handle, resource_handle;
+	char *new_uri_path, *repr_json;
+	GVariantIter *options;
+	OCStackResult ret;
+	OCEntityHandlerResponse response = {0};
+
+	g_variant_get(resp, "(&sia(qs)i&sii)",
+			&new_uri_path,
+			&error_code,
+			&options,
+			&result,
+			&repr_json,
+			&request_handle,
+			&resource_handle);
+
+	response.requestHandle = GINT_TO_POINTER(request_handle);
+	response.resourceHandle = GINT_TO_POINTER(resource_handle);
+	response.ehResult = (OCEntityHandlerResult)result;
+
+	if (OC_EH_RESOURCE_CREATED == response.ehResult)
+		snprintf(response.resourceUri, sizeof(response.resourceUri), "%s", new_uri_path);
+
+	options_size = g_variant_iter_n_children(options);
+	response.numSendVendorSpecificHeaderOptions = options_size;
+
+	if (0 != options_size) {
+		int ret= _ioty_get_header_options(options,
+				response.numSendVendorSpecificHeaderOptions,
+				response.sendVendorSpecificHeaderOptions,
+				sizeof(response.sendVendorSpecificHeaderOptions)
+				/ sizeof(response.sendVendorSpecificHeaderOptions[0]));
+
+		if (IOTCON_ERROR_NONE != ret)
+			ERR("_ioty_get_header_options() Fail(%d)", ret);
+	}
+	g_variant_iter_free(options);
+
+	response.payload = repr_json;
+	response.payloadSize = strlen(response.payload) + 1;
+
+	/* related to block transfer */
+	response.persistentBufferFlag = 0;
+
+	icd_ioty_csdk_lock();
+	ret = OCDoResponse(&response);
+	icd_ioty_csdk_unlock();
+
+	if (OC_STACK_OK != ret) {
+		ERR("OCDoResponse() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	return IOTCON_ERROR_NONE;
 }
 
 
-void _ioty_free_signal_context(void *data)
+static void _ioty_free_signal_context(void *data)
 {
 	icd_sig_ctx_s *context = data;
 	free(context->sender);
@@ -299,30 +451,6 @@ int icd_ioty_find_resource(const char *host_address, const char *resource_type,
 }
 
 
-static int _ioty_get_header_options(GVariantIter *src, int src_size,
-		OCHeaderOption dest[], int dest_size)
-{
-	gsize len;
-	char *option_data;
-	unsigned short option_id;
-
-	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
-
-	if (dest_size < src_size) {
-		ERR("Exceed Size(%d)", src_size);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-
-	while (g_variant_iter_loop(src, "(q&s)", &option_id, &option_data)) {
-		dest[i].protocolID = OC_COAP_ID;
-		dest[i].optionID = option_id;
-		dest[i].optionLength = strlen(option_data)+1;
-		memcpy(dest[i].optionData, option_data, dest[i].optionLength);
-	}
-
-	return IOTCON_ERROR_NONE;
-}
-
 /*
  * returned string SHOULD be released by you
  */
@@ -335,10 +463,6 @@ static char* _icd_ioty_resource_generate_uri(char *host, char *uri_path, GVarian
 	char uri_buf[PATH_MAX] = {0};
 
 	len = snprintf(uri_buf, sizeof(uri_buf), "%s%s", host, uri_path);
-	if (len < 0) {
-		ERR("snprintf() Fail");
-		return NULL;
-	}
 
 	/* remove suffix '/' */
 	if ('/' == uri_buf[strlen(uri_buf) - 1]) {
@@ -358,12 +482,6 @@ static char* _icd_ioty_resource_generate_uri(char *host, char *uri_path, GVarian
 			loop_first = false;
 		} else {
 			query_len = snprintf(uri_buf + len, sizeof(uri_buf), "&%s=%s", key, value);
-		}
-
-		if (0 > query_len) {
-			ERR("snprintf() Fail");
-			g_variant_iter_free(queryIter);
-			return NULL;
 		}
 
 		len += query_len;

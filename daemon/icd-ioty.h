@@ -52,9 +52,9 @@ int icd_ioty_bind_resource(void *parent, void *child);
 
 int icd_ioty_unbind_resource(void *parent, void *child);
 
-int icd_ioty_notify_list_of_observers(int resHandle, GVariant *msg, GVariant *observers);
+int icd_ioty_notify_list_of_observers(void *handle, GVariant *msg, GVariant *observers);
 
-int icd_ioty_notify_all(int resHandle);
+int icd_ioty_notify_all(void *handle);
 
 int icd_ioty_send_response(GVariant *resp);
 

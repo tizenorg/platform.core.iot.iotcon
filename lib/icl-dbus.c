@@ -125,30 +125,26 @@ static void _icl_dbus_request_handler(GDBusConnection *connection,
 {
 	FN_CALL;
 
-	int index = 0;
 	GVariantIter *options;
 	unsigned short option_id;
 	char *option_data;
 	GVariantIter *query;
 	char *key = NULL;
 	char *value = NULL;
-	GVariantIter *repr;
 	char *repr_json;
-	char *repr_uri_path;
 	int request_handle;
 	int resource_handle;
 	struct icl_resource_request request = {0};
 	icl_cb_container_s *cb_container = user_data;
 	iotcon_request_handler_cb cb = cb_container->cb;
 
-	g_variant_get(parameters, "(i&sa(qs)a(ss)iiasii)",
+	g_variant_get(parameters, "(ia(qs)a(ss)ii&sii)",
 			&request.types,
-			&request.uri_path,
 			&options,
 			&query,
 			&request.observation_info.action,
 			&request.observation_info.observer_id,
-			&repr,
+			&repr_json,
 			&request_handle,
 			&resource_handle);
 
@@ -169,27 +165,16 @@ static void _icl_dbus_request_handler(GDBusConnection *connection,
 	request.request_handle = GINT_TO_POINTER(request_handle);
 	request.resource_handle = GINT_TO_POINTER(resource_handle);
 
-	for (index = 0; g_variant_iter_loop(repr, "&s", &repr_json); index++) {
-		iotcon_repr_h cur_repr = icl_repr_parse_json(repr_json);
-		if (NULL == cur_repr) {
-			ERR("icl_repr_parse_json() Fail");
-			iotcon_options_free(request.header_options);
-			iotcon_query_free(request.query);
-			if (request.repr)
-				iotcon_repr_free(request.repr);
-			g_variant_iter_free(repr);
+	if (ic_utils_dbus_decode_str(repr_json)) {
+		request.repr = icl_repr_create_repr(repr_json);
+		if (NULL == request.repr) {
+			ERR("icl_repr_create_repr() Fail");
 			return;
 		}
-		repr_uri_path = icl_repr_json_get_uri_path(repr_json);
-		iotcon_repr_set_uri_path(cur_repr, repr_uri_path);
-		free(repr_uri_path);
-
-		if (0 == index)
-			request.repr = cur_repr;
-		else
-			request.repr->children = g_list_append(request.repr->children, cur_repr);
 	}
-	g_variant_iter_free(repr);
+
+	/* TODO remove request.uri */
+	request.uri_path = "temp_uri_path";
 
 	if (cb)
 		cb(&request, cb_container->user_data);

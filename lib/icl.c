@@ -307,7 +307,7 @@ API int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 
 
 /* The content of the resource should not be freed by user. */
-API int iotcon_resource_get_uri(iotcon_resource_h resource, char **uri_path)
+API int iotcon_resource_get_uri_path(iotcon_resource_h resource, char **uri_path)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);

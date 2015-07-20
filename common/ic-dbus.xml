@@ -34,7 +34,7 @@
 		</method>
 		<method name="notifyListOfObservers">
 			<arg type="i" name="resource" direction="in"/>
-			<arg type="a(iis)" name="notify_msg" direction="in"/>
+			<arg type="a(is)" name="notify_msg" direction="in"/>
 			<arg type="ai" name="observers" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
@@ -43,7 +43,7 @@
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="sendResponse">
-			<arg type="(sia(qs)iisii)" name="response" direction="in"/>
+			<arg type="(sia(qs)isii)" name="response" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="findResource">

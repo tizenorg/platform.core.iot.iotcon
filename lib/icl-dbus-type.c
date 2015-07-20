@@ -57,18 +57,19 @@ GVariant* icl_dbus_notimsg_to_gvariant(struct icl_notify_msg *msg)
 	GVariant *value;
 	GVariantBuilder *builder;
 
-	builder = g_variant_builder_new(G_VARIANT_TYPE("a(iis)"));
+	builder = g_variant_builder_new(G_VARIANT_TYPE("a(is)"));
 
 	if (msg) {
+		/* TODO Make repr_json using interface */
 		repr_json = icl_repr_generate_json(msg->repr, false);
 		if (NULL == repr_json) {
 			ERR("icl_repr_generate_json() Fail");
 			g_variant_builder_unref(builder);
 			return NULL;
 		}
-		g_variant_builder_add(builder, "(iis)", msg->error_code, msg->iface, repr_json);
+		g_variant_builder_add(builder, "(is)", msg->error_code, repr_json);
 	}
-	value = g_variant_new("a(iis)", builder);
+	value = g_variant_new("a(is)", builder);
 
 	free(repr_json);
 	g_variant_builder_unref(builder);
@@ -79,6 +80,7 @@ GVariant* icl_dbus_notimsg_to_gvariant(struct icl_notify_msg *msg)
 
 GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 {
+	char *repr_json;
 	GHashTableIter iter;
 	GVariantBuilder *options;
 	gpointer option_id, option_data;
@@ -92,13 +94,20 @@ GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 			g_variant_builder_add(options, "(qs)", GPOINTER_TO_INT(option_id), option_data);
 	}
 
-	value = g_variant_new("(sia(qs)iisii)",
+	/* TODO Make repr_json using interface */
+	repr_json = icl_repr_generate_json(response->repr, false);
+	if (NULL == repr_json) {
+		ERR("icl_repr_generate_json() Fail");
+		g_variant_builder_unref(options);
+		return NULL;
+	}
+
+	value = g_variant_new("(sia(qs)isii)",
 			ic_utils_dbus_encode_str(response->new_uri_path),
 			response->error_code,
 			options,
-			response->iface,
 			response->result,
-			icl_repr_generate_json(response->repr, false),
+			repr_json,
 			GPOINTER_TO_INT(response->request_handle),
 			GPOINTER_TO_INT(response->resource_handle));
 

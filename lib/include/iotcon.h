@@ -38,7 +38,7 @@ void iotcon_deinitialize();
  * Even if iotcon is disconnected, it is allowed to derive elements from handles.
  * On the other hand, using the functions related to connection are not allowed.
  * For example, when iotcon is disconnected, it is possible to use
- * "iotcon_resource_get_uri()", but it is impossible to use "iotcon_notify_all()".
+ * "iotcon_resource_get_uri_path()", but it is impossible to use "iotcon_notify_all()".
  * Thus, if you want to use functions related to connection, above all, you should free
  * handles, and you should make new handles.
  * In case of "iotcon_client_h", if the information of the resource owner are unchanged

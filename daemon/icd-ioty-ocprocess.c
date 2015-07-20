@@ -46,6 +46,20 @@ enum _icd_secure_type
 };
 
 
+struct icd_req_context {
+	unsigned int signum;
+	char *sender;
+	char *payload;
+	int types;
+	int observer_id;
+	int observe_action;
+	OCRequestHandle request_h;
+	OCResourceHandle resource_h;
+	GVariantBuilder *options;
+	GVariantBuilder *query;
+};
+
+
 struct icd_find_context {
 	unsigned int signum;
 	char *sender;
@@ -62,6 +76,7 @@ struct icd_get_context {
 	char *payload;
 	GVariantBuilder *options;
 };
+
 
 void icd_ioty_ocprocess_stop()
 {
@@ -125,12 +140,175 @@ static int _ocprocess_worker_start(_ocprocess_fn fn, void *ctx)
 }
 
 
-OCEntityHandlerResult EntityHandlerWrapper(OCEntityHandlerFlag flag,
-		OCEntityHandlerRequest *entityHandlerRequest)
+static int _ocprocess_response_signal(const char *dest, const char *signal,
+		unsigned int signum, GVariant *value)
 {
-	FN_CALL;
+	int ret;
+	char sig_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
-	DBG("reqJSONPayload : %s", entityHandlerRequest->reqJSONPayload);
+	ret = snprintf(sig_name, sizeof(sig_name), "%s_%u", signal, signum);
+	if (ret <= 0 || sizeof(sig_name) <= ret) {
+		ERR("snprintf() Fail(%d)", ret);
+		return IOTCON_ERROR_UNKNOWN;
+	}
+
+	ret = icd_dbus_emit_signal(dest, sig_name, value);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_dbus_emit_signal() Fail(%d)", ret);
+		return ret;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+static inline GVariantBuilder* _ocprocess_parse_header_options(
+		OCHeaderOption *oic_option, int option_size)
+{
+	int i;
+	GVariantBuilder *options;
+
+	options = g_variant_builder_new(G_VARIANT_TYPE("a(qs)"));
+	for (i = 0; i < option_size; i++) {
+		g_variant_builder_add(options, "(qs)", oic_option[i].optionID,
+				oic_option[i].optionData);
+	}
+
+	return options;
+}
+
+
+static int _worker_req_handler(void *context)
+{
+	int ret;
+	GVariant *value;
+	struct icd_req_context *ctx = context;
+
+	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
+
+	value = g_variant_new("(ia(qs)a(ss)iisii)",
+			ctx->types,
+			ctx->options,
+			ctx->query,
+			ctx->observe_action,
+			ctx->observer_id,
+			ctx->payload,
+			GPOINTER_TO_INT(ctx->request_h),
+			GPOINTER_TO_INT(ctx->resource_h));
+
+	ret = _ocprocess_response_signal(ctx->sender, IC_DBUS_SIGNAL_REQUEST_HANDLER,
+			ctx->signum, value);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("_ocprocess_response_signal() Fail(%d)", ret);
+
+	free(ctx->sender);
+	free(ctx->payload);
+	g_variant_builder_unref(ctx->options);
+	g_variant_builder_unref(ctx->query);
+	free(ctx);
+
+	return ret;
+}
+
+
+OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
+		OCEntityHandlerRequest *request)
+{
+	int ret;
+	unsigned int signal_number;
+	char *query_str, *query_key, *query_value;
+	char *token, *save_ptr1, *save_ptr2;
+	char *sender = NULL;
+	struct icd_req_context *req_ctx;
+
+	RETV_IF(NULL == request, OC_EH_ERROR);
+
+	req_ctx = calloc(1, sizeof(struct icd_req_context));
+	if (NULL == req_ctx) {
+		ERR("calloc() Fail(%d)", errno);
+		return OC_EH_ERROR;
+	}
+
+	/* handle */
+	req_ctx->request_h = request->requestHandle;
+	req_ctx->resource_h = request->resource;
+
+	ret = icd_dbus_bus_list_get_info(req_ctx->resource_h, &signal_number, &sender);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_dbus_bus_list_get_info() Fail(%d)", ret);
+		free(req_ctx);
+		return OC_EH_ERROR;
+	}
+
+	/* signal number & sender */
+	req_ctx->signum = signal_number;
+	req_ctx->sender = sender;
+
+	/* request type */
+	if (OC_REQUEST_FLAG & flag) {
+		switch (request->method) {
+		case OC_REST_GET:
+			req_ctx->types = IOTCON_REQUEST_GET;
+			req_ctx->payload = strdup(IC_STR_NULL);
+
+			if (OC_OBSERVE_FLAG & flag) {
+				req_ctx->types |= IOTCON_REQUEST_OBSERVE;
+				/* observation info*/
+				req_ctx->observer_id = request->obsInfo.obsId;
+				req_ctx->observe_action = request->obsInfo.action;
+			}
+			break;
+		case OC_REST_PUT:
+			req_ctx->types = IOTCON_REQUEST_PUT;
+			req_ctx->payload = ic_utils_strdup(request->reqJSONPayload);
+			break;
+		case OC_REST_POST:
+			req_ctx->types = IOTCON_REQUEST_POST;
+			req_ctx->payload = ic_utils_strdup(request->reqJSONPayload);
+			break;
+		case OC_REST_DELETE:
+			req_ctx->types = IOTCON_REQUEST_DELETE;
+			req_ctx->payload = strdup(IC_STR_NULL);
+			break;
+		default:
+			free(req_ctx->sender);
+			free(req_ctx);
+			return OC_EH_ERROR;
+		}
+	}
+
+	/* header options */
+	req_ctx->options = _ocprocess_parse_header_options(
+			request->rcvdVendorSpecificHeaderOptions,
+			request->numRcvdVendorSpecificHeaderOptions);
+
+	/* query */
+	req_ctx->query = g_variant_builder_new(G_VARIANT_TYPE("a(ss)"));
+	query_str = request->query;
+	while ((token = strtok_r(query_str, "&", &save_ptr1))) {
+		while ((query_key = strtok_r(token, "=", &save_ptr2))) {
+			token = NULL;
+			query_value = strtok_r(token, "=", &save_ptr2);
+			if (NULL == query_value)
+				break;
+
+			g_variant_builder_add(req_ctx->query, "(ss)", query_key, query_value);
+		}
+		query_str = NULL;
+	}
+
+	ret = _ocprocess_worker_start(_worker_req_handler, req_ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker_start() Fail(%d)", ret);
+		free(req_ctx->sender);
+		free(req_ctx->payload);
+		g_variant_builder_unref(req_ctx->options);
+		g_variant_builder_unref(req_ctx->query);
+		free(req_ctx);
+		return OC_EH_ERROR;
+	}
+
+	/* DO NOT FREE req_ctx. It MUST be freed in the _worker_req_handler func */
 
 	return OC_EH_OK;
 }
@@ -156,28 +334,6 @@ gpointer icd_ioty_ocprocess_thread(gpointer data)
 	}
 
 	return NULL;
-}
-
-
-static int _ocprocess_response_signal(const char *dest, const char *signal,
-		unsigned int signum, GVariant *value)
-{
-	int ret;
-	char sig_name[IC_DBUS_SIGNAL_LENGTH] = {0};
-
-	ret = snprintf(sig_name, sizeof(sig_name), "%s_%u", signal, signum);
-	if (ret <= 0 || sizeof(sig_name) <= ret) {
-		ERR("snprintf() Fail(%d)", ret);
-		return IOTCON_ERROR_UNKNOWN;
-	}
-
-	ret = icd_dbus_emit_signal(dest, sig_name, value);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_dbus_emit_signal() Fail(%d)", ret);
-		return ret;
-	}
-
-	return IOTCON_ERROR_NONE;
 }
 
 
@@ -280,7 +436,7 @@ static inline int _find_cb_response(JsonObject *rsrc_obj,
 	ret = _ocprocess_response_signal(ctx->sender, IC_DBUS_SIGNAL_FOUND_RESOURCE,
 			ctx->signum, value);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_dbus_emit_signal() Fail(%d)", ret);
+		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -363,7 +519,7 @@ static int _worker_find_cb(void *context)
 
 
 OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle,
-		OCClientResponse *clientResponse)
+		OCClientResponse *resp)
 {
 	int ret;
 	OCDevAddr *dev_addr;
@@ -371,10 +527,8 @@ OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 	icd_sig_ctx_s *sig_context = ctx;
 
 	RETV_IF(NULL == ctx, OC_STACK_KEEP_TRANSACTION);
-	RETV_IF(NULL == clientResponse, OC_STACK_KEEP_TRANSACTION);
-	RETV_IF(NULL == clientResponse->resJSONPayload, OC_STACK_KEEP_TRANSACTION);
-
-	DBG("JSON Payload : %s", clientResponse->resJSONPayload);
+	RETV_IF(NULL == resp, OC_STACK_KEEP_TRANSACTION);
+	RETV_IF(NULL == resp->resJSONPayload, OC_STACK_KEEP_TRANSACTION);
 
 	find_ctx = calloc(1, sizeof(struct icd_find_context));
 	if (NULL == find_ctx) {
@@ -388,13 +542,13 @@ OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 		free(find_ctx);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
-	memcpy(dev_addr, clientResponse->addr, sizeof(OCDevAddr));
+	memcpy(dev_addr, resp->addr, sizeof(OCDevAddr));
 
 	find_ctx->signum = sig_context->signum;
 	find_ctx->sender = ic_utils_strdup(sig_context->sender);
-	find_ctx->payload = ic_utils_strdup(clientResponse->resJSONPayload);
+	find_ctx->payload = ic_utils_strdup(resp->resJSONPayload);
 	find_ctx->dev_addr = dev_addr;
-	find_ctx->conn_type = clientResponse->connType;
+	find_ctx->conn_type = resp->connType;
 
 	ret = _ocprocess_worker_start(_worker_find_cb, find_ctx);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -450,27 +604,6 @@ static void _get_cb_response_error(const char *dest, unsigned int signum, int re
 }
 
 
-static inline GVariantBuilder* _ocprocess_parse_header_options(OCClientResponse *resp)
-{
-	int i;
-	GVariantBuilder *options;
-
-	RETV_IF(NULL == resp, NULL);
-
-	if (0 == resp->numRcvdVendorSpecificHeaderOptions)
-		return NULL;
-
-	options = g_variant_builder_new(G_VARIANT_TYPE("a(qs)"));
-	for (i = 0; i < resp->numRcvdVendorSpecificHeaderOptions; i++) {
-		g_variant_builder_add(options, "(qs)",
-				resp->rcvdVendorSpecificHeaderOptions[i].optionID,
-				resp->rcvdVendorSpecificHeaderOptions[i].optionData);
-	}
-
-	return options;
-}
-
-
 OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 		OCClientResponse *resp)
 {
@@ -501,7 +634,8 @@ OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 	result = resp->result;
 	if (result == OC_STACK_OK) {
 		res = IOTCON_RESPONSE_RESULT_OK;
-		options = _ocprocess_parse_header_options(resp);
+		options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
+				resp->numRcvdVendorSpecificHeaderOptions);
 	} else {
 		WARN("resp error(%d)", result);
 		res = IOTCON_RESPONSE_RESULT_ERROR;
