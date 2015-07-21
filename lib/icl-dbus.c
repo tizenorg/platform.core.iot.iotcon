@@ -286,4 +286,3 @@ void icl_dbus_stop()
 	icl_dbus_object = NULL;
 	_icl_dbus_unref();
 }
-

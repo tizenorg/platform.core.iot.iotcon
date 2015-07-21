@@ -47,7 +47,6 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 {
 	FN_CALL;
 	int conn_type;
-	JsonParser *parser;
 	iotcon_client_h client;
 	char *payload, *host;
 	icl_found_resource_s *cb_container = user_data;
@@ -58,12 +57,9 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 	RET_IF(NULL == payload);
 	RET_IF(NULL == host);
 
-	parser = json_parser_new();
-
-	client = icl_client_parse_resource_object(parser, payload, host, conn_type);
+	client = icl_client_parse_resource_object(payload, host, conn_type);
 	if (NULL == client) {
 		ERR("icl_client_parse_resource_object() Fail");
-		g_object_unref(parser);
 		return;
 	}
 
@@ -71,8 +67,6 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 		cb(client, cb_container->user_data);
 
 	iotcon_client_free(client);
-
-	g_object_unref(parser);
 
 	/* TODO
 	 * When is callback removed?
@@ -291,10 +285,11 @@ API int iotcon_client_set_options(iotcon_client_h resource,
 }
 
 
-iotcon_client_h icl_client_parse_resource_object(JsonParser *parser, char *json_string,
-		const char *host, iotcon_connectivity_type_e conn_type)
+iotcon_client_h icl_client_parse_resource_object(const char *json_string, const char *host,
+		iotcon_connectivity_type_e conn_type)
 {
 	FN_CALL;
+	JsonParser *parser;
 	int ret, observable;
 	GError *error = NULL;
 	iotcon_client_h client;
@@ -305,28 +300,44 @@ iotcon_client_h icl_client_parse_resource_object(JsonParser *parser, char *json_
 
 	DBG("input str : %s", json_string);
 
+	parser = json_parser_new();
 	ret = json_parser_load_from_data(parser, json_string, strlen(json_string), &error);
 	if (FALSE == ret) {
 		ERR("json_parser_load_from_data() Fail(%s)", error->message);
 		g_error_free(error);
+		g_object_unref(parser);
 		return NULL;
 	}
 
 	rsrc_obj = json_node_get_object(json_parser_get_root(parser));
+	if (NULL == rsrc_obj) {
+		ERR("json_node_get_object() Fail");
+		g_object_unref(parser);
+		return NULL;
+	}
 
 	uri_path = json_object_get_string_member(rsrc_obj, IC_JSON_KEY_URI_PATH);
+	if (NULL == uri_path) {
+		ERR("Invalid uri path");
+		g_object_unref(parser);
+		return NULL;
+	}
+
 	server_id = json_object_get_string_member(rsrc_obj, IC_JSON_KEY_SERVERID);
 	if (NULL == server_id) {
 		ERR("Invalid Server ID");
+		g_object_unref(parser);
 		return NULL;
 	}
 
 	/* parse resources type and interfaces */
 	property_obj = json_object_get_object_member(rsrc_obj, IC_JSON_KEY_PROPERTY);
 	if (property_obj) {
-		ret = icl_repr_parse_resource_property(property_obj, &res_types, &ifaces);
+		ret = icl_repr_parse_resource_property(property_obj, &res_types, &ifaces,
+				&observable);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_repr_parse_resource_property() Fail(%d)", ret);
+			g_object_unref(parser);
 			return NULL;
 		}
 	}
@@ -340,6 +351,7 @@ iotcon_client_h icl_client_parse_resource_object(JsonParser *parser, char *json_
 
 	if (NULL == client) {
 		ERR("iotcon_client_new() Fail");
+		g_object_unref(parser);
 		return NULL;
 	}
 	client->ref_count = 1;
@@ -348,9 +360,12 @@ iotcon_client_h icl_client_parse_resource_object(JsonParser *parser, char *json_
 	if (NULL == client->sid) {
 		ERR("strdup(sid) Fail(%d)", errno);
 		iotcon_client_free(client);
+		g_object_unref(parser);
 		return NULL;
 	}
 	client->conn_type = conn_type;
+
+	g_object_unref(parser);
 
 	return client;
 }

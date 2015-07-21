@@ -222,7 +222,7 @@ API int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr,
 	cb_container->cb = cb;
 	cb_container->user_data = user_data;
 
-	arg_repr = icl_repr_generate_json(repr, FALSE);
+	arg_repr = icl_repr_generate_json(repr, false, true);
 	if (NULL == arg_repr) {
 		ERR("icl_repr_generate_json() Fail");
 		iotcon_client_free(cb_container->resource);
@@ -271,7 +271,7 @@ API int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr,
 	cb_container->cb = cb;
 	cb_container->user_data = user_data;
 
-	arg_repr = icl_repr_generate_json(repr, FALSE);
+	arg_repr = icl_repr_generate_json(repr, false, true);
 	if (NULL == arg_repr) {
 		ERR("icl_repr_generate_json() Fail");
 		iotcon_client_free(cb_container->resource);

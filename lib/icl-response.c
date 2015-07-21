@@ -127,6 +127,51 @@ API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e p
 }
 
 
+static bool _icl_response_repr_child_fn(iotcon_repr_h child, void *user_data)
+{
+	int iface = GPOINTER_TO_INT(user_data);
+
+	if (IOTCON_INTERFACE_DEFAULT == iface)
+		child->visibility = ICL_VISIBILITY_PROP;
+	else if (IOTCON_INTERFACE_LINK == iface)
+		child->visibility = ICL_VISIBILITY_PROP;
+	else if (IOTCON_INTERFACE_BATCH == iface)
+		child->visibility = ICL_VISIBILITY_REPR;
+	else
+		child->visibility = ICL_VISIBILITY_PROP;
+
+	return IOTCON_FUNC_CONTINUE;
+}
+
+
+static int _icl_response_check_repr_visibility(iotcon_response_h resp)
+{
+	int ret;
+
+	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resp->repr, IOTCON_ERROR_INVALID_PARAMETER);
+
+	iotcon_repr_h first = resp->repr;
+
+	DBG("interface type of response : %d", resp->iface);
+	if (IOTCON_INTERFACE_NONE == resp->iface)
+		first->visibility = ICL_VISIBILITY_REPR;
+	else if (IOTCON_INTERFACE_DEFAULT == resp->iface)
+		first->visibility = ICL_VISIBILITY_REPR;
+	else
+		first->visibility = ICL_VISIBILITY_NONE;
+
+	ret = iotcon_repr_foreach_children(first, _icl_response_repr_child_fn,
+			GINT_TO_POINTER(resp->iface));
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_repr_foreach_children() Fail(%d)", ret);
+		return ret;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+
 API int iotcon_response_send(iotcon_response_h resp)
 {
 	FN_CALL;
@@ -137,6 +182,12 @@ API int iotcon_response_send(iotcon_response_h resp)
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resp->repr, IOTCON_ERROR_INVALID_PARAMETER);
+
+	ret = _icl_response_check_repr_visibility(resp);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_icl_response_check_repr_visibility() Fail(%d)", ret);
+		return ret;
+	}
 
 	arg_response = icl_dbus_response_to_gvariant(resp);
 	ic_dbus_call_send_response_sync(icl_dbus_get_object(), arg_response, &ret, NULL,
@@ -155,4 +206,3 @@ API int iotcon_response_send(iotcon_response_h resp)
 
 	return IOTCON_ERROR_NONE;
 }
-

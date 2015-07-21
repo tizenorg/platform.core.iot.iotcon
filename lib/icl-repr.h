@@ -26,6 +26,7 @@ struct icl_repr_s {
 	char *uri_path;
 	int ref_count;
 	int interfaces;
+	int visibility;
 	GHashTable *hash_table;
 	GList *children;
 	iotcon_resource_types_h res_types;
@@ -42,7 +43,7 @@ struct icl_repr_s {
  *
  * @return Generated JSON string, otherwise a null pointer if a parse error
  */
-char* icl_repr_generate_json(iotcon_repr_h repr, bool set_pretty);
+char* icl_repr_generate_json(iotcon_repr_h repr, bool set_pretty, bool include_oc_key);
 
 char* icl_repr_json_get_uri_path(const char *json_string);
 
@@ -51,7 +52,7 @@ iotcon_repr_h icl_repr_parse_json(const char *json_string);
 
 void icl_repr_inc_ref_count(iotcon_repr_h val);
 
-int icl_repr_parse_resource_property(JsonObject *prop_obj,
-		iotcon_resource_types_h *types, int *ifaces);
+int icl_repr_parse_resource_property(JsonObject *prop_obj, iotcon_resource_types_h *types,
+		int *ifaces, int *obs);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__ */

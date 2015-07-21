@@ -59,8 +59,7 @@ GVariant* icl_dbus_notimsg_to_gvariant(struct icl_notify_msg *msg)
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("a(is)"));
 
 	if (msg) {
-		/* TODO Make repr_json using interface */
-		repr_json = icl_repr_generate_json(msg->repr, false);
+		repr_json = icl_repr_generate_json(msg->repr, false, true);
 		if (NULL == repr_json) {
 			ERR("icl_repr_generate_json() Fail");
 			g_variant_builder_clear(&builder);
@@ -93,7 +92,7 @@ GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 	}
 
 	/* TODO Make repr_json using interface */
-	repr_json = icl_repr_generate_json(response->repr, false);
+	repr_json = icl_repr_generate_json(response->repr, false, false);
 	if (NULL == repr_json) {
 		ERR("icl_repr_generate_json() Fail");
 		g_variant_builder_clear(&options);

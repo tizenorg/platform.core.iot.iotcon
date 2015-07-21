@@ -35,7 +35,7 @@ struct icl_remote_resource {
 	unsigned int observe_sub_id;
 };
 
-iotcon_client_h icl_client_parse_resource_object(JsonParser *parser, char *json_string,
+iotcon_client_h icl_client_parse_resource_object(const char *json_string,
 		const char *host, iotcon_connectivity_type_e conn_type);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__ */

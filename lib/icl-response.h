@@ -20,6 +20,14 @@
 #include "iotcon-constant.h"
 #include "icl-request.h"
 
+
+typedef enum {
+	ICL_VISIBILITY_NONE = 0,
+	ICL_VISIBILITY_REPR,
+	ICL_VISIBILITY_PROP,
+} icl_visibility_e;
+
+
 struct icl_resource_response {
 	char *new_uri_path;
 	int error_code;

@@ -488,6 +488,7 @@ void icd_ioty_get_complete_error(GDBusMethodInvocation *invocation, int ret_val)
 gboolean icd_ioty_get(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource, GVariant *query)
 {
+	FN_CALL;
 	OCStackResult result;
 	GVariantIter *options;
 	OCCallbackData cbdata = {0};

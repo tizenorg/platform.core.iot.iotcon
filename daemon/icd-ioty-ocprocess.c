@@ -213,6 +213,7 @@ static int _worker_req_handler(void *context)
 OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 		OCEntityHandlerRequest *request)
 {
+	FN_CALL;
 	int ret;
 	unsigned int signal_number;
 	char *query_str, *query_key, *query_value;
@@ -480,7 +481,11 @@ static inline int _find_cb_handle_context(struct icd_find_context *ctx)
 	}
 
 	for (rsrc_index = 0; rsrc_index < rsrc_count; rsrc_index++) {
-		JsonObject *rsrc_obj = json_array_get_object_element(rsrc_array, rsrc_index);
+		JsonObject *rsrc_obj;
+
+		rsrc_obj = json_array_get_object_element(rsrc_array, rsrc_index);
+		if (0 == json_object_get_size(rsrc_obj)) /* for the case of empty "{}" */
+			continue;
 
 		ret = _find_cb_response(rsrc_obj, ctx);
 		if (IOTCON_ERROR_NONE != ret) {
@@ -568,7 +573,6 @@ OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 
 static int _worker_get_cb(void *context)
 {
-	int ret;
 	GVariant *value;
 	struct icd_get_context *ctx = context;
 
@@ -582,7 +586,7 @@ static int _worker_get_cb(void *context)
 	g_variant_builder_unref(ctx->options);
 	free(ctx);
 
-	return ret;
+	return IOTCON_ERROR_NONE;
 }
 
 
