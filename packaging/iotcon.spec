@@ -15,6 +15,10 @@ BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(json-glib-1.0)
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(capi-base-common)
+%if "%{tizen}" == "2.3"
+BuildRequires:  python-xml
+%endif
+
 %define _unitdir /usr/lib/systemd/system
 
 %description
@@ -67,6 +71,13 @@ mkdir -p %{buildroot}%{_unitdir}/multi-user.target.wants
 cp -af %{SOURCE1} %{buildroot}%{_unitdir}/
 ln -s ../%{name}.service %{buildroot}%{_unitdir}/multi-user.target.wants/%{name}.service
 
+%if 0%{?tizen_version_major} < 3
+mkdir -p %{buildroot}/%{_datadir}/license
+cp LICENSE.APLv2 %{buildroot}/%{_datadir}/license/%{name}
+cp LICENSE.APLv2 %{buildroot}/%{_datadir}/license/%{name}-lib
+%endif
+
+
 %post
 systemctl daemon-reload
 if [ $1 == 1 ]; then
@@ -92,13 +103,21 @@ systemctl daemon-reload
 %{_unitdir}/multi-user.target.wants/%{name}.service
 %{_bindir}/%{name}-daemon
 %{_datadir}/dbus-1/services/org.tizen.%{name}.dbus.service
+%if 0%{?tizen_version_major} < 3
+%{_datadir}/license/%{name}
+%else
 %license LICENSE.APLv2
+%endif
 
 %files lib
 %manifest lib%{name}.manifest
 %defattr(-,root,root,-)
 %{_libdir}/lib%{name}.so.*
+%if 0%{?tizen_version_major} < 3
+%{_datadir}/license/%{name}-lib
+%else
 %license LICENSE.APLv2
+%endif
 
 %files devel
 %defattr(-,root,root,-)
