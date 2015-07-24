@@ -48,7 +48,7 @@ enum _icd_secure_type
 
 struct icd_req_context {
 	unsigned int signum;
-	char *sender;
+	char *bus_name;
 	char *payload;
 	int types;
 	int observer_id;
@@ -62,7 +62,7 @@ struct icd_req_context {
 
 struct icd_find_context {
 	unsigned int signum;
-	char *sender;
+	char *bus_name;
 	char *payload;
 	OCDevAddr *dev_addr;
 	int conn_type;
@@ -70,11 +70,10 @@ struct icd_find_context {
 
 
 struct icd_get_context {
-	unsigned int signum;
 	int res;
-	char *sender;
 	char *payload;
 	GVariantBuilder *options;
+	GDBusMethodInvocation *invocation;
 };
 
 
@@ -196,12 +195,12 @@ static int _worker_req_handler(void *context)
 			GPOINTER_TO_INT(ctx->request_h),
 			GPOINTER_TO_INT(ctx->resource_h));
 
-	ret = _ocprocess_response_signal(ctx->sender, IC_DBUS_SIGNAL_REQUEST_HANDLER,
+	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_REQUEST_HANDLER,
 			ctx->signum, value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 
-	free(ctx->sender);
+	free(ctx->bus_name);
 	free(ctx->payload);
 	g_variant_builder_unref(ctx->options);
 	g_variant_builder_unref(ctx->query);
@@ -218,7 +217,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 	unsigned int signal_number;
 	char *query_str, *query_key, *query_value;
 	char *token, *save_ptr1, *save_ptr2;
-	char *sender = NULL;
+	char *bus_name = NULL;
 	struct icd_req_context *req_ctx;
 
 	RETV_IF(NULL == request, OC_EH_ERROR);
@@ -233,16 +232,16 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 	req_ctx->request_h = request->requestHandle;
 	req_ctx->resource_h = request->resource;
 
-	ret = icd_dbus_bus_list_get_info(req_ctx->resource_h, &signal_number, &sender);
+	ret = icd_dbus_client_list_get_info(req_ctx->resource_h, &signal_number, &bus_name);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_dbus_bus_list_get_info() Fail(%d)", ret);
+		ERR("icd_dbus_client_list_get_info() Fail(%d)", ret);
 		free(req_ctx);
 		return OC_EH_ERROR;
 	}
 
-	/* signal number & sender */
+	/* signal number & bus_name */
 	req_ctx->signum = signal_number;
-	req_ctx->sender = sender;
+	req_ctx->bus_name = bus_name;
 
 	/* request type */
 	if (OC_REQUEST_FLAG & flag) {
@@ -271,7 +270,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 			req_ctx->payload = strdup(IC_STR_NULL);
 			break;
 		default:
-			free(req_ctx->sender);
+			free(req_ctx->bus_name);
 			free(req_ctx);
 			return OC_EH_ERROR;
 		}
@@ -300,7 +299,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 	ret = _ocprocess_worker_start(_worker_req_handler, req_ctx);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_ocprocess_worker_start() Fail(%d)", ret);
-		free(req_ctx->sender);
+		free(req_ctx->bus_name);
 		free(req_ctx->payload);
 		g_variant_builder_unref(req_ctx->options);
 		g_variant_builder_unref(req_ctx->query);
@@ -433,7 +432,7 @@ static inline int _find_cb_response(JsonObject *rsrc_obj,
 	/* TODO : If one device has multi resources, it comes as bulk data.
 	 * To reduce the number of emit_signal, let's send signal only one time for one device.
 	 * for ex, client list. */
-	ret = _ocprocess_response_signal(ctx->sender, IC_DBUS_SIGNAL_FOUND_RESOURCE,
+	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_FOUND_RESOURCE,
 			ctx->signum, value);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
@@ -509,7 +508,7 @@ static int _worker_find_cb(void *context)
 		ERR("_find_cb_handle_context() Fail(%d)", ret);
 
 	/* ctx was allocated from icd_ioty_ocprocess_find_cb() */
-	free(ctx->sender);
+	free(ctx->bus_name);
 	free(ctx->payload);
 	free(ctx->dev_addr);
 	free(ctx);
@@ -545,7 +544,7 @@ OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 	memcpy(dev_addr, resp->addr, sizeof(OCDevAddr));
 
 	find_ctx->signum = sig_context->signum;
-	find_ctx->sender = ic_utils_strdup(sig_context->sender);
+	find_ctx->bus_name = ic_utils_strdup(sig_context->bus_name);
 	find_ctx->payload = ic_utils_strdup(resp->resJSONPayload);
 	find_ctx->dev_addr = dev_addr;
 	find_ctx->conn_type = resp->connType;
@@ -553,7 +552,7 @@ OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 	ret = _ocprocess_worker_start(_worker_find_cb, find_ctx);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_ocprocess_worker_start() Fail(%d)", ret);
-		free(find_ctx->sender);
+		free(find_ctx->bus_name);
 		free(find_ctx->payload);
 		free(find_ctx->dev_addr);
 		free(find_ctx);
@@ -576,31 +575,14 @@ static int _worker_get_cb(void *context)
 	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = g_variant_new("(a(qs)si)", ctx->options, ctx->payload, ctx->res);
-
-	ret = _ocprocess_response_signal(ctx->sender, IC_DBUS_SIGNAL_GET, ctx->signum, value);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("_ocprocess_response_signal() Fail(%d)", ret);
+	icd_ioty_get_complete(ctx->invocation, value);
 
 	/* ctx was allocated from icd_ioty_ocprocess_get_cb() */
-	free(ctx->sender);
 	free(ctx->payload);
 	g_variant_builder_unref(ctx->options);
 	free(ctx);
 
 	return ret;
-}
-
-
-static void _get_cb_response_error(const char *dest, unsigned int signum, int ret_val)
-{
-	int ret;
-	GVariant *value;
-
-	value = g_variant_new("(a(qs)si)", NULL, IC_STR_NULL, ret_val);
-
-	ret = _ocprocess_response_signal(dest, IC_DBUS_SIGNAL_GET, signum, value);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 }
 
 
@@ -612,22 +594,19 @@ OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 	OCStackResult result;
 	GVariantBuilder *options;
 	struct icd_get_context *get_ctx;
-	icd_sig_ctx_s *sig_context = ctx;
 
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
 
 	if (NULL == resp->resJSONPayload || '\0' == resp->resJSONPayload[0]) {
 		ERR("json payload is empty");
-		_get_cb_response_error(sig_context->sender, sig_context->signum,
-				IOTCON_ERROR_IOTIVITY);
+		icd_ioty_get_complete_error(ctx, IOTCON_ERROR_IOTIVITY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
 	get_ctx = calloc(1, sizeof(struct icd_get_context));
 	if (NULL == get_ctx) {
 		ERR("calloc() Fail(%d)", errno);
-		_get_cb_response_error(sig_context->sender, sig_context->signum,
-				IOTCON_ERROR_OUT_OF_MEMORY);
+		icd_ioty_get_complete_error(ctx, IOTCON_ERROR_OUT_OF_MEMORY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
@@ -643,23 +622,20 @@ OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 	}
 
 	get_ctx->payload = strdup(resp->resJSONPayload);
-	get_ctx->signum = sig_context->signum;
 	get_ctx->res = res;
-	get_ctx->sender = ic_utils_strdup(sig_context->sender);
 	get_ctx->options = options;
+	get_ctx->invocation = ctx;
 
 	ret = _ocprocess_worker_start(_worker_get_cb, get_ctx);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_ocprocess_worker_start() Fail(%d)", ret);
-		_get_cb_response_error(sig_context->sender, sig_context->signum, ret);
-		free(get_ctx->sender);
+		icd_ioty_get_complete_error(ctx, ret);
 		free(get_ctx->payload);
 		g_variant_builder_unref(get_ctx->options);
 		free(get_ctx);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	/* DO NOT FREE sig_context. It MUST be freed in the ocstack */
 	/* DO NOT FREE get_ctx. It MUST be freed in the _worker_get_cb func */
 
 	return OC_STACK_DELETE_TRANSACTION;

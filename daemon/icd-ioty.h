@@ -27,7 +27,7 @@
 
 typedef struct {
 	unsigned int signum;
-	char *sender;
+	char *bus_name;
 } icd_sig_ctx_s;
 
 
@@ -59,21 +59,30 @@ int icd_ioty_notify_all(void *handle);
 int icd_ioty_send_response(GVariant *resp);
 
 int icd_ioty_find_resource(const char *host_address, const char *resource_type,
-		unsigned int signal_number, const char *sender);
+		unsigned int signal_number, const char *bus_name);
 
-int icd_ioty_get(GVariant *resource, GVariant *query, unsigned int signal_number,
-		const char *sender);
+void icd_ioty_get_complete(GDBusMethodInvocation *invocation, GVariant *value);
+void icd_ioty_get_complete_error(GDBusMethodInvocation *invocation, int ret_val);
+gboolean icd_ioty_get(icDbus *object, GDBusMethodInvocation *invocation,
+		GVariant *resource, GVariant *query);
 
-int icd_ioty_put(GVariant *resource, const char *repr, GVariant *query,
-		unsigned int signal_number, const char *sender);
+void icd_ioty_put_complete(GDBusMethodInvocation *invocation, GVariant *value);
+void icd_ioty_put_complete_error(GDBusMethodInvocation *invocation, int ret_val);
+gboolean icd_ioty_put(icDbus *object, GDBusMethodInvocation *invocation,
+		GVariant *resource, const char *repr, GVariant *query);
 
-int icd_ioty_post(GVariant *resource, const char *repr, GVariant *query,
-		unsigned int signal_number, const char *sender);
+void icd_ioty_post_complete(GDBusMethodInvocation *invocation, GVariant *value);
+void icd_ioty_post_complete_error(GDBusMethodInvocation *invocation, int ret_val);
+gboolean icd_ioty_post(icDbus *object, GDBusMethodInvocation *invocation,
+		GVariant *resource, const char *repr, GVariant *query);
 
-int icd_ioty_delete(GVariant *resource, unsigned int signal_number, const char *sender);
+void icd_ioty_delete_complete(GDBusMethodInvocation *invocation, GVariant *value);
+void icd_ioty_delete_complete_error(GDBusMethodInvocation *invocation, int ret_val);
+gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
+		GVariant *resource);
 
 int icd_ioty_observer_start(GVariant *resource, int observe_type, GVariant *query,
-		unsigned int signal_number, const char *sender, int *observe_h);
+		unsigned int signal_number, const char *bus_name, int *observe_h);
 
 int icd_ioty_observer_stop(void *observe_h);
 
@@ -81,16 +90,16 @@ int icd_ioty_observer_stop(void *observe_h);
 int icd_ioty_register_device_info(GVariant *value);
 
 int icd_ioty_get_device_info(const char *host_address, unsigned int signal_number,
-		const char *sender);
+		const char *bus_name);
 #endif
 
 int icd_ioty_register_platform_info(GVariant *value);
 
 int icd_ioty_get_platform_info(const char *host_address, unsigned int signal_number,
-		const char *sender);
+		const char *bus_name);
 
 void* icd_ioty_subscribe_presence(const char *host_address, const char *resource_type,
-		unsigned int signal_number, const char *sender);
+		unsigned int signal_number, const char *bus_name);
 
 int icd_ioty_unsubscribe_presence(void *presence_handle);
 

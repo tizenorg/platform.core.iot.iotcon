@@ -3,3 +3,5 @@ cscope.out
 *.sw*
 .cproject
 .project
+common/ic-dbus.c
+common/ic-dbus.h

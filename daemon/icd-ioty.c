@@ -26,8 +26,10 @@
 #include <ocstack.h>
 
 #include "iotcon.h"
+#include "ic-dbus.h"
 #include "ic-utils.h"
 #include "icd.h"
+#include "icd-dbus.h"
 #include "icd-ioty.h"
 #include "icd-ioty-ocprocess.h"
 
@@ -369,12 +371,12 @@ int icd_ioty_send_response(GVariant *resp)
 static void _ioty_free_signal_context(void *data)
 {
 	icd_sig_ctx_s *context = data;
-	free(context->sender);
+	free(context->bus_name);
 	free(context);
 }
 
 int icd_ioty_find_resource(const char *host_address, const char *resource_type,
-		unsigned int signum, const char *sender)
+		unsigned int signum, const char *bus_name)
 {
 	int len;
 	OCStackResult result;
@@ -404,7 +406,7 @@ int icd_ioty_find_resource(const char *host_address, const char *resource_type,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	context->sender = ic_utils_strdup(sender);
+	context->bus_name = ic_utils_strdup(bus_name);
 	context->signum = signum;
 
 	cbdata.context = context;
@@ -418,7 +420,7 @@ int icd_ioty_find_resource(const char *host_address, const char *resource_type,
 
 	if (OC_STACK_OK != result) {
 		ERR("OCDoResource() Fail(%d)", result);
-		free(context->sender);
+		free(context->bus_name);
 		free(context);
 		return IOTCON_ERROR_IOTIVITY;
 	}
@@ -435,7 +437,7 @@ static char* _icd_ioty_resource_generate_uri(char *host, char *uri_path, GVarian
 	int len;
 	bool loop_first = true;
 	char *key, *value;
-	GVariantIter *queryIter;
+	GVariantIter query_iter;
 	char uri_buf[PATH_MAX] = {0};
 
 	len = snprintf(uri_buf, sizeof(uri_buf), "%s%s", host, uri_path);
@@ -446,9 +448,9 @@ static char* _icd_ioty_resource_generate_uri(char *host, char *uri_path, GVarian
 		len--;
 	}
 
-	g_variant_get(query, "a(ss)", &queryIter);
+	g_variant_iter_init(&query_iter, query);
 
-	while (g_variant_iter_loop(queryIter, "(&s&s)", &key, &value)) {
+	while (g_variant_iter_loop(&query_iter, "(&s&s)", &key, &value)) {
 		int query_len;
 
 		DBG("query exist. key(%s), value(%s)", key, value);
@@ -462,22 +464,35 @@ static char* _icd_ioty_resource_generate_uri(char *host, char *uri_path, GVarian
 
 		len += query_len;
 	}
-	g_variant_iter_free(queryIter);
 
 	return strdup(uri_buf);
 }
 
 
-int icd_ioty_get(GVariant *resource, GVariant *query, unsigned int signal_number,
-		const char *sender)
+void icd_ioty_get_complete(GDBusMethodInvocation *invocation, GVariant *value)
 {
-	FN_CALL;
-	int conn_type, options_size;
-	char *uri_path, *host, *uri;
+	ic_dbus_complete_get(icd_dbus_get_object(), invocation, value);
+}
+
+
+void icd_ioty_get_complete_error(GDBusMethodInvocation *invocation, int ret_val)
+{
+	GVariant *value;
+
+	value = g_variant_new("(a(qs)si)", NULL, IC_STR_NULL, ret_val);
+
+	ic_dbus_complete_get(icd_dbus_get_object(), invocation, value);
+}
+
+
+gboolean icd_ioty_get(icDbus *object, GDBusMethodInvocation *invocation,
+		GVariant *resource, GVariant *query)
+{
 	OCStackResult result;
 	GVariantIter *options;
 	OCCallbackData cbdata = {0};
-	icd_sig_ctx_s *context;
+	int conn_type, options_size;
+	char *uri_path, *host, *uri;
 	int is_observable, ifaces, observe_handle;
 	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
 
@@ -488,21 +503,12 @@ int icd_ioty_get(GVariant *resource, GVariant *query, unsigned int signal_number
 	if (NULL == uri) {
 		ERR("_icd_ioty_resource_generate_uri() Fail");
 		g_variant_iter_free(options);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+		icd_ioty_get_complete_error(invocation, IOTCON_ERROR_INVALID_PARAMETER);
+		return TRUE;
 	}
 
-	context = calloc(1, sizeof(icd_sig_ctx_s));
-	if (NULL == context) {
-		ERR("calloc() Fail(%d)", errno);
-		g_variant_iter_free(options);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
-	context->sender = ic_utils_strdup(sender);
-	context->signum = signal_number;
-
-	cbdata.context = context;
+	cbdata.context = invocation;
 	cbdata.cb = icd_ioty_ocprocess_get_cb;
-	cbdata.cd = _ioty_free_signal_context;
 
 	options_size = g_variant_iter_n_children(options);
 	if (0 != options_size) {
@@ -510,11 +516,10 @@ int icd_ioty_get(GVariant *resource, GVariant *query, unsigned int signal_number
 				sizeof(oic_options) / sizeof(oic_options[0]));
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_ioty_get_header_options() Fail(%d)", ret);
-			free(context->sender);
-			free(context);
 			free(uri);
 			g_variant_iter_free(options);
-			return ret;
+			icd_ioty_get_complete_error(invocation, ret);
+			return TRUE;
 		}
 	}
 	g_variant_iter_free(options);
@@ -529,33 +534,80 @@ int icd_ioty_get(GVariant *resource, GVariant *query, unsigned int signal_number
 
 	if (OC_STACK_OK != result) {
 		ERR("OCDoResource() Fail(%d)", result);
-		free(context->sender);
-		free(context);
-		return IOTCON_ERROR_IOTIVITY;
+		icd_ioty_get_complete_error(invocation, IOTCON_ERROR_IOTIVITY);
+		return TRUE;
 	}
 
-	return IOTCON_ERROR_NONE;
+	return TRUE;
 }
 
 
-int icd_ioty_put(GVariant *resource, const char *repr, GVariant *query,
-		unsigned int signal_number, const char *sender)
+void icd_ioty_put_complete(GDBusMethodInvocation *invocation, GVariant *value)
+{
+	ic_dbus_complete_put(icd_dbus_get_object(), invocation, value);
+}
+
+
+void icd_ioty_put_complete_error(GDBusMethodInvocation *invocation, int ret_val)
+{
+	GVariant *value;
+
+	value = g_variant_new("(a(qs)si)", NULL, IC_STR_NULL, ret_val);
+
+	ic_dbus_complete_put(icd_dbus_get_object(), invocation, value);
+}
+
+
+gboolean icd_ioty_put(icDbus *object, GDBusMethodInvocation *invocation,
+		GVariant *resource, const char *repr, GVariant *query)
 {
 	// TODO : To be implemented
 	return IOTCON_ERROR_NONE;
 }
 
 
-int icd_ioty_post(GVariant *resource, const char *repr, GVariant *query,
-		unsigned int signal_number, const char *sender)
+void icd_ioty_post_complete(GDBusMethodInvocation *invocation, GVariant *value)
+{
+	ic_dbus_complete_post(icd_dbus_get_object(), invocation, value);
+}
+
+
+void icd_ioty_post_complete_error(GDBusMethodInvocation *invocation, int ret_val)
+{
+	GVariant *value;
+
+	value = g_variant_new("(a(qs)si)", NULL, IC_STR_NULL, ret_val);
+
+	ic_dbus_complete_post(icd_dbus_get_object(), invocation, value);
+}
+
+
+gboolean icd_ioty_post(icDbus *object, GDBusMethodInvocation *invocation,
+		GVariant *resource, const char *repr, GVariant *query)
 {
 	// TODO : To be implemented
 	return IOTCON_ERROR_NONE;
 }
 
 
-int icd_ioty_delete(GVariant *resource, unsigned int signal_number,
-		const char *sender)
+void icd_ioty_delete_complete(GDBusMethodInvocation *invocation, GVariant *value)
+{
+	ic_dbus_complete_delete(icd_dbus_get_object(), invocation, value);
+}
+
+
+void icd_ioty_delete_complete_error(GDBusMethodInvocation *invocation, int ret_val)
+{
+	GVariant *value;
+
+	value = g_variant_new("(a(qs)i)", NULL, IC_STR_NULL, ret_val);
+
+	ic_dbus_complete_delete(icd_dbus_get_object(), invocation, value);
+}
+
+
+gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
+		GVariant *resource)
 {
 	// TODO : To be implemented
 	return IOTCON_ERROR_NONE;
@@ -563,7 +615,7 @@ int icd_ioty_delete(GVariant *resource, unsigned int signal_number,
 
 
 int icd_ioty_observer_start(GVariant *resource, int observe_type,
-		GVariant *query, unsigned int signal_number, const char *sender, int *observe_h)
+		GVariant *query, unsigned int signal_number, const char *bus_name, int *observe_h)
 {
 	// TODO : To be implemented
 	return IOTCON_ERROR_NONE;
@@ -586,7 +638,7 @@ int icd_ioty_register_device_info(GVariant *value)
 
 
 int icd_ioty_get_device_info(const char *host_address,
-		unsigned int signal_number, const char *sender)
+		unsigned int signal_number, const char *bus_name)
 {
 	// TODO : To be implemented
 	return IOTCON_ERROR_NONE;
@@ -602,7 +654,7 @@ int icd_ioty_register_platform_info(GVariant *value)
 
 
 int icd_ioty_get_platform_info(const char *host_address, unsigned int signal_number,
-		const char *sender)
+		const char *bus_name)
 {
 	// TODO : To be implemented
 	return IOTCON_ERROR_NONE;
@@ -610,7 +662,7 @@ int icd_ioty_get_platform_info(const char *host_address, unsigned int signal_num
 
 
 OCDoHandle icd_ioty_subscribe_presence(const char *host_address,
-		const char *resource_type, unsigned int signal_number, const char *sender)
+		const char *resource_type, unsigned int signal_number, const char *bus_name)
 {
 	// TODO : To be implemented
 	return NULL;
