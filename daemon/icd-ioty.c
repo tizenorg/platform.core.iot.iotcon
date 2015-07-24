@@ -28,7 +28,6 @@
 #include "iotcon.h"
 #include "ic-utils.h"
 #include "icd.h"
-#include "icd-ioty-repr.h"
 #include "icd-ioty.h"
 #include "icd-ioty-ocprocess.h"
 
@@ -152,39 +151,15 @@ int icd_ioty_unregister_resource(OCResourceHandle resource_handle)
 }
 
 
-static int _ioty_convert_interface_flag(iotcon_interface_e src, const char **dest)
-{
-	switch (src) {
-	case IOTCON_INTERFACE_DEFAULT:
-		*dest = IC_INTERFACE_DEFAULT;
-		break;
-	case IOTCON_INTERFACE_LINK:
-		*dest = IC_INTERFACE_LINK;
-		break;
-	case IOTCON_INTERFACE_BATCH:
-		*dest = IC_INTERFACE_BATCH;
-		break;
-	case IOTCON_INTERFACE_GROUP:
-		*dest = IC_INTERFACE_GROUP;
-		break;
-	case IOTCON_INTERFACE_NONE:
-	default:
-		ERR("Invalid interface(%d)", src);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-	return IOTCON_ERROR_NONE;
-}
-
-
 int icd_ioty_bind_interface(OCResourceHandle resourceHandle, iotcon_interface_e iface)
 {
 	int ret;
 	OCStackResult result;
-	const char *resource_interface;
+	char *resource_interface;
 
-	ret = _ioty_convert_interface_flag(iface, &resource_interface);
+	ret = ic_utils_convert_interface_flag(iface, &resource_interface);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_ioty_convert_interface_flag(%d) Fail(%d)", iface, ret);
+		ERR("ic_utils_convert_interface_flag(%d) Fail(%d)", iface, ret);
 		return ret;
 	}
 
@@ -198,6 +173,7 @@ int icd_ioty_bind_interface(OCResourceHandle resourceHandle, iotcon_interface_e 
 
 	return IOTCON_ERROR_NONE;
 }
+
 
 int icd_ioty_bind_type(OCResourceHandle resource_handle, const char *resource_type)
 {

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_H__
+#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_H__
 
 #include "iotcon.h"
 #include "icl-dbus.h"
@@ -37,7 +37,4 @@ struct icl_resource {
 	iotcon_resource_h children[IOTCON_CONTAINED_RESOURCES_MAX];
 };
 
-int icl_ioty_convert_interface_flag(iotcon_interface_e src, char **dest);
-int icl_ioty_convert_interface_string(const char *src, iotcon_interface_e *dest);
-
-#endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_H__*/
+#endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_H__*/

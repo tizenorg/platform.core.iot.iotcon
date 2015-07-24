@@ -16,6 +16,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include "iotcon-constant.h"
+#include "ic-common.h"
 #include "ic-log.h"
 #include "ic-utils.h"
 
@@ -51,5 +53,30 @@ char* ic_utils_dbus_decode_str(char *src)
 	else
 		return src;
 }
+
+
+int ic_utils_convert_interface_flag(iotcon_interface_e src, char **dest)
+{
+	switch (src) {
+	case IOTCON_INTERFACE_DEFAULT:
+		*dest = IC_INTERFACE_DEFAULT;
+		break;
+	case IOTCON_INTERFACE_LINK:
+		*dest = IC_INTERFACE_LINK;
+		break;
+	case IOTCON_INTERFACE_BATCH:
+		*dest = IC_INTERFACE_BATCH;
+		break;
+	case IOTCON_INTERFACE_GROUP:
+		*dest = IC_INTERFACE_GROUP;
+		break;
+	case IOTCON_INTERFACE_NONE:
+	default:
+		ERR("Invalid interface(%d)", src);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+	return IOTCON_ERROR_NONE;
+}
+
 
 

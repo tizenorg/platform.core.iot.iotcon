@@ -22,7 +22,7 @@
 #include "icl.h"
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
-#include "icl-ioty.h"
+#include "icl-resource.h"
 #include "icl-repr.h"
 #include "icl-options.h"
 #include "icl-request.h"

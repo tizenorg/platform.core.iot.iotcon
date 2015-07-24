@@ -16,11 +16,14 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__
 
+#include "iotcon-constant.h"
+
 #define IC_STR_EQUAL 0
 #define IC_STR_NULL "(NULL)"
 
 char* ic_utils_strdup(const char *src);
 const char* ic_utils_dbus_encode_str(const char *src);
 char* ic_utils_dbus_decode_str(char *src);
+int ic_utils_convert_interface_flag(iotcon_interface_e src, char **dest);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__ */

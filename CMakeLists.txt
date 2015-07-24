@@ -1,12 +1,10 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-PROJECT(iotcon)
+PROJECT(iotcon C)
 
 INCLUDE(FindPkgConfig)
 
 SET(EXTRA_CFLAGS "-Wall -Werror-implicit-function-declaration -fvisibility=hidden")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
-
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -fvisibility=hidden")
 
 SET(CLIENT ${PROJECT_NAME})
 SET(DAEMON "${PROJECT_NAME}-daemon")

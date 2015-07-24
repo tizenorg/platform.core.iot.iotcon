@@ -25,8 +25,8 @@
 #include "iotcon-representation.h"
 #include "ic-utils.h"
 #include "icl.h"
+#include "icl-resource.h"
 #include "icl-resource-types.h"
-#include "icl-ioty.h"
 #include "icl-repr-list.h"
 #include "icl-repr-value.h"
 #include "icl-repr-obj.h"
@@ -298,9 +298,9 @@ static JsonObject* _icl_repr_data_generate_json(iotcon_repr_h cur_repr,
 		for (i = 1; i <= ICL_INTERFACE_MAX; i = i << 1) {
 			if (IOTCON_INTERFACE_NONE == (ifaces & i)) /* this interface not exist */
 				continue;
-			ret = icl_ioty_convert_interface_flag((ifaces & i), &iface_str);
+			ret = ic_utils_convert_interface_flag((ifaces & i), &iface_str);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("icl_ioty_convert_interface_flag(%d) Fail(%d)", i, ret);
+				ERR("ic_utils_convert_interface_flag(%d) Fail(%d)", i, ret);
 				json_object_unref(repr_obj);
 				json_array_unref(if_array);
 				return NULL;
@@ -570,6 +570,26 @@ iotcon_repr_h icl_repr_create_repr(const char *json_string)
 }
 
 
+static int _icl_repr_convert_interface_string(const char *src, iotcon_interface_e *dest)
+{
+	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (IC_STR_EQUAL == strcmp(IC_INTERFACE_DEFAULT, src)) {
+		*dest = IOTCON_INTERFACE_DEFAULT;
+	} else if (IC_STR_EQUAL == strcmp(IC_INTERFACE_LINK, src)) {
+		*dest = IOTCON_INTERFACE_LINK;
+	} else if (IC_STR_EQUAL == strcmp(IC_INTERFACE_BATCH, src)) {
+		*dest = IOTCON_INTERFACE_BATCH;
+	} else {
+		ERR("Invalid Interface");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+
 int icl_repr_parse_resource_property(JsonObject *prop_obj,
 		iotcon_resource_types_h *types, int *ifaces)
 {
@@ -609,7 +629,7 @@ int icl_repr_parse_resource_property(JsonObject *prop_obj,
 		if_count = json_array_get_length(iface_array);
 		for (if_index = 0; if_index < if_count; if_index++) {
 			const char *iface_str = json_array_get_string_element(iface_array, if_index);
-			ret = icl_ioty_convert_interface_string(iface_str, &iface_flag);
+			ret = _icl_repr_convert_interface_string(iface_str, &iface_flag);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("icl_ioty_convert_interface_string() Fail(%d)", ret);
 				if (res_types)

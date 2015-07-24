@@ -38,10 +38,10 @@
 #define IC_DBUS_SIGNAL_PLATFORM "PLATFORM"
 #define IC_DBUS_SIGNAL_PRESENCE "PRESENCE"
 
-#define IC_INTERFACE_DEFAULT "oic.if.baseline";
-#define IC_INTERFACE_LINK "oic.if.ll";
-#define IC_INTERFACE_BATCH "oic.if.b";
-#define IC_INTERFACE_GROUP "oc.mi.grp";
+#define IC_INTERFACE_DEFAULT "oic.if.baseline"
+#define IC_INTERFACE_LINK "oic.if.ll"
+#define IC_INTERFACE_BATCH "oic.if.b"
+#define IC_INTERFACE_GROUP "oc.mi.grp"
 
 #define IC_JSON_KEY_OC "oc"
 #define IC_JSON_KEY_URI_PATH "href"
