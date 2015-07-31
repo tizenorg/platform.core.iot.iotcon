@@ -24,8 +24,7 @@
 #include "icl.h"
 #include "icl-dbus.h"
 
-static GDBusConnection *icl_dbus_conn;
-static int icl_dbus_count;
+static unsigned int icl_dbus_count;
 static icDbus *icl_dbus_object;
 static GList *icl_dbus_sub_ids;
 static GList *icl_dbus_conn_changed_cbs;
@@ -51,40 +50,13 @@ inline unsigned int icl_dbus_generate_signal_number()
 }
 
 
-static inline int _icl_dbus_get()
-{
-	if (NULL == icl_dbus_conn) {
-		icl_dbus_conn = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, NULL);
-		if (NULL == icl_dbus_conn) {
-			ERR("g_bus_get_sync() Fail");
-			return IOTCON_ERROR_DBUS;
-		}
-	}
-
-	icl_dbus_count++;
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-static inline void _icl_dbus_unref()
-{
-	icl_dbus_count--;
-
-	if (0 == icl_dbus_count) {
-		DBG("All connection is closed");
-		g_object_unref(icl_dbus_conn);
-		icl_dbus_conn = NULL;
-	}
-}
-
-
 unsigned int icl_dbus_subscribe_signal(char *sig_name, void *cb_container, void *cb_free,
 		GDBusSignalCallback sig_handler)
 {
 	unsigned int id;
+	GDBusConnection *conn = g_dbus_proxy_get_connection(G_DBUS_PROXY(icl_dbus_object));
 
-	id = g_dbus_connection_signal_subscribe(icl_dbus_conn,
+	id = g_dbus_connection_signal_subscribe(conn,
 			NULL,
 			IOTCON_DBUS_INTERFACE,
 			sig_name,
@@ -107,7 +79,9 @@ unsigned int icl_dbus_subscribe_signal(char *sig_name, void *cb_container, void 
 
 void icl_dbus_unsubscribe_signal(unsigned int id)
 {
-	g_dbus_connection_signal_unsubscribe(icl_dbus_conn, id);
+	GDBusConnection *conn = g_dbus_proxy_get_connection(G_DBUS_PROXY(icl_dbus_object));
+
+	g_dbus_connection_signal_unsubscribe(conn, id);
 
 	icl_dbus_sub_ids = g_list_remove(icl_dbus_sub_ids, GUINT_TO_POINTER(id));
 }
@@ -145,9 +119,11 @@ static icl_cb_container_s* _icl_dbus_find_connection_changed_cb(
 }
 
 
-int icl_dbus_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *user_data)
+API int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *user_data)
 {
 	unsigned int id;
+
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	icl_cb_container_s *cb_container;
 
@@ -180,10 +156,12 @@ int icl_dbus_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *us
 }
 
 
-int icl_dbus_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
+API int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
 		void *user_data)
 {
 	icl_cb_container_s *cb_container;
+
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	cb_container = _icl_dbus_find_connection_changed_cb(cb, user_data);
 	if (NULL == cb_container) {
@@ -202,7 +180,9 @@ int icl_dbus_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
 
 static void _icl_dbus_sub_id_list_free(gpointer data)
 {
-	g_dbus_connection_signal_unsubscribe(icl_dbus_conn, GPOINTER_TO_UINT(data));
+	GDBusConnection *conn = g_dbus_proxy_get_connection(G_DBUS_PROXY(icl_dbus_object));
+
+	g_dbus_connection_signal_unsubscribe(conn, GPOINTER_TO_UINT(data));
 }
 
 
@@ -240,26 +220,24 @@ inline int icl_dbus_convert_daemon_error(int error)
 }
 
 
-unsigned int icl_dbus_start()
+int icl_dbus_start()
 {
-	int ret;
 	unsigned int id;
 	GError *error = NULL;
 
-	ret = _icl_dbus_get();
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_icl_dbus_get() Fail(%d)", ret);
-		return ret;
+	if (icl_dbus_object) {
+		icl_dbus_count++;
+		return IOTCON_ERROR_NONE;
 	}
 
-	icl_dbus_object = ic_dbus_proxy_new_sync(icl_dbus_conn,
+	icl_dbus_object = ic_dbus_proxy_new_for_bus_sync(G_BUS_TYPE_SYSTEM,
 			G_DBUS_PROXY_FLAGS_NONE,
 			IOTCON_DBUS_INTERFACE,
 			IOTCON_DBUS_OBJPATH,
 			NULL,
 			&error);
 	if (NULL == icl_dbus_object) {
-		ERR("ic_iotcon_proxy_new_sync() Fail(%s)", error->message);
+		ERR("ic_dbus_proxy_new_for_bus_sync() Fail(%s)", error->message);
 		g_error_free(error);
 		return IOTCON_ERROR_DBUS;
 	}
@@ -275,8 +253,20 @@ unsigned int icl_dbus_start()
 }
 
 
-void icl_dbus_stop()
+int icl_dbus_stop()
 {
+	if (0 == icl_dbus_count) {
+		ERR("dbus not initialized");
+		return IOTCON_ERROR_DBUS;
+	}
+
+	icl_dbus_count--;
+
+	if (0 < icl_dbus_count)
+		return IOTCON_ERROR_NONE;
+
+	DBG("All connection is closed");
+
 	_icl_dbus_cleanup();
 
 	g_list_free_full(icl_dbus_conn_changed_cbs, free);
@@ -284,5 +274,6 @@ void icl_dbus_stop()
 
 	g_object_unref(icl_dbus_object);
 	icl_dbus_object = NULL;
-	_icl_dbus_unref();
+
+	return IOTCON_ERROR_NONE;
 }

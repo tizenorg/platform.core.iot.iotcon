@@ -27,8 +27,8 @@ extern "C" {
 #include <iotcon-constant.h>
 #include <iotcon-representation.h>
 
-int iotcon_initialize();
-void iotcon_deinitialize();
+int iotcon_open();
+void iotcon_close();
 
 /**
  * @brief Callback when iotcon connection is changed

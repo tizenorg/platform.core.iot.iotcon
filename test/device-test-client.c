@@ -39,8 +39,8 @@ int main()
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* iotcon initialize */
-	iotcon_initialize();
+	/* iotcon open */
+	iotcon_open();
 
 	iotcon_get_platform_info(IOTCON_MULTICAST_ADDRESS, _get_platform_info, NULL);
 
@@ -48,8 +48,8 @@ int main()
 
 	g_main_loop_unref(loop);
 
-	/* iotcon deinitialize */
-	iotcon_deinitialize();
+	/* iotcon close */
+	iotcon_close();
 
 	return 0;
 }

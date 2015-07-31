@@ -31,7 +31,7 @@ int icl_dbus_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
 
 int icl_dbus_convert_daemon_error(int error);
 
-unsigned int icl_dbus_start();
-void icl_dbus_stop();
+int icl_dbus_start();
+int icl_dbus_stop();
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_DBUS_H__ */

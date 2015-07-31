@@ -264,8 +264,8 @@ int main(int argc, char **argv)
 	GMainLoop *loop;
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* iotcon initialize */
-	iotcon_initialize();
+	/* iotcon open */
+	iotcon_open();
 
 	/* find door typed resources */
 	iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, "core.door", &_found_resource, NULL);
@@ -275,8 +275,8 @@ int main(int argc, char **argv)
 
 	free(door_resource_sid);
 
-	/* iotcon deinitialize */
-	iotcon_deinitialize();
+	/* iotcon close */
+	iotcon_close();
 
 	return 0;
 }

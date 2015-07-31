@@ -314,8 +314,8 @@ int main(int argc, char **argv)
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* iotcon initialize */
-	iotcon_initialize();
+	/* iotcon open */
+	iotcon_open();
 
 	/* set local door resource */
 	ret = _set_door_resource();
@@ -345,8 +345,8 @@ int main(int argc, char **argv)
 
 	iotcon_unregister_resource(door_handle);
 
-	/* iotcon deinitialize */
-	iotcon_deinitialize();
+	/* iotcon close */
+	iotcon_close();
 
 	return 0;
 }

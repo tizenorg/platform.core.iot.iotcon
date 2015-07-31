@@ -208,8 +208,8 @@ int main(int argc, char **argv)
 	GMainLoop *loop;
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* iotcon initialize */
-	iotcon_initialize();
+	/* iotcon open */
+	iotcon_open();
 
 	/* find room typed resources */
 	iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, "core.room", &_found_resource, NULL);
@@ -217,8 +217,8 @@ int main(int argc, char **argv)
 	g_main_loop_run(loop);
 	g_main_loop_unref(loop);
 
-	/* iotcon deinitialize */
-	iotcon_deinitialize();
+	/* iotcon close */
+	iotcon_close();
 
 	return 0;
 }

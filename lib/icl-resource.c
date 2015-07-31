@@ -20,7 +20,6 @@
 #include <string.h>
 #include <errno.h>
 #include <glib.h>
-#include <glib-object.h>
 
 #include "iotcon.h"
 #include "ic-utils.h"
@@ -31,79 +30,6 @@
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
 #include "icl.h"
-
-/**
- * @brief global context
- */
-static bool icl_is_init = false;
-
-API int iotcon_initialize()
-{
-	FN_CALL;
-	int ret;
-
-	RETVM_IF(true == icl_is_init, IOTCON_ERROR_ALREADY,  "already initialized");
-
-#if !GLIB_CHECK_VERSION(2, 35, 0)
-	g_type_init();
-#endif
-
-	ret = icl_dbus_start();
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icl_dbus_start() Fail(%d)", ret);
-		return ret;
-	}
-
-	icl_is_init = true;
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-API void iotcon_deinitialize()
-{
-	FN_CALL;
-
-	RETM_IF(false == icl_is_init, "Not initialized");
-
-	icl_dbus_stop();
-
-	icl_is_init = false;
-}
-
-
-API int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *user_data)
-{
-	int ret;
-
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
-
-	ret = icl_dbus_add_connection_changed_cb(cb, user_data);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icl_dbus_add_connection_changed_cb() Fail(%d)", ret);
-		return ret;
-	}
-
-	return ret;
-}
-
-
-API int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
-		void *user_data)
-{
-	int ret;
-
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
-
-	ret = icl_dbus_remove_connection_changed_cb(cb, user_data);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icl_dbus_remove_connection_changed_cb() Fail(%d)", ret);
-		return ret;
-	}
-
-	return ret;
-}
-
 
 static void _icl_request_handler(GDBusConnection *connection,
 		const gchar *sender_name,
