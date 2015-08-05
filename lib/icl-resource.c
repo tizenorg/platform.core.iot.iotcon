@@ -39,6 +39,7 @@ static void _icl_request_handler(GDBusConnection *connection,
 		GVariant *parameters,
 		gpointer user_data)
 {
+	FN_CALL;
 	GVariantIter *options;
 	unsigned short option_id;
 	char *option_data;

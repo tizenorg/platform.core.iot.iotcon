@@ -165,8 +165,6 @@ API iotcon_client_h iotcon_client_new(const char *host, const char *uri_path,
 
 API void iotcon_client_free(iotcon_client_h resource)
 {
-	FN_CALL;
-
 	RET_IF(NULL == resource);
 
 	resource->ref_count--;

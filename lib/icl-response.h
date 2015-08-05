@@ -23,8 +23,8 @@
 
 typedef enum {
 	ICL_VISIBILITY_NONE = 0,
-	ICL_VISIBILITY_REPR,
-	ICL_VISIBILITY_PROP,
+	ICL_VISIBILITY_REPR = (1 << 0),
+	ICL_VISIBILITY_PROP = (1 << 1),
 } icl_visibility_e;
 
 

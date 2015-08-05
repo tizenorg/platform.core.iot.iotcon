@@ -349,7 +349,6 @@ API iotcon_value_h icl_value_from_json(JsonNode *node)
 
 void icl_value_free(gpointer data)
 {
-	FN_CALL;
 	int ret;
 	iotcon_value_h value;
 	iotcon_list_h list;

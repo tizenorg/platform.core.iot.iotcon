@@ -49,6 +49,7 @@ typedef struct {
 
 static void _icl_on_cru_cb(GVariant *result, icl_on_cru_s *cb_container)
 {
+	FN_CALL;
 	int res;
 	iotcon_repr_h repr;
 	GVariantIter *options;
@@ -294,6 +295,7 @@ API int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr,
 static void _icl_on_delete_cb(GObject *object, GAsyncResult *g_async_res,
 		gpointer user_data)
 {
+	FN_CALL;
 	int res;
 	GVariant *result;
 	char *option_data;
@@ -315,7 +317,7 @@ static void _icl_on_delete_cb(GObject *object, GAsyncResult *g_async_res,
 	}
 	g_variant_get(result, "(a(qs)i)", &options, &res);
 
-	if (IOTCON_ERROR_NONE != res && g_variant_iter_n_children(options)) {
+	if (IOTCON_ERROR_NONE == res && g_variant_iter_n_children(options)) {
 		header_options = iotcon_options_new();
 		while (g_variant_iter_loop(options, "(q&s)", &option_id, &option_data))
 			iotcon_options_insert(header_options, option_id, option_data);

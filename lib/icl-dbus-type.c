@@ -128,14 +128,8 @@ GVariant* icl_dbus_client_to_gvariant(struct icl_remote_resource *resource)
 		}
 	}
 
-	value = g_variant_new("(ssba(qs)iii)",
-			resource->uri_path,
-			resource->host,
-			resource->is_observable,
-			&options,
-			resource->ifaces,
-			resource->conn_type,
-			GPOINTER_TO_INT(resource->observe_handle));
+	value = g_variant_new("(ssa(qs)i)", resource->uri_path, resource->host, &options,
+			resource->conn_type);
 
 	return value;
 }

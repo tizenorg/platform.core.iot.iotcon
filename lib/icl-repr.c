@@ -73,6 +73,7 @@ API iotcon_repr_h iotcon_repr_new()
 	ret_val->hash_table = g_hash_table_new_full(g_str_hash, g_str_equal, free,
 			icl_value_free);
 	icl_repr_inc_ref_count(ret_val);
+	ret_val->visibility = (ICL_VISIBILITY_REPR | ICL_VISIBILITY_PROP);
 
 	return ret_val;
 }
@@ -253,7 +254,7 @@ static JsonObject* _icl_repr_data_generate_json(iotcon_repr_h cur_repr,
 
 	/* representation attributes are included if interface type is one of None
 	 * or Default Parent or Batch Child */
-	if (ICL_VISIBILITY_REPR == cur_repr->visibility && 0 < iotcon_repr_get_keys_count(cur_repr)) {
+	if ((ICL_VISIBILITY_REPR & cur_repr->visibility) && 0 < iotcon_repr_get_keys_count(cur_repr)) {
 		repr_obj = icl_obj_to_json(cur_repr);
 		if (NULL == repr_obj) {
 			ERR("icl_obj_to_json() Fail");
@@ -273,7 +274,7 @@ static JsonObject* _icl_repr_data_generate_json(iotcon_repr_h cur_repr,
 
 	/* properties such as resource types and resource interfaces are included
 	 * if interface type is one of None or Default Child or Link Child */
-	if (ICL_VISIBILITY_PROP == cur_repr->visibility) {
+	if (ICL_VISIBILITY_PROP & cur_repr->visibility) {
 		if (0 < rt_count || IOTCON_INTERFACE_NONE != cur_repr->interfaces) {
 			prop_obj = json_object_new();
 			json_object_set_object_member(repr_obj, IC_JSON_KEY_PROPERTY, prop_obj);
@@ -797,7 +798,6 @@ iotcon_repr_h icl_repr_parse_json(const char *json_string)
 
 API void iotcon_repr_free(iotcon_repr_h repr)
 {
-	FN_CALL;
 	RET_IF(NULL == repr);
 
 	if (false == _icl_repr_dec_ref_count(repr))

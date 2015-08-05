@@ -26,10 +26,19 @@ gpointer icd_ioty_ocprocess_thread(gpointer data);
 OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 		OCEntityHandlerRequest *request);
 
-OCStackApplicationResult icd_ioty_ocprocess_find_cb(void* ctx, OCDoHandle handle,
+OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle,
 		OCClientResponse* resp);
 
-OCStackApplicationResult icd_ioty_ocprocess_get_cb(void* ctx, OCDoHandle handle,
+OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 		OCClientResponse* resp);
+
+OCStackApplicationResult icd_ioty_ocprocess_put_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp);
+
+OCStackApplicationResult icd_ioty_ocprocess_post_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp);
+
+OCStackApplicationResult icd_ioty_ocprocess_delete_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp);
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_THREAD_H__*/

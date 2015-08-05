@@ -53,24 +53,24 @@
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="get">
-			<arg type="(ssba(qs)iii)" name="client" direction="in"/>
+			<arg type="(ssa(qs)i)" name="client" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
 			<arg type="(a(qs)si)" name="ret" direction="out"/>
 		</method>
 		<method name="put">
-			<arg type="(ssba(qs)asii)" name="client" direction="in"/>
+			<arg type="(ssa(qs)i)" name="client" direction="in"/>
 			<arg type="s" name="repr" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
 			<arg type="(a(qs)si)" name="ret" direction="out"/>
 		</method>
 		<method name="post">
-			<arg type="(ssba(qs)asii)" name="client" direction="in"/>
+			<arg type="(ssa(qs)i)" name="client" direction="in"/>
 			<arg type="s" name="repr" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
 			<arg type="(a(qs)si)" name="ret" direction="out"/>
 		</method>
 		<method name="delete">
-			<arg type="(ssba(qs)asii)" name="client" direction="in"/>
+			<arg type="(ssa(qs)i)" name="client" direction="in"/>
 			<arg type="(a(qs)i)" name="ret" direction="out"/>
 		</method>
 		<method name="observerStart">

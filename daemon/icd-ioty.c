@@ -469,47 +469,106 @@ static char* _icd_ioty_resource_generate_uri(char *host, char *uri_path, GVarian
 }
 
 
-void icd_ioty_get_complete(GDBusMethodInvocation *invocation, GVariant *value)
+void icd_ioty_complete(int type, GDBusMethodInvocation *invocation, GVariant *value)
 {
-	ic_dbus_complete_get(icd_dbus_get_object(), invocation, value);
+	switch(type) {
+	case ICD_CRUD_GET:
+		ic_dbus_complete_get(icd_dbus_get_object(), invocation, value);
+		break;
+	case ICD_CRUD_PUT:
+		ic_dbus_complete_put(icd_dbus_get_object(), invocation, value);
+		break;
+	case ICD_CRUD_POST:
+		ic_dbus_complete_post(icd_dbus_get_object(), invocation, value);
+		break;
+	case ICD_CRUD_DELETE:
+		ic_dbus_complete_delete(icd_dbus_get_object(), invocation, value);
+		break;
+	}
 }
 
 
-void icd_ioty_get_complete_error(GDBusMethodInvocation *invocation, int ret_val)
+void icd_ioty_complete_error(int type, GDBusMethodInvocation *invocation, int ret_val)
 {
 	GVariant *value;
 
-	value = g_variant_new("(a(qs)si)", NULL, IC_STR_NULL, ret_val);
-
-	ic_dbus_complete_get(icd_dbus_get_object(), invocation, value);
+	switch (type) {
+	case ICD_CRUD_GET:
+		value = g_variant_new("(a(qs)si)", NULL, IC_STR_NULL, ret_val);
+		ic_dbus_complete_get(icd_dbus_get_object(), invocation, value);
+		break;
+	case ICD_CRUD_PUT:
+		value = g_variant_new("(a(qs)si)", NULL, IC_STR_NULL, ret_val);
+		ic_dbus_complete_put(icd_dbus_get_object(), invocation, value);
+		break;
+	case ICD_CRUD_POST:
+		value = g_variant_new("(a(qs)si)", NULL, IC_STR_NULL, ret_val);
+		ic_dbus_complete_post(icd_dbus_get_object(), invocation, value);
+		break;
+	case ICD_CRUD_DELETE:
+		value = g_variant_new("(a(qs)i)", NULL, ret_val);
+		ic_dbus_complete_delete(icd_dbus_get_object(), invocation, value);
+		break;
+	}
 }
 
 
-gboolean icd_ioty_get(icDbus *object, GDBusMethodInvocation *invocation,
-		GVariant *resource, GVariant *query)
+static gboolean _icd_ioty_crud(int type, icDbus *object, GDBusMethodInvocation *invocation,
+		GVariant *resource, GVariant *query, const char *repr)
 {
-	FN_CALL;
+	OCMethod rest_type;
 	OCStackResult result;
 	GVariantIter *options;
 	OCCallbackData cbdata = {0};
 	int conn_type, options_size;
 	char *uri_path, *host, *uri;
-	int is_observable, ifaces, observe_handle;
+	char uri_buf[PATH_MAX] = {0};
 	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
+	OCHeaderOption *oic_options_ptr = NULL;
 
-	g_variant_get(resource, "(&s&sba(qs)iii)", &uri_path, &host, &is_observable, &options,
-			&ifaces, &observe_handle, &conn_type);
+	switch (type) {
+	case ICD_CRUD_GET:
+		cbdata.cb = icd_ioty_ocprocess_get_cb;
+		rest_type = OC_REST_GET;
+		break;
+	case ICD_CRUD_PUT:
+		cbdata.cb = icd_ioty_ocprocess_put_cb;
+		rest_type = OC_REST_PUT;
+		break;
+	case ICD_CRUD_POST:
+		cbdata.cb = icd_ioty_ocprocess_post_cb;
+		rest_type = OC_REST_POST;
+		break;
+	case ICD_CRUD_DELETE:
+		cbdata.cb = icd_ioty_ocprocess_delete_cb;
+		rest_type = OC_REST_DELETE;
+		break;
+	default:
+		ERR("Invalid CRUD Type(%d)", type);
+		return FALSE;
+	}
 
-	uri = _icd_ioty_resource_generate_uri(host, uri_path, query);
-	if (NULL == uri) {
-		ERR("_icd_ioty_resource_generate_uri() Fail");
-		g_variant_iter_free(options);
-		icd_ioty_get_complete_error(invocation, IOTCON_ERROR_INVALID_PARAMETER);
-		return TRUE;
+	g_variant_get(resource, "(&s&sa(qs)i)", &uri_path, &host, &options, &conn_type);
+
+	switch (type) {
+	case ICD_CRUD_GET:
+	case ICD_CRUD_PUT:
+	case ICD_CRUD_POST:
+		uri = _icd_ioty_resource_generate_uri(host, uri_path, query);
+		if (NULL == uri) {
+			ERR("_icd_ioty_resource_generate_uri() Fail");
+			g_variant_iter_free(options);
+			icd_ioty_complete_error(type, invocation, IOTCON_ERROR_INVALID_PARAMETER);
+			return TRUE;
+		}
+		break;
+	case ICD_CRUD_DELETE:
+		snprintf(uri_buf, sizeof(uri_buf), "%s%s", host, uri_path);
+		uri = strdup(uri_buf);
+		break;
 	}
 
 	cbdata.context = invocation;
-	cbdata.cb = icd_ioty_ocprocess_get_cb;
 
 	options_size = g_variant_iter_n_children(options);
 	if (0 != options_size) {
@@ -519,99 +578,59 @@ gboolean icd_ioty_get(icDbus *object, GDBusMethodInvocation *invocation,
 			ERR("_ioty_get_header_options() Fail(%d)", ret);
 			free(uri);
 			g_variant_iter_free(options);
-			icd_ioty_get_complete_error(invocation, ret);
+			icd_ioty_complete_error(type, invocation, ret);
 			return TRUE;
 		}
+		oic_options_ptr = oic_options;
 	}
 	g_variant_iter_free(options);
 
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
-	result = OCDoResource(NULL, OC_REST_GET, uri, NULL, NULL, conn_type, OC_HIGH_QOS,
-			&cbdata, options_size?oic_options:NULL, options_size);
+	result = OCDoResource(NULL, rest_type, uri, NULL, repr, conn_type, OC_HIGH_QOS,
+			&cbdata, oic_options_ptr, options_size);
 	icd_ioty_csdk_unlock();
 
 	free(uri);
 
 	if (OC_STACK_OK != result) {
 		ERR("OCDoResource() Fail(%d)", result);
-		icd_ioty_get_complete_error(invocation, IOTCON_ERROR_IOTIVITY);
+		icd_ioty_complete_error(type, invocation, IOTCON_ERROR_IOTIVITY);
 		return TRUE;
 	}
 
 	return TRUE;
 }
 
-
-void icd_ioty_put_complete(GDBusMethodInvocation *invocation, GVariant *value)
+gboolean icd_ioty_get(icDbus *object, GDBusMethodInvocation *invocation,
+		GVariant *resource, GVariant *query)
 {
-	ic_dbus_complete_put(icd_dbus_get_object(), invocation, value);
-}
-
-
-void icd_ioty_put_complete_error(GDBusMethodInvocation *invocation, int ret_val)
-{
-	GVariant *value;
-
-	value = g_variant_new("(a(qs)si)", NULL, IC_STR_NULL, ret_val);
-
-	ic_dbus_complete_put(icd_dbus_get_object(), invocation, value);
+	FN_CALL;
+	return _icd_ioty_crud(ICD_CRUD_GET, object, invocation, resource, query, NULL);
 }
 
 
 gboolean icd_ioty_put(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource, const char *repr, GVariant *query)
 {
-	// TODO : To be implemented
-	return IOTCON_ERROR_NONE;
-}
-
-
-void icd_ioty_post_complete(GDBusMethodInvocation *invocation, GVariant *value)
-{
-	ic_dbus_complete_post(icd_dbus_get_object(), invocation, value);
-}
-
-
-void icd_ioty_post_complete_error(GDBusMethodInvocation *invocation, int ret_val)
-{
-	GVariant *value;
-
-	value = g_variant_new("(a(qs)si)", NULL, IC_STR_NULL, ret_val);
-
-	ic_dbus_complete_post(icd_dbus_get_object(), invocation, value);
+	FN_CALL;
+	return _icd_ioty_crud(ICD_CRUD_PUT, object, invocation, resource, query, repr);
 }
 
 
 gboolean icd_ioty_post(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource, const char *repr, GVariant *query)
 {
-	// TODO : To be implemented
-	return IOTCON_ERROR_NONE;
-}
-
-
-void icd_ioty_delete_complete(GDBusMethodInvocation *invocation, GVariant *value)
-{
-	ic_dbus_complete_delete(icd_dbus_get_object(), invocation, value);
-}
-
-
-void icd_ioty_delete_complete_error(GDBusMethodInvocation *invocation, int ret_val)
-{
-	GVariant *value;
-
-	value = g_variant_new("(a(qs)i)", NULL, IC_STR_NULL, ret_val);
-
-	ic_dbus_complete_delete(icd_dbus_get_object(), invocation, value);
+	FN_CALL;
+	return _icd_ioty_crud(ICD_CRUD_POST, object, invocation, resource, query, repr);
 }
 
 
 gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource)
 {
-	// TODO : To be implemented
-	return IOTCON_ERROR_NONE;
+	FN_CALL;
+	return _icd_ioty_crud(ICD_CRUD_DELETE, object, invocation, resource, NULL, NULL);
 }
 
 

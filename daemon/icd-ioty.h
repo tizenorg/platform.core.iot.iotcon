@@ -30,6 +30,12 @@ typedef struct {
 	char *bus_name;
 } icd_sig_ctx_s;
 
+enum {
+	ICD_CRUD_GET,
+	ICD_CRUD_PUT,
+	ICD_CRUD_POST,
+	ICD_CRUD_DELETE
+};
 
 void icd_ioty_csdk_lock();
 
@@ -61,23 +67,18 @@ int icd_ioty_send_response(GVariant *resp);
 int icd_ioty_find_resource(const char *host_address, const char *resource_type,
 		unsigned int signal_number, const char *bus_name);
 
-void icd_ioty_get_complete(GDBusMethodInvocation *invocation, GVariant *value);
-void icd_ioty_get_complete_error(GDBusMethodInvocation *invocation, int ret_val);
+void icd_ioty_complete(int type, GDBusMethodInvocation *invocation, GVariant *value);
+void icd_ioty_complete_error(int type, GDBusMethodInvocation *invocation, int ret_val);
+
 gboolean icd_ioty_get(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource, GVariant *query);
 
-void icd_ioty_put_complete(GDBusMethodInvocation *invocation, GVariant *value);
-void icd_ioty_put_complete_error(GDBusMethodInvocation *invocation, int ret_val);
 gboolean icd_ioty_put(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource, const char *repr, GVariant *query);
 
-void icd_ioty_post_complete(GDBusMethodInvocation *invocation, GVariant *value);
-void icd_ioty_post_complete_error(GDBusMethodInvocation *invocation, int ret_val);
 gboolean icd_ioty_post(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource, const char *repr, GVariant *query);
 
-void icd_ioty_delete_complete(GDBusMethodInvocation *invocation, GVariant *value);
-void icd_ioty_delete_complete_error(GDBusMethodInvocation *invocation, int ret_val);
 gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource);
 

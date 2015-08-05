@@ -69,8 +69,9 @@ struct icd_find_context {
 };
 
 
-struct icd_get_context {
+struct icd_crud_context {
 	int res;
+	int crud_type;
 	char *payload;
 	GVariantBuilder *options;
 	GDBusMethodInvocation *invocation;
@@ -571,22 +572,57 @@ OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 }
 
 
-static int _worker_get_cb(void *context)
+static int _worker_crud_cb(void *context)
 {
 	GVariant *value;
-	struct icd_get_context *ctx = context;
+	struct icd_crud_context *ctx = context;
 
 	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = g_variant_new("(a(qs)si)", ctx->options, ctx->payload, ctx->res);
-	icd_ioty_get_complete(ctx->invocation, value);
+	if (ICD_CRUD_DELETE == ctx->crud_type)
+		value = g_variant_new("(a(qs)i)", ctx->options, ctx->res);
+	else
+		value = g_variant_new("(a(qs)si)", ctx->options, ctx->payload, ctx->res);
+	icd_ioty_complete(ctx->crud_type, ctx->invocation, value);
 
-	/* ctx was allocated from icd_ioty_ocprocess_get_cb() */
+	/* ctx was allocated from icd_ioty_ocprocess_xxx_cb() */
 	free(ctx->payload);
 	g_variant_builder_unref(ctx->options);
 	free(ctx);
 
 	return IOTCON_ERROR_NONE;
+}
+
+
+static int _ocprocess_worker(_ocprocess_fn fn, int type, const char *payload, int res,
+		GVariantBuilder *options, void *ctx)
+{
+	int ret;
+	struct icd_crud_context *crud_ctx;
+
+	crud_ctx = calloc(1, sizeof(struct icd_crud_context));
+	if (NULL == crud_ctx) {
+		ERR("calloc() Fail(%d)", errno);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
+
+	crud_ctx->crud_type = type;
+	crud_ctx->payload = strdup(ic_utils_dbus_encode_str(payload));
+	crud_ctx->res = res;
+	crud_ctx->options = options;
+	crud_ctx->invocation = ctx;
+
+	ret = _ocprocess_worker_start(fn, crud_ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker_start() Fail(%d)", ret);
+		free(crud_ctx->payload);
+		g_variant_builder_unref(crud_ctx->options);
+		free(crud_ctx);
+	}
+
+	/* DO NOT FREE crud_ctx. It MUST be freed in the _worker_crud_cb func */
+
+	return ret;
 }
 
 
@@ -597,20 +633,20 @@ OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 	int ret, res;
 	OCStackResult result;
 	GVariantBuilder *options;
-	struct icd_get_context *get_ctx;
+	struct icd_crud_context *crud_ctx;
 
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
 
 	if (NULL == resp->resJSONPayload || '\0' == resp->resJSONPayload[0]) {
 		ERR("json payload is empty");
-		icd_ioty_get_complete_error(ctx, IOTCON_ERROR_IOTIVITY);
+		icd_ioty_complete_error(ICD_CRUD_GET, ctx, IOTCON_ERROR_IOTIVITY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	get_ctx = calloc(1, sizeof(struct icd_get_context));
-	if (NULL == get_ctx) {
+	crud_ctx = calloc(1, sizeof(struct icd_crud_context));
+	if (NULL == crud_ctx) {
 		ERR("calloc() Fail(%d)", errno);
-		icd_ioty_get_complete_error(ctx, IOTCON_ERROR_OUT_OF_MEMORY);
+		icd_ioty_complete_error(ICD_CRUD_GET, ctx, IOTCON_ERROR_OUT_OF_MEMORY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
@@ -625,22 +661,177 @@ OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 		options = NULL;
 	}
 
-	get_ctx->payload = strdup(resp->resJSONPayload);
-	get_ctx->res = res;
-	get_ctx->options = options;
-	get_ctx->invocation = ctx;
-
-	ret = _ocprocess_worker_start(_worker_get_cb, get_ctx);
+	ret = _ocprocess_worker(_worker_crud_cb, ICD_CRUD_GET, resp->resJSONPayload, res,
+			options, ctx);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_ocprocess_worker_start() Fail(%d)", ret);
-		icd_ioty_get_complete_error(ctx, ret);
-		free(get_ctx->payload);
-		g_variant_builder_unref(get_ctx->options);
-		free(get_ctx);
+		ERR("_ocprocess_worker() Fail(%d)", ret);
+		icd_ioty_complete_error(ICD_CRUD_GET, ctx, ret);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	/* DO NOT FREE get_ctx. It MUST be freed in the _worker_get_cb func */
+	return OC_STACK_DELETE_TRANSACTION;
+}
+
+
+OCStackApplicationResult icd_ioty_ocprocess_put_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp)
+{
+	FN_CALL;
+	int ret, res;
+	OCStackResult result;
+	GVariantBuilder *options;
+
+	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
+
+	if (NULL == resp->resJSONPayload || '\0' == resp->resJSONPayload[0]) {
+		ERR("json payload is empty");
+		icd_ioty_complete_error(ICD_CRUD_PUT, ctx, IOTCON_ERROR_IOTIVITY);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	result = resp->result;
+	switch (result) {
+	case OC_STACK_OK:
+		res = IOTCON_RESPONSE_RESULT_OK;
+		break;
+	case OC_STACK_RESOURCE_CREATED:
+		res = IOTCON_RESPONSE_RESULT_RESOURCE_CREATED;
+		break;
+	case OC_STACK_RESOURCE_DELETED:
+		res = IOTCON_RESPONSE_RESULT_RESOURCE_DELETED;
+		break;
+	default:
+		WARN("resp error(%d)", result);
+		res = IOTCON_RESPONSE_RESULT_ERROR;
+		options = NULL;
+	}
+
+	if (IOTCON_RESPONSE_RESULT_ERROR != res) {
+		options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
+				resp->numRcvdVendorSpecificHeaderOptions);
+	}
+
+	ret = _ocprocess_worker(_worker_crud_cb, ICD_CRUD_PUT, resp->resJSONPayload, res,
+			options, ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker() Fail(%d)", ret);
+		icd_ioty_complete_error(ICD_CRUD_PUT, ctx, ret);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	return OC_STACK_DELETE_TRANSACTION;
+}
+
+
+OCStackApplicationResult icd_ioty_ocprocess_post_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp)
+{
+	FN_CALL;
+	int ret, res;
+	OCStackResult result;
+	GVariantBuilder *options;
+	struct icd_crud_context *crud_ctx;
+
+	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
+
+	if (NULL == resp->resJSONPayload || '\0' == resp->resJSONPayload[0]) {
+		ERR("json payload is empty");
+		icd_ioty_complete_error(ICD_CRUD_POST, ctx, IOTCON_ERROR_IOTIVITY);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	crud_ctx = calloc(1, sizeof(struct icd_crud_context));
+	if (NULL == crud_ctx) {
+		ERR("calloc() Fail(%d)", errno);
+		icd_ioty_complete_error(ICD_CRUD_POST, ctx, IOTCON_ERROR_OUT_OF_MEMORY);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	result = resp->result;
+	switch (result) {
+	case OC_STACK_OK:
+		res = IOTCON_RESPONSE_RESULT_OK;
+		break;
+	case OC_STACK_RESOURCE_CREATED:
+		res = IOTCON_RESPONSE_RESULT_RESOURCE_CREATED;
+		break;
+	case OC_STACK_RESOURCE_DELETED:
+		res = IOTCON_RESPONSE_RESULT_RESOURCE_DELETED;
+		break;
+	default:
+		WARN("resp error(%d)", result);
+		res = IOTCON_RESPONSE_RESULT_ERROR;
+		options = NULL;
+	}
+
+	if (IOTCON_RESPONSE_RESULT_ERROR != res) {
+		options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
+				resp->numRcvdVendorSpecificHeaderOptions);
+	}
+
+	ret = _ocprocess_worker(_worker_crud_cb, ICD_CRUD_POST, resp->resJSONPayload, res,
+			options, ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker() Fail(%d)", ret);
+		icd_ioty_complete_error(ICD_CRUD_POST, ctx, ret);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	return OC_STACK_DELETE_TRANSACTION;
+}
+
+
+OCStackApplicationResult icd_ioty_ocprocess_delete_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp)
+{
+	FN_CALL;
+	int ret, res;
+	OCStackResult result;
+	GVariantBuilder *options;
+	struct icd_crud_context *crud_ctx;
+
+	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
+
+	if (NULL == resp->resJSONPayload || '\0' == resp->resJSONPayload[0]) {
+		ERR("json payload is empty");
+		icd_ioty_complete_error(ICD_CRUD_DELETE, ctx, IOTCON_ERROR_IOTIVITY);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	crud_ctx = calloc(1, sizeof(struct icd_crud_context));
+	if (NULL == crud_ctx) {
+		ERR("calloc() Fail(%d)", errno);
+		icd_ioty_complete_error(ICD_CRUD_DELETE, ctx, IOTCON_ERROR_OUT_OF_MEMORY);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	result = resp->result;
+	switch (result) {
+	case OC_STACK_OK:
+		res = IOTCON_RESPONSE_RESULT_OK;
+		break;
+	case OC_STACK_RESOURCE_DELETED:
+		res = IOTCON_RESPONSE_RESULT_RESOURCE_DELETED;
+		break;
+	default:
+		WARN("resp error(%d)", result);
+		res = IOTCON_RESPONSE_RESULT_ERROR;
+		options = NULL;
+	}
+
+	if (IOTCON_RESPONSE_RESULT_ERROR != res) {
+		options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
+				resp->numRcvdVendorSpecificHeaderOptions);
+	}
+
+	ret = _ocprocess_worker(_worker_crud_cb, ICD_CRUD_DELETE, NULL, res, options, ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker() Fail(%d)", ret);
+		icd_ioty_complete_error(ICD_CRUD_DELETE, ctx, ret);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	/* DO NOT FREE crud_ctx. It MUST be freed in the _worker_delete_cb func */
 
 	return OC_STACK_DELETE_TRANSACTION;
 }
