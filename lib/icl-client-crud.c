@@ -380,50 +380,42 @@ static void _icl_on_observe_cb(GDBusConnection *connection,
 		gpointer user_data)
 {
 	FN_CALL;
-	int index;
-	GVariantIter *options;
-	unsigned short option_id;
-	char *option_data;
-	iotcon_options_h header_options = NULL;
-	iotcon_repr_h repr = NULL;
-	GVariantIter *repr_iter;
-	char *repr_json;
-	char *repr_uri_path;
 	int res;
 	int seq_num;
+	iotcon_repr_h repr;
+	GVariantIter *options;
+	unsigned short option_id;
+	char *option_data, *repr_json;
+	iotcon_options_h header_options = NULL;
 
 	icl_on_observe_s *cb_container = user_data;
 	iotcon_on_observe_cb cb = cb_container->cb;
 
-	g_variant_get(parameters, "(a(qs)asii)", &options, &repr_iter, &res, &seq_num);
+	g_variant_get(parameters, "(a(qs)sii)", &options, &repr_json, &res, &seq_num);
 
-	if (g_variant_iter_n_children(options)) {
+	if (IOTCON_ERROR_NONE == res && g_variant_iter_n_children(options)) {
 		header_options = iotcon_options_new();
 		while (g_variant_iter_loop(options, "(q&s)", &option_id, &option_data))
 			iotcon_options_insert(header_options, option_id, option_data);
 	}
 	g_variant_iter_free(options);
 
-	for (index = 0; g_variant_iter_loop(repr_iter, "&s", &repr_json); index++) {
-		iotcon_repr_h cur_repr = icl_repr_parse_json(repr_json);
-		if (NULL == cur_repr) {
-			ERR("icl_repr_parse_json() Fail");
-			iotcon_options_free(header_options);
-			if (repr)
-				iotcon_repr_free(repr);
-			g_variant_iter_free(repr_iter);
+	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, repr_json)) {
+		repr = iotcon_repr_new();
+	} else {
+		repr = icl_repr_create_repr(repr_json);
+		if (NULL == repr) {
+			ERR("icl_repr_create_repr() Fail");
+			if (header_options)
+				iotcon_options_free(header_options);
+
+			iotcon_client_free(cb_container->resource);
+			free(cb_container);
 			return;
 		}
-		repr_uri_path = icl_repr_json_get_uri_path(repr_json);
-		iotcon_repr_set_uri_path(cur_repr, repr_uri_path);
-		free(repr_uri_path);
-
-		if (0 == index)
-			repr = cur_repr;
-		else
-			repr->children = g_list_append(repr->children, cur_repr);
 	}
-	g_variant_iter_free(repr_iter);
+
+	res = icl_dbus_convert_daemon_error(res);
 
 	if (cb)
 		cb(cb_container->resource, repr, header_options, res, seq_num,
@@ -451,7 +443,6 @@ API int iotcon_observer_start(iotcon_client_h resource,
 		iotcon_on_observe_cb cb,
 		void *user_data)
 {
-	int ret;
 	int observe_handle;
 	GError *error = NULL;
 	unsigned int sub_id;
@@ -471,7 +462,7 @@ API int iotcon_observer_start(iotcon_client_h resource,
 	arg_query = icl_dbus_query_to_gvariant(query);
 
 	ic_dbus_call_observer_start_sync(icl_dbus_get_object(), arg_client, observe_type,
-			arg_query, signal_number, &observe_handle, &ret, NULL, &error);
+			arg_query, signal_number, &observe_handle, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_observer_start_sync() Fail(%s)", error->message);
 		g_error_free(error);
@@ -480,9 +471,9 @@ API int iotcon_observer_start(iotcon_client_h resource,
 		return IOTCON_ERROR_DBUS;
 	}
 
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
+	if (0 == observe_handle) {
+		ERR("iotcon-daemon Fail");
+		return IOTCON_ERROR_IOTIVITY;
 	}
 
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_OBSERVE,
@@ -504,8 +495,8 @@ API int iotcon_observer_start(iotcon_client_h resource,
 	cb_container->cb = cb;
 	cb_container->user_data = user_data;
 
-	sub_id = icl_dbus_subscribe_signal(signal_name, cb_container, _icl_observe_conn_cleanup,
-			_icl_on_observe_cb);
+	sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
+			_icl_observe_conn_cleanup, _icl_on_observe_cb);
 	if (0 == sub_id) {
 		ERR("icl_dbus_subscribe_signal() Fail");
 		return IOTCON_ERROR_DBUS;
@@ -513,7 +504,7 @@ API int iotcon_observer_start(iotcon_client_h resource,
 	resource->observe_sub_id = sub_id;
 	resource->observe_handle = observe_handle;
 
-	return ret;
+	return IOTCON_ERROR_NONE;
 }
 
 
@@ -521,6 +512,7 @@ API int iotcon_observer_stop(iotcon_client_h resource)
 {
 	int ret;
 	GError *error = NULL;
+	GVariant *arg_options;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
@@ -529,8 +521,10 @@ API int iotcon_observer_stop(iotcon_client_h resource)
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	ic_dbus_call_observer_stop_sync(icl_dbus_get_object(),
-			resource->observe_handle, &ret, NULL, &error);
+	arg_options = icl_dbus_options_to_gvariant(resource->header_options);
+
+	ic_dbus_call_observer_stop_sync(icl_dbus_get_object(), resource->observe_handle,
+			arg_options, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_observer_stop_sync() Fail(%s)", error->message);
 		g_error_free(error);

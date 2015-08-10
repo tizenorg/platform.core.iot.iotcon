@@ -20,6 +20,7 @@
 #include <glib.h>
 
 #include "iotcon.h"
+#include "ic-utils.h"
 #include "icl.h"
 #include "icl-dbus.h"
 
@@ -96,6 +97,8 @@ static void _icl_presence_cb(GDBusConnection *connection,
 
 	g_variant_get(parameters, "(iu&s)", &res, &nonce, &host_address);
 
+	res = icl_dbus_convert_daemon_error(res);
+
 	if (cb)
 		cb(res, nonce, host_address, presence_container->user_data);
 }
@@ -134,8 +137,7 @@ API iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
 		return NULL;
 	}
 
-	if (NULL == resource_type)
-		resource_type = "";
+	resource_type = ic_utils_dbus_encode_str(resource_type);
 
 	ic_dbus_call_subscribe_presence_sync(icl_dbus_get_object(), host_address,
 			resource_type, signal_number, &(presence_container->handle), NULL, &error);

@@ -41,4 +41,10 @@ OCStackApplicationResult icd_ioty_ocprocess_post_cb(void *ctx, OCDoHandle handle
 OCStackApplicationResult icd_ioty_ocprocess_delete_cb(void *ctx, OCDoHandle handle,
 		OCClientResponse *resp);
 
+OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse* resp);
+
+OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse* resp);
+
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_THREAD_H__*/

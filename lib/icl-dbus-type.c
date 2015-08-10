@@ -59,7 +59,7 @@ GVariant* icl_dbus_notimsg_to_gvariant(struct icl_notify_msg *msg)
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("a(is)"));
 
 	if (msg) {
-		repr_json = icl_repr_generate_json(msg->repr, false, true);
+		repr_json = icl_repr_generate_json(msg->repr, false, false);
 		if (NULL == repr_json) {
 			ERR("icl_repr_generate_json() Fail");
 			g_variant_builder_clear(&builder);
@@ -192,6 +192,25 @@ GVariant* icl_dbus_query_to_gvariant(iotcon_query_h query)
 	}
 
 	return g_variant_builder_end(&builder);
+}
+
+
+GVariant* icl_dbus_options_to_gvariant(iotcon_options_h options)
+{
+	GHashTableIter iter;
+	GVariantBuilder builder;
+	gpointer option_id, option_data;
+
+	g_variant_builder_init(&builder, G_VARIANT_TYPE("a(qs)"));
+	if (options) {
+		g_hash_table_iter_init(&iter, options->hash);
+		while (g_hash_table_iter_next(&iter, &option_id, &option_data)) {
+			g_variant_builder_add(&builder, "(qs)", GPOINTER_TO_INT(option_id),
+					option_data);
+		}
+	}
+
+	return g_variant_new("a(qs)", builder);
 }
 
 

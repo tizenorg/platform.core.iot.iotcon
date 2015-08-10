@@ -137,12 +137,12 @@ OCResourceHandle icd_ioty_register_resource(const char *uri_path,
 }
 
 
-int icd_ioty_unregister_resource(OCResourceHandle resource_handle)
+int icd_ioty_unregister_resource(OCResourceHandle handle)
 {
 	OCStackResult ret;
 
 	icd_ioty_csdk_lock();
-	ret = OCDeleteResource(resource_handle);
+	ret = OCDeleteResource(handle);
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCDeleteResource() Fail(%d)", ret);
@@ -153,7 +153,7 @@ int icd_ioty_unregister_resource(OCResourceHandle resource_handle)
 }
 
 
-int icd_ioty_bind_interface(OCResourceHandle resourceHandle, iotcon_interface_e iface)
+int icd_ioty_bind_interface(OCResourceHandle handle, iotcon_interface_e iface)
 {
 	int ret;
 	OCStackResult result;
@@ -166,7 +166,7 @@ int icd_ioty_bind_interface(OCResourceHandle resourceHandle, iotcon_interface_e 
 	}
 
 	icd_ioty_csdk_lock();
-	result = OCBindResourceInterfaceToResource(resourceHandle, resource_interface);
+	result = OCBindResourceInterfaceToResource(handle, resource_interface);
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != result) {
 		ERR("OCBindResourceInterfaceToResource() Fail(%d)", result);
@@ -177,12 +177,12 @@ int icd_ioty_bind_interface(OCResourceHandle resourceHandle, iotcon_interface_e 
 }
 
 
-int icd_ioty_bind_type(OCResourceHandle resource_handle, const char *resource_type)
+int icd_ioty_bind_type(OCResourceHandle handle, const char *resource_type)
 {
 	OCStackResult ret;
 
 	icd_ioty_csdk_lock();
-	ret = OCBindResourceTypeToResource(resource_handle, resource_type);
+	ret = OCBindResourceTypeToResource(handle, resource_type);
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCBindResourceTypeToResource() Fail(%d)", ret);
@@ -225,7 +225,8 @@ int icd_ioty_unbind_resource(OCResourceHandle parent, OCResourceHandle child)
 }
 
 
-int icd_ioty_notify_list_of_observers(void *handle, GVariant *msg, GVariant *observers)
+int icd_ioty_notify_list_of_observers(OCResourceHandle handle, GVariant *msg,
+		GVariant *observers)
 {
 	int i, error_code, obs_length;
 	char *repr_json = NULL;
@@ -262,7 +263,7 @@ int icd_ioty_notify_list_of_observers(void *handle, GVariant *msg, GVariant *obs
 }
 
 
-int icd_ioty_notify_all(void *handle)
+int icd_ioty_notify_all(OCResourceHandle handle)
 {
 	OCStackResult ret;
 
@@ -634,17 +635,110 @@ gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
 }
 
 
-int icd_ioty_observer_start(GVariant *resource, int observe_type,
-		GVariant *query, unsigned int signal_number, const char *bus_name, int *observe_h)
+OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVariant *query,
+		unsigned int signal_number, const char *bus_name)
 {
-	// TODO : To be implemented
-	return IOTCON_ERROR_NONE;
+	OCMethod method;
+	OCDoHandle handle;
+	OCStackResult result;
+	GVariantIter *options;
+	icd_sig_ctx_s *context;
+	OCCallbackData cbdata = {0};
+	int conn_type, options_size;
+	char *uri_path, *host, *uri;
+	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
+	OCHeaderOption *oic_options_ptr = NULL;
+
+	g_variant_get(resource, "(&s&sa(qs)i)", &uri_path, &host, &options, &conn_type);
+
+	uri = _icd_ioty_resource_generate_uri(host, uri_path, query);
+	if (NULL == uri) {
+		ERR("_icd_ioty_resource_generate_uri() Fail");
+		g_variant_iter_free(options);
+		return NULL;
+	}
+
+	if (IOTCON_OBSERVE == observe_type)
+		method = OC_REST_OBSERVE;
+	else if (IOTCON_OBSERVE_ALL == observe_type)
+		method = OC_REST_OBSERVE_ALL;
+	else
+		method = OC_REST_OBSERVE_ALL;
+
+	context = calloc(1, sizeof(icd_sig_ctx_s));
+	if (NULL == context) {
+		ERR("calloc() Fail(%d)", errno);
+		return NULL;
+	}
+	context->bus_name = ic_utils_strdup(bus_name);
+	context->signum = signal_number;
+
+	cbdata.context = context;
+	cbdata.cb = icd_ioty_ocprocess_observe_cb;
+	cbdata.cd = _ioty_free_signal_context;
+
+	options_size = g_variant_iter_n_children(options);
+	if (0 != options_size) {
+		int ret = _ioty_get_header_options(options, options_size, oic_options,
+				sizeof(oic_options) / sizeof(oic_options[0]));
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_ioty_get_header_options() Fail(%d)", ret);
+			free(context->bus_name);
+			free(context);
+			free(uri);
+			g_variant_iter_free(options);
+			return NULL;
+		}
+		oic_options_ptr = oic_options;
+	}
+	g_variant_iter_free(options);
+
+	icd_ioty_csdk_lock();
+	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
+	result = OCDoResource(&handle, method, uri, NULL, NULL, conn_type, OC_HIGH_QOS,
+			&cbdata, oic_options_ptr, options_size);
+	icd_ioty_csdk_unlock();
+	free(uri);
+	if (OC_STACK_OK != result) {
+		ERR("OCDoResource() Fail(%d)", result);
+		free(context->bus_name);
+		free(context);
+		return NULL;
+	}
+
+	return handle;
 }
 
 
-int icd_ioty_observer_stop(void *observe_h)
+int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options)
 {
-	// TODO : To be implemented
+	int options_size;
+	OCStackResult ret;
+	GVariantIter options_iter;
+	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
+	OCHeaderOption *oic_options_ptr = NULL;
+
+	g_variant_iter_init(&options_iter, options);
+
+	options_size = g_variant_iter_n_children(&options_iter);
+	if (0 != options_size) {
+		int ret = _ioty_get_header_options(&options_iter, options_size, oic_options,
+				sizeof(oic_options) / sizeof(oic_options[0]));
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_ioty_get_header_options() Fail(%d)", ret);
+			return ret;
+		}
+		oic_options_ptr = oic_options;
+	}
+
+	icd_ioty_csdk_lock();
+	ret = OCCancel(handle, OC_HIGH_QOS, oic_options_ptr, options_size);
+	icd_ioty_csdk_unlock();
+	if (OC_STACK_OK != ret) {
+		ERR("OCCancel() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	return IOTCON_ERROR_NONE;
 }
 
@@ -684,27 +778,96 @@ int icd_ioty_get_platform_info(const char *host_address, unsigned int signal_num
 OCDoHandle icd_ioty_subscribe_presence(const char *host_address,
 		const char *resource_type, unsigned int signal_number, const char *bus_name)
 {
-	// TODO : To be implemented
-	return NULL;
+	int len;
+	OCDoHandle handle;
+	OCStackResult result;
+	char uri[PATH_MAX] = {0};
+	OCCallbackData cbdata = {0};
+	icd_sig_ctx_s *context;
+	iotcon_connectivity_type_e conn_type = IOTCON_CONNECTIVITY_IPV4;
+
+	len = snprintf(uri, sizeof(uri), "%s%s", host_address, OC_PRESENCE_URI);
+	if (len <= 0 || sizeof(uri) <= len) {
+		ERR("snprintf() Fail(%d)", len);
+		return NULL;
+	}
+
+	if (IC_STR_EQUAL != strcmp(IC_STR_NULL, resource_type))
+		snprintf(uri + len, sizeof(uri), "?rt=%s", resource_type);
+
+	context = calloc(1, sizeof(icd_sig_ctx_s));
+	if (NULL == context) {
+		ERR("calloc() Fail(%d)", errno);
+		return NULL;
+	}
+	context->bus_name = ic_utils_strdup(bus_name);
+	context->signum = signal_number;
+
+	cbdata.context = context;
+	cbdata.cb = icd_ioty_ocprocess_presence_cb;
+	cbdata.cd = _ioty_free_signal_context;
+
+	/* TODO : OC_ALL has wrong behaviour in iotivity version 0.9.1.
+	 * Therefore, OC_IPV4 SHOULD be changed to OC_ALL later.
+	 */
+	icd_ioty_csdk_lock();
+	result = OCDoResource(&handle, OC_REST_PRESENCE, uri, NULL, NULL, conn_type,
+			OC_LOW_QOS, &cbdata, NULL, 0);
+	icd_ioty_csdk_unlock();
+
+	if (OC_STACK_OK != result) {
+		ERR("OCDoResource() Fail(%d)", result);
+		free(context->bus_name);
+		free(context);
+		return NULL;
+	}
+	return handle;
 }
 
 
-int icd_ioty_unsubscribe_presence(OCDoHandle presence_handle)
+int icd_ioty_unsubscribe_presence(OCDoHandle handle)
 {
-	// TODO : To be implemented
+	OCStackResult ret;
+
+	icd_ioty_csdk_lock();
+	ret = OCCancel(handle, OC_LOW_QOS, NULL, 0);
+	icd_ioty_csdk_unlock();
+	if (OC_STACK_OK != ret) {
+		ERR("OCCancel() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	return IOTCON_ERROR_NONE;
 }
 
 
 int icd_ioty_start_presence(unsigned int time_to_live)
 {
-	// TODO : To be implemented
+	OCStackResult ret;
+
+	icd_ioty_csdk_lock();
+	ret = OCStartPresence(time_to_live);
+	icd_ioty_csdk_unlock();
+	if (OC_STACK_OK != ret) {
+		ERR("OCStartPresence() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	return IOTCON_ERROR_NONE;
 }
 
 
 int icd_ioty_stop_presence()
 {
-	// TODO : To be implemented
+	OCStackResult ret;
+
+	icd_ioty_csdk_lock();
+	ret = OCStopPresence();
+	icd_ioty_csdk_unlock();
+	if (OC_STACK_OK != ret) {
+		ERR("OCStopPresence() Fail(%d)", ret);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	return IOTCON_ERROR_NONE;
 }

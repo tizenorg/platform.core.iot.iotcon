@@ -217,7 +217,7 @@ static int _icd_dbus_client_list_find_client(const gchar *owner, GList **ret_lis
 		client_list = client_list->next;
 	}
 
-	return IOTCON_ERROR_NO_DATA;
+	return IOTCON_ERROR_NONE;
 }
 
 static void _icd_dbus_name_owner_changed_cb(GDBusConnection *conn,
@@ -511,17 +511,16 @@ static gboolean _dbus_handle_observer_start(icDbus *object,
 		GVariant *query,
 		guint signal_number)
 {
-	int ret;
-	int observe_h;
+	void *observe_h;
 	const gchar *sender;
 
 	sender = g_dbus_method_invocation_get_sender(invocation);
-	ret = icd_ioty_observer_start(client, observe_type, query, signal_number, sender,
-			&observe_h);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icd_ioty_observer_start() Fail(%d)", ret);
+	observe_h = icd_ioty_observer_start(client, observe_type, query, signal_number,
+			sender);
+	if (NULL == observe_h)
+		ERR("icd_ioty_observer_start() Fail");
 
-	ic_dbus_complete_observer_start(object, invocation, observe_h, ret);
+	ic_dbus_complete_observer_start(object, invocation, GPOINTER_TO_INT(observe_h));
 
 	/* observe_h will be freed in _dbus_handle_observer_stop() */
 	return TRUE;
@@ -530,11 +529,12 @@ static gboolean _dbus_handle_observer_start(icDbus *object,
 
 static gboolean _dbus_handle_observer_stop(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		gint observe_h)
+		gint observe_h,
+		GVariant *options)
 {
 	int ret;
 
-	ret = icd_ioty_observer_stop(GINT_TO_POINTER(observe_h));
+	ret = icd_ioty_observer_stop(GINT_TO_POINTER(observe_h), options);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_observer_stop() Fail(%d)", ret);
 
@@ -706,8 +706,7 @@ static gboolean _dbus_handle_subscribe_presence(icDbus *object,
 	if (NULL == presence_h)
 		ERR("icd_ioty_subscribe_presence() Fail");
 
-	ic_dbus_complete_subscribe_presence(object, invocation,
-			GPOINTER_TO_INT(presence_h));
+	ic_dbus_complete_subscribe_presence(object, invocation, GPOINTER_TO_INT(presence_h));
 
 	return TRUE;
 }

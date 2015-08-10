@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <glib.h>
 
+#include <octypes.h>
+
 #include "iotcon.h"
 
 #define ICD_IOTY_COAP "coap://"
@@ -45,22 +47,23 @@ GThread* icd_ioty_init(const char *addr, unsigned short port);
 
 void icd_ioty_deinit();
 
-void* icd_ioty_register_resource(const char *uri_path, const char* const* res_types,
-		int ifaces, uint8_t properties);
+OCResourceHandle icd_ioty_register_resource(const char *uri_path,
+		const char* const* res_types, int ifaces, uint8_t properties);
 
-int icd_ioty_unregister_resource(void *resource_handle);
+int icd_ioty_unregister_resource(OCResourceHandle handle);
 
-int icd_ioty_bind_interface(void *resource_handle, iotcon_interface_e iface);
+int icd_ioty_bind_interface(OCResourceHandle handle, iotcon_interface_e iface);
 
-int icd_ioty_bind_type(void *resource_handle, const char *resource_type);
+int icd_ioty_bind_type(OCResourceHandle handle, const char *resource_type);
 
-int icd_ioty_bind_resource(void *parent, void *child);
+int icd_ioty_bind_resource(OCResourceHandle parent, OCResourceHandle child);
 
-int icd_ioty_unbind_resource(void *parent, void *child);
+int icd_ioty_unbind_resource(OCResourceHandle parent, OCResourceHandle child);
 
-int icd_ioty_notify_list_of_observers(void *handle, GVariant *msg, GVariant *observers);
+int icd_ioty_notify_list_of_observers(OCResourceHandle handle, GVariant *msg,
+		GVariant *observers);
 
-int icd_ioty_notify_all(void *handle);
+int icd_ioty_notify_all(OCResourceHandle handle);
 
 int icd_ioty_send_response(GVariant *resp);
 
@@ -82,10 +85,10 @@ gboolean icd_ioty_post(icDbus *object, GDBusMethodInvocation *invocation,
 gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource);
 
-int icd_ioty_observer_start(GVariant *resource, int observe_type, GVariant *query,
-		unsigned int signal_number, const char *bus_name, int *observe_h);
+OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVariant *query,
+		unsigned int signal_number, const char *bus_name);
 
-int icd_ioty_observer_stop(void *observe_h);
+int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options);
 
 #ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 int icd_ioty_register_device_info(GVariant *value);
@@ -99,10 +102,10 @@ int icd_ioty_register_platform_info(GVariant *value);
 int icd_ioty_get_platform_info(const char *host_address, unsigned int signal_number,
 		const char *bus_name);
 
-void* icd_ioty_subscribe_presence(const char *host_address, const char *resource_type,
-		unsigned int signal_number, const char *bus_name);
+OCDoHandle icd_ioty_subscribe_presence(const char *host_address,
+		const char *resource_type, unsigned int signal_number, const char *bus_name);
 
-int icd_ioty_unsubscribe_presence(void *presence_handle);
+int icd_ioty_unsubscribe_presence(OCDoHandle handle);
 
 int icd_ioty_start_presence(unsigned int time_to_live);
 

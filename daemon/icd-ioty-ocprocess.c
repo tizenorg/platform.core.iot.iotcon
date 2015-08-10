@@ -20,6 +20,7 @@
 #include <json-glib/json-glib.h>
 
 #include <ocstack.h>
+#include <octypes.h>
 
 #include "iotcon.h"
 #include "ic-utils.h"
@@ -77,6 +78,24 @@ struct icd_crud_context {
 	GDBusMethodInvocation *invocation;
 };
 
+
+struct icd_observe_context {
+	unsigned int signum;
+	int res;
+	int seqnum;
+	char *bus_name;
+	char *payload;
+	GVariantBuilder *options;
+};
+
+
+struct icd_presence_context {
+	unsigned int signum;
+	char *bus_name;
+	int result;
+	unsigned int nonce;
+	OCDevAddr *dev_addr;
+};
 
 void icd_ioty_ocprocess_stop()
 {
@@ -651,7 +670,7 @@ OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 	}
 
 	result = resp->result;
-	if (result == OC_STACK_OK) {
+	if (OC_STACK_OK == result) {
 		res = IOTCON_RESPONSE_RESULT_OK;
 		options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
 				resp->numRcvdVendorSpecificHeaderOptions);
@@ -696,9 +715,6 @@ OCStackApplicationResult icd_ioty_ocprocess_put_cb(void *ctx, OCDoHandle handle,
 		break;
 	case OC_STACK_RESOURCE_CREATED:
 		res = IOTCON_RESPONSE_RESULT_RESOURCE_CREATED;
-		break;
-	case OC_STACK_RESOURCE_DELETED:
-		res = IOTCON_RESPONSE_RESULT_RESOURCE_DELETED;
 		break;
 	default:
 		WARN("resp error(%d)", result);
@@ -754,9 +770,6 @@ OCStackApplicationResult icd_ioty_ocprocess_post_cb(void *ctx, OCDoHandle handle
 		break;
 	case OC_STACK_RESOURCE_CREATED:
 		res = IOTCON_RESPONSE_RESULT_RESOURCE_CREATED;
-		break;
-	case OC_STACK_RESOURCE_DELETED:
-		res = IOTCON_RESPONSE_RESULT_RESOURCE_DELETED;
 		break;
 	default:
 		WARN("resp error(%d)", result);
@@ -835,4 +848,237 @@ OCStackApplicationResult icd_ioty_ocprocess_delete_cb(void *ctx, OCDoHandle hand
 
 	return OC_STACK_DELETE_TRANSACTION;
 }
+
+
+static int _worker_observe_cb(void *context)
+{
+	int ret;
+	GVariant *value;
+	struct icd_observe_context *ctx = context;
+
+	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
+
+	value = g_variant_new("(a(qs)sii)", ctx->options, ctx->payload, ctx->res,
+			ctx->seqnum);
+
+	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_OBSERVE, ctx->signum,
+			value);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("_ocprocess_response_signal() Fail(%d)", ret);
+
+	/* ctx was allocated from icd_ioty_ocprocess_observe_cb() */
+	free(ctx->bus_name);
+	free(ctx->payload);
+	g_variant_builder_unref(ctx->options);
+	free(ctx);
+
+	return ret;
+}
+
+
+static void _observe_cb_response_error(const char *dest, unsigned int signum, int ret_val)
+{
+	int ret;
+	GVariant *value;
+
+	value = g_variant_new("(a(qs)sii)", NULL, IC_STR_NULL, ret_val, 0);
+
+	ret = _ocprocess_response_signal(dest, IC_DBUS_SIGNAL_OBSERVE, signum, value);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("_ocprocess_response_signal() Fail(%d)", ret);
+}
+
+
+OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp)
+{
+	int ret, res;
+	OCStackResult result;
+	GVariantBuilder *options;
+	struct icd_observe_context *observe_ctx;
+	icd_sig_ctx_s *sig_context = ctx;
+
+	RETV_IF(NULL == ctx, OC_STACK_KEEP_TRANSACTION);
+
+	if (NULL == resp->resJSONPayload || '\0' == resp->resJSONPayload[0]) {
+		ERR("json payload is empty");
+		_observe_cb_response_error(sig_context->bus_name, sig_context->signum,
+				IOTCON_ERROR_IOTIVITY);
+		return OC_STACK_KEEP_TRANSACTION;
+	}
+
+	observe_ctx = calloc(1, sizeof(struct icd_observe_context));
+	if (NULL == observe_ctx) {
+		ERR("calloc() Fail(%d)", errno);
+		_observe_cb_response_error(sig_context->bus_name, sig_context->signum,
+				IOTCON_ERROR_OUT_OF_MEMORY);
+		return OC_STACK_KEEP_TRANSACTION;
+	}
+
+	result = resp->result;
+	if (OC_STACK_OK == result) {
+		res = IOTCON_RESPONSE_RESULT_OK;
+		options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
+				resp->numRcvdVendorSpecificHeaderOptions);
+	} else {
+		WARN("resp error(%d)", result);
+		res = IOTCON_RESPONSE_RESULT_ERROR;
+		options = NULL;
+	}
+
+	observe_ctx->payload = strdup(resp->resJSONPayload);
+	observe_ctx->signum = sig_context->signum;
+	observe_ctx->res = res;
+	observe_ctx->bus_name = ic_utils_strdup(sig_context->bus_name);
+	observe_ctx->options = options;
+
+	ret = _ocprocess_worker_start(_worker_observe_cb, observe_ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker_start() Fail(%d)", ret);
+		_observe_cb_response_error(sig_context->bus_name, sig_context->signum, ret);
+		free(observe_ctx->bus_name);
+		free(observe_ctx->payload);
+		g_variant_builder_unref(observe_ctx->options);
+		free(observe_ctx);
+		return OC_STACK_KEEP_TRANSACTION;
+	}
+
+	/* DO NOT FREE sig_context. It MUST be freed in the ocstack */
+	/* DO NOT FREE observe_ctx. It MUST be freed in the _worker_observe_cb func */
+
+	return OC_STACK_KEEP_TRANSACTION;
+}
+
+
+
+static int _worker_presence_cb(void *context)
+{
+	FN_CALL;
+	int ret;
+	uint16_t port;
+	uint8_t a, b, c, d;
+	GVariant *value;
+	char addr[PATH_MAX] = {0};
+	struct icd_presence_context *ctx = context;
+
+	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
+
+	ret = OCDevAddrToIPv4Addr(ctx->dev_addr, &a, &b, &c, &d);
+	if (OC_STACK_OK != ret) {
+		ERR("OCDevAddrToIPv4Addr() Fail(%d)", ret);
+		free(ctx->bus_name);
+		free(ctx->dev_addr);
+		free(ctx);
+		return ret;
+	}
+
+	ret = OCDevAddrToPort(ctx->dev_addr, &port);
+	if (OC_STACK_OK != ret) {
+		ERR("OCDevAddrToPort() Fail(%d)", ret);
+		free(ctx->bus_name);
+		free(ctx->dev_addr);
+		free(ctx);
+		return ret;
+	}
+
+	/* TODO coap:// ? */
+	snprintf(addr, sizeof(addr), ICD_IOTY_COAP"%d.%d.%d.%d:%d", a, b, c, d, port);
+
+	value = g_variant_new("(ius)", ctx->result, ctx->nonce, addr);
+
+	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_PRESENCE, ctx->signum,
+			value);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("_ocprocess_response_signal() Fail(%d)", ret);
+
+	/* ctx was allocated from icd_ioty_ocprocess_presence_cb() */
+	free(ctx->bus_name);
+	free(ctx->dev_addr);
+	free(ctx);
+
+	return ret;
+}
+
+
+static void _presence_cb_response_error(const char *dest, unsigned int signum,
+		int ret_val)
+{
+	FN_CALL;
+	int ret;
+	GVariant *value;
+
+	value = g_variant_new("(ius)", ret_val, 0, IC_STR_NULL);
+
+	ret = _ocprocess_response_signal(dest, IC_DBUS_SIGNAL_PRESENCE, signum, value);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("_ocprocess_response_signal() Fail(%d)", ret);
+}
+
+
+OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp)
+{
+	FN_CALL;
+	int ret;
+	OCDevAddr *dev_addr;
+	icd_sig_ctx_s *sig_context = ctx;
+	struct icd_presence_context *presence_ctx;
+
+	RETV_IF(NULL == ctx, OC_STACK_KEEP_TRANSACTION);
+
+	presence_ctx = calloc(1, sizeof(struct icd_presence_context));
+	if (NULL == presence_ctx) {
+		ERR("calloc() Fail(%d)", errno);
+		_presence_cb_response_error(sig_context->bus_name, sig_context->signum,
+				IOTCON_ERROR_OUT_OF_MEMORY);
+		return OC_STACK_KEEP_TRANSACTION;
+	}
+
+	dev_addr = calloc(1, sizeof(OCDevAddr));
+	if (NULL == dev_addr) {
+		ERR("calloc() Fail(%d)", errno);
+		_presence_cb_response_error(sig_context->bus_name, sig_context->signum,
+				IOTCON_ERROR_OUT_OF_MEMORY);
+		free(presence_ctx);
+		return OC_STACK_KEEP_TRANSACTION;
+	}
+	memcpy(dev_addr, resp->addr, sizeof(OCDevAddr));
+
+	switch (resp->result) {
+	case OC_STACK_OK:
+		presence_ctx->result = IOTCON_PRESENCE_OK;
+		break;
+	case OC_STACK_PRESENCE_STOPPED:
+		presence_ctx->result = IOTCON_PRESENCE_STOPPED;
+		break;
+	case OC_STACK_PRESENCE_TIMEOUT:
+		presence_ctx->result = IOTCON_PRESENCE_TIMEOUT;
+		break;
+	case OC_STACK_ERROR:
+	default:
+		DBG("Presence error(%d)", resp->result);
+		presence_ctx->result = IOTCON_ERROR_IOTIVITY;
+	}
+
+	presence_ctx->signum = sig_context->signum;
+	presence_ctx->bus_name = ic_utils_strdup(sig_context->bus_name);
+	presence_ctx->nonce = resp->sequenceNumber;
+	presence_ctx->dev_addr = dev_addr;
+
+	ret = _ocprocess_worker_start(_worker_presence_cb, presence_ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker_start() Fail(%d)", ret);
+		_presence_cb_response_error(sig_context->bus_name, sig_context->signum, ret);
+		free(presence_ctx->bus_name);
+		free(presence_ctx->dev_addr);
+		free(presence_ctx);
+		return OC_STACK_KEEP_TRANSACTION;
+	}
+
+	/* DO NOT FREE sig_context. It MUST be freed in the ocstack */
+	/* DO NOT FREE presence_ctx. It MUST be freed in the _worker_presence_cb func */
+
+	return OC_STACK_KEEP_TRANSACTION;
+}
+
 

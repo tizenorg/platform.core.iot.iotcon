@@ -29,6 +29,7 @@ GVariant* icl_dbus_device_info_to_gvariant(iotcon_device_info_s *device_info);
 #endif
 GVariant* icl_dbus_platform_info_to_gvariant(iotcon_platform_info_s *platform_info);
 GVariant* icl_dbus_query_to_gvariant(iotcon_query_h query);
+GVariant* icl_dbus_options_to_gvariant(iotcon_options_h options);
 GVariant* icl_dbus_observers_to_gvariant(iotcon_observers_h observers);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_UTILITY_H__ */
