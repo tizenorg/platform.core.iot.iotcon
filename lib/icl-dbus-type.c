@@ -162,17 +162,17 @@ GVariant* icl_dbus_platform_info_to_gvariant(iotcon_platform_info_s *platform_in
 	GVariant *value;
 
 	value = g_variant_new("(sssssssssss)",
-			ic_utils_dbus_encode_str(platform_info->platform_id),
-			ic_utils_dbus_encode_str(platform_info->manuf_name),
-			ic_utils_dbus_encode_str(platform_info->manuf_url),
-			ic_utils_dbus_encode_str(platform_info->model_number),
-			ic_utils_dbus_encode_str(platform_info->date_of_manufacture),
-			ic_utils_dbus_encode_str(platform_info->platform_ver),
-			ic_utils_dbus_encode_str(platform_info->os_ver),
-			ic_utils_dbus_encode_str(platform_info->hardware_ver),
-			ic_utils_dbus_encode_str(platform_info->firmware_ver),
-			ic_utils_dbus_encode_str(platform_info->support_url),
-			ic_utils_dbus_encode_str(platform_info->system_time));
+			platform_info->platform_id,
+			platform_info->manuf_name,
+			platform_info->manuf_url,
+			platform_info->model_number,
+			platform_info->date_of_manufacture,
+			platform_info->platform_ver,
+			platform_info->os_ver,
+			platform_info->hardware_ver,
+			platform_info->firmware_ver,
+			platform_info->support_url,
+			platform_info->system_time);
 
 	return value;
 }

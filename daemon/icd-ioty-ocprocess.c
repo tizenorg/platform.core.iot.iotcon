@@ -79,6 +79,14 @@ struct icd_crud_context {
 };
 
 
+struct icd_platform_context {
+	unsigned int signum;
+	int res;
+	char *bus_name;
+	char *payload;
+};
+
+
 struct icd_observe_context {
 	unsigned int signum;
 	int res;
@@ -613,6 +621,30 @@ static int _worker_crud_cb(void *context)
 }
 
 
+static int _worker_platform_cb(void *context)
+{
+	int ret;
+	GVariant *value;
+	struct icd_platform_context *ctx = context;
+
+	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
+
+	value = g_variant_new("(s)", ctx->payload);
+
+	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_PLATFORM, ctx->signum,
+			value);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("_ocprocess_response_signal() Fail(%d)", ret);
+
+	/* ctx was allocated from icd_ioty_ocprocess_platform_cb() */
+	free(ctx->bus_name);
+	free(ctx->payload);
+	free(ctx);
+
+	return ret;
+}
+
+
 static int _ocprocess_worker(_ocprocess_fn fn, int type, const char *payload, int res,
 		GVariantBuilder *options, void *ctx)
 {
@@ -1082,3 +1114,41 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 }
 
 
+OCStackApplicationResult icd_ioty_ocprocess_platform_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp)
+{
+	int ret;
+	struct icd_platform_context *platform_ctx;
+	icd_sig_ctx_s *sig_context = ctx;
+
+	RETV_IF(NULL == ctx, OC_STACK_KEEP_TRANSACTION);
+
+	if (NULL == resp->resJSONPayload || '\0' == resp->resJSONPayload[0]) {
+		ERR("json payload is empty");
+		return OC_STACK_KEEP_TRANSACTION;
+	}
+
+	platform_ctx = calloc(1, sizeof(struct icd_platform_context));
+	if (NULL == platform_ctx) {
+		ERR("calloc() Fail(%d)", errno);
+		return OC_STACK_KEEP_TRANSACTION;
+	}
+
+	platform_ctx->payload = strdup(resp->resJSONPayload);
+	platform_ctx->signum = sig_context->signum;
+	platform_ctx->bus_name = ic_utils_strdup(sig_context->bus_name);
+
+	ret = _ocprocess_worker_start(_worker_platform_cb, platform_ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker_start() Fail(%d)", ret);
+		free(platform_ctx->bus_name);
+		free(platform_ctx->payload);
+		free(platform_ctx);
+		return OC_STACK_KEEP_TRANSACTION;
+	}
+
+	/* DO NOT FREE sig_context. It MUST be freed in the ocstack */
+	/* DO NOT FREE platform_ctx. It MUST be freed in the _worker_platform_cb func */
+
+	return OC_STACK_KEEP_TRANSACTION;
+}

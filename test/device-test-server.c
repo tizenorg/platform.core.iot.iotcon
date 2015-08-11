@@ -20,6 +20,7 @@
 
 int main()
 {
+	FN_CALL;
 	int ret;
 	GMainLoop *loop;
 

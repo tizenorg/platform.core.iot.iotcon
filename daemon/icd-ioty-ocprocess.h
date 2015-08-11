@@ -47,4 +47,7 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle han
 OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle handle,
 		OCClientResponse* resp);
 
+OCStackApplicationResult icd_ioty_ocprocess_platform_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp);
+
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_THREAD_H__*/

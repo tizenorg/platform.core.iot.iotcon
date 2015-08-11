@@ -22,6 +22,7 @@
 #include "iotcon.h"
 #include "ic-utils.h"
 #include "icl.h"
+#include "icl-repr.h"
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
 
@@ -192,6 +193,21 @@ API int iotcon_register_platform_info(iotcon_platform_info_s platform_info)
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 
+	if (NULL == platform_info.platform_id
+			|| NULL == platform_info.manuf_name
+			|| NULL == platform_info.manuf_url
+			|| NULL == platform_info.model_number
+			|| NULL == platform_info.date_of_manufacture
+			|| NULL == platform_info.platform_ver
+			|| NULL == platform_info.os_ver
+			|| NULL == platform_info.hardware_ver
+			|| NULL == platform_info.firmware_ver
+			|| NULL == platform_info.support_url
+			|| NULL == platform_info.system_time) {
+		ERR("one of parameter is NULL");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
 	if (platform_info.manuf_name
 			&& (IOTCON_MANUFACTURER_NAME_LENGTH_MAX < strlen(platform_info.manuf_name))) {
 		ERR("The length of manufacturer_name(%s) is invalid.", platform_info.manuf_name);
@@ -231,38 +247,24 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 		GVariant *parameters,
 		gpointer user_data)
 {
+	FN_CALL;
+	char *repr_json = NULL;
+	iotcon_repr_h repr;
 	icl_platform_info_s *cb_container = user_data;
 	iotcon_platform_info_cb cb = cb_container->cb;
 
-	iotcon_platform_info_s info = {0};
+	g_variant_get(parameters, "(&s)", &repr_json);
+	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, repr_json)) {
+		ERR("Invalid Representation");
+		return;
+	}
 
-	g_variant_get(parameters, "(&s&s&s&s&s&s&s&s&s&s&s)",
-			&info.platform_id,
-			&info.manuf_name,
-			&info.manuf_url,
-			&info.model_number,
-			&info.date_of_manufacture,
-			&info.platform_ver,
-			&info.os_ver,
-			&info.hardware_ver,
-			&info.firmware_ver,
-			&info.support_url,
-			&info.system_time);
-
-	info.platform_id = ic_utils_dbus_decode_str(info.platform_id);
-	info.manuf_name = ic_utils_dbus_decode_str(info.manuf_name);
-	info.manuf_url = ic_utils_dbus_decode_str(info.manuf_url);
-	info.model_number = ic_utils_dbus_decode_str(info.model_number);
-	info.date_of_manufacture = ic_utils_dbus_decode_str(info.date_of_manufacture);
-	info.platform_ver = ic_utils_dbus_decode_str(info.platform_ver);
-	info.os_ver = ic_utils_dbus_decode_str(info.os_ver);
-	info.hardware_ver = ic_utils_dbus_decode_str(info.hardware_ver);
-	info.firmware_ver = ic_utils_dbus_decode_str(info.firmware_ver);
-	info.support_url = ic_utils_dbus_decode_str(info.support_url);
-	info.system_time = ic_utils_dbus_decode_str(info.system_time);
+	repr = icl_repr_create_repr(repr_json);
 
 	if (cb)
-		cb(info, cb_container->user_data);
+		cb(repr, cb_container->user_data);
+
+	iotcon_repr_free(repr);
 }
 
 

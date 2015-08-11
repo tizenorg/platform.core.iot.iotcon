@@ -45,6 +45,19 @@
 #define IOTCON_FUNC_STOP 0
 #define IOTCON_FUNC_CONTINUE 1
 
+#define IOTCON_PLATFORM_PLATFORM_ID "pi"
+#define IOTCON_PLATFORM_MFG_NAME "mnmn"
+#define IOTCON_PLATFORM_MFG_URL "mnml"
+#define IOTCON_PLATFORM_MODEL_NUM "mnmo"
+#define IOTCON_PLATFORM_MFG_DATE "mndt"
+#define IOTCON_PLATFORM_PLATFORM_VERSION "mnpv"
+#define IOTCON_PLATFORM_OS_VERSION "mnos"
+#define IOTCON_PLATFORM_HARDWARE_VERSION "mnhw"
+#define IOTCON_PLATFORM_FIRMWARE_VERSION "mnfv"
+#define IOTCON_PLATFORM_SUPPORT_URL "mnsl"
+#define IOTCON_PLATFORM_SYSTEM_TIME "st"
+
+
 /**
  * @brief Action associated with observation
  */

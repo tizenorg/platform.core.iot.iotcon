@@ -75,7 +75,7 @@ int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 #endif
 
 int iotcon_register_platform_info(iotcon_platform_info_s platform_info);
-typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_s info, void *user_data);
+typedef void (*iotcon_platform_info_cb)(iotcon_repr_h repr, void *user_data);
 int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_cb cb,
 		void *user_data);
 

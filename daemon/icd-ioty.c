@@ -33,6 +33,8 @@
 #include "icd-ioty.h"
 #include "icd-ioty-ocprocess.h"
 
+#define ICD_IOTY_PLATFORM_URI_PATH "/oic/p"
+
 static GMutex icd_csdk_mutex;
 
 void icd_ioty_csdk_lock()
@@ -139,6 +141,7 @@ OCResourceHandle icd_ioty_register_resource(const char *uri_path,
 
 int icd_ioty_unregister_resource(OCResourceHandle handle)
 {
+	FN_CALL;
 	OCStackResult ret;
 
 	icd_ioty_csdk_lock();
@@ -762,7 +765,31 @@ int icd_ioty_get_device_info(const char *host_address,
 
 int icd_ioty_register_platform_info(GVariant *value)
 {
-	// TODO : To be implemented
+	OCStackResult result;
+	OCPlatformInfo platform_info = {0};
+
+	g_variant_get(value, "(&s&s&s&s&s&s&s&s&s&s&s)",
+			&platform_info.platformID,
+			&platform_info.manufacturerName,
+			&platform_info.manufacturerUrl,
+			&platform_info.modelNumber,
+			&platform_info.dateOfManufacture,
+			&platform_info.platformVersion,
+			&platform_info.operatingSystemVersion,
+			&platform_info.hardwareVersion,
+			&platform_info.firmwareVersion,
+			&platform_info.supportUrl,
+			&platform_info.systemTime);
+
+	icd_ioty_csdk_lock();
+	result = OCSetPlatformInfo(platform_info);
+	icd_ioty_csdk_unlock();
+
+	if (OC_STACK_OK != result) {
+		ERR("OCSetPlatformInfo() Fail(%d)", result);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	return IOTCON_ERROR_NONE;
 }
 
@@ -770,7 +797,50 @@ int icd_ioty_register_platform_info(GVariant *value)
 int icd_ioty_get_platform_info(const char *host_address, unsigned int signal_number,
 		const char *bus_name)
 {
-	// TODO : To be implemented
+	FN_CALL;
+	char *uri;
+	OCStackResult result;
+	icd_sig_ctx_s *context;
+	OCCallbackData cbdata = {0};
+	char uri_buf[PATH_MAX] = {0};
+	iotcon_connectivity_type_e conn_type = IOTCON_CONNECTIVITY_IPV4;
+
+	snprintf(uri_buf, sizeof(uri_buf), "%s:%d"ICD_IOTY_PLATFORM_URI_PATH, host_address,
+			OC_MULTICAST_PORT);
+	uri = strdup(uri_buf);
+	if (NULL == uri) {
+		ERR("strdup() Fail(%d)", errno);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	context = calloc(1, sizeof(icd_sig_ctx_s));
+	if (NULL == context) {
+		ERR("calloc() Fail(%d)", errno);
+		free(uri);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
+	context->bus_name = ic_utils_strdup(bus_name);
+	context->signum = signal_number;
+
+	cbdata.context = context;
+	cbdata.cb = icd_ioty_ocprocess_platform_cb;
+	cbdata.cd = _ioty_free_signal_context;
+
+	icd_ioty_csdk_lock();
+	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
+	result = OCDoResource(NULL, OC_REST_GET, uri, NULL, NULL, conn_type, OC_HIGH_QOS,
+			&cbdata, NULL, 0);
+	icd_ioty_csdk_unlock();
+
+	free(uri);
+
+	if (OC_STACK_OK != result) {
+		ERR("OCDoResource() Fail(%d)", result);
+		free(context->bus_name);
+		free(context);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	return IOTCON_ERROR_NONE;
 }
 
