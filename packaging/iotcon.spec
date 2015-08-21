@@ -12,7 +12,6 @@ BuildRequires:  cmake
 BuildRequires:  boost-devel
 BuildRequires:  iotivity-devel
 BuildRequires:  pkgconfig(glib-2.0)
-BuildRequires:  pkgconfig(json-glib-1.0)
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(capi-base-common)
 %if "%{tizen}" == "2.3"

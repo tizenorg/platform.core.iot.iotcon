@@ -7,8 +7,8 @@ SET(CLIENT_SRCS ${CLIENT_SRCS} ${CMAKE_SOURCE_DIR}/common/ic-dbus.c)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/common/ic-dbus.c
 	PROPERTIES GENERATED TRUE)
 
-pkg_check_modules(client_pkgs REQUIRED glib-2.0 dlog json-glib-1.0 capi-base-common
-	gio-2.0 gio-unix-2.0)
+pkg_check_modules(client_pkgs REQUIRED glib-2.0 dlog capi-base-common gio-2.0
+	gio-unix-2.0)
 INCLUDE_DIRECTORIES(${client_pkgs_INCLUDE_DIRS})
 LINK_DIRECTORIES(${client_pkgs_LIBRARY_DIRS})
 

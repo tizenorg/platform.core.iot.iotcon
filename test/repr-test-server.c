@@ -113,7 +113,7 @@ static void _room_request_handler_get(iotcon_request_h request,
 	if (query)
 		iotcon_query_foreach(query, _query_foreach_fn, &query_str);
 
-	if (query_str && (TEST_STR_EQUAL == strcmp("oc.mi.b", query_str))) {
+	if (query_str && (TEST_STR_EQUAL == strcmp("oic.if.b", query_str))) {
 		DBG("operation for BATCH interface");
 		interface = IOTCON_INTERFACE_BATCH;
 	} else {

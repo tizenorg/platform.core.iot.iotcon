@@ -18,7 +18,6 @@
 
 #include <stdbool.h>
 #include <glib.h>
-#include <json-glib/json-glib.h>
 
 #include "iotcon-struct.h"
 
@@ -32,27 +31,6 @@ struct icl_repr_s {
 	iotcon_resource_types_h res_types;
 };
 
-/**
- * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
- * @brief Generates JSON string from Representation.
- * @since_tizen 3.0
- * @remarks The returned string must be released with free() by you.
- *
- * @param[in] repr The handle to the Representation
- * @param[in] set_pretty Whether the generated JSON string should be pretty printed
- *
- * @return Generated JSON string, otherwise a null pointer if a parse error
- */
-char* icl_repr_generate_json(iotcon_repr_h repr, bool set_pretty, bool include_oc_key);
-
-char* icl_repr_json_get_uri_path(const char *json_string);
-
-iotcon_repr_h icl_repr_create_repr(const char *json_string);
-iotcon_repr_h icl_repr_parse_json(const char *json_string);
-
 void icl_repr_inc_ref_count(iotcon_repr_h val);
-
-int icl_repr_parse_resource_property(JsonObject *prop_obj, iotcon_resource_types_h *types,
-		int *ifaces, int *obs);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__ */

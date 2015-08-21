@@ -30,6 +30,7 @@
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
 #include "icl.h"
+#include "icl-payload.h"
 
 static void _icl_request_handler(GDBusConnection *connection,
 		const gchar *sender_name,
@@ -44,22 +45,23 @@ static void _icl_request_handler(GDBusConnection *connection,
 	unsigned short option_id;
 	char *option_data;
 	GVariantIter *query;
+	GVariantIter *repr_iter;
 	char *key = NULL;
 	char *value = NULL;
-	char *repr_json;
 	int request_handle;
 	int resource_handle;
 	struct icl_resource_request request = {0};
 	iotcon_resource_h resource = user_data;
 	iotcon_request_handler_cb cb = resource->cb;
+	GVariant *repr_gvar;
 
-	g_variant_get(parameters, "(ia(qs)a(ss)ii&sii)",
+	g_variant_get(parameters, "(ia(qs)a(ss)iiavii)",
 			&request.types,
 			&options,
 			&query,
 			&request.observation_info.action,
 			&request.observation_info.observer_id,
-			&repr_json,
+			&repr_iter,
 			&request_handle,
 			&resource_handle);
 
@@ -80,8 +82,8 @@ static void _icl_request_handler(GDBusConnection *connection,
 	request.request_handle = GINT_TO_POINTER(request_handle);
 	request.resource_handle = GINT_TO_POINTER(resource_handle);
 
-	if (ic_utils_dbus_decode_str(repr_json)) {
-		request.repr = icl_repr_create_repr(repr_json);
+	if (g_variant_iter_loop(repr_iter, "v", &repr_gvar)) {
+		request.repr = icl_repr_from_gvariant(repr_gvar);
 		if (NULL == request.repr) {
 			ERR("icl_repr_create_repr() Fail");
 			if (request.query)
@@ -123,7 +125,6 @@ API iotcon_resource_h iotcon_register_resource(const char *uri_path,
 		iotcon_request_handler_cb cb,
 		void *user_data)
 {
-	FN_CALL;
 	int signal_number;
 	unsigned int sub_id;
 	GError *error = NULL;

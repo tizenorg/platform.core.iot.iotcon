@@ -112,8 +112,6 @@ typedef int (*iotcon_repr_fn)(iotcon_repr_h repr, const char *key, void *user_da
 int iotcon_repr_foreach(iotcon_repr_h repr, iotcon_repr_fn fn, void *user_data);
 unsigned int iotcon_repr_get_keys_count(iotcon_repr_h repr);
 
-char* iotcon_repr_generate_json(iotcon_repr_h repr);
-
 iotcon_list_h iotcon_list_new(iotcon_types_e type);
 void iotcon_list_free(iotcon_list_h list);
 

@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_OBJECT_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_OBJECT_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_DAEMON_PAYLOAD_H__
+#define __IOT_CONNECTIVITY_MANAGER_DAEMON_PAYLOAD_H__
 
-#include "iotcon-struct.h"
-#include "iotcon-constant.h"
+#include <glib.h>
 
-int icl_obj_del_value(iotcon_repr_h repr, const char *key,
-		iotcon_types_e value_type);
+#include <ocpayload.h>
 
-int ic_repr_obj_get_value(iotcon_repr_h repr, const char *key, iotcon_value_h *retval);
-int icl_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value);
+GVariant* icd_payload_to_gvariant(OCPayload *payload);
+GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr);
+OCRepPayload* icd_payload_repr_from_gvariant(GVariant *var);
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_OBJECT_H__ */
+#endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_PAYLOAD_H__*/

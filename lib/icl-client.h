@@ -18,15 +18,14 @@
 
 #include "iotcon-struct.h"
 #include "icl-options.h"
-#include <json-glib/json-glib.h>
 
 struct icl_remote_resource {
 	int ref_count;
 	char *uri_path;
 	char *host;
 	char *sid;
+	bool is_secure;
 	bool is_observable;
-	bool is_collection;
 	iotcon_options_h header_options;
 	iotcon_resource_types_h types;
 	int ifaces;
@@ -34,8 +33,5 @@ struct icl_remote_resource {
 	int observe_handle;
 	unsigned int observe_sub_id;
 };
-
-iotcon_client_h icl_client_parse_resource_object(const char *json_string,
-		const char *host, iotcon_connectivity_type_e conn_type);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__ */

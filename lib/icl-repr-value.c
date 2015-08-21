@@ -16,7 +16,6 @@
 
 #include <stdlib.h>
 #include <errno.h>
-#include <json-glib/json-glib.h>
 
 #include "iotcon-struct.h"
 #include "iotcon-representation.h"
@@ -118,7 +117,7 @@ iotcon_value_h icl_value_new_double(double val)
 	return (iotcon_value_h)value;
 }
 
-iotcon_value_h icl_value_new_str(char *val)
+iotcon_value_h icl_value_new_str(const char *val)
 {
 	icl_basic_s *value;
 
@@ -245,107 +244,6 @@ int icl_value_get_repr(iotcon_value_h value, iotcon_repr_h *repr)
 	return IOTCON_ERROR_NONE;
 }
 
-/*
- * A general result : 1
- *                  : true
- *                                     : 5.5
- *                  : "Hello"
- */
-JsonNode* icl_value_to_json(iotcon_value_h value)
-{
-	JsonNode *node;
-	icl_basic_s *real = (icl_basic_s*)value;
-
-	RETV_IF(NULL == value, NULL);
-
-	if (IOTCON_TYPE_NULL == value->type)
-		node = json_node_new(JSON_NODE_NULL);
-	else
-		node = json_node_new(JSON_NODE_VALUE);
-
-	if (NULL == node) {
-		ERR("json_node_new(%d) Fail", value->type);
-		return NULL;
-	}
-
-	switch (value->type) {
-	case IOTCON_TYPE_INT:
-		json_node_set_int(node, real->val.i);
-		break;
-	case IOTCON_TYPE_BOOL:
-		json_node_set_boolean(node, real->val.b);
-		break;
-	case IOTCON_TYPE_DOUBLE:
-		json_node_set_double(node, real->val.d);
-		break;
-	case IOTCON_TYPE_STR:
-		json_node_set_string(node, real->val.s);
-		break;
-	case IOTCON_TYPE_NULL:
-		break;
-	default:
-		ERR("Invalid type(%d)", value->type);
-		break;
-	}
-
-	return node;
-}
-
-/*
- * A general result : 1
- *                  : true
- *                  : 5.5
- *                  : "Hello"
- */
-API iotcon_value_h icl_value_from_json(JsonNode *node)
-{
-	gint64 ival64;
-	GType gtype = 0;
-	iotcon_value_h value = NULL;
-
-	RETV_IF(NULL == node, NULL);
-
-	if (JSON_NODE_HOLDS_NULL(node)) {
-		value = icl_value_new_null();
-		if (NULL == value)
-			ERR("icl_value_new_null() Fail");
-		return value;
-	}
-
-	gtype = json_node_get_value_type(node);
-	switch (gtype) {
-	case G_TYPE_INT64:
-		ival64 = json_node_get_int(node);
-		if (INT_MAX < ival64 || ival64 < INT_MIN) {
-			ERR("value SHOULD NOT exceeds the integer range. ival64(%lld)", ival64);
-			return NULL;
-		}
-		value = icl_value_new_int(ival64);
-		if (NULL == value)
-			ERR("icl_value_new_int(%ll) Fail", ival64);
-		break;
-	case G_TYPE_BOOLEAN:
-		value = icl_value_new_bool(json_node_get_boolean(node));
-		if (NULL == value)
-			ERR("icl_value_new_bool() Fail");
-		break;
-	case G_TYPE_DOUBLE:
-		value = icl_value_new_double(json_node_get_double(node));
-		if (NULL == value)
-			ERR("icl_value_new_double() Fail");
-		break;
-	case G_TYPE_STRING:
-		value = icl_value_new_str(ic_utils_strdup(json_node_get_string(node)));
-		if (NULL == value)
-			ERR("icl_value_new_str() Fail");
-		break;
-	default:
-		ERR("Invalid type(%d)", gtype);
-		break;
-	}
-
-	return value;
-}
 
 void icl_value_free(gpointer data)
 {

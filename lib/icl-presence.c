@@ -115,6 +115,7 @@ static void _icl_presence_conn_cleanup(icl_presence_s *presence)
 API iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
 		const char *resource_type, iotcon_presence_cb cb, void *user_data)
 {
+	FN_CALL;
 	GError *error = NULL;
 	unsigned int sub_id;
 	int signal_number;

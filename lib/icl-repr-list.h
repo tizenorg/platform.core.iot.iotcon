@@ -17,7 +17,6 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_LIST_H__
 
 #include <glib.h>
-#include <json-glib/json-glib.h>
 
 #include "iotcon-struct.h"
 
@@ -29,9 +28,6 @@ struct icl_list_s {
 
 int icl_list_remove(iotcon_list_h list, iotcon_value_h val);
 int icl_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
-
-JsonArray* icl_list_to_json(iotcon_list_h list);
-iotcon_list_h icl_list_from_json(JsonArray *parray);
 
 iotcon_list_h icl_list_clone(iotcon_list_h list);
 

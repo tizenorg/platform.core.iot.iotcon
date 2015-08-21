@@ -67,15 +67,15 @@ int iotcon_bind_request_handler(iotcon_resource_h resource, iotcon_request_handl
 int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child);
 int iotcon_unbind_resource(iotcon_resource_h parent, iotcon_resource_h child);
 
-#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
-int iotcon_register_device_info(iotcon_device_info_s device_info);
-typedef void (*iotcon_device_info_cb)(iotcon_device_info_s info, void *user_data);
+
+int iotcon_register_device_info(const char *device_name);
+typedef void (*iotcon_device_info_cb)(const char *device_name, const char *sid,
+		const char *spec_version, const char *data_model_version, void *user_data);
 int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 		void *user_data);
-#endif
 
 int iotcon_register_platform_info(iotcon_platform_info_s platform_info);
-typedef void (*iotcon_platform_info_cb)(iotcon_repr_h repr, void *user_data);
+typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_s info, void *user_data);
 int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_cb cb,
 		void *user_data);
 

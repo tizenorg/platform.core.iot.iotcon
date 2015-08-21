@@ -111,7 +111,7 @@ static void _on_get_1st(iotcon_client_h resource, iotcon_repr_h recv_repr,
 	_on_get(recv_repr, response_result);
 
 	query_params = iotcon_query_new();
-	iotcon_query_insert(query_params, "if", "oc.mi.b");
+	iotcon_query_insert(query_params, "if", "oic.if.b");
 
 	/* send GET request again with BATCH interface */
 	iotcon_get(resource, query_params, _on_get_2nd, NULL);

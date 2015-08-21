@@ -23,12 +23,6 @@
 static const char* const door_uri_path = "/a/door";
 static char *door_resource_sid;
 
-void _print_repr_info(iotcon_repr_h repr)
-{
-	if (0 < iotcon_repr_get_keys_count(repr))
-		DBG("rep : \n%s", iotcon_repr_generate_json(repr));
-}
-
 static void _on_observe(iotcon_client_h resource,
 		iotcon_repr_h recv_repr,
 		iotcon_options_h header_options,
@@ -77,8 +71,6 @@ static void _on_post(iotcon_client_h resource, iotcon_repr_h recv_repr,
 			"_on_post Response error(%d)", response_result);
 	INFO("POST request was successful");
 
-	_print_repr_info(recv_repr);
-
 	iotcon_repr_get_str(recv_repr, "createduripath", &created_uri_path);
 
 	if (NULL == created_uri_path) {
@@ -121,8 +113,6 @@ static void _on_put(iotcon_client_h resource, iotcon_repr_h recv_repr,
 			response_result);
 	INFO("PUT request was successful");
 
-	_print_repr_info(recv_repr);
-
 	iotcon_repr_h send_repr = iotcon_repr_new();
 
 	/* send POST request */
@@ -137,8 +127,6 @@ static void _on_get(iotcon_client_h resource, iotcon_repr_h recv_repr,
 	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result, "_on_get Response error(%d)",
 			response_result);
 	INFO("GET request was successful");
-
-	_print_repr_info(recv_repr);
 
 	iotcon_repr_h send_repr = iotcon_repr_new();
 	iotcon_repr_set_bool(send_repr, "opened", true);

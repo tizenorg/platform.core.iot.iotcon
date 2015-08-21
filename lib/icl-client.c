@@ -19,7 +19,6 @@
 #include <string.h>
 #include <errno.h>
 #include <glib.h>
-#include <json-glib/json-glib.h>
 
 #include "iotcon.h"
 #include "ic-utils.h"
@@ -29,6 +28,7 @@
 #include "icl-dbus.h"
 #include "icl-repr.h"
 #include "icl-client.h"
+#include "icl-payload.h"
 
 typedef struct {
 	iotcon_found_resource_cb cb;
@@ -36,6 +36,8 @@ typedef struct {
 	unsigned int id;
 } icl_found_resource_s;
 
+static iotcon_client_h _icl_client_from_gvariant(GVariant *payload,
+		iotcon_connectivity_type_e conn_type);
 
 static void _icl_found_resource_cb(GDBusConnection *connection,
 		const gchar *sender_name,
@@ -48,16 +50,14 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 	FN_CALL;
 	int conn_type;
 	iotcon_client_h client;
-	char *payload, *host;
+
+	GVariant *payload;
 	icl_found_resource_s *cb_container = user_data;
 	iotcon_found_resource_cb cb = cb_container->cb;
 
-	g_variant_get(parameters, "(&s&si)", &payload, &host, &conn_type);
+	g_variant_get(parameters, "(vi)", &payload, &conn_type);
 
-	RET_IF(NULL == payload);
-	RET_IF(NULL == host);
-
-	client = icl_client_parse_resource_object(payload, host, conn_type);
+	client = _icl_client_from_gvariant(payload, conn_type);
 	if (NULL == client) {
 		ERR("icl_client_parse_resource_object() Fail");
 		return;
@@ -283,87 +283,51 @@ API int iotcon_client_set_options(iotcon_client_h resource,
 }
 
 
-iotcon_client_h icl_client_parse_resource_object(const char *json_string, const char *host,
+static iotcon_client_h _icl_client_from_gvariant(GVariant *payload,
 		iotcon_connectivity_type_e conn_type)
 {
-	FN_CALL;
-	JsonParser *parser;
-	int ret, observable;
-	GError *error = NULL;
+	char host_addr[PATH_MAX] = {0};
+	char *uri_path, *sid, *res_type, *addr;
+	int ifaces, is_observable, is_secure, port;
+	GVariantIter *types_iter;
+	iotcon_resource_types_h res_types;
 	iotcon_client_h client;
-	const char *uri_path, *server_id;
-	int ifaces = IOTCON_INTERFACE_NONE;
-	JsonObject *rsrc_obj, *property_obj;
-	iotcon_resource_types_h res_types = NULL;
 
-	DBG("input str : %s", json_string);
+	g_variant_get(payload, "(&s&siasib&si)", &uri_path, &sid, &ifaces, &types_iter,
+			&is_observable, &is_secure, &addr, &port);
 
-	parser = json_parser_new();
-	ret = json_parser_load_from_data(parser, json_string, strlen(json_string), &error);
-	if (FALSE == ret) {
-		ERR("json_parser_load_from_data() Fail(%s)", error->message);
-		g_error_free(error);
-		g_object_unref(parser);
-		return NULL;
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV6:
+		snprintf(host_addr, sizeof(host_addr), "[%s]:%d", addr, port);
+		break;
+	case IOTCON_CONNECTIVITY_IPV4:
+	default:
+		snprintf(host_addr, sizeof(host_addr), "%s:%d", addr, port);
 	}
 
-	rsrc_obj = json_node_get_object(json_parser_get_root(parser));
-	if (NULL == rsrc_obj) {
-		ERR("json_node_get_object() Fail");
-		g_object_unref(parser);
-		return NULL;
-	}
+	res_types = iotcon_resource_types_new();
+	while (g_variant_iter_loop(types_iter, "s", &res_type))
+		iotcon_resource_types_insert(res_types, res_type);
 
-	uri_path = json_object_get_string_member(rsrc_obj, IC_JSON_KEY_URI_PATH);
-	if (NULL == uri_path) {
-		ERR("Invalid uri path");
-		g_object_unref(parser);
-		return NULL;
-	}
-
-	server_id = json_object_get_string_member(rsrc_obj, IC_JSON_KEY_SERVERID);
-	if (NULL == server_id) {
-		ERR("Invalid Server ID");
-		g_object_unref(parser);
-		return NULL;
-	}
-
-	/* parse resources type and interfaces */
-	property_obj = json_object_get_object_member(rsrc_obj, IC_JSON_KEY_PROPERTY);
-	if (property_obj) {
-		ret = icl_repr_parse_resource_property(property_obj, &res_types, &ifaces,
-				&observable);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_repr_parse_resource_property() Fail(%d)", ret);
-			g_object_unref(parser);
-			return NULL;
-		}
-	}
-
-	/* parse observable */
-	observable = json_object_get_int_member(rsrc_obj, IC_JSON_KEY_OBSERVABLE);
-
-	client = iotcon_client_new(host, uri_path, !!observable, res_types, ifaces);
+	client = iotcon_client_new(host_addr, uri_path, !!is_observable, res_types, ifaces);
 	if (res_types)
 		iotcon_resource_types_free(res_types);
 
 	if (NULL == client) {
 		ERR("iotcon_client_new() Fail");
-		g_object_unref(parser);
 		return NULL;
 	}
 	client->ref_count = 1;
 
-	client->sid = strdup(server_id);
+	client->sid = strdup(sid);
 	if (NULL == client->sid) {
 		ERR("strdup(sid) Fail(%d)", errno);
 		iotcon_client_free(client);
-		g_object_unref(parser);
 		return NULL;
 	}
 	client->conn_type = conn_type;
-
-	g_object_unref(parser);
+	client->is_secure = true;
 
 	return client;
 }
+

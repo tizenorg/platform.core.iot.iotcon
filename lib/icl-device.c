@@ -26,13 +26,11 @@
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
 
-#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 typedef struct {
 	iotcon_device_info_cb cb;
 	void *user_data;
 	unsigned int id;
 } icl_device_info_s;
-#endif
 
 typedef struct {
 	iotcon_platform_info_cb cb;
@@ -41,30 +39,16 @@ typedef struct {
 } icl_platform_info_s;
 
 
-#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
-/* The length of manufacturer_name should be less than and equal to 16.
- * The length of manufacturer_url should be less than and equal to 32. */
-int iotcon_register_device_info(iotcon_device_info_s device_info)
+API int iotcon_register_device_info(const char *device_name)
 {
 	int ret;
 	GError *error = NULL;
 	GVariant *arg_info;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+	RETV_IF(NULL == device_name, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (device_info.manuf_name
-			&& (IOTCON_MANUFACTURER_NAME_LENGTH_MAX < strlen(device_info.manuf_name))) {
-		ERR("The length of manufacturer_name(%s) is invalid.", device_info.manuf_name);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-
-	if (device_info.manuf_url
-			&& (IOTCON_MANUFACTURER_URL_LENGTH_MAX < strlen(device_info.manuf_url))) {
-		ERR("The length of manufacturer_url(%s) is invalid.", device_info.manuf_url);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-
-	arg_info = icl_dbus_device_info_to_gvariant(&device_info);
+	arg_info = icl_dbus_device_info_to_gvariant(device_name);
 	ic_dbus_call_register_device_info_sync(icl_dbus_get_object(), arg_info, &ret,
 			NULL, &error);
 	if (error) {
@@ -93,42 +77,17 @@ static void _icl_device_info_cb(GDBusConnection *connection,
 {
 	icl_device_info_s *cb_container = user_data;
 	iotcon_device_info_cb cb = cb_container->cb;
+	char *device_name, *sid, *spec_version, *data_model_version;
 
-	iotcon_device_info_s info = {0};
-
-	g_variant_get(parameters, "(&s&s&s&s&s&s&s&s&s&s&s&s)",
-			&info.name,
-			&info.host_name,
-			&info.uuid,
-			&info.content_type,
-			&info.version,
-			&info.manuf_name,
-			&info.manuf_url,
-			&info.model_number,
-			&info.date_of_manufacture,
-			&info.platform_ver,
-			&info.firmware_ver,
-			&info.support_url);
-
-	info.name = ic_utils_dbus_decode_str(info.name);
-	info.host_name = ic_utils_dbus_decode_str(info.host_name);
-	info.uuid = ic_utils_dbus_decode_str(info.uuid);
-	info.content_type = ic_utils_dbus_decode_str(info.content_type);
-	info.version = ic_utils_dbus_decode_str(info.version);
-	info.manuf_name = ic_utils_dbus_decode_str(info.manuf_name);
-	info.manuf_url = ic_utils_dbus_decode_str(info.manuf_url);
-	info.model_number = ic_utils_dbus_decode_str(info.model_number);
-	info.date_of_manufacture = ic_utils_dbus_decode_str(info.date_of_manufacture);
-	info.platform_ver = ic_utils_dbus_decode_str(info.platform_ver);
-	info.firmware_ver = ic_utils_dbus_decode_str(info.firmware_ver);
-	info.support_url = ic_utils_dbus_decode_str(info.support_url);
+	g_variant_get(parameters, "(&s&s&s&s)", &device_name, &sid, &spec_version,
+			&data_model_version);
 
 	if (cb)
-		cb(info, cb_container->user_data);
+		cb(device_name, sid, spec_version, data_model_version, cb_container->user_data);
 }
 
 
-int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
+API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 		void *user_data)
 {
 	int ret;
@@ -160,7 +119,7 @@ int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_DEVICE,
 			signal_number);
 
-	cb_container = calloc(1, sizeof(icl_device_info_container_s));
+	cb_container = calloc(1, sizeof(icl_device_info_s));
 	if (NULL == cb_container) {
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
@@ -180,7 +139,6 @@ int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 
 	return ret;
 }
-#endif
 
 
 /* The length of manufacturer_name should be less than and equal to 16.
@@ -247,24 +205,29 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 		GVariant *parameters,
 		gpointer user_data)
 {
-	FN_CALL;
-	char *repr_json = NULL;
-	iotcon_repr_h repr;
+	char *uri_path;
+	iotcon_platform_info_s info = {0};
 	icl_platform_info_s *cb_container = user_data;
 	iotcon_platform_info_cb cb = cb_container->cb;
 
-	g_variant_get(parameters, "(&s)", &repr_json);
-	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, repr_json)) {
-		ERR("Invalid Representation");
-		return;
-	}
+	g_variant_get(parameters, "(&s&s&s&s&s&s&s&s&s&s&s&s)",
+			&uri_path,
+			&info.platform_id,
+			&info.manuf_name,
+			&info.manuf_url,
+			&info.model_number,
+			&info.date_of_manufacture,
+			&info.platform_ver,
+			&info.os_ver,
+			&info.hardware_ver,
+			&info.firmware_ver,
+			&info.support_url,
+			&info.system_time);
 
-	repr = icl_repr_create_repr(repr_json);
+	/* From iotivity, we can get uri_path. But, the value is always "/oic/p". */
 
 	if (cb)
-		cb(repr, cb_container->user_data);
-
-	iotcon_repr_free(repr);
+		cb(info, cb_container->user_data);
 }
 
 

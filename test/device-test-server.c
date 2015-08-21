@@ -20,9 +20,9 @@
 
 int main()
 {
-	FN_CALL;
 	int ret;
 	GMainLoop *loop;
+	char *device_name;
 
 	iotcon_platform_info_s platform_info = {0};
 
@@ -38,12 +38,20 @@ int main()
 	platform_info.support_url = "support_url";
 	platform_info.system_time = "system_time";
 
+	device_name = "device_name";
+
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* iotcon open */
 	iotcon_open();
 
 	ret = iotcon_register_platform_info(platform_info);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_register_platform_info() Fail(%d)", ret);
+		return -1;
+	}
+
+	ret = iotcon_register_device_info(device_name);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_register_platform_info() Fail(%d)", ret);
 		return -1;

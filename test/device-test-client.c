@@ -18,49 +18,34 @@
 #include <iotcon.h>
 #include "test.h"
 
-static void _get_platform_info(iotcon_repr_h repr, void *user_data)
+static void _get_platform_info(iotcon_platform_info_s info, void *user_data)
 {
-	FN_CALL;
-	char *platform_id = NULL;
-	char *manuf_name = NULL;
-	char *manuf_url = NULL;
-	char *model_number = NULL;
-	char *date_of_manufacture = NULL;
-	char *platform_ver = NULL;
-	char *os_ver = NULL;
-	char *hardware_ver = NULL;
-	char *firmware_ver = NULL;
-	char *support_url = NULL;
-	char *system_time = NULL;
-
-	iotcon_repr_get_str(repr, IOTCON_PLATFORM_PLATFORM_ID, &platform_id);
-	iotcon_repr_get_str(repr, IOTCON_PLATFORM_MFG_NAME, &manuf_name);
-	iotcon_repr_get_str(repr, IOTCON_PLATFORM_MFG_URL, &manuf_url);
-	iotcon_repr_get_str(repr, IOTCON_PLATFORM_MODEL_NUM, &model_number);
-	iotcon_repr_get_str(repr, IOTCON_PLATFORM_MFG_DATE, &date_of_manufacture);
-	iotcon_repr_get_str(repr, IOTCON_PLATFORM_PLATFORM_VERSION, &platform_ver);
-	iotcon_repr_get_str(repr, IOTCON_PLATFORM_OS_VERSION, &os_ver);
-	iotcon_repr_get_str(repr, IOTCON_PLATFORM_HARDWARE_VERSION, &hardware_ver);
-	iotcon_repr_get_str(repr, IOTCON_PLATFORM_FIRMWARE_VERSION, &firmware_ver);
-	iotcon_repr_get_str(repr, IOTCON_PLATFORM_SUPPORT_URL, &support_url);
-	iotcon_repr_get_str(repr, IOTCON_PLATFORM_SYSTEM_TIME, &system_time);
-
-	INFO("platform_id : %s", platform_id);
-	INFO("manuf_name : %s", manuf_name);
-	INFO("manuf_url : %s", manuf_url);
-	INFO("model_number : %s", model_number);
-	INFO("date_of_manufacture : %s", date_of_manufacture);
-	INFO("platform_ver : %s", platform_ver);
-	INFO("os_ver : %s", os_ver);
-	INFO("hardware_ver : %s", hardware_ver);
-	INFO("firmware_ver : %s", firmware_ver);
-	INFO("support_url : %s", support_url);
-	INFO("system_time : %s", system_time);
+	INFO("platform_id : %s", info.platform_id);
+	INFO("manuf_name : %s", info.manuf_name);
+	INFO("manuf_url : %s", info.manuf_url);
+	INFO("model_number : %s", info.model_number);
+	INFO("date_of_manufacture : %s", info.date_of_manufacture);
+	INFO("platform_ver : %s", info.platform_ver);
+	INFO("os_ver : %s", info.os_ver);
+	INFO("hardware_ver : %s", info.hardware_ver);
+	INFO("firmware_ver : %s", info.firmware_ver);
+	INFO("support_url : %s", info.support_url);
+	INFO("system_time : %s", info.system_time);
 }
+
+
+static void _get_device_info(const char *device_name, const char *sid,
+		const char *spec_version, const char *data_model_version, void *user_data)
+{
+	INFO("device_name : %s", device_name);
+	INFO("sid : %s", sid);
+	INFO("spec_version : %s", spec_version);
+	INFO("data_model_version : %s", data_model_version);
+}
+
 
 int main()
 {
-	FN_CALL;
 	GMainLoop *loop;
 
 	loop = g_main_loop_new(NULL, FALSE);
@@ -69,6 +54,8 @@ int main()
 	iotcon_open();
 
 	iotcon_get_platform_info(IOTCON_MULTICAST_ADDRESS, _get_platform_info, NULL);
+
+	iotcon_get_device_info(IOTCON_MULTICAST_ADDRESS, _get_device_info, NULL);
 
 	g_main_loop_run(loop);
 

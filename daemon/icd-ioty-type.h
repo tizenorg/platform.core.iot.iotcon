@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_OBJECT_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_OBJECT_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_TYPE_H__
+#define __IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_TYPE_H__
 
-#include "iotcon-struct.h"
+#include <octypes.h>
+
 #include "iotcon-constant.h"
 
-int icl_obj_del_value(iotcon_repr_h repr, const char *key,
-		iotcon_types_e value_type);
+OCConnectivityType icd_ioty_conn_type_to_oic_conn_type(int conn_type);
 
-int ic_repr_obj_get_value(iotcon_repr_h repr, const char *key, iotcon_value_h *retval);
-int icl_obj_set_value(iotcon_repr_h repr, const char *key, iotcon_value_h value);
+int icd_ioty_transport_flag_to_conn_type(OCTransportAdapter adapter,
+		OCTransportFlags flag);
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_OBJECT_H__ */
+#endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_TYPE_H__*/

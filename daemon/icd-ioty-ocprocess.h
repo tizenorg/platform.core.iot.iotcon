@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_THREAD_H__
-#define __IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_THREAD_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_OCPROCESS_H__
+#define __IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_OCPROCESS_H__
 
 #include <glib.h>
 #include <octypes.h>
@@ -24,7 +24,7 @@ void icd_ioty_ocprocess_stop();
 gpointer icd_ioty_ocprocess_thread(gpointer data);
 
 OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
-		OCEntityHandlerRequest *request);
+		OCEntityHandlerRequest *request, void *user_data);
 
 OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle,
 		OCClientResponse* resp);
@@ -47,7 +47,7 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle han
 OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle handle,
 		OCClientResponse* resp);
 
-OCStackApplicationResult icd_ioty_ocprocess_platform_cb(void *ctx, OCDoHandle handle,
+OCStackApplicationResult icd_ioty_ocprocess_info_cb(void *ctx, OCDoHandle handle,
 		OCClientResponse *resp);
 
-#endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_THREAD_H__*/
+#endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_OCPROCESS_H__*/

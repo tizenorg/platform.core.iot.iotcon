@@ -36,7 +36,9 @@ enum {
 	ICD_CRUD_GET,
 	ICD_CRUD_PUT,
 	ICD_CRUD_POST,
-	ICD_CRUD_DELETE
+	ICD_CRUD_DELETE,
+	ICD_DEVICE_INFO,
+	ICD_PLATFORM_INFO,
 };
 
 void icd_ioty_csdk_lock();
@@ -77,10 +79,10 @@ gboolean icd_ioty_get(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource, GVariant *query);
 
 gboolean icd_ioty_put(icDbus *object, GDBusMethodInvocation *invocation,
-		GVariant *resource, const char *repr, GVariant *query);
+		GVariant *resource, GVariant *repr, GVariant *query);
 
 gboolean icd_ioty_post(icDbus *object, GDBusMethodInvocation *invocation,
-		GVariant *resource, const char *repr, GVariant *query);
+		GVariant *resource, GVariant *repr, GVariant *query);
 
 gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource);
@@ -90,16 +92,11 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVarian
 
 int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options);
 
-#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 int icd_ioty_register_device_info(GVariant *value);
-
-int icd_ioty_get_device_info(const char *host_address, unsigned int signal_number,
-		const char *bus_name);
-#endif
 
 int icd_ioty_register_platform_info(GVariant *value);
 
-int icd_ioty_get_platform_info(const char *host_address, unsigned int signal_number,
+int icd_ioty_get_info(int type, const char *host_address, unsigned int signal_number,
 		const char *bus_name);
 
 OCDoHandle icd_ioty_subscribe_presence(const char *host_address,

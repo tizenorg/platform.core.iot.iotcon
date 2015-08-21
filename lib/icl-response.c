@@ -190,7 +190,7 @@ static int _icl_response_check_repr_visibility(iotcon_response_h resp)
 API int iotcon_response_send(iotcon_response_h resp)
 {
 	FN_CALL;
-	int ret;
+	int ret = 0;
 	GError *error = NULL;
 	GVariant *arg_response;
 

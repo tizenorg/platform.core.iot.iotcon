@@ -28,22 +28,9 @@ typedef struct icl_notify_msg* iotcon_notimsg_h;
 
 typedef struct icl_presence* iotcon_presence_h;
 
-#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 typedef struct _device_info {
-	char *name;
-	char *host_name;
-	char *uuid;
-	char *content_type;
-	char *version;
-	char *manuf_name;
-	char *manuf_url;
-	char *model_number;
-	char *date_of_manufacture;
-	char *platform_ver;
-	char *firmware_ver;
-	char *support_url;
+	char *device_name;
 } iotcon_device_info_s;
-#endif
 
 typedef struct _platform_info {
 	char *platform_id;
@@ -144,5 +131,21 @@ typedef struct icl_resource_response* iotcon_response_h;
 iotcon_response_h iotcon_response_new(iotcon_request_h request_h);
 void iotcon_response_free(iotcon_response_h resp);
 int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e prop, ...);
+
+typedef struct icl_device_info* iotcon_device_h;
+int iotcon_device_get_name(iotcon_device_h device, char **name);
+
+typedef struct icl_platform_info* iotcon_platform_h;
+int iotcon_platform_get_id(iotcon_device_h device, char **id);
+int iotcon_platform_get_manuf_name(iotcon_device_h device, char **manuf_name);
+int iotcon_platform_get_manuf_url(iotcon_device_h device, char **manuf_url);
+int iotcon_platform_get_model_number(iotcon_device_h device, char **model_number);
+int iotcon_platform_get_date_of_maunfacture(iotcon_device_h device, char **date);
+int iotcon_platform_get_platform_ver(iotcon_device_h device, char **platform_ver);
+int iotcon_platform_get_os_ver(iotcon_device_h device, char **os_ver);
+int iotcon_platform_get_hardware_ver(iotcon_device_h device, char **hardware_ver);
+int iotcon_platform_get_firmware_ver(iotcon_device_h device, char **firmware_ver);
+int iotcon_platform_get_support_url(iotcon_device_h device, char **support_url);
+int iotcon_platform_get_system_time(iotcon_device_h device, char **system_time);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_STRUCT_H__ */

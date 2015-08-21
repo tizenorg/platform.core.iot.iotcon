@@ -189,6 +189,7 @@ static int _icd_dbus_client_list_cleanup_handle_list(GList *client_list)
 	free(client->bus_name);
 	client->bus_name = NULL;
 	free(client);
+	g_list_free(client_list);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -245,16 +246,17 @@ static void _icd_dbus_name_owner_changed_cb(GDBusConnection *conn,
 
 		if (client) { /* found bus name in our bus list */
 			DBG("bus(%s) stopped", old_owner);
+			icd_dbus_client_list = g_list_remove_link(icd_dbus_client_list, client);
+		}
+		g_mutex_unlock(&icd_dbus_client_list_mutex);
 
+		if (client) {
 			ret = _icd_dbus_client_list_cleanup_handle_list(client);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("_icd_dbus_client_list_cleanup_handle_list() Fail(%d)", ret);
-				g_mutex_unlock(&icd_dbus_client_list_mutex);
 				return;
 			}
-			icd_dbus_client_list = g_list_delete_link(icd_dbus_client_list, client);
 		}
-		g_mutex_unlock(&icd_dbus_client_list_mutex);
 	}
 }
 
@@ -592,7 +594,7 @@ static gboolean _dbus_handle_send_response(icDbus *object,
 	return TRUE;
 }
 
-#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
+
 static gboolean _dbus_handle_register_device_info(icDbus *object,
 		GDBusMethodInvocation *invocation, GVariant *device_info)
 {
@@ -617,15 +619,15 @@ static gboolean _dbus_handle_get_device_info(icDbus *object,
 	const gchar *sender;
 
 	sender = g_dbus_method_invocation_get_sender(invocation);
-	ret = icd_ioty_get_device_info(host_address, signal_number, sender);
+	ret = icd_ioty_get_info(ICD_DEVICE_INFO, host_address, signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("icd_ioty_get_device_info() Fail(%d)", ret);
+		ERR("icd_ioty_get_info(device info) Fail(%d)", ret);
 
 	ic_dbus_complete_get_device_info(object, invocation, ret);
 
 	return TRUE;
 }
-#endif
+
 
 static gboolean _dbus_handle_register_platform_info(icDbus *object,
 		GDBusMethodInvocation *invocation, GVariant *platform_info)
@@ -651,9 +653,9 @@ static gboolean _dbus_handle_get_platform_info(icDbus *object,
 	const gchar *sender;
 
 	sender = g_dbus_method_invocation_get_sender(invocation);
-	ret = icd_ioty_get_platform_info(host_address, signal_number, sender);
+	ret = icd_ioty_get_info(ICD_PLATFORM_INFO, host_address, signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("icd_ioty_get_platform_info() Fail(%d)", ret);
+		ERR("icd_ioty_get_info(platform info) Fail(%d)", ret);
 
 	ic_dbus_complete_get_platform_info(object, invocation, ret);
 
@@ -772,12 +774,10 @@ static void _dbus_on_bus_acquired(GDBusConnection *conn, const gchar *name,
 			G_CALLBACK(_dbus_handle_notify_all), NULL);
 	g_signal_connect(icd_dbus_object, "handle-send-response",
 			G_CALLBACK(_dbus_handle_send_response), NULL);
-#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
 	g_signal_connect(icd_dbus_object, "handle-register-device-info",
 			G_CALLBACK(_dbus_handle_register_device_info), NULL);
 	g_signal_connect(icd_dbus_object, "handle-get-device-info",
 			G_CALLBACK(_dbus_handle_get_device_info), NULL);
-#endif
 	g_signal_connect(icd_dbus_object, "handle-register-platform-info",
 			G_CALLBACK(_dbus_handle_register_platform_info), NULL);
 	g_signal_connect(icd_dbus_object, "handle-get-platform-info",

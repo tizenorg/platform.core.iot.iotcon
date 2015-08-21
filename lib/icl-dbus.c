@@ -249,6 +249,7 @@ int icl_dbus_start()
 		return IOTCON_ERROR_DBUS;
 	}
 
+	icl_dbus_count++;
 	return IOTCON_ERROR_NONE;
 }
 

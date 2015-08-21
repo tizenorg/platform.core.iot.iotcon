@@ -100,9 +100,9 @@ typedef enum {
 
 typedef enum {
 	IOTCON_HIDDEN = 0,
-	IOTCON_ACTIVE = (1 << 0),
-	IOTCON_DISCOVERABLE = (1 << 1),
-	IOTCON_OBSERVABLE = (1 << 2),
+	IOTCON_DISCOVERABLE = (1 << 0),
+	IOTCON_OBSERVABLE = (1 << 1),
+	IOTCON_ACTIVE = (1 << 2),
 	IOTCON_SLOW = (1 << 3),
 	IOTCON_SECURE = (1 << 4),
 } iotcon_resource_property_e;

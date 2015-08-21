@@ -30,6 +30,7 @@
 #include "icl-client.h"
 #include "icl-repr.h"
 #include "icl-dbus-type.h"
+#include "icl-payload.h"
 
 const char** icl_dbus_resource_types_to_array(iotcon_resource_types_h types)
 {
@@ -53,21 +54,19 @@ const char** icl_dbus_resource_types_to_array(iotcon_resource_types_h types)
 
 GVariant* icl_dbus_notimsg_to_gvariant(struct icl_notify_msg *msg)
 {
-	char *repr_json = NULL;
 	GVariantBuilder builder;
+	GVariant *repr_gvar;
 
-	g_variant_builder_init(&builder, G_VARIANT_TYPE("a(is)"));
+	g_variant_builder_init(&builder, G_VARIANT_TYPE("a(iv)"));
 
 	if (msg) {
-		repr_json = icl_repr_generate_json(msg->repr, false, false);
-		if (NULL == repr_json) {
-			ERR("icl_repr_generate_json() Fail");
+		repr_gvar = icl_repr_to_gvariant(msg->repr);
+		if (NULL == repr_gvar) {
+			ERR("icl_repr_to_gvariant() Fail");
 			g_variant_builder_clear(&builder);
 			return NULL;
 		}
-		g_variant_builder_add(&builder, "(is)", msg->error_code, repr_json);
-
-		free(repr_json);
+		g_variant_builder_add(&builder, "(iv)", msg->error_code, repr_gvar);
 	}
 
 	return g_variant_builder_end(&builder);
@@ -76,8 +75,9 @@ GVariant* icl_dbus_notimsg_to_gvariant(struct icl_notify_msg *msg)
 
 GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 {
-	char *repr_json;
+	FN_CALL;
 	GVariant *value;
+	GVariant *repr_gvar;
 	GHashTableIter iter;
 	GVariantBuilder options;
 	gpointer option_id, option_data;
@@ -91,22 +91,23 @@ GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 		}
 	}
 
-	/* TODO Make repr_json using interface */
-	repr_json = icl_repr_generate_json(response->repr, false, false);
-	if (NULL == repr_json) {
-		ERR("icl_repr_generate_json() Fail");
+	repr_gvar = icl_repr_to_gvariant(response->repr);
+	if (NULL == repr_gvar) {
+		ERR("icl_repr_to_gvariant() Fail");
 		g_variant_builder_clear(&options);
 		return NULL;
 	}
 
-	value = g_variant_new("(sia(qs)isii)",
+	value = g_variant_new("(sia(qs)ivii)",
 			ic_utils_dbus_encode_str(response->new_uri_path),
 			response->error_code,
 			&options,
 			response->result,
-			repr_json,
+			repr_gvar,
 			GPOINTER_TO_INT(response->request_handle),
 			GPOINTER_TO_INT(response->resource_handle));
+
+	DBG("response : %s", g_variant_print(value, FALSE));
 
 	return value;
 }
@@ -114,6 +115,7 @@ GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 
 GVariant* icl_dbus_client_to_gvariant(struct icl_remote_resource *resource)
 {
+	FN_CALL;
 	GVariant *value;
 	GHashTableIter iter;
 	GVariantBuilder options;
@@ -128,34 +130,22 @@ GVariant* icl_dbus_client_to_gvariant(struct icl_remote_resource *resource)
 		}
 	}
 
-	value = g_variant_new("(ssa(qs)i)", resource->uri_path, resource->host, &options,
-			resource->conn_type);
+	value = g_variant_new("(ssba(qs)i)", resource->uri_path, resource->host,
+			resource->is_secure, &options, resource->conn_type);
 
 	return value;
 }
 
-#ifdef DEVICE_INFO_IMPL /* not implemented in iotivity 0.9.1 */
-GVariant* icl_dbus_device_info_to_gvariant(iotcon_device_info_s *device_info)
+
+GVariant* icl_dbus_device_info_to_gvariant(const char *device_name)
 {
 	GVariant *value;
 
-	value = g_variant_new("(ssssssssssss)",
-			ic_utils_dbus_encode_str(device_info->name),
-			ic_utils_dbus_encode_str(device_info->host_name),
-			ic_utils_dbus_encode_str(device_info->uuid),
-			ic_utils_dbus_encode_str(device_info->content_type),
-			ic_utils_dbus_encode_str(device_info->version),
-			ic_utils_dbus_encode_str(device_info->manuf_name),
-			ic_utils_dbus_encode_str(device_info->manuf_url),
-			ic_utils_dbus_encode_str(device_info->model_number),
-			ic_utils_dbus_encode_str(device_info->date_of_manufacture),
-			ic_utils_dbus_encode_str(device_info->platform_ver),
-			ic_utils_dbus_encode_str(device_info->firmware_ver),
-			ic_utils_dbus_encode_str(device_info->support_url));
+	value = g_variant_new("(s)", device_name);
 
 	return value;
 }
-#endif
+
 
 GVariant* icl_dbus_platform_info_to_gvariant(iotcon_platform_info_s *platform_info)
 {
@@ -180,6 +170,7 @@ GVariant* icl_dbus_platform_info_to_gvariant(iotcon_platform_info_s *platform_in
 
 GVariant* icl_dbus_query_to_gvariant(iotcon_query_h query)
 {
+	FN_CALL;
 	gpointer key, value;
 	GHashTableIter iter;
 	GVariantBuilder builder;

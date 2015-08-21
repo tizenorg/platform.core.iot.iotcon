@@ -16,14 +16,21 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__
 
+#include <glib.h>
+
 #include "iotcon-constant.h"
 
 #define IC_STR_EQUAL 0
 #define IC_STR_NULL "(NULL)"
 
+#define IC_INTERFACE_MAX (IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_LINK | \
+		IOTCON_INTERFACE_BATCH | IOTCON_INTERFACE_GROUP)
+
 char* ic_utils_strdup(const char *src);
 const char* ic_utils_dbus_encode_str(const char *src);
 char* ic_utils_dbus_decode_str(char *src);
 int ic_utils_convert_interface_flag(iotcon_interface_e src, char **dest);
+int ic_utils_convert_interface_string(const char *src, iotcon_interface_e *dest);
+void ic_utils_gvariant_array_free(GVariant **value);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__ */

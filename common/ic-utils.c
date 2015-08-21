@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <glib.h>
 
 #include "iotcon-constant.h"
 #include "ic-common.h"
@@ -78,5 +80,37 @@ int ic_utils_convert_interface_flag(iotcon_interface_e src, char **dest)
 	return IOTCON_ERROR_NONE;
 }
 
+
+int ic_utils_convert_interface_string(const char *src, iotcon_interface_e *dest)
+{
+	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (IC_STR_EQUAL == strcmp(IC_INTERFACE_DEFAULT, src)) {
+		*dest = IOTCON_INTERFACE_DEFAULT;
+	} else if (IC_STR_EQUAL == strcmp(IC_INTERFACE_LINK, src)) {
+		*dest = IOTCON_INTERFACE_LINK;
+	} else if (IC_STR_EQUAL == strcmp(IC_INTERFACE_BATCH, src)) {
+		*dest = IOTCON_INTERFACE_BATCH;
+	} else if (IC_STR_EQUAL == strcmp(IC_INTERFACE_GROUP, src)) {
+		*dest = IOTCON_INTERFACE_GROUP;
+	} else {
+		ERR("Invalid Interface");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+void ic_utils_gvariant_array_free(GVariant **value)
+{
+	int i;
+
+	for (i = 0; value[i]; i++)
+		g_variant_unref(value[i]);
+
+	free(value);
+}
 
 
