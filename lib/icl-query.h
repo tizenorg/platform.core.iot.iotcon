@@ -18,6 +18,14 @@
 
 #include "iotcon-struct.h"
 
+/**
+ * @brief The maximum length which can be held in a query.
+ *
+ * @since_tizen 3.0
+ */
+#define IOTCON_QUERY_LENGTH_MAX 64
+
+
 struct icl_query {
 	int len;
 	GHashTable *hash;

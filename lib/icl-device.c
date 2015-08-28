@@ -26,6 +26,21 @@
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
 
+/**
+ * @brief The maximum length which can be held in a manufacturer name.
+ *
+ * @since_tizen 3.0
+ */
+#define IOTCON_MANUFACTURER_NAME_LENGTH_MAX 15
+
+/**
+ * @brief The maximum length which can be held in a manufacturer url.
+ *
+ * @since_tizen 3.0
+ */
+#define IOTCON_MANUFACTURER_URL_LENGTH_MAX 32
+
+
 typedef struct {
 	iotcon_device_info_cb cb;
 	void *user_data;

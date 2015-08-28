@@ -16,139 +16,165 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_CONSTANT_H__
 #define __IOT_CONNECTIVITY_MANAGER_CONSTANT_H__
 
+/**
+ * @addtogroup CAPI_IOT_CONNECTIVITY_MODULE
+ *
+ * @{
+ */
+
+/**
+ * @brief The IP Address for multicast.
+ *
+ * @since_tizen 3.0
+ */
 #define IOTCON_MULTICAST_ADDRESS "224.0.1.187" /**< Multicast IP Address */
 
 /**
- * @brief HeaderOption range from 2048 to 3000
- * NOTE: HeaderOptionID  is an unsigned integer value which MUST be within
- * range of 2048 to 3000 inclusive of lower and upper bound.
- * HeaderOptions instance creation fails if above condition is not satisfied.
+ * @brief Use this value as the return value to stop foreach function.
+ *
+ * @since_tizen 3.0
  */
-#define IOTCON_OPTIONID_MIN 2048
-#define IOTCON_OPTIONID_MAX 3000
-
-#define IOTCON_OPTIONS_MAX 2
-#define IOTCON_OPTION_DATA_LENGTH_MAX 16
-
-#define IOTCON_URI_PATH_LENGTH_MAX 36
-
-#define IOTCON_QUERY_LENGTH_MAX 64
-
-/* IOTCON_QUERY_LENGTH_MAX - LENGTH("rt=") */
-#define IOTCON_RESOURCE_TYPE_LENGTH_MAX (IOTCON_QUERY_LENGTH_MAX - 3)
-
-#define IOTCON_MANUFACTURER_NAME_LENGTH_MAX 15
-#define IOTCON_MANUFACTURER_URL_LENGTH_MAX 32
-
-#define IOTCON_CONTAINED_RESOURCES_MAX 5
-
 #define IOTCON_FUNC_STOP 0
-#define IOTCON_FUNC_CONTINUE 1
-
-#define IOTCON_PLATFORM_PLATFORM_ID "pi"
-#define IOTCON_PLATFORM_MFG_NAME "mnmn"
-#define IOTCON_PLATFORM_MFG_URL "mnml"
-#define IOTCON_PLATFORM_MODEL_NUM "mnmo"
-#define IOTCON_PLATFORM_MFG_DATE "mndt"
-#define IOTCON_PLATFORM_PLATFORM_VERSION "mnpv"
-#define IOTCON_PLATFORM_OS_VERSION "mnos"
-#define IOTCON_PLATFORM_HARDWARE_VERSION "mnhw"
-#define IOTCON_PLATFORM_FIRMWARE_VERSION "mnfv"
-#define IOTCON_PLATFORM_SUPPORT_URL "mnsl"
-#define IOTCON_PLATFORM_SYSTEM_TIME "st"
-
 
 /**
- * @brief Action associated with observation
+ * @brief Use this value as the return value to continue foreach function.
+ *
+ * @since_tizen 3.0
+ */
+#define IOTCON_FUNC_CONTINUE 1
+
+/**
+ * @brief Enumeration for action of observation.
+ *
+ * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_OBSERVE_REGISTER = 0,
-	IOTCON_OBSERVE_DEREGISTER = 1,
-	IOTCON_OBSERVE_NO_OPTION = 2
+	IOTCON_OBSERVE_REGISTER = 0, /**< Indicates action of registering observation*/
+	IOTCON_OBSERVE_DEREGISTER = 1, /**< Indicates action of unregistering observation */
+	IOTCON_OBSERVE_NO_OPTION = 2 /**< Indicates no option */
 } iotcon_observe_action_e;
 
+/**
+ * @brief Enumeration for type of observation.
+ *
+ * @since_tizen 3.0
+ */
 typedef enum {
-	IOTCON_OBSERVE = 0,
-	IOTCON_OBSERVE_ALL = 1
+	IOTCON_OBSERVE = 0, /**< Indicates observation request for most up-to-date notifications only */
+	IOTCON_OBSERVE_ALL = 1 /**< Indicates observation request for all notifications including stale notifications */
 } iotcon_observe_type_e;
 
 /**
- * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
- * @brief Enumerations of Iotcon interface types.
+ * @brief Enumeration for type of interfaces which can be held in a resource.
+ *
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_INTERFACE_NONE = 0,
-	IOTCON_INTERFACE_DEFAULT = (1 << 0), /* default interface */
-	IOTCON_INTERFACE_LINK = (1 << 1), /* discovers children of the parent resource */
-	IOTCON_INTERFACE_BATCH = (1 << 2), /* requests CRUD to children of the parent resource */
-	IOTCON_INTERFACE_GROUP = (1 << 3), /* requests CRUD to remote resources of a group */
+	IOTCON_INTERFACE_NONE = 0, /**< Indicates interface not specified or uninitialized */
+	IOTCON_INTERFACE_DEFAULT = (1 << 0), /**< Indicates interface for default */
+	IOTCON_INTERFACE_LINK = (1 << 1), /**< Indicates interface which is used to retrieve (GET) a list of resources on a server */
+	IOTCON_INTERFACE_BATCH = (1 << 2), /**< Indicates interface which is used to to manipulate (GET, PUT, POST, DELETE) a collection of sub-resources at the same time */
+	IOTCON_INTERFACE_GROUP = (1 << 3), /**< Indicates interface which is used to to manipulate (GET, PUT, POST) a group of remote resources */
 } iotcon_interface_e;
 
 /**
- * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
- * @brief Enumerations of Iotcon connectivity types.
+ * @brief Enumeration for of connectivities which can be held in a resource.
+ *
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_CONNECTIVITY_IPV4 = 0,
-	IOTCON_CONNECTIVITY_IPV6,
-	IOTCON_CONNECTIVITY_EDR,
-	IOTCON_CONNECTIVITY_LE,
-	IOTCON_CONNECTIVITY_ALL, /* sends over all the interfaces */
+	IOTCON_CONNECTIVITY_IPV4 = 0, /**< Indicates Internet Protocol version 4 connectivity */
+	IOTCON_CONNECTIVITY_IPV6, /**< Indicates Internet Protocol version 6 connectivity */
+	IOTCON_CONNECTIVITY_EDR, /**< Indicates Bluetooth Enhanced Data Rate connectivity */
+	IOTCON_CONNECTIVITY_LE, /**< Indicates Bluetooth Low Energy connectivity */
+	IOTCON_CONNECTIVITY_ALL, /**< Indicates all (IPV4 + IPV6 + EDR + LE) connectivities */
 } iotcon_connectivity_type_e;
 
+/**
+ * @brief Enumeration for property which can be held in a resource.
+ *
+ * @since_tizen 3.0
+ */
 typedef enum {
-	IOTCON_HIDDEN = 0,
-	IOTCON_DISCOVERABLE = (1 << 0),
-	IOTCON_OBSERVABLE = (1 << 1),
-	IOTCON_ACTIVE = (1 << 2),
-	IOTCON_SLOW = (1 << 3),
-	IOTCON_SECURE = (1 << 4),
+	IOTCON_HIDDEN = 0, /**< Indicates resource uninitialized */
+	IOTCON_DISCOVERABLE = (1 << 0), /**< Indicates resource that is allowed to be discovered */
+	IOTCON_OBSERVABLE = (1 << 1), /**< Indicates resource that is allowed to be observed */
+	IOTCON_ACTIVE = (1 << 2), /**< Indicates resource initialized and activated */
+	IOTCON_SLOW = (1 << 3), /**< Indicates resource which takes some delay to respond */
+	IOTCON_SECURE = (1 << 4), /**< Indicates secure resource */
 } iotcon_resource_property_e;
 
+/**
+ * @brief Enumeration for property which can be held in a response.
+ *
+ * @since_tizen 3.0
+ */
 typedef enum {
-	IOTCON_RESPONSE_NEW_URI_PATH = 1,
-	IOTCON_RESPONSE_RESULT = 2,
-	IOTCON_RESPONSE_REPRESENTATION = 3,
-	IOTCON_RESPONSE_HEADER_OPTIONS = 4,
-	IOTCON_RESPONSE_INTERFACE = 5,
+	IOTCON_RESPONSE_NEW_URI_PATH = 1, /**< Indicates uri_path which can be held in a response */
+	IOTCON_RESPONSE_RESULT = 2, /**< Indicates result which can be held in a response */
+	IOTCON_RESPONSE_REPRESENTATION = 3, /**< Indicates representation which can be held in a response */
+	IOTCON_RESPONSE_HEADER_OPTIONS = 4, /**< Indicates header options which can be held in a response */
+	IOTCON_RESPONSE_INTERFACE = 5, /**< Indicates interface which can be held in a response */
 } iotcon_response_property_e;
 
+/**
+ * @brief Enumeration for type of request.
+ *
+ * @since_tizen 3.0
+ */
 typedef enum {
-	IOTCON_REQUEST_GET = (1 << 0),
-	IOTCON_REQUEST_PUT = (1 << 1),
-	IOTCON_REQUEST_POST = (1 << 2),
-	IOTCON_REQUEST_DELETE = (1 << 3),
-	IOTCON_REQUEST_OBSERVE = (1 << 4),
+	IOTCON_REQUEST_GET = (1 << 0), /**< Indicates get method of request */
+	IOTCON_REQUEST_PUT = (1 << 1), /**< Indicates put method of request */
+	IOTCON_REQUEST_POST = (1 << 2), /**< Indicates post method of request */
+	IOTCON_REQUEST_DELETE = (1 << 3), /**< Indicates delete method of request */
+	IOTCON_REQUEST_OBSERVE = (1 << 4), /**< Indicates observe method of request */
 } iotcon_request_type_e;
 
+/**
+ * @brief Enumeration for result of response.
+ *
+ * @since_tizen 3.0
+ */
 typedef enum {
-	IOTCON_RESPONSE_RESULT_OK = 0,
-	IOTCON_RESPONSE_RESULT_ERROR,
-	IOTCON_RESPONSE_RESULT_RESOURCE_CREATED,
-	IOTCON_RESPONSE_RESULT_RESOURCE_DELETED,
-	IOTCON_RESPONSE_RESULT_SLOW,
-	IOTCON_RESPONSE_RESULT_FORBIDDEN,
+	IOTCON_RESPONSE_RESULT_OK = 0, /**< Indicates result of response for success */
+	IOTCON_RESPONSE_RESULT_ERROR, /**< Indicates result of response for something error */
+	IOTCON_RESPONSE_RESULT_RESOURCE_CREATED, /**< Indicates result of response for resource has created */
+	IOTCON_RESPONSE_RESULT_RESOURCE_DELETED, /**< Indicates result of response for resource has deleted */
+	IOTCON_RESPONSE_RESULT_SLOW, /**< Indicates result of response for slow resource */
+	IOTCON_RESPONSE_RESULT_FORBIDDEN, /**< Indicates result of response for accessing unauthorized resource */
 	IOTCON_RESPONSE_RESULT_MAX
 } iotcon_response_result_e;
 
+/**
+ * @brief Enumeration for result of presence.
+ *
+ * @since_tizen 3.0
+ */
 typedef enum {
-	IOTCON_PRESENCE_OK = 0,
-	IOTCON_PRESENCE_STOPPED,
-	IOTCON_PRESENCE_TIMEOUT,
-	IOTCON_PRESENCE_ERROR
+	IOTCON_PRESENCE_OK = 0, /**< Indicates for successful action of presence */
+	IOTCON_PRESENCE_STOPPED, /**< Indicates for stopped action of presence */
+	IOTCON_PRESENCE_TIMEOUT, /**< Indicates for no response of presence for some time */
+	IOTCON_PRESENCE_ERROR /**< Indicates for some errors of presence */
 } iotcon_presence_result_e;
 
+/**
+ * @brief Enumeration for types of representation that is able to have.
+ *
+ * @since_tizen 3.0
+ */
 typedef enum {
-	IOTCON_TYPE_NONE = 0,
-	IOTCON_TYPE_INT,
-	IOTCON_TYPE_BOOL,
-	IOTCON_TYPE_DOUBLE,
-	IOTCON_TYPE_STR,
-	IOTCON_TYPE_NULL,
-	IOTCON_TYPE_LIST,
-	IOTCON_TYPE_REPR,
+	IOTCON_TYPE_NONE = 0, /**< Indicates for representation that have no type */
+	IOTCON_TYPE_INT, /**< Indicates for representation that have int type */
+	IOTCON_TYPE_BOOL, /**< Indicates for representation that have bool type */
+	IOTCON_TYPE_DOUBLE, /**< Indicates for representation that have double type */
+	IOTCON_TYPE_STR, /**< Indicates for representation that have string type */
+	IOTCON_TYPE_NULL, /**< Indicates for representation that have null type */
+	IOTCON_TYPE_LIST, /**< Indicates for representation that have list type */
+	IOTCON_TYPE_REPR, /**< Indicates for representation that have another representation type */
 } iotcon_types_e;
+
+/**
+ * @}
+ */
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_CONSTANT_H__ */

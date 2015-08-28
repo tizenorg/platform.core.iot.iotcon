@@ -17,6 +17,15 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_TYPES_H__
 
 #include "iotcon-struct.h"
+#include "icl-query.h"
+
+/**
+ * @brief The maximum length which can be held in a resource type.
+ *
+ * @since_tizen 3.0
+ */
+#define IOTCON_RESOURCE_TYPE_LENGTH_MAX (IOTCON_QUERY_LENGTH_MAX - 3)
+
 
 struct icl_resource_types {
 	int ref_count;

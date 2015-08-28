@@ -23,6 +23,38 @@
 #include "icl.h"
 #include "icl-options.h"
 
+/**
+ * @brief HeaderOption range from 2048 to 3000
+ * NOTE: HeaderOptionID  is an unsigned integer value which MUST be within
+ * range of 2048 to 3000 inclusive of lower and upper bound.
+ * HeaderOptions instance creation fails if above condition is not satisfied.
+ *
+ * @since_tizen 3.0
+ */
+#define IOTCON_OPTIONID_MIN 2048
+
+/**
+ * @brief The maximum value of option id which can be held in a resource.
+ *
+ * @since_tizen 3.0
+ */
+#define IOTCON_OPTIONID_MAX 3000
+
+/**
+ * @brief The maximum number of option which can be held in a resource.
+ *
+ * @since_tizen 3.0
+ */
+#define IOTCON_OPTIONS_MAX 2
+
+/**
+ * @brief The maximum length of option data which can be held in a resource.
+ *
+ * @since_tizen 3.0
+ */
+#define IOTCON_OPTION_DATA_LENGTH_MAX 16
+
+
 iotcon_options_h icl_options_ref(iotcon_options_h options)
 {
 	RETV_IF(NULL == options, NULL);

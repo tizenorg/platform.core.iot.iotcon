@@ -23,6 +23,7 @@
 #include "iotcon.h"
 #include "ic-utils.h"
 #include "icl.h"
+#include "icl-resource-types.h"
 #include "icl-dbus.h"
 
 typedef struct icl_presence {

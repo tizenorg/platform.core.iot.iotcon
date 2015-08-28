@@ -18,16 +18,15 @@
 
 #include <tizen.h>
 
-/**
- * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
- * @brief Enumerations of Iotcon error codes.
- * @since_tizen 3.0
- */
-
 #ifndef TIZEN_ERROR_IOTCON
 #define TIZEN_ERROR_IOTCON -0x09000000
 #endif
 
+/**
+ * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
+ * @brief Enumeration for Iotcon error code.
+ * @since_tizen 3.0
+ */
 typedef enum
 {
 	IOTCON_ERROR_NONE = TIZEN_ERROR_NONE, /**< Successful*/

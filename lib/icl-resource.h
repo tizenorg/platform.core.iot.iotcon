@@ -20,6 +20,14 @@
 #include "iotcon.h"
 #include "icl-dbus.h"
 
+/**
+ * @brief The maximum number of children resources which can be held in a parent resource.
+ *
+ * @since_tizen 3.0
+ */
+#define IOTCON_CONTAINED_RESOURCES_MAX 5
+
+
 struct icl_notify_msg {
 	int error_code;
 	iotcon_interface_e iface;
