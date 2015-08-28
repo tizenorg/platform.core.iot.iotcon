@@ -98,14 +98,14 @@ GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 		return NULL;
 	}
 
-	value = g_variant_new("(sia(qs)ivii)",
+	value = g_variant_new("(sia(qs)ivxx)",
 			ic_utils_dbus_encode_str(response->new_uri_path),
 			response->error_code,
 			&options,
 			response->result,
 			repr_gvar,
-			GPOINTER_TO_INT(response->request_handle),
-			GPOINTER_TO_INT(response->resource_handle));
+			response->oic_request_h,
+			response->oic_resource_h);
 
 	DBG("response : %s", g_variant_print(value, FALSE));
 

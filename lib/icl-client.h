@@ -16,6 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__
 
+#include <stdint.h>
 #include "iotcon-struct.h"
 #include "icl-options.h"
 
@@ -30,7 +31,7 @@ struct icl_remote_resource {
 	iotcon_resource_types_h types;
 	int ifaces;
 	iotcon_connectivity_type_e conn_type;
-	int observe_handle;
+	int64_t observe_handle;
 	unsigned int observe_sub_id;
 };
 

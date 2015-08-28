@@ -319,15 +319,15 @@ static int _ioty_get_header_options(GVariantIter *src, int src_size,
 
 int icd_ioty_send_response(GVariant *resp)
 {
-	int result, error_code, options_size;
-	int request_handle, resource_handle;
 	char *new_uri_path;
 	GVariant *repr_gvar;
 	GVariantIter *options;
 	OCStackResult ret;
 	OCEntityHandlerResponse response = {0};
+	int result, error_code, options_size;
+	int64_t request_handle, resource_handle;
 
-	g_variant_get(resp, "(&sia(qs)ivii)",
+	g_variant_get(resp, "(&sia(qs)ivxx)",
 			&new_uri_path,
 			&error_code,
 			&options,
@@ -336,8 +336,8 @@ int icd_ioty_send_response(GVariant *resp)
 			&request_handle,
 			&resource_handle);
 
-	response.requestHandle = GINT_TO_POINTER(request_handle);
-	response.resourceHandle = GINT_TO_POINTER(resource_handle);
+	response.requestHandle = ICD_INT64_TO_POINTER(request_handle);
+	response.resourceHandle = ICD_INT64_TO_POINTER(resource_handle);
 	response.ehResult = (OCEntityHandlerResult)result;
 
 	if (OC_EH_RESOURCE_CREATED == response.ehResult)
@@ -444,8 +444,7 @@ int icd_ioty_find_resource(const char *host_address, const char *resource_type,
 /*
  * returned string SHOULD be released by you
  */
-static char* _icd_ioty_resource_generate_uri(char *host, bool is_secure, char *uri_path,
-		GVariant *query)
+static char* _icd_ioty_resource_generate_uri(char *uri_path, GVariant *query)
 {
 	int len;
 	bool loop_first = true;
@@ -453,10 +452,7 @@ static char* _icd_ioty_resource_generate_uri(char *host, bool is_secure, char *u
 	GVariantIter query_iter;
 	char uri_buf[PATH_MAX] = {0};
 
-	if (is_secure)
-		len = snprintf(uri_buf, sizeof(uri_buf), ICD_IOTY_COAPS"%s%s", host, uri_path);
-	else
-		len = snprintf(uri_buf, sizeof(uri_buf), ICD_IOTY_COAP"%s%s", host, uri_path);
+	len = snprintf(uri_buf, sizeof(uri_buf), "%s", uri_path);
 
 	/* remove suffix '/' */
 	if ('/' == uri_buf[strlen(uri_buf) - 1]) {
@@ -538,12 +534,12 @@ static gboolean _icd_ioty_crud(int type, icDbus *object, GDBusMethodInvocation *
 	GVariantIter *options;
 	OCCallbackData cbdata = {0};
 	int conn_type, options_size;
-	char *uri_path, *host, *uri;
-	char uri_buf[PATH_MAX] = {0};
+	char *uri_path, *host, *uri, *dev_host, *ptr;
 	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
 	OCHeaderOption *oic_options_ptr = NULL;
 	OCPayload *payload = NULL;
 	OCConnectivityType oic_conn_type;
+	OCDevAddr dev_addr = {0};
 
 	switch (type) {
 	case ICD_CRUD_GET:
@@ -567,14 +563,14 @@ static gboolean _icd_ioty_crud(int type, icDbus *object, GDBusMethodInvocation *
 		return FALSE;
 	}
 
-	g_variant_get(resource, "(&s&sba(qs)i)", &uri_path, &host, &is_secure,  &options,
+	g_variant_get(resource, "(&s&sba(qs)i)", &uri_path, &host, &is_secure, &options,
 			&conn_type);
 
 	switch (type) {
 	case ICD_CRUD_GET:
 	case ICD_CRUD_PUT:
 	case ICD_CRUD_POST:
-		uri = _icd_ioty_resource_generate_uri(host, is_secure, uri_path, query);
+		uri = _icd_ioty_resource_generate_uri(uri_path, query);
 		if (NULL == uri) {
 			ERR("_icd_ioty_resource_generate_uri() Fail");
 			g_variant_iter_free(options);
@@ -583,8 +579,7 @@ static gboolean _icd_ioty_crud(int type, icDbus *object, GDBusMethodInvocation *
 		}
 		break;
 	case ICD_CRUD_DELETE:
-		snprintf(uri_buf, sizeof(uri_buf), "%s%s", host, uri_path);
-		uri = strdup(uri_buf);
+		uri = strdup(uri_path);
 		break;
 	}
 
@@ -610,10 +605,30 @@ static gboolean _icd_ioty_crud(int type, icDbus *object, GDBusMethodInvocation *
 
 	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
 
+	icd_ioty_conn_type_to_oic_transport_type(conn_type, &dev_addr.adapter,
+			&dev_addr.flags);
+
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+		dev_host = strtok_r(host, ":", &ptr);
+		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
+		dev_addr.port = atoi(strtok_r(NULL, ":", &ptr));
+		break;
+	case IOTCON_CONNECTIVITY_IPV6:
+		dev_host = strtok_r(host, "]", &ptr);
+		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
+		dev_addr.port = atoi(strtok_r(NULL, "]", &ptr));
+		break;
+	default:
+		ERR("Invalid Connectivitiy Type");
+		icd_ioty_complete_error(type, invocation, IOTCON_ERROR_IOTIVITY);
+		return TRUE;
+	}
+
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
-	result = OCDoResource(NULL, rest_type, uri, NULL, payload, oic_conn_type, OC_LOW_QOS,
-			&cbdata, oic_options_ptr, options_size);
+	result = OCDoResource(NULL, rest_type, uri, &dev_addr, payload, oic_conn_type,
+			OC_LOW_QOS, &cbdata, oic_options_ptr, options_size);
 	icd_ioty_csdk_unlock();
 
 	free(uri);
@@ -666,15 +681,16 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVarian
 	icd_sig_ctx_s *context;
 	OCCallbackData cbdata = {0};
 	int conn_type, options_size;
-	char *uri_path, *host, *uri;
+	char *uri_path, *host, *uri, *dev_host, *ptr;
 	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
 	OCHeaderOption *oic_options_ptr = NULL;
 	OCConnectivityType oic_conn_type;
+	OCDevAddr dev_addr = {0};
 
 	g_variant_get(resource, "(&s&sba(qs)i)", &uri_path, &host, &is_secure,  &options,
 			&conn_type);
 
-	uri = _icd_ioty_resource_generate_uri(host, is_secure, uri_path, query);
+	uri = _icd_ioty_resource_generate_uri(uri_path, query);
 	if (NULL == uri) {
 		ERR("_icd_ioty_resource_generate_uri() Fail");
 		g_variant_iter_free(options);
@@ -718,10 +734,29 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVarian
 
 	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
 
+	icd_ioty_conn_type_to_oic_transport_type(conn_type, &dev_addr.adapter,
+			&dev_addr.flags);
+
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+		dev_host = strtok_r(host, ":", &ptr);
+		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
+		dev_addr.port = atoi(strtok_r(NULL, ":", &ptr));
+		break;
+	case IOTCON_CONNECTIVITY_IPV6:
+		dev_host = strtok_r(host, "]", &ptr);
+		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
+		dev_addr.port = atoi(strtok_r(NULL, "]", &ptr));
+		break;
+	default:
+		ERR("Invalid Connectivitiy Type");
+		return NULL;
+	}
+
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
-	result = OCDoResource(&handle, method, uri, NULL, NULL, oic_conn_type, OC_LOW_QOS,
-			&cbdata, oic_options_ptr, options_size);
+	result = OCDoResource(&handle, method, uri, &dev_addr, NULL, oic_conn_type,
+			OC_LOW_QOS, &cbdata, oic_options_ptr, options_size);
 	icd_ioty_csdk_unlock();
 	free(uri);
 	if (OC_STACK_OK != result) {
@@ -882,8 +917,6 @@ OCDoHandle icd_ioty_subscribe_presence(const char *host_address,
 	char uri[PATH_MAX] = {0};
 	OCCallbackData cbdata = {0};
 	icd_sig_ctx_s *context;
-	iotcon_connectivity_type_e conn_type = IOTCON_CONNECTIVITY_IPV4;
-	OCConnectivityType oic_conn_type;
 
 	len = snprintf(uri, sizeof(uri), "%s%s", host_address, OC_RSRVD_PRESENCE_URI);
 	if (len <= 0 || sizeof(uri) <= len) {
@@ -906,10 +939,9 @@ OCDoHandle icd_ioty_subscribe_presence(const char *host_address,
 	cbdata.cb = icd_ioty_ocprocess_presence_cb;
 	cbdata.cd = _ioty_free_signal_context;
 
-	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
-
+	/* In case of IPV4 or IPV6, connectivity type is CT_ADAPTER_IP in iotivity 0.9.2 */
 	icd_ioty_csdk_lock();
-	result = OCDoResource(&handle, OC_REST_PRESENCE, uri, NULL, NULL, oic_conn_type,
+	result = OCDoResource(&handle, OC_REST_PRESENCE, uri, NULL, NULL, CT_ADAPTER_IP,
 			OC_LOW_QOS, &cbdata, NULL, 0);
 	icd_ioty_csdk_unlock();
 

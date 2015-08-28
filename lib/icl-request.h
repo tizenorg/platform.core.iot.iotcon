@@ -16,11 +16,9 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_REQUEST_H__
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REQUEST_H__
 
+#include <stdint.h>
 #include "iotcon-struct.h"
 #include "iotcon-constant.h"
-
-typedef void* oc_request_h;
-typedef void* oc_resource_h;
 
 struct icl_observe_info {
 	iotcon_observe_action_e action;
@@ -34,8 +32,8 @@ struct icl_resource_request {
 	iotcon_query_h query;
 	struct icl_observe_info observation_info;
 	iotcon_repr_h repr;
-	oc_request_h request_handle;
-	oc_resource_h resource_handle;
+	int64_t oic_request_h;
+	int64_t oic_resource_h;
 };
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REQUEST_H__ */

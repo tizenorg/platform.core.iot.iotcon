@@ -40,8 +40,8 @@ API iotcon_response_h iotcon_response_new(iotcon_request_h request_h)
 		return NULL;
 	}
 
-	resp->request_handle = request_h->request_handle;
-	resp->resource_handle = request_h->resource_handle;
+	resp->oic_request_h = request_h->oic_request_h;
+	resp->oic_resource_h = request_h->oic_resource_h;
 	resp->error_code = 200;
 
 	return resp;

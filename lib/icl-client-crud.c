@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <glib.h>
@@ -431,7 +432,7 @@ API int iotcon_observer_start(iotcon_client_h resource,
 		iotcon_on_observe_cb cb,
 		void *user_data)
 {
-	int observe_handle;
+	int64_t observe_handle;
 	GError *error = NULL;
 	unsigned int sub_id;
 	int signal_number;

@@ -16,8 +16,12 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__
 #define __IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__
 
+#include <stdint.h>
 #include <glib.h>
 #include "ic-dbus.h"
+
+#define ICD_INT64_TO_POINTER(i) ((void*)(intptr_t)(i))
+#define ICD_POINTER_TO_INT64(p) ((int64_t)(intptr_t)(p))
 
 icDbus* icd_dbus_get_object();
 int icd_dbus_client_list_get_info(void *handle, unsigned int *sig_num, gchar **bus_name);

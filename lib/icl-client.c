@@ -326,7 +326,7 @@ static iotcon_client_h _icl_client_from_gvariant(GVariant *payload,
 		return NULL;
 	}
 	client->conn_type = conn_type;
-	client->is_secure = true;
+	client->is_secure = is_secure;
 
 	return client;
 }

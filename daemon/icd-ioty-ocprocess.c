@@ -214,15 +214,15 @@ static int _worker_req_handler(void *context)
 	if (ctx->payload)
 		g_variant_builder_add(&payload_builder, "v", ctx->payload);
 
-	value = g_variant_new("(ia(qs)a(ss)iiavii)",
+	value = g_variant_new("(ia(qs)a(ss)iiavxx)",
 			ctx->types,
 			ctx->options,
 			ctx->query,
 			ctx->observe_action,
 			ctx->observer_id,
 			&payload_builder,
-			GPOINTER_TO_INT(ctx->request_h),
-			GPOINTER_TO_INT(ctx->resource_h));
+			ICD_POINTER_TO_INT64(ctx->request_h),
+			ICD_POINTER_TO_INT64(ctx->resource_h));
 
 	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_REQUEST_HANDLER,
 			ctx->signum, value);

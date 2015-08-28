@@ -16,10 +16,9 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESPONSE_H__
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESPONSE_H__
 
+#include <stdint.h>
 #include "iotcon-struct.h"
 #include "iotcon-constant.h"
-#include "icl-request.h"
-
 
 typedef enum {
 	ICL_VISIBILITY_NONE = 0,
@@ -35,8 +34,8 @@ struct icl_resource_response {
 	iotcon_interface_e iface;
 	iotcon_response_result_e result;
 	iotcon_repr_h repr;
-	oc_request_h request_handle;
-	oc_resource_h resource_handle;
+	int64_t oic_request_h;
+	int64_t oic_resource_h;
 };
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESPONSE_H__ */

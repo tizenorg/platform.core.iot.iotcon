@@ -6,44 +6,44 @@
 			<arg type="i" name="ifaces" direction="in"/>
 			<arg type="y" name="properties" direction="in"/>
 			<arg type="u" name="signal_number" direction="in"/>
-			<arg type="i" name="resource" direction="out"/>
+			<arg type="x" name="resource" direction="out"/>
 		</method>
 		<method name="unregisterResource">
-			<arg type="i" name="resource" direction="in"/>
+			<arg type="x" name="resource" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="bindInterface">
-			<arg type="i" name="resource" direction="in"/>
+			<arg type="x" name="resource" direction="in"/>
 			<arg type="i" name="iface" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="bindType">
-			<arg type="i" name="resource" direction="in"/>
+			<arg type="x" name="resource" direction="in"/>
 			<arg type="s" name="type" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="bindResource">
-			<arg type="i" name="parent" direction="in"/>
-			<arg type="i" name="child" direction="in"/>
+			<arg type="x" name="parent" direction="in"/>
+			<arg type="x" name="child" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="unbindResource">
-			<arg type="i" name="parent" direction="in"/>
-			<arg type="i" name="child" direction="in"/>
+			<arg type="x" name="parent" direction="in"/>
+			<arg type="x" name="child" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="notifyListOfObservers">
-			<arg type="i" name="resource" direction="in"/>
+			<arg type="x" name="resource" direction="in"/>
 			<arg type="a(iv)" name="notify_msg" direction="in"/>
 			<arg type="ai" name="observers" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="notifyAll">
-			<arg type="i" name="resource" direction="in"/>
+			<arg type="x" name="resource" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="sendResponse">
-			<arg type="(sia(qs)ivii)" name="response" direction="in"/>
+			<arg type="(sia(qs)ivxx)" name="response" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="findResource">
@@ -78,10 +78,10 @@
 			<arg type="i" name="observe_type" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
 			<arg type="u" name="signal_number" direction="in"/>
-			<arg type="i" name="observe_h" direction="out"/>
+			<arg type="x" name="observe_h" direction="out"/>
 		</method>
 		<method name="observerStop">
-			<arg type="i" name="observe_h" direction="in"/>
+			<arg type="x" name="observe_h" direction="in"/>
 			<arg type="a(qs)" name="options" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
@@ -107,10 +107,10 @@
 			<arg type="s" name="host_address" direction="in"/>
 			<arg type="s" name="type" direction="in"/>
 			<arg type="u" name="signal_number" direction="in"/>
-			<arg type="i" name="presence_h" direction="out"/>
+			<arg type="x" name="presence_h" direction="out"/>
 		</method>
 		<method name="unsubscribePresence">
-			<arg type="i" name="presence_h" direction="in"/>
+			<arg type="x" name="presence_h" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="startPresence">

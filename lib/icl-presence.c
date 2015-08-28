@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -28,7 +29,7 @@ typedef struct icl_presence {
 	iotcon_presence_cb cb;
 	void *user_data;
 	unsigned int id;
-	int handle;
+	int64_t handle;
 } icl_presence_s;
 
 API int iotcon_start_presence(unsigned int time_to_live)
@@ -107,7 +108,13 @@ static void _icl_presence_cb(GDBusConnection *connection,
 static void _icl_presence_conn_cleanup(icl_presence_s *presence)
 {
 	presence->id = 0;
-	presence->handle = 0;
+
+	if (presence->handle) {
+		presence->handle = 0;
+		return;
+	}
+
+	free(presence);
 }
 
 
@@ -202,10 +209,9 @@ API int iotcon_unsubscribe_presence(iotcon_presence_h presence)
 		ERR("iotcon-daemon Fail(%d)", ret);
 		return icl_dbus_convert_daemon_error(ret);
 	}
+	presence->handle = 0;
 
 	icl_dbus_unsubscribe_signal(presence->id);
-
-	free(presence);
 
 	return IOTCON_ERROR_NONE;
 }

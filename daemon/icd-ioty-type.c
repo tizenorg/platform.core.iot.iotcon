@@ -72,4 +72,32 @@ int icd_ioty_transport_flag_to_conn_type(OCTransportAdapter adapter,
 }
 
 
+int icd_ioty_conn_type_to_oic_transport_type(int conn_type, OCTransportAdapter *adapter,
+		OCTransportFlags *flag)
+{
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+		*adapter = OC_ADAPTER_IP;
+		*flag = OC_IP_USE_V4;
+		break;
+	case IOTCON_CONNECTIVITY_IPV6:
+		*adapter = OC_ADAPTER_IP;
+		*flag = OC_IP_USE_V6;
+		break;
+	case IOTCON_CONNECTIVITY_EDR:
+		*adapter = OC_ADAPTER_RFCOMM_BTEDR;
+		*flag = OC_DEFAULT_FLAGS;
+		break;
+	case IOTCON_CONNECTIVITY_LE:
+		*adapter = OC_ADAPTER_GATT_BTLE;
+		*flag = OC_DEFAULT_FLAGS;
+		break;
+	case IOTCON_CONNECTIVITY_ALL:
+	default:
+		*adapter = OC_DEFAULT_ADAPTER;
+		*flag = OC_DEFAULT_FLAGS;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
 

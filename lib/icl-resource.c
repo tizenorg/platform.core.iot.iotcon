@@ -48,22 +48,20 @@ static void _icl_request_handler(GDBusConnection *connection,
 	GVariantIter *repr_iter;
 	char *key = NULL;
 	char *value = NULL;
-	int request_handle;
-	int resource_handle;
 	struct icl_resource_request request = {0};
 	iotcon_resource_h resource = user_data;
 	iotcon_request_handler_cb cb = resource->cb;
 	GVariant *repr_gvar;
 
-	g_variant_get(parameters, "(ia(qs)a(ss)iiavii)",
+	g_variant_get(parameters, "(ia(qs)a(ss)iiavxx)",
 			&request.types,
 			&options,
 			&query,
 			&request.observation_info.action,
 			&request.observation_info.observer_id,
 			&repr_iter,
-			&request_handle,
-			&resource_handle);
+			&request.oic_request_h,
+			&request.oic_resource_h);
 
 	if (g_variant_iter_n_children(options)) {
 		request.header_options = iotcon_options_new();
@@ -78,9 +76,6 @@ static void _icl_request_handler(GDBusConnection *connection,
 			iotcon_query_insert(request.query, key, value);
 	}
 	g_variant_iter_free(query);
-
-	request.request_handle = GINT_TO_POINTER(request_handle);
-	request.resource_handle = GINT_TO_POINTER(resource_handle);
 
 	if (g_variant_iter_loop(repr_iter, "v", &repr_gvar)) {
 		request.repr = icl_repr_from_gvariant(repr_gvar);
@@ -113,7 +108,15 @@ static void _icl_request_handler(GDBusConnection *connection,
 static void _icl_resource_conn_cleanup(iotcon_resource_h resource)
 {
 	resource->sub_id = 0;
-	resource->handle = 0;
+
+	if (resource->handle) {
+		resource->handle = 0;
+		return;
+	}
+
+	iotcon_resource_types_free(resource->types);
+	free(resource->uri_path);
+	free(resource);
 }
 
 
@@ -225,12 +228,9 @@ API int iotcon_unregister_resource(iotcon_resource_h resource)
 		ERR("iotcon-daemon Fail(%d)", ret);
 		return icl_dbus_convert_daemon_error(ret);
 	}
+	resource->handle = 0;
 
 	icl_dbus_unsubscribe_signal(resource->sub_id);
-
-	iotcon_resource_types_free(resource->types);
-	free(resource->uri_path);
-	free(resource);
 
 	return IOTCON_ERROR_NONE;
 }

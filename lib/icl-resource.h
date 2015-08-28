@@ -16,6 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_H__
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_H__
 
+#include <stdint.h>
 #include "iotcon.h"
 #include "icl-dbus.h"
 
@@ -33,7 +34,7 @@ struct icl_resource {
 	iotcon_request_handler_cb cb;
 	void *user_data;
 	unsigned int sub_id;
-	int handle;
+	int64_t handle;
 	iotcon_resource_h children[IOTCON_CONTAINED_RESOURCES_MAX];
 };
 
