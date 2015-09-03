@@ -31,7 +31,7 @@ struct icl_resource_request {
 	iotcon_options_h header_options;
 	iotcon_query_h query;
 	struct icl_observe_info observation_info;
-	iotcon_repr_h repr;
+	iotcon_representation_h repr;
 	int64_t oic_request_h;
 	int64_t oic_resource_h;
 };

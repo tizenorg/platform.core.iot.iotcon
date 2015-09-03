@@ -22,22 +22,26 @@
 #include "iotcon-struct.h"
 #include "ic-utils.h"
 #include "icl.h"
+#include "icl-resource-types.h"
 #include "icl-query.h"
 
-API iotcon_query_h iotcon_query_new()
+API int iotcon_query_create(iotcon_query_h *ret_query)
 {
 	iotcon_query_h query = calloc(1, sizeof(struct icl_query));
 	if (NULL == query) {
 		ERR("calloc() Fail(%d)", errno);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	query->hash = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
-	return query;
+
+	*ret_query = query;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API void iotcon_query_free(iotcon_query_h query)
+API void iotcon_query_destroy(iotcon_query_h query)
 {
 	RET_IF(NULL == query);
 
@@ -58,7 +62,7 @@ API int iotcon_query_insert(iotcon_query_h query, const char *key, const char *v
 	/* first query : ?key=value
 	 * Rest of query : &key=value */
 	query_len = strlen(key) + strlen(value) + 2;
-	if (IOTCON_QUERY_LENGTH_MAX < (query->len + query_len)) {
+	if (ICL_QUERY_LENGTH_MAX < (query->len + query_len)) {
 		ERR("Length of query is invalid.");
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
@@ -98,32 +102,34 @@ API int iotcon_query_delete(iotcon_query_h query, const char *key)
 }
 
 
-API const char* iotcon_query_lookup(iotcon_query_h query, const char *key)
+API int iotcon_query_lookup(iotcon_query_h query, const char *key, const char **data)
 {
-	const char *ret = NULL;
+	const char *value = NULL;
 
-	RETV_IF(NULL == query, NULL);
-	RETV_IF(NULL == key, NULL);
+	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = g_hash_table_lookup(query->hash, key);
-	if (NULL == ret)
+	value = g_hash_table_lookup(query->hash, key);
+	if (NULL == value)
 		ERR("g_hash_table_lookup() Fail");
 
-	return ret;
+	*data = value;
+
+	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_fn fn,
+API int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
 		void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key, value;
 
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	g_hash_table_iter_init(&iter, query->hash);
 	while (g_hash_table_iter_next(&iter, &key, &value)) {
-		if (false == fn(key, value, user_data))
+		if (false == cb(key, value, user_data))
 			break;
 	}
 

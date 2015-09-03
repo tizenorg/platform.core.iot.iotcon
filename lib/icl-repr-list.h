@@ -19,6 +19,7 @@
 #include <glib.h>
 
 #include "iotcon-struct.h"
+#include "icl-repr-value.h"
 
 struct icl_list_s {
 	int type;

@@ -31,10 +31,10 @@
 #include "icl-response.h"
 #include "icl-repr-list.h"
 #include "icl-repr-value.h"
-#include "icl-repr-obj.h"
+#include "icl-repr-state.h"
 #include "icl-repr.h"
 
-void icl_repr_inc_ref_count(iotcon_repr_h val)
+void icl_representation_inc_ref_count(iotcon_representation_h val)
 {
 	RET_IF(NULL == val);
 	RETM_IF(val->ref_count < 0, "Invalid Count(%d)", val->ref_count);
@@ -42,7 +42,8 @@ void icl_repr_inc_ref_count(iotcon_repr_h val)
 	val->ref_count++;
 }
 
-static bool _icl_repr_dec_ref_count(iotcon_repr_h val)
+
+static bool _icl_representation_dec_ref_count(iotcon_representation_h val)
 {
 	bool ret;
 
@@ -58,26 +59,52 @@ static bool _icl_repr_dec_ref_count(iotcon_repr_h val)
 	return ret;
 }
 
-API iotcon_repr_h iotcon_repr_new()
-{
-	iotcon_repr_h ret_val;
-	errno = 0;
 
-	ret_val = calloc(1, sizeof(struct icl_repr_s));
-	if (NULL == ret_val) {
+API int iotcon_representation_create(iotcon_representation_h *ret_repr)
+{
+	errno = 0;
+	iotcon_representation_h repr;
+
+	repr = calloc(1, sizeof(struct icl_representation_s));
+	if (NULL == repr) {
 		ERR("calloc() Fail(%d)", errno);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	ret_val->hash_table = g_hash_table_new_full(g_str_hash, g_str_equal, free,
-			icl_value_free);
-	icl_repr_inc_ref_count(ret_val);
-	ret_val->visibility = (ICL_VISIBILITY_REPR | ICL_VISIBILITY_PROP);
+	repr->visibility = (ICL_VISIBILITY_REPR | ICL_VISIBILITY_PROP);
+	icl_representation_inc_ref_count(repr);
 
-	return ret_val;
+	*ret_repr = repr;
+
+	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_get_uri_path(iotcon_repr_h repr, const char **uri_path)
+
+API void iotcon_representation_destroy(iotcon_representation_h repr)
+{
+	RET_IF(NULL == repr);
+
+	if (false == _icl_representation_dec_ref_count(repr))
+		return;
+
+	free(repr->uri_path);
+
+	/* (GDestroyNotify) : iotcon_representation_h is proper type than gpointer */
+	g_list_free_full(repr->children, (GDestroyNotify)iotcon_representation_destroy);
+
+	/* null COULD be allowed */
+	if (repr->res_types)
+		iotcon_resource_types_destroy(repr->res_types);
+
+	/* null COULD be allowed */
+	if (repr->state)
+		iotcon_state_destroy(repr->state);
+
+	free(repr);
+}
+
+
+API int iotcon_representation_get_uri_path(iotcon_representation_h repr, const char **uri_path)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
@@ -87,7 +114,7 @@ API int iotcon_repr_get_uri_path(iotcon_repr_h repr, const char **uri_path)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_set_uri_path(iotcon_repr_h repr, const char *uri_path)
+API int iotcon_representation_set_uri_path(iotcon_representation_h repr, const char *uri_path)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -106,7 +133,8 @@ API int iotcon_repr_set_uri_path(iotcon_repr_h repr, const char *uri_path)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_get_resource_types(iotcon_repr_h repr, iotcon_resource_types_h *types)
+API int iotcon_representation_get_resource_types(iotcon_representation_h repr,
+		iotcon_resource_types_h *types)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
@@ -116,11 +144,12 @@ API int iotcon_repr_get_resource_types(iotcon_repr_h repr, iotcon_resource_types
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_set_resource_types(iotcon_repr_h repr, iotcon_resource_types_h types)
+API int iotcon_representation_set_resource_types(iotcon_representation_h repr,
+		iotcon_resource_types_h types)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	iotcon_resource_types_free(repr->res_types);
+	iotcon_resource_types_destroy(repr->res_types);
 	repr->res_types = NULL;
 
 	if (types)
@@ -129,14 +158,18 @@ API int iotcon_repr_set_resource_types(iotcon_repr_h repr, iotcon_resource_types
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_get_resource_interfaces(iotcon_repr_h repr)
+API int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr,
+		int *ifaces)
 {
-	RETV_IF(NULL == repr, IOTCON_INTERFACE_NONE);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return repr->interfaces;
+	*ifaces = repr->interfaces;
+
+	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_set_resource_interfaces(iotcon_repr_h repr, int ifaces)
+API int iotcon_representation_set_resource_interfaces(iotcon_representation_h repr,
+		int ifaces)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -148,29 +181,85 @@ API int iotcon_repr_set_resource_interfaces(iotcon_repr_h repr, int ifaces)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_append_child(iotcon_repr_h parent, iotcon_repr_h child)
+
+API int iotcon_representation_set_state(iotcon_representation_h repr,
+		iotcon_state_h state)
+{
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (repr->state) {
+		ERR("state already set. Remove first !");
+		return IOTCON_ERROR_ALREADY;
+	}
+
+	icl_state_inc_ref_count(state);
+	repr->state = state;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_representation_get_state(iotcon_representation_h repr,
+		iotcon_state_h *state)
+{
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*state = repr->state;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_representation_del_state(iotcon_representation_h repr)
+{
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (repr->state)
+		iotcon_state_destroy(repr->state);
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_representation_append_child(iotcon_representation_h parent,
+		iotcon_representation_h child)
 {
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
-	icl_repr_inc_ref_count(child);
+	icl_representation_inc_ref_count(child);
 	parent->children = g_list_append(parent->children, child);
 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_foreach_children(iotcon_repr_h parent, iotcon_children_fn fn,
-		void *user_data)
+
+API int iotcon_representation_remove_child(iotcon_representation_h parent,
+		iotcon_representation_h child)
+{
+	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
+
+	parent->children = g_list_remove(parent->children, child);
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_representation_foreach_children(iotcon_representation_h parent,
+		iotcon_children_cb cb, void *user_data)
 {
 	GList *list, *next;
 
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	list = parent->children;
 	while (list) {
 		next = list->next;
-		if (IOTCON_FUNC_STOP == fn(list->data, user_data))
+		if (IOTCON_FUNC_STOP == cb(list->data, user_data))
 			break;
 		list = next;
 	}
@@ -178,15 +267,19 @@ API int iotcon_repr_foreach_children(iotcon_repr_h parent, iotcon_children_fn fn
 	return IOTCON_ERROR_NONE;
 }
 
-API unsigned int iotcon_repr_get_children_count(iotcon_repr_h parent)
+API int iotcon_representation_get_children_count(iotcon_representation_h parent,
+		unsigned int *count)
 {
-	RETV_IF(NULL == parent, 0);
-	RETV_IF(NULL == parent->children, 0);
+	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == parent->children, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return g_list_length(parent->children);
+	*count = g_list_length(parent->children);
+
+	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_get_nth_child(iotcon_repr_h parent, int pos, iotcon_repr_h *child)
+API int iotcon_representation_get_nth_child(iotcon_representation_h parent, int pos,
+		iotcon_representation_h *child)
 {
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == parent->children, IOTCON_ERROR_INVALID_PARAMETER);
@@ -201,58 +294,43 @@ API int iotcon_repr_get_nth_child(iotcon_repr_h parent, int pos, iotcon_repr_h *
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_repr_foreach(iotcon_repr_h repr, iotcon_repr_fn fn, void *user_data)
+API int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb, void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key;
 
-	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	g_hash_table_iter_init(&iter, repr->hash_table);
+	g_hash_table_iter_init(&iter, state->hash_table);
 	while (g_hash_table_iter_next(&iter, &key, NULL)) {
-		if (IOTCON_FUNC_STOP == fn(repr, key, user_data))
+		if (IOTCON_FUNC_STOP == cb(state, key, user_data))
 			break;
 	}
 
 	return IOTCON_ERROR_NONE;
 }
 
-API unsigned int iotcon_repr_get_keys_count(iotcon_repr_h repr)
-{
-	RETV_IF(NULL == repr, 0);
-	RETV_IF(NULL == repr->hash_table, 0);
 
-	return g_hash_table_size(repr->hash_table);
+API int iotcon_state_get_keys_count(iotcon_state_h state, unsigned int *count)
+{
+	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == state->hash_table, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*count = g_hash_table_size(state->hash_table);
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API void iotcon_repr_free(iotcon_repr_h repr)
-{
-	RET_IF(NULL == repr);
-
-	if (false == _icl_repr_dec_ref_count(repr))
-		return;
-
-	free(repr->uri_path);
-
-	/* (GDestroyNotify) : iotcon_repr_h is proper type than gpointer */
-	g_list_free_full(repr->children, (GDestroyNotify)iotcon_repr_free);
-
-	/* null COULD be allowed */
-	if (repr->res_types)
-		iotcon_resource_types_free(repr->res_types);
-	g_hash_table_destroy(repr->hash_table);
-	free(repr);
-}
-
-static void _icl_repr_obj_clone(char *key, iotcon_value_h src_val, iotcon_repr_h dest_repr)
+void icl_state_clone(char *key, iotcon_value_h src_val, iotcon_state_h dest_state)
 {
 	FN_CALL;
 	int type, ret;
 	iotcon_value_h value, copied_val;
 	iotcon_list_h child_list, copied_list;
-	iotcon_repr_h child_repr, copied_repr;
+	iotcon_state_h child_state;
+	iotcon_state_h copied_state = NULL;
 
 	type = src_val->type;
 	switch (type) {
@@ -267,7 +345,7 @@ static void _icl_repr_obj_clone(char *key, iotcon_value_h src_val, iotcon_repr_h
 			return;
 		}
 
-		icl_obj_set_value(dest_repr, key, copied_val);
+		icl_state_set_value(dest_state, key, copied_val);
 		break;
 	case IOTCON_TYPE_LIST:
 		ret = icl_value_get_list(src_val, &child_list);
@@ -282,35 +360,32 @@ static void _icl_repr_obj_clone(char *key, iotcon_value_h src_val, iotcon_repr_h
 			return;
 		}
 
-		value = icl_value_new_list(copied_list);
+		value = icl_value_create_list(copied_list);
 		if (NULL == value) {
-			ERR("icl_value_new_list() Fail");
-			iotcon_list_free(copied_list);
+			ERR("icl_value_create_list() Fail");
+			iotcon_list_destroy(copied_list);
 			return;
 		}
 
-		icl_obj_set_value(dest_repr, key, value);
+		icl_state_set_value(dest_state, key, value);
 		break;
-	case IOTCON_TYPE_REPR:
-		ret = icl_value_get_repr(src_val, &child_repr);
+	case IOTCON_TYPE_STATE:
+		ret = icl_value_get_state(src_val, &child_state);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_value_get_repr() Fail(%d)", ret);
+			ERR("icl_value_get_state() Fail(%d)", ret);
 			return;
 		}
 
-		copied_repr = iotcon_repr_clone(child_repr);
-		if (NULL == copied_repr) {
-			ERR("icl_list_clone() Fail");
-			return;
-		}
+		g_hash_table_foreach(child_state->hash_table, (GHFunc)icl_state_clone,
+				copied_state);
 
-		value = icl_value_new_repr(copied_repr);
+		value = icl_value_create_state(copied_state);
 		if (NULL == value) {
-			ERR("icl_value_new_repr(%p) Fail", copied_repr);
+			ERR("icl_value_create_state(%p) Fail", copied_state);
 			return;
 		}
 
-		icl_obj_set_value(dest_repr, key, value);
+		icl_state_set_value(dest_state, key, value);
 		break;
 	default:
 		ERR("Invalid type(%d)", type);
@@ -318,54 +393,71 @@ static void _icl_repr_obj_clone(char *key, iotcon_value_h src_val, iotcon_repr_h
 	}
 }
 
-API iotcon_repr_h iotcon_repr_clone(const iotcon_repr_h src)
+API int iotcon_representation_clone(const iotcon_representation_h src,
+		iotcon_representation_h *dest)
 {
 	FN_CALL;
+	int ret;
 	GList *node;
-	iotcon_repr_h dest, copied_repr;
 	iotcon_resource_types_h list;
+	iotcon_state_h ori_state;
+	iotcon_state_h cloned_state = NULL;
+	iotcon_representation_h cloned_repr, copied_repr;
 
-	RETV_IF(NULL == src, NULL);
+	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
 
-	dest = iotcon_repr_new();
-	if (NULL == dest) {
-		ERR("iotcon_repr_new() Fail");
-		return NULL;
+	ret = iotcon_representation_create(&cloned_repr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_create() Fail(%d)", ret);
+		return ret;
 	}
 
 	if (src->uri_path) {
-		dest->uri_path = strdup(src->uri_path);
-		if (NULL == dest->uri_path) {
+		cloned_repr->uri_path = strdup(src->uri_path);
+		if (NULL == cloned_repr->uri_path) {
 			ERR("strdup() Fail");
-			iotcon_repr_free(dest);
-			return NULL;
+			iotcon_representation_destroy(cloned_repr);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
 	}
 
 	if (src->interfaces)
-		dest->interfaces = src->interfaces;
+		cloned_repr->interfaces = src->interfaces;
 
 	if (src->res_types) {
-		list = iotcon_resource_types_clone(src->res_types);
-		if (NULL == list) {
+		ret = iotcon_resource_types_clone(src->res_types, &list);
+		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_resource_types_clone() Fail");
-			iotcon_repr_free(dest);
-			return NULL;
+			iotcon_representation_destroy(cloned_repr);
+			return ret;
 		}
-		dest->res_types = list;
+		cloned_repr->res_types = list;
 	}
 
 	for (node = g_list_first(src->children); node; node = node->next) {
-		copied_repr = iotcon_repr_clone((iotcon_repr_h)node->data);
-		if (NULL == copied_repr) {
-			ERR("iotcon_repr_clone(child) Fail");
-			iotcon_repr_free(dest);
-			return NULL;
+		ret = iotcon_representation_clone((iotcon_representation_h)node->data,
+				&copied_repr);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_representation_clone(child) Fail(%d)", ret);
+			iotcon_representation_destroy(cloned_repr);
+			return ret;
 		}
-		dest->children = g_list_append(dest->children, copied_repr);
+		cloned_repr->children = g_list_append(cloned_repr->children, copied_repr);
 	}
 
-	g_hash_table_foreach(src->hash_table, (GHFunc)_icl_repr_obj_clone, dest);
+	ori_state = src->state;
+	if (ori_state->hash_table) {
+		g_hash_table_foreach(ori_state->hash_table, (GHFunc)icl_state_clone,
+				cloned_state);
+		ret = iotcon_representation_set_state(cloned_repr, cloned_state);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_representation_set_state() Fail");
+			iotcon_representation_destroy(cloned_repr);
+			return ret;
+		}
+	}
 
-	return dest;
+	*dest = cloned_repr;
+
+	return IOTCON_ERROR_NONE;
 }

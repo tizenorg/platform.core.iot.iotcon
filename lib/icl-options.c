@@ -31,28 +31,28 @@
  *
  * @since_tizen 3.0
  */
-#define IOTCON_OPTIONID_MIN 2048
+#define ICL_OPTIONID_MIN 2048
 
 /**
  * @brief The maximum value of option id which can be held in a resource.
  *
  * @since_tizen 3.0
  */
-#define IOTCON_OPTIONID_MAX 3000
+#define ICL_OPTIONID_MAX 3000
 
 /**
  * @brief The maximum number of option which can be held in a resource.
  *
  * @since_tizen 3.0
  */
-#define IOTCON_OPTIONS_MAX 2
+#define ICL_OPTIONS_MAX 2
 
 /**
  * @brief The maximum length of option data which can be held in a resource.
  *
  * @since_tizen 3.0
  */
-#define IOTCON_OPTION_DATA_LENGTH_MAX 16
+#define ICL_OPTION_DATA_LENGTH_MAX 16
 
 
 iotcon_options_h icl_options_ref(iotcon_options_h options)
@@ -66,22 +66,24 @@ iotcon_options_h icl_options_ref(iotcon_options_h options)
 }
 
 
-API iotcon_options_h iotcon_options_new()
+API int iotcon_options_create(iotcon_options_h *ret_options)
 {
 	iotcon_options_h options = calloc(1, sizeof(struct icl_options));
 	if (NULL == options) {
 		ERR("calloc() Fail(%d)", errno);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	options->hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, free);
 	options->ref_count = 1;
 
-	return options;
+	*ret_options = options;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API void iotcon_options_free(iotcon_options_h options)
+API void iotcon_options_destroy(iotcon_options_h options)
 {
 	RET_IF(NULL == options);
 
@@ -103,14 +105,14 @@ API int iotcon_options_insert(iotcon_options_h options, unsigned short id,
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(1 < options->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
-	RETVM_IF(IOTCON_OPTIONS_MAX <= g_hash_table_size(options->hash),
+	RETVM_IF(ICL_OPTIONS_MAX <= g_hash_table_size(options->hash),
 			IOTCON_ERROR_OUT_OF_MEMORY, "Options already have maximum elements.");
 
-	RETVM_IF(((id < IOTCON_OPTIONID_MIN) || (IOTCON_OPTIONID_MAX < id)),
+	RETVM_IF(((id < ICL_OPTIONID_MIN) || (ICL_OPTIONID_MAX < id)),
 			IOTCON_ERROR_INVALID_PARAMETER, "Invalid id(%d)", id);
 
 	RETV_IF(NULL == data, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_OPTION_DATA_LENGTH_MAX < strlen(data), IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(ICL_OPTION_DATA_LENGTH_MAX < strlen(data), IOTCON_ERROR_INVALID_PARAMETER,
 			"The length of option data(%s) is invalid.", data);
 
 	g_hash_table_insert(options->hash, GUINT_TO_POINTER(id), ic_utils_strdup(data));
@@ -136,32 +138,35 @@ API int iotcon_options_delete(iotcon_options_h options, unsigned short id)
 }
 
 
-API const char* iotcon_options_lookup(iotcon_options_h options, unsigned short id)
+API int iotcon_options_lookup(iotcon_options_h options, unsigned short id,
+		const char **data)
 {
 	const char *ret;
 
-	RETV_IF(NULL == options, NULL);
+	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = g_hash_table_lookup(options->hash, GUINT_TO_POINTER(id));
 	if (NULL == ret)
 		ERR("g_hash_table_lookup() Fail");
 
-	return ret;
+	*data = ret;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API int iotcon_options_foreach(iotcon_options_h options,
-		iotcon_options_foreach_fn fn, void *user_data)
+API int iotcon_options_foreach(iotcon_options_h options, iotcon_options_foreach_cb cb,
+		void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key, value;
 
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	g_hash_table_iter_init(&iter, options->hash);
 	while (g_hash_table_iter_next(&iter, &key, &value)) {
-		if (false == fn(GPOINTER_TO_UINT(key), value, user_data))
+		if (false == cb(GPOINTER_TO_UINT(key), value, user_data))
 			break;
 	}
 

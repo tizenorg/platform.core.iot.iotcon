@@ -25,13 +25,13 @@
  *
  * @since_tizen 3.0
  */
-#define IOTCON_CONTAINED_RESOURCES_MAX 5
+#define ICL_CONTAINED_RESOURCES_MAX 5
 
 
 struct icl_notify_msg {
 	int error_code;
 	iotcon_interface_e iface;
-	iotcon_repr_h repr;
+	iotcon_representation_h repr;
 };
 
 struct icl_resource {
@@ -43,7 +43,7 @@ struct icl_resource {
 	void *user_data;
 	unsigned int sub_id;
 	int64_t handle;
-	iotcon_resource_h children[IOTCON_CONTAINED_RESOURCES_MAX];
+	iotcon_resource_h children[ICL_CONTAINED_RESOURCES_MAX];
 };
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_H__*/

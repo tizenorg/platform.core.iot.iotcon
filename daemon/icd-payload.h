@@ -22,6 +22,6 @@
 
 GVariant* icd_payload_to_gvariant(OCPayload *payload);
 GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr);
-OCRepPayload* icd_payload_repr_from_gvariant(GVariant *var);
+OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var);
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_PAYLOAD_H__*/

@@ -18,7 +18,7 @@
 
 #include <glib.h>
 
-GVariant* icl_repr_to_gvariant(iotcon_repr_h repr);
-iotcon_repr_h icl_repr_from_gvariant(GVariant *var);
+GVariant* icl_representation_to_gvariant(iotcon_representation_h repr);
+iotcon_representation_h icl_representation_from_gvariant(GVariant *var);
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_PAYLOAD_H__*/

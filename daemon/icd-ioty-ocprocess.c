@@ -33,12 +33,12 @@
 
 static int icd_ioty_alive;
 
-typedef int (*_ocprocess_fn)(void *user_data);
+typedef int (*_ocprocess_cb)(void *user_data);
 
 struct icd_ioty_worker
 {
 	void *ctx;
-	_ocprocess_fn fn;
+	_ocprocess_cb cb;
 };
 
 
@@ -116,9 +116,9 @@ static void* _ocprocess_worker_thread(void *data)
 		return NULL;
 	}
 
-	ret = worker->fn(worker->ctx);
+	ret = worker->cb(worker->ctx);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("fn() Fail(%d)", ret);
+		ERR("cb() Fail(%d)", ret);
 
 	/* worker was allocated from _ocprocess_worker_start() */
 	free(worker);
@@ -128,13 +128,13 @@ static void* _ocprocess_worker_thread(void *data)
 }
 
 
-static int _ocprocess_worker_start(_ocprocess_fn fn, void *ctx)
+static int _ocprocess_worker_start(_ocprocess_cb cb, void *ctx)
 {
 	GError *error;
 	GThread *thread;
 	struct icd_ioty_worker *worker;
 
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	worker = calloc(1, sizeof(struct icd_ioty_worker));
 	if (NULL == worker) {
@@ -142,7 +142,7 @@ static int _ocprocess_worker_start(_ocprocess_fn fn, void *ctx)
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	worker->fn = fn;
+	worker->cb = cb;
 	worker->ctx = ctx;
 
 	/* TODO : consider thread pool mechanism */
@@ -172,7 +172,7 @@ static int _ocprocess_response_signal(const char *dest, const char *signal,
 	ret = snprintf(sig_name, sizeof(sig_name), "%s_%u", signal, signum);
 	if (ret <= 0 || sizeof(sig_name) <= ret) {
 		ERR("snprintf() Fail(%d)", ret);
-		return IOTCON_ERROR_UNKNOWN;
+		return IOTCON_ERROR_IO_ERROR;
 	}
 
 	ret = icd_dbus_emit_signal(dest, sig_name, value);
@@ -408,8 +408,8 @@ OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 	if (NULL == resp->payload)
 		/* normal case : payload COULD be NULL */
 		return OC_STACK_KEEP_TRANSACTION;
-	RETV_IF(PAYLOAD_TYPE_DISCOVERY != resp->payload->type,
-			OC_STACK_KEEP_TRANSACTION);
+	RETVM_IF(PAYLOAD_TYPE_DISCOVERY != resp->payload->type,
+			OC_STACK_KEEP_TRANSACTION, "Invalid payload type(%d)", resp->payload->type);
 
 	find_ctx = calloc(1, sizeof(struct icd_find_context));
 	if (NULL == find_ctx) {
@@ -485,7 +485,7 @@ static int _worker_info_cb(void *context)
 }
 
 
-static int _ocprocess_worker(_ocprocess_fn fn, int type, OCPayload *payload, int res,
+static int _ocprocess_worker(_ocprocess_cb cb, int type, OCPayload *payload, int res,
 		GVariantBuilder *options, void *ctx)
 {
 	int ret;
@@ -503,7 +503,7 @@ static int _ocprocess_worker(_ocprocess_fn fn, int type, OCPayload *payload, int
 	crud_ctx->options = options;
 	crud_ctx->invocation = ctx;
 
-	ret = _ocprocess_worker_start(fn, crud_ctx);
+	ret = _ocprocess_worker_start(cb, crud_ctx);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_ocprocess_worker_start() Fail(%d)", ret);
 		if (crud_ctx->payload)

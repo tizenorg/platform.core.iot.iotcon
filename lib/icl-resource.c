@@ -23,13 +23,13 @@
 
 #include "iotcon.h"
 #include "ic-utils.h"
-#include "icl-resource-types.h"
-#include "icl-resource.h"
-#include "icl-request.h"
+#include "icl.h"
 #include "icl-repr.h"
 #include "icl-dbus.h"
+#include "icl-request.h"
 #include "icl-dbus-type.h"
-#include "icl.h"
+#include "icl-resource-types.h"
+#include "icl-resource.h"
 #include "icl-payload.h"
 
 /**
@@ -37,7 +37,7 @@
  *
  * @since_tizen 3.0
  */
-#define IOTCON_URI_PATH_LENGTH_MAX 36
+#define ICL_URI_PATH_LENGTH_MAX 36
 
 
 static void _icl_request_handler(GDBusConnection *connection,
@@ -49,17 +49,18 @@ static void _icl_request_handler(GDBusConnection *connection,
 		gpointer user_data)
 {
 	FN_CALL;
-	GVariantIter *options;
-	unsigned short option_id;
-	char *option_data;
-	GVariantIter *query;
-	GVariantIter *repr_iter;
+	int ret;
 	char *key = NULL;
+	char *option_data;
 	char *value = NULL;
+	GVariant *repr_gvar;
+	GVariantIter *query;
+	GVariantIter *options;
+	GVariantIter *repr_iter;
+	unsigned short option_id;
 	struct icl_resource_request request = {0};
 	iotcon_resource_h resource = user_data;
 	iotcon_request_handler_cb cb = resource->cb;
-	GVariant *repr_gvar;
 
 	g_variant_get(parameters, "(ia(qs)a(ss)iiavxx)",
 			&request.types,
@@ -72,30 +73,46 @@ static void _icl_request_handler(GDBusConnection *connection,
 			&request.oic_resource_h);
 
 	if (g_variant_iter_n_children(options)) {
-		request.header_options = iotcon_options_new();
+		ret = iotcon_options_create(&request.header_options);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_options_create() Fail(%d)", ret);
+			g_variant_iter_free(options);
+			g_variant_iter_free(query);
+			g_variant_iter_free(repr_iter);
+			return;
+		}
+
 		while (g_variant_iter_loop(options, "(q&s)", &option_id, &option_data))
 			iotcon_options_insert(request.header_options, option_id, option_data);
 	}
 	g_variant_iter_free(options);
 
 	if (g_variant_iter_n_children(query)) {
-		request.query = iotcon_query_new();
+		ret = iotcon_query_create(&request.query);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_query_create() Fail(%d)", ret);
+			g_variant_iter_free(query);
+			g_variant_iter_free(repr_iter);
+			return;
+		}
+
 		while (g_variant_iter_loop(query, "(&s&s)", &key, &value))
 			iotcon_query_insert(request.query, key, value);
 	}
 	g_variant_iter_free(query);
 
 	if (g_variant_iter_loop(repr_iter, "v", &repr_gvar)) {
-		request.repr = icl_repr_from_gvariant(repr_gvar);
+		request.repr = icl_representation_from_gvariant(repr_gvar);
 		if (NULL == request.repr) {
-			ERR("icl_repr_create_repr() Fail");
+			ERR("icl_representation_from_gvariant() Fail");
 			if (request.query)
-				iotcon_query_free(request.query);
+				iotcon_query_destroy(request.query);
 			if (request.header_options)
-				iotcon_options_free(request.header_options);
+				iotcon_options_destroy(request.header_options);
 			return;
 		}
 	}
+	g_variant_iter_free(repr_iter);
 
 	/* TODO remove request.uri */
 	request.uri_path = "temp_uri_path";
@@ -103,13 +120,13 @@ static void _icl_request_handler(GDBusConnection *connection,
 	if (cb)
 		cb(resource, &request, resource->user_data);
 
-	/* To avoid unnecessary ERR log (repr could be NULL) */
+	/* To avoid unnecessary ERR log (representation could be NULL) */
 	if (request.repr)
-		iotcon_repr_free(request.repr);
+		iotcon_representation_destroy(request.repr);
 	if (request.query)
-		iotcon_query_free(request.query);
+		iotcon_query_destroy(request.query);
 	if (request.header_options)
-		iotcon_options_free(request.header_options);
+		iotcon_options_destroy(request.header_options);
 }
 
 
@@ -122,19 +139,20 @@ static void _icl_resource_conn_cleanup(iotcon_resource_h resource)
 		return;
 	}
 
-	iotcon_resource_types_free(resource->types);
+	iotcon_resource_types_destroy(resource->types);
 	free(resource->uri_path);
 	free(resource);
 }
 
 
 /* The length of uri_path should be less than or equal to 36. */
-API iotcon_resource_h iotcon_register_resource(const char *uri_path,
+API int iotcon_register_resource(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int ifaces,
 		uint8_t properties,
 		iotcon_request_handler_cb cb,
-		void *user_data)
+		void *user_data,
+		iotcon_resource_h *resource_handle)
 {
 	int signal_number;
 	unsigned int sub_id;
@@ -143,24 +161,24 @@ API iotcon_resource_h iotcon_register_resource(const char *uri_path,
 	char sig_name[IC_DBUS_SIGNAL_LENGTH];
 	iotcon_resource_h resource;
 
-	RETV_IF(NULL == icl_dbus_get_object(), NULL);
-	RETV_IF(NULL == uri_path, NULL);
-	RETVM_IF(IOTCON_URI_PATH_LENGTH_MAX < strlen(uri_path), NULL, "Invalid uri_path(%s)",
-			uri_path);
-	RETV_IF(NULL == res_types, NULL);
-	RETV_IF(NULL == cb, NULL);
+	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(ICL_URI_PATH_LENGTH_MAX < strlen(uri_path),
+			IOTCON_ERROR_INVALID_PARAMETER, "Invalid uri_path(%s)", uri_path);
+	RETV_IF(NULL == res_types, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	resource = calloc(1, sizeof(struct icl_resource));
 	if (NULL == resource) {
 		ERR("calloc() Fail(%d)", errno);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	types = icl_dbus_resource_types_to_array(res_types);
 	if (NULL == types) {
 		ERR("icl_dbus_resource_types_to_array() Fail");
 		free(resource);
-		return NULL;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	signal_number = icl_dbus_generate_signal_number();
@@ -172,14 +190,14 @@ API iotcon_resource_h iotcon_register_resource(const char *uri_path,
 		g_error_free(error);
 		free(types);
 		free(resource);
-		return NULL;
+		return IOTCON_ERROR_DBUS;
 	}
 	free(types);
 
 	if (0 == resource->handle) {
 		ERR("iotcon-daemon Fail");
 		free(resource);
-		return NULL;
+		return IOTCON_ERROR_IOTIVITY;
 	}
 
 	resource->cb = cb;
@@ -198,12 +216,14 @@ API iotcon_resource_h iotcon_register_resource(const char *uri_path,
 	if (0 == sub_id) {
 		ERR("icl_dbus_subscribe_signal() Fail");
 		free(resource);
-		return NULL;
+		return IOTCON_ERROR_DBUS;
 	}
 
 	resource->sub_id = sub_id;
 
-	return resource;
+	*resource_handle = resource;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
@@ -218,7 +238,7 @@ API int iotcon_unregister_resource(iotcon_resource_h resource)
 
 	if (0 == resource->sub_id) {
 		WARN("Invalid Resource handle");
-		iotcon_resource_types_free(resource->types);
+		iotcon_resource_types_destroy(resource->types);
 		free(resource->uri_path);
 		free(resource);
 		return IOTCON_ERROR_NONE;
@@ -244,7 +264,7 @@ API int iotcon_unregister_resource(iotcon_resource_h resource)
 }
 
 
-API int iotcon_bind_interface(iotcon_resource_h resource, iotcon_interface_e iface)
+API int iotcon_resource_bind_interface(iotcon_resource_h resource, int iface)
 {
 	FN_CALL;
 	int ret;
@@ -274,7 +294,7 @@ API int iotcon_bind_interface(iotcon_resource_h resource, iotcon_interface_e ifa
 }
 
 
-API int iotcon_bind_type(iotcon_resource_h resource, const char *resource_type)
+API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resource_type)
 {
 	FN_CALL;
 	int ret;
@@ -283,7 +303,7 @@ API int iotcon_bind_type(iotcon_resource_h resource, const char *resource_type)
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
-	if (IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type)) {
+	if (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type)) {
 		ERR("Invalid resource_type(%s)", resource_type);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
@@ -310,7 +330,7 @@ API int iotcon_bind_type(iotcon_resource_h resource, const char *resource_type)
 }
 
 
-API int iotcon_bind_request_handler(iotcon_resource_h resource,
+API int iotcon_resource_bind_request_handler(iotcon_resource_h resource,
 		iotcon_request_handler_cb cb)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
@@ -323,7 +343,8 @@ API int iotcon_bind_request_handler(iotcon_resource_h resource,
 }
 
 
-API int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child)
+API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
+		iotcon_resource_h child)
 {
 	FN_CALL;
 	int ret;
@@ -344,14 +365,14 @@ API int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child)
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	for (i = 0; i < IOTCON_CONTAINED_RESOURCES_MAX; i++) {
+	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
 		if (child == parent->children[i]) {
 			ERR("Child resource was already bound to parent resource.");
 			return IOTCON_ERROR_ALREADY;
 		}
 	}
 
-	for (i = 0; i < IOTCON_CONTAINED_RESOURCES_MAX; i++) {
+	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
 		if (NULL == parent->children[i]) {
 			ic_dbus_call_bind_resource_sync(icl_dbus_get_object(), parent->handle,
 					child->handle, &ret, NULL, &error);
@@ -377,7 +398,8 @@ API int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child)
 }
 
 
-API int iotcon_unbind_resource(iotcon_resource_h parent, iotcon_resource_h child)
+API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
+		iotcon_resource_h child)
 {
 	int ret;
 	int i;
@@ -409,7 +431,7 @@ API int iotcon_unbind_resource(iotcon_resource_h parent, iotcon_resource_h child
 		return icl_dbus_convert_daemon_error(ret);
 	}
 
-	for (i = 0; i < IOTCON_CONTAINED_RESOURCES_MAX; i++) {
+	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
 		if (child == parent->children[i])
 			parent->children[i] = NULL;
 	}
@@ -426,7 +448,7 @@ API int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *
 	RETV_IF(NULL == number, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*number = 0;
-	for (i = 0; i < IOTCON_CONTAINED_RESOURCES_MAX; i++) {
+	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
 		if (resource->children[i])
 			*number += 1;
 	}
@@ -440,7 +462,7 @@ API int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 {
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
-	if ((index < 0) || (IOTCON_CONTAINED_RESOURCES_MAX <= index)) {
+	if ((index < 0) || (ICL_CONTAINED_RESOURCES_MAX <= index)) {
 		ERR("Invalid index(%d)", index);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
@@ -498,32 +520,35 @@ API int iotcon_resource_is_observable(iotcon_resource_h resource, bool *observab
 }
 
 
-API iotcon_notimsg_h iotcon_notimsg_new(iotcon_repr_h repr, iotcon_interface_e iface)
+API int iotcon_notimsg_create(iotcon_representation_h repr, int iface,
+		iotcon_notimsg_h *notimsg_handle)
 {
 	iotcon_notimsg_h msg;
 
-	RETV_IF(NULL == repr, NULL);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	msg = calloc(1, sizeof(struct icl_notify_msg));
 	if (NULL == msg) {
 		ERR("calloc() Fail(%d)", errno);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	msg->repr = repr;
-	icl_repr_inc_ref_count(msg->repr);
+	icl_representation_inc_ref_count(msg->repr);
 	msg->iface = iface;
 	msg->error_code = 200;
 
-	return msg;
+	*notimsg_handle = msg;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API void iotcon_notimsg_free(iotcon_notimsg_h msg)
+API void iotcon_notimsg_destroy(iotcon_notimsg_h msg)
 {
 	RET_IF(NULL == msg);
 
-	iotcon_repr_free(msg->repr);
+	iotcon_representation_destroy(msg->repr);
 	free(msg);
 }
 
@@ -571,7 +596,7 @@ API int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notim
 }
 
 
-API int iotcon_notify_all(iotcon_resource_h resource)
+API int iotcon_resource_notify_all(iotcon_resource_h resource)
 {
 	int ret;
 	GError *error = NULL;

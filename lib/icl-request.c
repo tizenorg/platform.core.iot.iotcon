@@ -31,7 +31,8 @@ API int iotcon_request_get_uri_path(iotcon_request_h request, char **uri_path)
 
 
 /* The content of the request should not be freed by user. */
-API int iotcon_request_get_representation(iotcon_request_h request, iotcon_repr_h *repr)
+API int iotcon_request_get_representation(iotcon_request_h request,
+		iotcon_representation_h *repr)
 {
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
@@ -78,7 +79,7 @@ API int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query
 
 
 API int iotcon_request_get_observer_action(iotcon_request_h request,
-		iotcon_observe_action_e *action)
+		int *action)
 {
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == action, IOTCON_ERROR_INVALID_PARAMETER);

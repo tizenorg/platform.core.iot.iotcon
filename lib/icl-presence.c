@@ -26,6 +26,8 @@
 #include "icl-resource-types.h"
 #include "icl-dbus.h"
 
+#define ICL_PRESENCE_TTL_SECONDS_MAX (60 * 60 * 24) /* 60 sec/min * 60 min/hr * 24 hr/day */
+
 typedef struct icl_presence {
 	iotcon_presence_cb cb;
 	void *user_data;
@@ -40,6 +42,7 @@ API int iotcon_start_presence(unsigned int time_to_live)
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+	RETV_IF(ICL_PRESENCE_TTL_SECONDS_MAX < time_to_live, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ic_dbus_call_start_presence_sync(icl_dbus_get_object(), time_to_live, &ret, NULL,
 			&error);
@@ -58,7 +61,7 @@ API int iotcon_start_presence(unsigned int time_to_live)
 }
 
 
-API int iotcon_stop_presence()
+API int iotcon_stop_presence(void)
 {
 	FN_CALL;
 	int ret;
@@ -120,8 +123,8 @@ static void _icl_presence_conn_cleanup(icl_presence_s *presence)
 
 
 /* The length of resource_type should be less than or equal to 61. */
-API iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
-		const char *resource_type, iotcon_presence_cb cb, void *user_data)
+API int iotcon_subscribe_presence(const char *host_address, const char *resource_type,
+		iotcon_presence_cb cb, void *user_data, iotcon_presence_h *presence_handle)
 {
 	FN_CALL;
 	GError *error = NULL;
@@ -130,12 +133,13 @@ API iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	icl_presence_s *presence_container;
 
-	RETV_IF(NULL == icl_dbus_get_object(), NULL);
-	RETV_IF(NULL == host_address, NULL);
-	RETV_IF(NULL == cb, NULL);
-	if (resource_type && (IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
+	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (resource_type && (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
 		ERR("The length of resource_type(%s) is invalid", resource_type);
-		return NULL;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	signal_number = icl_dbus_generate_signal_number();
@@ -143,7 +147,7 @@ API iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
 	presence_container = calloc(1, sizeof(icl_presence_s));
 	if (NULL == presence_container) {
 		ERR("calloc() Fail(%d)", errno);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	resource_type = ic_utils_dbus_encode_str(resource_type);
@@ -154,13 +158,13 @@ API iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
 		ERR("ic_dbus_call_subscribe_presence_sync() Fail(%s)", error->message);
 		g_error_free(error);
 		free(presence_container);
-		return NULL;
+		return IOTCON_ERROR_DBUS;
 	}
 
 	if (0 == presence_container->handle) {
 		ERR("iotcon-daemon Fail");
 		free(presence_container);
-		return NULL;
+		return IOTCON_ERROR_IOTIVITY;
 	}
 
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_PRESENCE,
@@ -174,12 +178,14 @@ API iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
 	if (0 == sub_id) {
 		ERR("icl_dbus_subscribe_signal() Fail");
 		free(presence_container);
-		return NULL;
+		return IOTCON_ERROR_DBUS;
 	}
 
 	presence_container->id = sub_id;
 
-	return presence_container;
+	*presence_handle = presence_container;
+
+	return IOTCON_ERROR_NONE;
 }
 
 

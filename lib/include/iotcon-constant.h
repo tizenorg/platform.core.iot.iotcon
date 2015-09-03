@@ -142,7 +142,6 @@ typedef enum {
 	IOTCON_RESPONSE_RESULT_RESOURCE_DELETED, /**< Indicates result of response for resource has deleted */
 	IOTCON_RESPONSE_RESULT_SLOW, /**< Indicates result of response for slow resource */
 	IOTCON_RESPONSE_RESULT_FORBIDDEN, /**< Indicates result of response for accessing unauthorized resource */
-	IOTCON_RESPONSE_RESULT_MAX
 } iotcon_response_result_e;
 
 /**
@@ -170,7 +169,7 @@ typedef enum {
 	IOTCON_TYPE_STR, /**< Indicates for representation that have string type */
 	IOTCON_TYPE_NULL, /**< Indicates for representation that have null type */
 	IOTCON_TYPE_LIST, /**< Indicates for representation that have list type */
-	IOTCON_TYPE_REPR, /**< Indicates for representation that have another representation type */
+	IOTCON_TYPE_STATE, /**< Indicates for representation that have another representation type */
 } iotcon_types_e;
 
 /**

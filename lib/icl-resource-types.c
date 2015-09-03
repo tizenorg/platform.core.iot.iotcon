@@ -35,21 +35,23 @@ iotcon_resource_types_h icl_resource_types_ref(iotcon_resource_types_h types)
 }
 
 
-API iotcon_resource_types_h iotcon_resource_types_new()
+API int iotcon_resource_types_create(iotcon_resource_types_h *ret_types)
 {
 	iotcon_resource_types_h types = calloc(1, sizeof(struct icl_resource_types));
 	if (NULL == types) {
 		ERR("calloc() Fail(%d)", errno);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	types->ref_count = 1;
 
-	return types;
+	*ret_types = types;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API void iotcon_resource_types_free(iotcon_resource_types_h types)
+API void iotcon_resource_types_destroy(iotcon_resource_types_h types)
 {
 	RET_IF(NULL == types);
 
@@ -95,9 +97,9 @@ API int iotcon_resource_types_insert(iotcon_resource_types_h types, const char *
 	RETVM_IF(1 < types->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
 
-	if (IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(type)) {
+	if (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(type)) {
 		ERR("The length of type(%s) should be less than or equal to %d.", type,
-				IOTCON_RESOURCE_TYPE_LENGTH_MAX);
+				ICL_RESOURCE_TYPE_LENGTH_MAX);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
@@ -141,15 +143,15 @@ API int iotcon_resource_types_delete(iotcon_resource_types_h types, const char *
 
 
 API int iotcon_resource_types_foreach(iotcon_resource_types_h types,
-		iotcon_resource_types_foreach_fn fn, void *user_data)
+		iotcon_resource_types_foreach_cb cb, void *user_data)
 {
 	GList *node;
 
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	for (node = types->type_list; node; node = node->next) {
-		if (IOTCON_FUNC_STOP == fn((const char*)node->data, user_data))
+		if (IOTCON_FUNC_STOP == cb((const char*)node->data, user_data))
 			break;
 	}
 
@@ -157,33 +159,37 @@ API int iotcon_resource_types_foreach(iotcon_resource_types_h types,
 }
 
 
-API iotcon_resource_types_h iotcon_resource_types_clone(iotcon_resource_types_h types)
+API int iotcon_resource_types_clone(iotcon_resource_types_h src,
+		iotcon_resource_types_h *dest)
 {
 	GList *node;
 	char *resource_type;
-	iotcon_resource_types_h clone;
+	iotcon_resource_types_h resource_types;
 
-	RETV_IF(NULL == types, NULL);
+	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
 
-	clone = calloc(1, sizeof(struct icl_resource_types));
-	if (NULL == clone) {
+	resource_types = calloc(1, sizeof(struct icl_resource_types));
+	if (NULL == resource_types) {
 		ERR("calloc() Fail(%d)", errno);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	for (node = types->type_list; node; node = node->next) {
+	for (node = src->type_list; node; node = node->next) {
 		resource_type = ic_utils_strdup(node->data);
 		if (NULL == resource_type) {
-			iotcon_resource_types_free(clone);
+			iotcon_resource_types_destroy(resource_types);
 			ERR("ic_utils_strdup() Fail");
-			return NULL;
+			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
-		clone->type_list = g_list_append(clone->type_list, resource_type);
+		resource_types->type_list = g_list_append(resource_types->type_list,
+				resource_type);
 	}
 
-	clone->ref_count = 1;
+	resource_types->ref_count = 1;
 
-	return clone;
+	*dest = resource_types;
+
+	return IOTCON_ERROR_NONE;
 }
 
 

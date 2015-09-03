@@ -23,7 +23,7 @@
  *
  * @since_tizen 3.0
  */
-#define IOTCON_QUERY_LENGTH_MAX 64
+#define ICL_QUERY_LENGTH_MAX 64
 
 
 struct icl_query {

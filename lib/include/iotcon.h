@@ -53,7 +53,7 @@ extern "C" {
  *
  * @see iotcon_close()
  */
-int iotcon_open();
+int iotcon_open(void);
 
 /**
  * @brief Closes Iotcon.
@@ -67,7 +67,7 @@ int iotcon_open();
  *
  * @see iotcon_open()
  */
-void iotcon_close();
+int iotcon_close(void);
 
 /**
  * @brief Specifies the type of function passed to iotcon_add_connection_changed_cb() and
@@ -127,7 +127,7 @@ int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb, void *u
 
 /**
  * @brief Specifies the type of function passed to iotcon_register_resource() and
- * iotcon_bind_request_handler()
+ * iotcon_resource_bind_request_handler()
  * @details Called when server receive request from the client.
  *
  * @since_tizen 3.0
@@ -139,7 +139,7 @@ int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb, void *u
  * @pre The callback must be registered using iotcon_register_resource()
  *
  * @see iotcon_register_resource()
- * @see iotcon_bind_request_handler()
+ * @see iotcon_resource_bind_request_handler()
  */
 typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
 		iotcon_request_h request, void *user_data);
@@ -173,28 +173,32 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @param[in] properties The property of the resource.
  * @param[in] cb The request handler callback function
  * @param[in] user_data The user data to pass to the callback function
+ * @param[out] resource_handle The handle of the resource
  *
- * @return resource handle of the registered resource, otherwise a null pointer if registering
- * has an error
- * @retval iotcon_resource_h Success
- * @retval NULL Failure
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ * @retval #IOTCON_ERROR_DBUS  Dbus errors
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
  * @post When the resource receive CRUD request, iotcon_request_handler_cb() will be called.
  *
  * @see iotcon_unregister_resource()
- * @see iotcon_bind_interface()
- * @see iotcon_bind_type()
- * @see iotcon_bind_request_handler()
- * @see iotcon_bind_resource()
- * @see iotcon_unbind_resource()
+ * @see iotcon_resource_bind_interface()
+ * @see iotcon_resource_bind_type()
+ * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_bind_child_resource()
+ * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-iotcon_resource_h iotcon_register_resource(const char *uri_path,
+int iotcon_register_resource(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int ifaces,
 		uint8_t properties,
 		iotcon_request_handler_cb cb,
-		void *user_data);
+		void *user_data,
+		iotcon_resource_h *resource_handle);
 
 /**
  * @brief Unregisters a resource and releases its data.
@@ -211,11 +215,11 @@ iotcon_resource_h iotcon_register_resource(const char *uri_path,
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  *
  * @see iotcon_register_resource()
- * @see iotcon_bind_interface()
- * @see iotcon_bind_type()
- * @see iotcon_bind_request_handler()
- * @see iotcon_bind_resource()
- * @see iotcon_unbind_resource()
+ * @see iotcon_resource_bind_interface()
+ * @see iotcon_resource_bind_type()
+ * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_bind_child_resource()
+ * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
 int iotcon_unregister_resource(iotcon_resource_h resource_handle);
@@ -223,6 +227,7 @@ int iotcon_unregister_resource(iotcon_resource_h resource_handle);
 /**
  * @brief Binds an interface to the resource
  *
+ * @details The @a action could be one of #iotcon_interface_e.
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
@@ -240,13 +245,13 @@ int iotcon_unregister_resource(iotcon_resource_h resource_handle);
  *
  * @see iotcon_register_resource()
  * @see iotcon_unregister_resource()
- * @see iotcon_bind_type()
- * @see iotcon_bind_request_handler()
- * @see iotcon_bind_resource()
- * @see iotcon_unbind_resource()
+ * @see iotcon_resource_bind_type()
+ * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_bind_child_resource()
+ * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_bind_interface(iotcon_resource_h resource, iotcon_interface_e iface);
+int iotcon_resource_bind_interface(iotcon_resource_h resource, int iface);
 
 /**
  * @brief Binds a type to the resource
@@ -266,13 +271,13 @@ int iotcon_bind_interface(iotcon_resource_h resource, iotcon_interface_e iface);
  *
  * @see iotcon_register_resource()
  * @see iotcon_unregister_resource()
- * @see iotcon_bind_interface()
- * @see iotcon_bind_request_handler()
- * @see iotcon_bind_resource()
- * @see iotcon_unbind_resource()
+ * @see iotcon_resource_bind_interface()
+ * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_bind_child_resource()
+ * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_bind_type(iotcon_resource_h resource_handle, const char *resource_type);
+int iotcon_resource_bind_type(iotcon_resource_h resource_handle, const char *resource_type);
 
 /**
  * @brief Binds a request handler to the resource
@@ -292,13 +297,13 @@ int iotcon_bind_type(iotcon_resource_h resource_handle, const char *resource_typ
  *
  * @see iotcon_register_resource()
  * @see iotcon_unregister_resource()
- * @see iotcon_bind_interface()
- * @see iotcon_bind_type()
- * @see iotcon_bind_resource()
- * @see iotcon_unbind_resource()
+ * @see iotcon_resource_bind_interface()
+ * @see iotcon_resource_bind_type()
+ * @see iotcon_resource_bind_child_resource()
+ * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_bind_request_handler(iotcon_resource_h resource, iotcon_request_handler_cb cb);
+int iotcon_resource_bind_request_handler(iotcon_resource_h resource, iotcon_request_handler_cb cb);
 
 /**
  * @brief Binds a child resource into the parent resource.
@@ -319,13 +324,13 @@ int iotcon_bind_request_handler(iotcon_resource_h resource, iotcon_request_handl
  *
  * @see iotcon_register_resource()
  * @see iotcon_unregister_resource()
- * @see iotcon_bind_interface()
- * @see iotcon_bind_type()
- * @see iotcon_bind_request_handler()
- * @see iotcon_unbind_resource()
+ * @see iotcon_resource_bind_interface()
+ * @see iotcon_resource_bind_type()
+ * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child);
+int iotcon_resource_bind_child_resource(iotcon_resource_h parent, iotcon_resource_h child);
 
 /**
  * @brief Unbinds a child resource from the parent resource.
@@ -345,13 +350,13 @@ int iotcon_bind_resource(iotcon_resource_h parent, iotcon_resource_h child);
  *
  * @see iotcon_register_resource()
  * @see iotcon_unregister_resource()
- * @see iotcon_bind_interface()
- * @see iotcon_bind_type()
- * @see iotcon_bind_request_handler()
- * @see iotcon_bind_resource()
+ * @see iotcon_resource_bind_interface()
+ * @see iotcon_resource_bind_type()
+ * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_bind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_unbind_resource(iotcon_resource_h parent, iotcon_resource_h child);
+int iotcon_resource_unbind_child_resource(iotcon_resource_h parent, iotcon_resource_h child);
 
 /**
  * @brief Register device information in a server.
@@ -422,7 +427,7 @@ int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  */
-int iotcon_register_platform_info(iotcon_platform_info_s platform_info);
+int iotcon_register_platform_info(iotcon_platform_info_s *platform_info);
 
 /**
  * @brief Specifies the type of function passed to iotcon_get_platform_info().
@@ -436,7 +441,7 @@ int iotcon_register_platform_info(iotcon_platform_info_s platform_info);
  *
  * @see iotcon_get_platform_info()
  */
-typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_s info, void *user_data);
+typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_s *info, void *user_data);
 
 /**
  * @brief Calls a function for platform information of remote server.
@@ -511,7 +516,7 @@ int iotcon_start_presence(unsigned int time_to_live);
  * @see iotcon_subscribe_presence()
  * @see iotcon_unsubscribe_presence()
  */
-int iotcon_stop_presence();
+int iotcon_stop_presence(void);
 
 /**
  * @brief Specifies the type of function passed to iotcon_subscribe_presence().
@@ -545,10 +550,14 @@ typedef void (*iotcon_presence_cb)(int result, unsigned int nonce,
  * @param[in] resource_type A resource type that a client has interested in
  * @param[in] cb The callback function to invoke
  * @param[in] user_data The user data to pass to the function
+ * @param[out] presence_handle The generated presence handle
  *
- * @return Generated presence handle, otherwise a null pointer if fail to subscribe
- * @retval iotcon_presence_h Success
- * @retval NULL Failure
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ * @retval #IOTCON_ERROR_DBUS  Dbus errors
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
  * @post When the resource receive presence, iotcon_presence_cb() will be called.
  *
@@ -557,8 +566,8 @@ typedef void (*iotcon_presence_cb)(int result, unsigned int nonce,
  * @see iotcon_unsubscribe_presence()
  * @see iotcon_presence_cb()
  */
-iotcon_presence_h iotcon_subscribe_presence(const char *host_address,
-		const char *resource_type, iotcon_presence_cb cb, void *user_data);
+int iotcon_subscribe_presence(const char *host_address, const char *resource_type,
+		iotcon_presence_cb cb, void *user_data, iotcon_presence_h *presence_handle);
 
 /**
  * @brief Unsubscribes to a server's presence events.
@@ -641,19 +650,24 @@ int iotcon_find_resource(const char *host_address, const char *resource_type,
  * @param[in] is_observable Allow observation
  * @param[in] resource_types The resource type of the resource. For example, "core.light"
  * @param[in] resource_interfaces The resource interfaces (whether it is collection etc)
+ * @param[out] client_handle Generated resource handle
  *
- * @return Generated resource handle, otherwise a null pointer if a allocation error
- * @retval iotcon_client_h Success
- * @retval NULL Failure
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ * @retval #IOTCON_ERROR_DBUS  Dbus errors
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
- * @see iotcon_client_free()
+ * @see iotcon_client_destroy()
  * @see iotcon_client_ref()
  */
-iotcon_client_h iotcon_client_new(const char *host,
+int iotcon_client_create(const char *host,
 		const char *uri_path,
 		bool is_observable,
 		iotcon_resource_types_h resource_types,
-		int resource_interfaces);
+		int resource_ifs,
+		iotcon_client_h *client_handle);
 
 /**
  * @brief Releases a resource handle.
@@ -666,30 +680,31 @@ iotcon_client_h iotcon_client_new(const char *host,
  *
  * @return void
  *
- * @see iotcon_client_new()
+ * @see iotcon_client_create()
  * @see iotcon_client_ref()
  */
-void iotcon_client_free(iotcon_client_h resource);
+void iotcon_client_destroy(iotcon_client_h resource);
 
 /**
  * @brief Increments reference count of the source resource.
  *
  * @since_tizen 3.0
  *
- * @param[in] resource The Source of resource
+ * @param[in] src The Source of resource
+ * @param[out] dest The referenced resource handle
  *
- * @return Referenced resource handle, otherwise a null pointer if the operation has an error
- * @retval iotcon_client_h Success
- * @retval NULL Failure
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_client_new()
- * @see iotcon_client_free()
+ * @see iotcon_client_create()
+ * @see iotcon_client_destroy()
  */
-iotcon_client_h iotcon_client_ref(iotcon_client_h resource);
+int iotcon_client_ref(iotcon_client_h src, iotcon_client_h *dest);
 
 /**
  * @brief Specifies the type of function passed to iotcon_observer_start().
- * @details Called when a client receive notifications from a server.
+ * @details Called when a client receive notifications from a server. The @a response_result could be one of #iotcon_response_result_e.
  *
  * @since_tizen 3.0
  *
@@ -705,7 +720,7 @@ iotcon_client_h iotcon_client_ref(iotcon_client_h resource);
  * @see iotcon_observer_start()
  */
 typedef void (*iotcon_on_observe_cb)(iotcon_client_h resource,
-		iotcon_repr_h repr,
+		iotcon_representation_h repr,
 		iotcon_options_h options,
 		int response_result,
 		int sequence_number,
@@ -714,6 +729,7 @@ typedef void (*iotcon_on_observe_cb)(iotcon_client_h resource,
 /**
  * @brief Sets observation on the resource
  * @details When server sends notification message, iotcon_on_observe_cb() will be called.
+ * The @a observe_type could be one of #iotcon_observe_type_e.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -736,15 +752,12 @@ typedef void (*iotcon_on_observe_cb)(iotcon_client_h resource,
  *
  * @see iotcon_on_observe_cb()
  * @see iotcon_observer_stop()
- * @see iotcon_notimsg_new()
+ * @see iotcon_notimsg_create()
  * @see iotcon_notify_list_of_observers()
- * @see iotcon_notify_all()
+ * @see iotcon_resource_notify_all()
  */
-int iotcon_observer_start(iotcon_client_h resource,
-		iotcon_observe_type_e observe_type,
-		iotcon_query_h query,
-		iotcon_on_observe_cb cb,
-		void *user_data);
+int iotcon_observer_start(iotcon_client_h resource, int observe_type,
+		iotcon_query_h query, iotcon_on_observe_cb cb, void *user_data);
 
 /**
  * @brief Cancels the observation on the resource
@@ -763,9 +776,9 @@ int iotcon_observer_start(iotcon_client_h resource,
  *
  * @see iotcon_on_observe_cb()
  * @see iotcon_observer_start()
- * @see iotcon_notimsg_new()
+ * @see iotcon_notimsg_create()
  * @see iotcon_notify_list_of_observers()
- * @see iotcon_notify_all()
+ * @see iotcon_resource_notify_all()
  */
 int iotcon_observer_stop(iotcon_client_h resource);
 
@@ -788,21 +801,27 @@ int iotcon_response_send(iotcon_response_h resp);
 
 /**
  * @brief Creates a new notifications message handle.
+ * @details @a iface could be one of #iotcon_interface_e.
  *
  * @since_tizen 3.0
  *
  * @param[in] repr The handle of the representation
  * @param[in] iface The resource interface
+ * @param[out] notimsg_handle The generated notifications message handle
  *
- * @return Generated notifications message handle, otherwise a null pointer if a allocation error.
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
  * @see iotcon_on_observe_cb()
  * @see iotcon_observer_start()
  * @see iotcon_observer_stop()
  * @see iotcon_notify_list_of_observers()
- * @see iotcon_notify_all()
+ * @see iotcon_resource_notify_all()
  */
-iotcon_notimsg_h iotcon_notimsg_new(iotcon_repr_h repr, iotcon_interface_e iface);
+int iotcon_notimsg_create(iotcon_representation_h repr, int iface,
+		iotcon_notimsg_h *notimsg_handle);
 
 /**
  * @brief Releases a notifications message handle.
@@ -813,9 +832,9 @@ iotcon_notimsg_h iotcon_notimsg_new(iotcon_repr_h repr, iotcon_interface_e iface
  *
  * @return void
  *
- * @see iotcon_notimsg_new()
+ * @see iotcon_notimsg_create()
  */
-void iotcon_notimsg_free(iotcon_notimsg_h msg);
+void iotcon_notimsg_destroy(iotcon_notimsg_h msg);
 
 /**
  * @brief Notifies only specific clients that resource's attributes have changed.
@@ -838,8 +857,8 @@ void iotcon_notimsg_free(iotcon_notimsg_h msg);
  * @see iotcon_on_observe_cb()
  * @see iotcon_observer_start()
  * @see iotcon_observer_stop()
- * @see iotcon_notimsg_new()
- * @see iotcon_notify_all()
+ * @see iotcon_notimsg_create()
+ * @see iotcon_resource_notify_all()
  */
 int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notimsg_h msg,
 		iotcon_observers_h observers);
@@ -862,13 +881,14 @@ int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notimsg_h
  * @see iotcon_on_observe_cb()
  * @see iotcon_observer_start()
  * @see iotcon_observer_stop()
- * @see iotcon_notimsg_new()
+ * @see iotcon_notimsg_create()
  * @see iotcon_notify_list_of_observers()
  */
-int iotcon_notify_all(iotcon_resource_h resource);
+int iotcon_resource_notify_all(iotcon_resource_h resource);
 
 /**
  * @brief Specifies the type of function passed to iotcon_get(), iotcon_put(), iotcon_post()
+ * @details The @a response_result could be one of #iotcon_response_result_e.
  *
  * @since_tizen 3.0
  *
@@ -884,7 +904,7 @@ int iotcon_notify_all(iotcon_resource_h resource);
  * @see iotcon_put()
  * @see iotcon_post()
  */
-typedef void (*iotcon_on_cru_cb)(iotcon_client_h resource, iotcon_repr_h repr,
+typedef void (*iotcon_on_cru_cb)(iotcon_client_h resource, iotcon_representation_h repr,
 		iotcon_options_h options, int response_result, void *user_data);
 
 /**
@@ -941,7 +961,7 @@ int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
  * @see iotcon_get()
  * @see iotcon_post()
  */
-int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
+int iotcon_put(iotcon_client_h resource, iotcon_representation_h repr, iotcon_query_h query,
 		iotcon_on_cru_cb cb, void *user_data);
 
 /**
@@ -970,11 +990,12 @@ int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h quer
  * @see iotcon_get()
  * @see iotcon_put()
  */
-int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr, iotcon_query_h query,
+int iotcon_post(iotcon_client_h resource, iotcon_representation_h repr, iotcon_query_h query,
 		iotcon_on_cru_cb cb, void *user_data);
 
 /**
  * @brief Specifies the type of function passed to iotcon_delete()
+ * @details The @a response_result could be one of #iotcon_response_result_e.
  *
  * @since_tizen 3.0
  *

@@ -20,7 +20,7 @@
 #include "iotcon-struct.h"
 #include "icl.h"
 
-API void iotcon_observers_free(iotcon_observers_h observers)
+API void iotcon_observers_destroy(iotcon_observers_h observers)
 {
 	RET_IF(NULL == observers);
 
@@ -29,18 +29,20 @@ API void iotcon_observers_free(iotcon_observers_h observers)
 
 
 /* If you want to make a new list, then you should set observers is NULL. */
-API iotcon_observers_h iotcon_observers_append(iotcon_observers_h observers,
-		int obs_id)
+API int iotcon_observers_append(iotcon_observers_h observers, int obs_id,
+		iotcon_observers_h *ret_observers)
 {
-	return g_list_append(observers, GUINT_TO_POINTER(obs_id));
+	*ret_observers = g_list_append(observers, GUINT_TO_POINTER(obs_id));
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API iotcon_observers_h iotcon_observers_remove(iotcon_observers_h observers,
-		int obs_id)
+API int iotcon_observers_remove(iotcon_observers_h observers, int obs_id,
+		iotcon_observers_h *ret_observers)
 {
-	RETV_IF(NULL == observers, observers);
+	*ret_observers = g_list_remove(observers, GUINT_TO_POINTER(obs_id));
 
-	return g_list_remove(observers, GUINT_TO_POINTER(obs_id));
+	return IOTCON_ERROR_NONE;
 }
 

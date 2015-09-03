@@ -24,7 +24,7 @@
  *
  * @since_tizen 3.0
  */
-#define IOTCON_RESOURCE_TYPE_LENGTH_MAX (IOTCON_QUERY_LENGTH_MAX - 3)
+#define ICL_RESOURCE_TYPE_LENGTH_MAX (ICL_QUERY_LENGTH_MAX - 3)
 
 
 struct icl_resource_types {

@@ -53,60 +53,61 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 	int ret;
 	int types;
 	iotcon_response_h response;
-	iotcon_repr_h resp_repr;
+	iotcon_representation_h resp_repr;
 
 	ret = iotcon_request_get_types(request, &types);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 
 	if (IOTCON_REQUEST_GET & types) {
-		response = iotcon_response_new(request);
-		if (NULL == response)
+		ret = iotcon_response_create(request, &response);
+		if (IOTCON_ERROR_NONE != ret)
 			return;
 
-		resp_repr = iotcon_repr_new();
-		if (NULL == resp_repr) {
-			iotcon_response_free(response);
+		ret = iotcon_representation_create(&resp_repr);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_response_destroy(response);
 			return;
 		}
 
-		ret = iotcon_repr_set_uri_path(resp_repr, "core.door");
+		ret = iotcon_representation_set_uri_path(resp_repr, "core.door");
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_repr_free(resp_repr);
-			iotcon_response_free(response);
+			iotcon_representation_destroy(resp_repr);
+			iotcon_response_destroy(response);
 			return;
 		}
 
-		ret = iotcon_repr_set_bool(resp_repr, "opened", true);
+		ret = iotcon_state_set_bool(resp_repr, "opened", true);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_repr_free(resp_repr);
-			iotcon_response_free(response);
+			iotcon_representation_destroy(resp_repr);
+			iotcon_response_destroy(response);
 			return;
 		}
 
-		ret = iotcon_response_set(response, IOTCON_RESPONSE_RESULT, IOTCON_RESPONSE_RESULT_OK);
+		ret = iotcon_response_set_result(response, IOTCON_RESPONSE_RESULT_OK);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_repr_free(resp_repr);
-			iotcon_response_free(response);
+			iotcon_representation_destroy(resp_repr);
+			iotcon_response_destroy(response);
 			return;
 		}
 
-		ret = iotcon_response_set(response, IOTCON_RESPONSE_REPRESENTATION, resp_repr);
+
+		ret = iotcon_response_set_representation(response, resp_repr);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_repr_free(resp_repr);
-			iotcon_response_free(response);
+			iotcon_representation_destroy(resp_repr);
+			iotcon_response_destroy(response);
 			return;
 		}
 
 		ret = iotcon_response_send(response);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_repr_free(resp_repr);
-			iotcon_response_free(response);
+			iotcon_representation_destroy(resp_repr);
+			iotcon_response_destroy(response);
 			return;
 		}
 
-		iotcon_repr_free(resp_repr);
-		iotcon_response_free(response);
+		iotcon_representation_destroy(resp_repr);
+		iotcon_response_destroy(response);
 	}
 }
 ...
@@ -116,26 +117,27 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 	int properties = (IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE);
 	const char *uri_path = "/a/door1";
 	const char *type = "core.door";
+	iotcon_resource_types_h resource_types;
 
-	iotcon_resource_types_h resource_types = iotcon_resource_types_new();
-	if (NULL == resource_types) {
+	ret = iotcon_resource_types_create(&resource_types);
+	if (IOTCON_ERROR_NONE != ret) {
 		return;
 	}
 
 	ret = iotcon_resource_types_insert(resource_types, type);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_free(resource_types);
+		iotcon_resource_types_destroy(resource_types);
 		return;
 	}
 
 	iotcon_resource_h handle = iotcon_register_resource(uri_path, resource_types,
 			interfaces, properties, _request_handler, NULL);
 	if (NULL == handle) {
-		iotcon_resource_types_free(resource_types);
+		iotcon_resource_types_destroy(resource_types);
 		return;
 	}
 
-	iotcon_resource_types_free(resource_types);
+	iotcon_resource_types_destroy(resource_types);
 }
  * @endcode
  *
@@ -147,7 +149,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
  * Example :
  * @code
 #include <iotcon.h>
-static void _on_get(iotcon_options_h header_options, iotcon_repr_h recv_repr,
+static void _on_get(iotcon_options_h header_options, iotcon_representation_h recv_repr,
 		int response_result, void *user_data)
 {
 	// handle get from response
@@ -188,11 +190,15 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		return;
 	}
 
-	query = iotcon_query_new();
+	ret = iotcon_query_create(&query);
+	if (IOTCON_ERROR_NONE != ret) {
+		return;
+	}
+
 	iotcon_query_insert(query, "key", "value");
 
 	iotcon_get(resource, query, &_on_get, NULL);
-	iotcon_query_free(query);
+	iotcon_query_destroy(query);
 }
 ...
 {
@@ -248,13 +254,19 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
-			observers = iotcon_observers_append(observers, observer_id);
+			ret = iotcon_observers_append(observers, observer_id, &observers);
+			if (IOTCON_ERROR_NONE != ret) {
+				return;
+			}
 		} else if (IOTCON_OBSERVE_DEREGISTER == observer_action) {
 			ret = iotcon_request_get_observer_id(request, &observer_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
-			observers = iotcon_observers_remove(observers, observer_id);
+			ret = iotcon_observers_remove(observers, observer_id, &observers);
+			if (IOTCON_ERROR_NONE != ret) {
+				return;
+			}
 		}
 	}
 }
@@ -263,43 +275,57 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 	int ret;
 	int interfaces = IOTCON_INTERFACE_DEFAULT;
 	int properties = (IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE);
+	iotcon_resource_h door_handle;
 	const char *uri_path = "/a/door1";
 	const char *type = "core.door";
+	iotcon_resource_types_h resource_types;
 
-	iotcon_resource_types_h resource_types = iotcon_resource_types_new();
-	if (NULL == resource_types) {
+	ret = iotcon_resource_types_create(&resource_types);
+	if (IOTCON_ERROR_NONE == ret) {
 		return;
 	}
 
 	ret = iotcon_resource_types_insert(resource_types, type);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_free(resource_types);
+		iotcon_resource_types_destroy(resource_types);
 		return;
 	}
 
-	iotcon_resource_h door_handle = iotcon_register_resource(uri_path, resource_types,
-			interfaces, properties, _request_handler, NULL);
-	if (NULL == door_handle) {
-		iotcon_resource_types_free(resource_types);
+	ret = iotcon_register_resource(uri_path, resource_types,
+			interfaces, properties, _request_handler, NULL, door_handle);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_types_destroy(resource_types);
 		return;
 	}
 
-	iotcon_resource_types_free(resource_types);
+	iotcon_resource_types_destroy(resource_types);
 }
 ...
 {
-	iotcon_repr_h repr = iotcon_repr_new();
-	iotcon_notimsg_h msg = iotcon_notimsg_new(repr, IOTCON_INTERFACE_DEFAULT);
+	int ret;
+	iotcon_representation_h repr;
+	iotcon_notimsg_h msg;
 
-	ret = iotcon_notify_list_of_observers(door_handle, msg, observers);
+	ret = iotcon_representation_create(&resp_repr);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_notimsg_free(msg);
-		iotcon_repr_free(repr);
 		return;
 	}
 
-	iotcon_notimsg_free(msg);
-	iotcon_repr_free(repr);
+	ret = iotcon_notimsg_create(resp_repr, IOTCON_INTERFACE_DEFAULT, &msg);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_representation_destroy(resp_repr);
+		return;
+	}
+
+	ret = iotcon_notify_list_of_observers(door_handle, msg, observers);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_notimsg_destroy(msg);
+		iotcon_representation_destroy(resp_repr);
+		return;
+	}
+
+	iotcon_notimsg_destroy(msg);
+	iotcon_representation_destroy(resp_repr);
 }
  * @endcode
  *
@@ -309,7 +335,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 ...
 static iotcon_client_h door_resource;
 ...
-static void _on_observe(iotcon_options_h header_options, iotcon_repr_h recv_repr,
+static void _on_observe(iotcon_options_h header_options, iotcon_representation_h recv_repr,
 		int response_result, int sequence_number, void *user_data)
 {
 }
@@ -341,23 +367,23 @@ static void _on_observe(iotcon_options_h header_options, iotcon_repr_h recv_repr
  *         <td>iotcon_subscribe_presence</td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_bind_interface</td>
+ *         <td>iotcon_resource_bind_interface</td>
  *         <td>iotcon_unsubscribe_presence</td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_bind_type</td>
+ *         <td>iotcon_resource_bind_type</td>
  *         <td>iotcon_find_resource</td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_bind_request_handler</td>
+ *         <td>iotcon_resource_bind_request_handler</td>
  *         <td>iotcon_observer_start</td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_bind_resource</td>
+ *         <td>iotcon_resource_bind_child_resource</td>
  *         <td>iotcon_observer_stop</td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_unbind_resource</td>
+ *         <td>iotcon_resource_unbind_child_resource</td>
  *         <td>iotcon_get</td>
  *     </tr>
  *     <tr>
@@ -381,7 +407,7 @@ static void _on_observe(iotcon_options_h header_options, iotcon_repr_h recv_repr
  *         <td></td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_notify_all</td>
+ *         <td>iotcon_resource_notify_all</td>
  *         <td></td>
  *     </tr>
  *     <tr>
@@ -397,156 +423,157 @@ static void _on_observe(iotcon_options_h header_options, iotcon_repr_h recv_repr
  * @defgroup CAPI_IOT_CONNECTIVITY_REPRESENTATION_MODULE Iotcon Representation
  *
  * @section CAPI_IOT_CONNECTIVITY_REPRESENTATION_MODULE_HEADER Required Header
- * \#include <iotcon-representation.h>
+ * \#include <iotcon-resp_repr.h>
  *
  * @section CAPI_IOT_CONNECTIVITY_REPRESENTATION_MODULE_OVERVIEW Overview
- * The Iotcon Representation API provides data type of representation handling.\n
- * A representation is a payload of a request or a response.\n
+ * The Iotcon Representation API provides data type of resp_repr handling.\n
+ * A resp_repr is a payload of a request or a response.\n
  * It has uri_path, interface, list of resource types and its attributes.\n
  * Attributes have capabilties to store and retrieve integer, boolean, double, string, list, null,
- * representation.\n
+ * resp_repr.\n
  * A list is a container that includes number of datas of same type.\n
- * It has capabilties to store and retrieve integer, boolean, double, string, list, null, representation.
+ * It has capabilties to store and retrieve integer, boolean, double, string, list, null, resp_repr.
  *
  *@code
 #include <iotcon.h>
 ...
 {
 	int ret;
-	iotcon_repr_h repr;
+	iotcon_representation_h repr;
 	iotcon_resource_types_h types;
 	iotcon_list_h bright_step_list;
 
-	repr = iotcon_repr_new();
-	if (NULL == repr)
-		return;
-
-	ret = iotcon_repr_set_uri_path(repr, "/a/light");
+	ret = iotcon_representation_create(&resp_repr);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_repr_free(repr);
 		return;
 	}
 
-	types = iotcon_resource_types_new();
-	if (NULL == types) {
-		iotcon_repr_free(repr);
+	ret = iotcon_representation_set_uri_path(resp_repr, "/a/light");
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_representation_destroy(resp_repr);
+		return;
+	}
+
+	ret = iotcon_resource_types_create(&types);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
 	ret = iotcon_resource_types_insert(types, "core.light");
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_repr_set_resource_types(repr, types);
+	ret = iotcon_representation_set_resource_types(resp_repr, types);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_repr_set_resource_interfaces(repr, IOTCON_INTERFACE_LINK);
+	ret = iotcon_representation_set_resource_interfaces(resp_repr, IOTCON_INTERFACE_LINK);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_repr_set_str(repr, "type", "lamp");
+	ret = iotcon_state_set_str(resp_repr, "type", "lamp");
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_repr_set_str(repr, "where", "desk");
+	ret = iotcon_state_set_str(resp_repr, "where", "desk");
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_repr_set_double(repr, "default_bright", 200.0);
+	ret = iotcon_state_set_double(resp_repr, "default_bright", 200.0);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_repr_set_str(repr, "unit", "lux");
+	ret = iotcon_state_set_str(resp_repr, "unit", "lux");
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_repr_set_bool(repr, "bright_step", true);
+	ret = iotcon_state_set_bool(resp_repr, "bright_step", true);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	bright_step_list = iotcon_list_new(IOTCON_TYPE_DOUBLE);
-	if (NULL == bright_step_list) {
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+	ret = iotcon_list_create(IOTCON_TYPE_DOUBLE, &bright_step_list);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
 	ret = iotcon_list_insert_double(bright_step_list, 100.0, -1);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_free(bright_step_list);
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_list_destroy(bright_step_list);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
 	ret = iotcon_list_insert_double(bright_step_list, 200.0, -1);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_free(bright_step_list);
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_list_destroy(bright_step_list);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
 	ret = iotcon_list_insert_double(bright_step_list, 300.0, -1);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_free(bright_step_list);
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_list_destroy(bright_step_list);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
 	ret = iotcon_list_insert_double(bright_step_list, 400.0, -1);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_free(bright_step_list);
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_list_destroy(bright_step_list);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
 	ret = iotcon_list_insert_double(bright_step_list, 500.0, -1);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_free(bright_step_list);
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_list_destroy(bright_step_list);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_repr_set_list(repr, "bright_step_list", bright_step_list);
+	ret = iotcon_state_set_list(resp_repr, "bright_step_list", bright_step_list);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_free(bright_step_list);
-		iotcon_resource_types_free(types);
-		iotcon_repr_free(repr);
+		iotcon_list_destroy(bright_step_list);
+		iotcon_resource_types_destroy(types);
+		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	iotcon_list_free(bright_step_list);
-	iotcon_resource_types_free(types);
-	iotcon_repr_free(repr);
+	iotcon_list_destroy(bright_step_list);
+	iotcon_resource_types_destroy(types);
+	iotcon_representation_destroy(resp_repr);
 }
  * @endcode
  */

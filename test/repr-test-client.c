@@ -22,101 +22,132 @@
 static const char* const room_uri_path = "/a/room";
 static char *room_resource_sid;
 
-static int _get_int_list_fn(int pos, const int value, void *user_data)
+static int _get_int_list_cb(int pos, const int value, void *user_data)
 {
 	DBG("%d°C", value);
 
 	return IOTCON_FUNC_CONTINUE;
 }
 
-static void _on_get(iotcon_repr_h recv_repr, int response_result)
+static void _on_get(iotcon_representation_h recv_repr, int response_result)
 {
 	int i, ret;
-	unsigned int key_count, children_count;
-	const char *uri_path;
-	iotcon_repr_h child_repr;
+	bool is_null;
 	iotcon_list_h list;
+	const char *uri_path;
+	iotcon_representation_h child_repr;
+	iotcon_state_h recv_state, child_state;
+	unsigned int key_count, children_count;
 
 	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result,
 			"_on_get Response error(%d)", response_result);
 	INFO("GET request was successful");
 
 	DBG("[ parent representation ]");
-	iotcon_repr_get_uri_path(recv_repr, &uri_path);
+	iotcon_representation_get_uri_path(recv_repr, &uri_path);
 	if (uri_path)
 		DBG("uri_path : %s", uri_path);
-	key_count = iotcon_repr_get_keys_count(recv_repr);
+
+	iotcon_representation_get_state(recv_repr, &recv_state);
+
+	ret = iotcon_state_get_keys_count(recv_state, &key_count);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_state_get_keys_count() Fail(%d)", ret);
+		return;
+	}
+
 	if (key_count) {
 		char *str;
-		iotcon_repr_get_str(recv_repr, "name", &str);
+		iotcon_state_get_str(recv_state, "name", &str);
 		if (str)
 			DBG("name : %s", str);
 
-		iotcon_repr_get_list(recv_repr, "today_temp", &list);
+		iotcon_state_get_list(recv_state, "today_temp", &list);
 
 		DBG("today's temperature :");
-		iotcon_list_foreach_int(list, _get_int_list_fn, NULL);
+		iotcon_list_foreach_int(list, _get_int_list_cb, NULL);
 
-		if (iotcon_repr_is_null(recv_repr, "null value"))
+		ret = iotcon_state_is_null(recv_state, "null value", &is_null);
+		if (is_null)
 			DBG("null value is null");
 	}
 
-	children_count = iotcon_repr_get_children_count(recv_repr);
+	ret = iotcon_representation_get_children_count(recv_repr, &children_count);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_get_children_count() Fail(%d)", ret);
+		return;
+	}
 
 	for (i = 0; i < children_count; i++) {
 		DBG("[ child representation ]");
 		const char *uri_path;
 
-		ret = iotcon_repr_get_nth_child(recv_repr, i, &child_repr);
+		ret = iotcon_representation_get_nth_child(recv_repr, i, &child_repr);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_repr_get_nth_child(%d) Fail(%d)", i, ret);
+			ERR("iotcon_representation_get_nth_child(%d) Fail(%d)", i, ret);
 			continue;
 		}
 
-		iotcon_repr_get_uri_path(child_repr, &uri_path);
+		iotcon_representation_get_uri_path(child_repr, &uri_path);
 		if (NULL == uri_path)
 			continue;
 
 		DBG("uri_path : %s", uri_path);
 
+		iotcon_representation_get_state(child_repr, &child_state);
 		if (TEST_STR_EQUAL == strcmp("/a/light", uri_path)) {
-			key_count = iotcon_repr_get_keys_count(child_repr);
+			ret = iotcon_state_get_keys_count(child_state, &key_count);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("iotcon_state_get_keys_count() Fail(%d)", ret);
+				return;
+			}
+
 			if (key_count) {
 				int brightness;
-				iotcon_repr_get_int(child_repr, "brightness", &brightness);
+				iotcon_state_get_int(child_state, "brightness", &brightness);
 				DBG("brightness : %d", brightness);
 			}
 		} else if (TEST_STR_EQUAL == strcmp("/a/switch", uri_path)) {
-			key_count = iotcon_repr_get_keys_count(child_repr);
+			ret = iotcon_state_get_keys_count(child_state, &key_count);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("iotcon_state_get_keys_count() Fail(%d)", ret);
+				return;
+			}
 			if (key_count) {
 				bool bswitch;
-				iotcon_repr_get_bool(child_repr, "switch", &bswitch);
+				iotcon_state_get_bool(child_state, "switch", &bswitch);
 				DBG("switch : %d", bswitch);
 			}
 		}
 	}
 }
 
-static void _on_get_2nd(iotcon_client_h resource, iotcon_repr_h recv_repr,
+static void _on_get_2nd(iotcon_client_h resource, iotcon_representation_h recv_repr,
 		iotcon_options_h header_options, int response_result, void *user_data)
 {
 	_on_get(recv_repr, response_result);
 }
 
-static void _on_get_1st(iotcon_client_h resource, iotcon_repr_h recv_repr,
+static void _on_get_1st(iotcon_client_h resource, iotcon_representation_h recv_repr,
 		iotcon_options_h header_options, int response_result, void *user_data)
 {
+	int ret;
 	iotcon_query_h query_params;
 
 	_on_get(recv_repr, response_result);
 
-	query_params = iotcon_query_new();
+	ret = iotcon_query_create(&query_params);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_query_create() Fail(%d)", ret);
+		return;
+	}
+
 	iotcon_query_insert(query_params, "if", "oic.if.b");
 
 	/* send GET request again with BATCH interface */
 	iotcon_get(resource, query_params, _on_get_2nd, NULL);
 
-	iotcon_query_free(query_params);
+	iotcon_query_destroy(query_params);
 }
 
 static int _get_res_type_fn(const char *string, void *user_data)

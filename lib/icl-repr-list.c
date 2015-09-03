@@ -21,7 +21,7 @@
 #include "iotcon-constant.h"
 #include "iotcon-representation.h"
 #include "icl.h"
-#include "icl-repr-obj.h"
+#include "icl-repr-state.h"
 #include "icl-repr.h"
 #include "icl-repr-value.h"
 #include "icl-repr-list.h"
@@ -50,29 +50,42 @@ static bool _icl_list_dec_ref_count(iotcon_list_h val)
 	return ret;
 }
 
-static iotcon_list_h _icl_list_new(iotcon_types_e type)
+static int _icl_list_create(iotcon_types_e type, iotcon_list_h *ret_list)
 {
 	iotcon_list_h list;
 
 	list = calloc(1, sizeof(struct icl_list_s));
 	if (NULL == list) {
 		ERR("calloc() Fail(%d)", errno);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 	icl_list_inc_ref_count(list);
 	list->type = type;
 
-	return list;
+	*ret_list = list;
+
+	return IOTCON_ERROR_NONE;
 }
 
-API iotcon_list_h iotcon_list_new(iotcon_types_e type)
+API int iotcon_list_create(iotcon_types_e type, iotcon_list_h *ret_list)
 {
-	if (type < IOTCON_TYPE_INT || IOTCON_TYPE_REPR < type) {
+	int ret;
+	iotcon_list_h list;
+
+	if (type < IOTCON_TYPE_INT || IOTCON_TYPE_STATE < type) {
 		ERR("Invalid Type(%d)", type);
-		return NULL;
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	return _icl_list_new(type);
+	ret = _icl_list_create(type, &list);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_icl_list_create() Fail");
+		return ret;
+	}
+
+	*ret_list = list;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
@@ -84,9 +97,9 @@ API int iotcon_list_insert_int(iotcon_list_h list, int val, int pos)
 	RETVM_IF(IOTCON_TYPE_INT != list->type, IOTCON_ERROR_INVALID_TYPE, "Invalid Type(%d)",
 			list->type);
 
-	value = icl_value_new_int(val);
+	value = icl_value_create_int(val);
 	if (NULL == value) {
-		ERR("icl_value_new_int(%d) Fail", val);
+		ERR("icl_value_create_int(%d) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -102,9 +115,9 @@ API int iotcon_list_insert_bool(iotcon_list_h list, bool val, int pos)
 	RETVM_IF(IOTCON_TYPE_BOOL != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 
-	value = icl_value_new_bool(val);
+	value = icl_value_create_bool(val);
 	if (NULL == value) {
-		ERR("icl_value_new_bool(%d) Fail", val);
+		ERR("icl_value_create_bool(%d) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -120,9 +133,9 @@ API int iotcon_list_insert_double(iotcon_list_h list, double val, int pos)
 	RETVM_IF(IOTCON_TYPE_DOUBLE != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 
-	value = icl_value_new_double(val);
+	value = icl_value_create_double(val);
 	if (NULL == value) {
-		ERR("icl_value_new_double(%f) Fail", val);
+		ERR("icl_value_create_double(%f) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -139,9 +152,9 @@ API int iotcon_list_insert_str(iotcon_list_h list, char *val, int pos)
 	RETVM_IF(IOTCON_TYPE_STR != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 
-	value = icl_value_new_str(val);
+	value = icl_value_create_str(val);
 	if (NULL == value) {
-		ERR("icl_value_new_str(%s) Fail", val);
+		ERR("icl_value_create_str(%s) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -158,9 +171,9 @@ API int iotcon_list_insert_list(iotcon_list_h list, iotcon_list_h val, int pos)
 	RETVM_IF(IOTCON_TYPE_LIST != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 
-	value = icl_value_new_list(val);
+	value = icl_value_create_list(val);
 	if (NULL == value) {
-		ERR("icl_value_new_list(%p) Fail", val);
+		ERR("icl_value_create_list(%p) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -170,21 +183,21 @@ API int iotcon_list_insert_list(iotcon_list_h list, iotcon_list_h val, int pos)
 }
 
 
-API int iotcon_list_insert_repr(iotcon_list_h list, iotcon_repr_h val, int pos)
+API int iotcon_list_insert_state(iotcon_list_h list, iotcon_state_h val, int pos)
 {
 	iotcon_value_h value;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_REPR != list->type, IOTCON_ERROR_INVALID_TYPE,
+	RETVM_IF(IOTCON_TYPE_STATE != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 
-	value = icl_value_new_repr(val);
+	value = icl_value_create_state(val);
 	if (NULL == value) {
-		ERR("icl_value_new_repr(%p) Fail", val);
+		ERR("icl_value_create_state(%p) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
-	icl_repr_inc_ref_count(val);
+	icl_state_inc_ref_count(val);
 
 	return icl_list_insert(list, value, pos);
 }
@@ -329,15 +342,15 @@ API int iotcon_list_get_nth_list(iotcon_list_h src, int pos, iotcon_list_h *dest
 }
 
 
-API int iotcon_list_get_nth_repr(iotcon_list_h list, int pos, iotcon_repr_h *repr)
+API int iotcon_list_get_nth_state(iotcon_list_h list, int pos, iotcon_state_h *state)
 {
 	int ret;
 	iotcon_value_h value;
-	iotcon_repr_h repr_val;
+	iotcon_state_h state_val;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == list->list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = g_list_nth_data(list->list, pos);
 	if (NULL == value) {
@@ -345,13 +358,13 @@ API int iotcon_list_get_nth_repr(iotcon_list_h list, int pos, iotcon_repr_h *rep
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	ret = icl_value_get_repr(value, &repr_val);
+	ret = icl_value_get_state(value, &state_val);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icl_value_get_list() Fail(%d)", ret);
+		ERR("icl_value_get_state() Fail(%d)", ret);
 		return IOTCON_ERROR_REPRESENTATION;
 	}
 
-	*repr = repr_val;
+	*state = state_val;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -377,10 +390,10 @@ static int _icl_list_del_nth_value(iotcon_list_h list, int pos, iotcon_types_e v
 		free(real->val.s);
 	} else if (IOTCON_TYPE_LIST == value->type) {
 		icl_val_list_s *real = (icl_val_list_s*)value;
-		iotcon_list_free(real->list);
-	} else if (IOTCON_TYPE_REPR == value->type) {
-		icl_val_repr_s *real = (icl_val_repr_s*)value;
-		iotcon_repr_free(real->repr);
+		iotcon_list_destroy(real->list);
+	} else if (IOTCON_TYPE_STATE == value->type) {
+		icl_val_state_s *real = (icl_val_state_s*)value;
+		iotcon_state_destroy(real->state);
 	}
 
 	icl_list_remove(list, value);
@@ -448,11 +461,11 @@ API int iotcon_list_del_nth_list(iotcon_list_h list, int pos)
 }
 
 
-API int iotcon_list_del_nth_repr(iotcon_list_h list, int pos)
+API int iotcon_list_del_nth_state(iotcon_list_h list, int pos)
 {
 	int ret;
 
-	ret = _icl_list_del_nth_value(list, pos, IOTCON_TYPE_REPR);
+	ret = _icl_list_del_nth_value(list, pos, IOTCON_TYPE_STATE);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_icl_list_del_nth_value() Fail(%d)", ret);
 
@@ -471,12 +484,14 @@ API int iotcon_list_get_type(iotcon_list_h list, int *type)
 }
 
 
-API unsigned int iotcon_list_get_length(iotcon_list_h list)
+API int iotcon_list_get_length(iotcon_list_h list, unsigned int *length)
 {
-	RETV_IF(NULL == list, 0);
-	RETV_IF(NULL == list->list, 0);
+	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == list->list, IOTCON_ERROR_INVALID_PARAMETER);
 
-	return g_list_length(list->list);
+	*length = g_list_length(list->list);
+
+	return IOTCON_ERROR_NONE;
 }
 
 
@@ -499,7 +514,7 @@ int icl_list_insert(iotcon_list_h list, iotcon_value_h value, int pos)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_fn fn,
+API int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_cb cb,
 		void *user_data)
 {
 	GList *cur;
@@ -509,13 +524,13 @@ API int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_fn fn,
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_INT != list->type, IOTCON_ERROR_INVALID_TYPE, "Invalid Type(%d)",
 			list->type);
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	cur = list->list;
 	while (cur) {
 		GList *next = cur->next;
 		real = cur->data;
-		if (IOTCON_FUNC_STOP == fn(index, real->val.i, user_data))
+		if (IOTCON_FUNC_STOP == cb(index, real->val.i, user_data))
 			break;
 		index++;
 		cur = next;
@@ -524,7 +539,7 @@ API int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_fn fn,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_fn fn,
+API int iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_cb cb,
 		void *user_data)
 {
 	GList *cur;
@@ -534,13 +549,13 @@ API int iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_fn fn,
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_BOOL != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	cur = list->list;
 	while (cur) {
 		GList *next = cur->next;
 		real = cur->data;
-		if (IOTCON_FUNC_STOP == fn(index, real->val.b, user_data))
+		if (IOTCON_FUNC_STOP == cb(index, real->val.b, user_data))
 			break;
 		index++;
 		cur = next;
@@ -549,7 +564,7 @@ API int iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_fn fn,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_fn fn,
+API int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_cb cb,
 		void *user_data)
 {
 	GList *cur;
@@ -559,13 +574,13 @@ API int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_fn fn,
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_DOUBLE != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	cur = list->list;
 	while (cur) {
 		GList *next = cur->next;
 		real = cur->data;
-		if (IOTCON_FUNC_STOP == fn(index, real->val.d, user_data))
+		if (IOTCON_FUNC_STOP == cb(index, real->val.d, user_data))
 			break;
 		index++;
 		cur = next;
@@ -574,7 +589,7 @@ API int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_fn fn,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_fn fn,
+API int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_cb cb,
 		void *user_data)
 {
 	GList *cur;
@@ -584,13 +599,13 @@ API int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_fn fn,
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_STR != list->type, IOTCON_ERROR_INVALID_TYPE, "Invalid Type(%d)",
 			list->type);
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	cur = list->list;
 	while (cur) {
 		GList *next = cur->next;
 		real = cur->data;
-		if (IOTCON_FUNC_STOP == fn(index, real->val.s, user_data))
+		if (IOTCON_FUNC_STOP == cb(index, real->val.s, user_data))
 			break;
 		index++;
 		cur = next;
@@ -599,7 +614,7 @@ API int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_fn fn,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_fn fn,
+API int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_cb cb,
 		void *user_data)
 {
 	int index = 0;
@@ -609,13 +624,13 @@ API int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_fn fn,
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_LIST != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	cur = list->list;
 	while (cur) {
 		GList *next = cur->next;
 		real = cur->data;
-		if (IOTCON_FUNC_STOP == fn(index, real->list, user_data))
+		if (IOTCON_FUNC_STOP == cb(index, real->list, user_data))
 			break;
 		index++;
 		cur = next;
@@ -624,22 +639,23 @@ API int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_fn fn,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_list_foreach_repr(iotcon_list_h list, iotcon_list_repr_fn fn, void *user_data)
+API int iotcon_list_foreach_state(iotcon_list_h list, iotcon_list_state_cb cb,
+		void *user_data)
 {
 	int index = 0;
 	GList *cur = NULL;
-	icl_val_repr_s *real = NULL;
+	icl_val_state_s *real = NULL;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_REPR != list->type, IOTCON_ERROR_INVALID_TYPE,
+	RETVM_IF(IOTCON_TYPE_STATE != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
-	RETV_IF(NULL == fn, IOTCON_ERROR_INVALID_PARAMETER);;
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);;
 
 	cur = list->list;
 	while (cur) {
 		GList *next = cur->next;
 		real = cur->data;
-		if (IOTCON_FUNC_STOP == fn(index, real->repr, user_data))
+		if (IOTCON_FUNC_STOP == cb(index, real->state, user_data))
 			break;
 		index++;
 		cur = next;
@@ -658,7 +674,7 @@ static iotcon_value_h _icl_list_get_nth_value(iotcon_list_h list, int pos)
 }
 
 
-API void iotcon_list_free(iotcon_list_h list)
+API void iotcon_list_destroy(iotcon_list_h list)
 {
 	FN_CALL;
 	GList *cur = NULL;
@@ -670,7 +686,7 @@ API void iotcon_list_free(iotcon_list_h list)
 
 	cur = list->list;
 	while (cur) {
-		icl_value_free(cur->data);
+		icl_value_destroy(cur->data);
 		cur = cur->next;
 	}
 	free(list);
@@ -702,7 +718,7 @@ static int _icl_list_clone_value(iotcon_list_h list, iotcon_list_h ret_list)
 		ret = icl_list_insert(ret_list, copied_value, -1);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_list_insert() Fail");
-			icl_value_free(copied_value);
+			icl_value_destroy(copied_value);
 			return IOTCON_ERROR_REPRESENTATION;
 		}
 	}
@@ -732,17 +748,17 @@ static int _icl_list_clone_list(iotcon_list_h list, iotcon_list_h ret_list)
 			return IOTCON_ERROR_REPRESENTATION;
 		}
 
-		value = icl_value_new_list(copied_list);
+		value = icl_value_create_list(copied_list);
 		if (NULL == value) {
-			ERR("icl_value_new_list(%p) Fail", copied_list);
-			iotcon_list_free(copied_list);
+			ERR("icl_value_create_list(%p) Fail", copied_list);
+			iotcon_list_destroy(copied_list);
 			return IOTCON_ERROR_REPRESENTATION;
 		}
 
 		ret = icl_list_insert(ret_list, value, -1);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_list_insert(%d) Fail", ret);
-			icl_value_free(value);
+			icl_value_destroy(value);
 			return IOTCON_ERROR_REPRESENTATION;
 		}
 	}
@@ -751,37 +767,38 @@ static int _icl_list_clone_list(iotcon_list_h list, iotcon_list_h ret_list)
 }
 
 
-static int _icl_list_clone_repr(iotcon_list_h list, iotcon_list_h ret_list)
+static int _icl_list_clone_state(iotcon_list_h list, iotcon_list_h ret_list)
 {
 	int i, ret, count;
 	iotcon_value_h value;
-	iotcon_repr_h repr_val, copied_repr;
+	iotcon_state_h state_val;
+	iotcon_state_h copied_state = NULL;
 
 	count = g_list_length(list->list);
 	for (i = 0; i < count; i++) {
-		ret = iotcon_list_get_nth_repr(list, i, &repr_val);
+		ret = iotcon_list_get_nth_state(list, i, &state_val);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_list_get_nth_repr() Fail");
+			ERR("iotcon_list_get_nth_state() Fail");
 			return IOTCON_ERROR_REPRESENTATION;
 		}
 
-		copied_repr = iotcon_repr_clone(repr_val);
-		if (NULL == copied_repr) {
-			ERR("_ic_repr_clone_repr() Fail");
-			return IOTCON_ERROR_REPRESENTATION;
+
+		if (state_val->hash_table) {
+			g_hash_table_foreach(state_val->hash_table, (GHFunc)icl_state_clone,
+					copied_state);
 		}
 
-		value = icl_value_new_repr(copied_repr);
+		value = icl_value_create_state(copied_state);
 		if (NULL == value) {
-			ERR("icl_value_new_repr(%p) Fail", copied_repr);
-			iotcon_repr_free(copied_repr);
+			ERR("icl_value_create_state(%p) Fail", copied_state);
+			iotcon_state_destroy(copied_state);
 			return IOTCON_ERROR_REPRESENTATION;
 		}
 
 		ret = icl_list_insert(ret_list, value, -1);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_list_insert(%d) Fail", ret);
-			icl_value_free(value);
+			icl_value_destroy(value);
 			return IOTCON_ERROR_REPRESENTATION;
 		}
 	}
@@ -798,9 +815,9 @@ iotcon_list_h icl_list_clone(iotcon_list_h list)
 	RETV_IF(NULL == list, NULL);
 	RETV_IF(NULL == list->list, NULL);
 
-	ret_list = iotcon_list_new(list->type);
-	if (NULL == ret_list) {
-		ERR("iotcon_list_new(%d) Fail", list->type);
+	ret = iotcon_list_create(list->type, &ret_list);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_list_create(%d) Fail(%d)", list->type, ret);
 		return NULL;
 	}
 
@@ -813,7 +830,7 @@ iotcon_list_h icl_list_clone(iotcon_list_h list)
 		ret = _icl_list_clone_value(list, ret_list);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_icl_list_clone_value() Fail(%d)", ret);
-			iotcon_list_free(ret_list);
+			iotcon_list_destroy(ret_list);
 			return NULL;
 		}
 		break;
@@ -821,21 +838,21 @@ iotcon_list_h icl_list_clone(iotcon_list_h list)
 		ret = _icl_list_clone_list(list, ret_list);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_icl_list_clone_list() Fail(%d)", ret);
-			iotcon_list_free(ret_list);
+			iotcon_list_destroy(ret_list);
 			return NULL;
 		}
 		break;
-	case IOTCON_TYPE_REPR:
-		ret = _icl_list_clone_repr(list, ret_list);
+	case IOTCON_TYPE_STATE:
+		ret = _icl_list_clone_state(list, ret_list);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("_icl_list_clone_repr() Fail(%d)", ret);
-			iotcon_list_free(ret_list);
+			ERR("_icl_list_clone_state() Fail(%d)", ret);
+			iotcon_list_destroy(ret_list);
 			return NULL;
 		}
 		break;
 	default:
 		ERR("Invalid type(%d)", list->type);
-		iotcon_list_free(ret_list);
+		iotcon_list_destroy(ret_list);
 		return NULL;
 	}
 

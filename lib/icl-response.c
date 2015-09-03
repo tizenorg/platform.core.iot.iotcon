@@ -28,104 +28,123 @@
 #include "icl-request.h"
 #include "icl-response.h"
 
-API iotcon_response_h iotcon_response_new(iotcon_request_h request_h)
+/* the last index of iotcon_response_result_e */
+#define ICL_RESPONSE_RESULT_MAX (IOTCON_RESPONSE_RESULT_FORBIDDEN + 1)
+
+API int iotcon_response_create(iotcon_request_h request,
+		iotcon_response_h *response)
 {
 	FN_CALL;
 
-	RETV_IF(NULL == request_h, NULL);
+	RETV_IF(NULL == request, TIZEN_ERROR_INVALID_PARAMETER);
 
 	iotcon_response_h resp = calloc(1, sizeof(struct icl_resource_response));
 	if (NULL == resp) {
 		ERR("calloc() Fail(%d)", errno);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	resp->oic_request_h = request_h->oic_request_h;
-	resp->oic_resource_h = request_h->oic_resource_h;
+	resp->oic_request_h = request->oic_request_h;
+	resp->oic_resource_h = request->oic_resource_h;
 	resp->error_code = 200;
 
-	return resp;
-}
-
-
-API void iotcon_response_free(iotcon_response_h resp)
-{
-	RET_IF(NULL == resp);
-
-	if (resp->repr)
-		iotcon_repr_free(resp->repr);
-	if (resp->new_uri_path)
-		free(resp->new_uri_path);
-	if (resp->header_options)
-		iotcon_options_free(resp->header_options);
-	free(resp);
-}
-
-
-API int iotcon_response_set(iotcon_response_h resp, iotcon_response_property_e prop, ...)
-{
-	int value;
-	va_list args;
-	char *new_uri_path = NULL;
-	iotcon_options_h options = NULL;
-
-	va_start(args, prop);
-
-	switch (prop) {
-	case IOTCON_RESPONSE_INTERFACE:
-		resp->iface = va_arg(args, int);
-		break;
-	case IOTCON_RESPONSE_REPRESENTATION:
-		resp->repr = va_arg(args, iotcon_repr_h);
-		icl_repr_inc_ref_count(resp->repr);
-		break;
-	case IOTCON_RESPONSE_RESULT:
-		value = va_arg(args, int);
-		if (value < IOTCON_RESPONSE_RESULT_OK || IOTCON_RESPONSE_RESULT_MAX <= value) {
-			ERR("Invalid value(%d)", value);
-			va_end(args);
-			return IOTCON_ERROR_INVALID_PARAMETER;
-		}
-		resp->result = value;
-		break;
-	case IOTCON_RESPONSE_NEW_URI_PATH:
-		new_uri_path = va_arg(args, char*);
-		if (resp->new_uri_path)
-			free(resp->new_uri_path);
-
-		if (new_uri_path) {
-			resp->new_uri_path = strdup(new_uri_path);
-			if (NULL == resp->new_uri_path) {
-				ERR("strdup() Fail(%d)", errno);
-				va_end(args);
-				return IOTCON_ERROR_OUT_OF_MEMORY;
-			}
-		} else {
-			resp->new_uri_path = NULL;
-		}
-		break;
-	case IOTCON_RESPONSE_HEADER_OPTIONS:
-		options = va_arg(args, iotcon_options_h);
-		if (resp->header_options)
-			iotcon_options_free(resp->header_options);
-
-		if (options)
-			resp->header_options = icl_options_ref(options);
-		else
-			resp->header_options = NULL;
-		break;
-	default:
-		ERR("Invalid Response Property(%d)", prop);
-		break;
-	}
-
-	va_end(args);
+	*response = resp;
 
 	return IOTCON_ERROR_NONE;
 }
 
 
-static bool _icl_response_repr_child_fn(iotcon_repr_h child, void *user_data)
+API void iotcon_response_destroy(iotcon_response_h resp)
+{
+	RET_IF(NULL == resp);
+
+	if (resp->repr)
+		iotcon_representation_destroy(resp->repr);
+	if (resp->new_uri_path)
+		free(resp->new_uri_path);
+	if (resp->header_options)
+		iotcon_options_destroy(resp->header_options);
+	free(resp);
+}
+
+
+API int iotcon_response_set_new_uri_path(iotcon_response_h resp, char *new_uri_path)
+{
+	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (resp->new_uri_path)
+		free(resp->new_uri_path);
+
+	if (new_uri_path) {
+		resp->new_uri_path = strdup(new_uri_path);
+		if (NULL == resp->new_uri_path) {
+			ERR("strdup() Fail(%d)", errno);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+	} else {
+		resp->new_uri_path = NULL;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_response_set_result(iotcon_response_h resp, int result)
+{
+	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (result < IOTCON_RESPONSE_RESULT_OK || ICL_RESPONSE_RESULT_MAX <= result) {
+		ERR("Invalid result(%d)", result);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+	resp->result = result;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_response_set_representation(iotcon_response_h resp,
+		iotcon_representation_h repr)
+{
+	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+
+	resp->repr = repr;
+	icl_representation_inc_ref_count(resp->repr);
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_response_set_header_options(iotcon_response_h resp,
+		iotcon_options_h options)
+{
+	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (resp->header_options)
+		iotcon_options_destroy(resp->header_options);
+
+	if (options)
+		resp->header_options = icl_options_ref(options);
+	else
+		resp->header_options = NULL;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_response_set_interface(iotcon_response_h resp, int iface)
+{
+	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+
+	resp->iface = iface;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+static bool _icl_response_representation_child_cb(iotcon_representation_h child,
+		void *user_data)
 {
 	int iface = GPOINTER_TO_INT(user_data);
 
@@ -149,14 +168,14 @@ static bool _icl_response_repr_child_fn(iotcon_repr_h child, void *user_data)
 }
 
 
-static int _icl_response_check_repr_visibility(iotcon_response_h resp)
+static int _icl_response_check_representation_visibility(iotcon_response_h resp)
 {
 	int ret;
 
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resp->repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	iotcon_repr_h first = resp->repr;
+	iotcon_representation_h first = resp->repr;
 
 	DBG("interface type of response : %d", resp->iface);
 
@@ -176,10 +195,10 @@ static int _icl_response_check_repr_visibility(iotcon_response_h resp)
 		break;
 	}
 
-	ret = iotcon_repr_foreach_children(first, _icl_response_repr_child_fn,
-			GINT_TO_POINTER(resp->iface));
+	ret = iotcon_representation_foreach_children(first,
+			_icl_response_representation_child_cb, GINT_TO_POINTER(resp->iface));
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_repr_foreach_children() Fail(%d)", ret);
+		ERR("iotcon_representation_foreach_children() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -190,7 +209,7 @@ static int _icl_response_check_repr_visibility(iotcon_response_h resp)
 API int iotcon_response_send(iotcon_response_h resp)
 {
 	FN_CALL;
-	int ret = 0;
+	int ret;
 	GError *error = NULL;
 	GVariant *arg_response;
 
@@ -198,9 +217,9 @@ API int iotcon_response_send(iotcon_response_h resp)
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resp->repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = _icl_response_check_repr_visibility(resp);
+	ret = _icl_response_check_representation_visibility(resp);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_icl_response_check_repr_visibility() Fail(%d)", ret);
+		ERR("_icl_response_check_representation_visibility() Fail(%d)", ret);
 		return ret;
 	}
 

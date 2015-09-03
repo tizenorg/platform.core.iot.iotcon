@@ -24,10 +24,10 @@
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-options.h"
-#include "icl-resource-types.h"
 #include "icl-dbus.h"
 #include "icl-repr.h"
 #include "icl-client.h"
+#include "icl-resource-types.h"
 #include "icl-payload.h"
 
 typedef struct {
@@ -66,7 +66,7 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 	if (cb)
 		cb(client, cb_container->user_data);
 
-	iotcon_client_free(client);
+	iotcon_client_destroy(client);
 
 	/* TODO
 	 * When is callback removed?
@@ -81,15 +81,15 @@ API int iotcon_find_resource(const char *host_address, const char *resource_type
 {
 	int ret;
 	int signal_number;
-	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	unsigned int sub_id;
-	icl_found_resource_s *cb_container;
 	GError *error = NULL;
+	icl_found_resource_s *cb_container;
+	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
-	if (resource_type && (IOTCON_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
+	if (resource_type && (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
 		ERR("The length of resource_type(%s) is invalid", resource_type);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
@@ -135,20 +135,24 @@ API int iotcon_find_resource(const char *host_address, const char *resource_type
 
 
 /* If you know the information of resource, then you can make a proxy of the resource. */
-API iotcon_client_h iotcon_client_new(const char *host, const char *uri_path,
-		bool is_observable, iotcon_resource_types_h resource_types, int resource_ifs)
+API int iotcon_client_create(const char *host,
+		const char *uri_path,
+		bool is_observable,
+		iotcon_resource_types_h resource_types,
+		int resource_ifs,
+		iotcon_client_h *client_handle)
 {
 	FN_CALL;
 	iotcon_client_h resource = NULL;
 
-	RETV_IF(NULL == host, NULL);
-	RETV_IF(NULL == uri_path, NULL);
-	RETV_IF(NULL == resource_types, NULL);
+	RETV_IF(NULL == host, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resource_types, IOTCON_ERROR_INVALID_PARAMETER);
 
 	resource = calloc(1, sizeof(struct icl_remote_resource));
 	if (NULL == resource) {
 		ERR("calloc() Fail(%d)", errno);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	resource->host = ic_utils_strdup(host);
@@ -159,11 +163,13 @@ API iotcon_client_h iotcon_client_new(const char *host, const char *uri_path,
 
 	resource->ref_count = 1;
 
-	return resource;
+	*client_handle = resource;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
-API void iotcon_client_free(iotcon_client_h resource)
+API void iotcon_client_destroy(iotcon_client_h resource)
 {
 	RET_IF(NULL == resource);
 
@@ -175,24 +181,26 @@ API void iotcon_client_free(iotcon_client_h resource)
 	free(resource->uri_path);
 	free(resource->host);
 	free(resource->sid);
-	iotcon_resource_types_free(resource->types);
+	iotcon_resource_types_destroy(resource->types);
 
 	/* null COULD be allowed */
 	if (resource->header_options)
-		iotcon_options_free(resource->header_options);
+		iotcon_options_destroy(resource->header_options);
 
 	free(resource);
 }
 
 
-API iotcon_client_h iotcon_client_ref(iotcon_client_h resource)
+API int iotcon_client_ref(iotcon_client_h src, iotcon_client_h *dest)
 {
-	RETV_IF(NULL == resource, NULL);
-	RETV_IF(resource->ref_count <= 0, NULL);
+	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(src->ref_count <= 0, IOTCON_ERROR_INVALID_PARAMETER);
 
-	resource->ref_count++;
+	src->ref_count++;
 
-	return resource;
+	*dest = src;
+
+	return IOTCON_ERROR_NONE;
 }
 
 
@@ -272,7 +280,7 @@ API int iotcon_client_set_options(iotcon_client_h resource,
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (resource->header_options)
-		iotcon_options_free(resource->header_options);
+		iotcon_options_destroy(resource->header_options);
 
 	if (header_options)
 		resource->header_options = icl_options_ref(header_options);
@@ -286,12 +294,13 @@ API int iotcon_client_set_options(iotcon_client_h resource,
 static iotcon_client_h _icl_client_from_gvariant(GVariant *payload,
 		iotcon_connectivity_type_e conn_type)
 {
+	int ret;
+	iotcon_client_h client;
+	GVariantIter *types_iter;
 	char host_addr[PATH_MAX] = {0};
+	iotcon_resource_types_h res_types;
 	char *uri_path, *sid, *res_type, *addr;
 	int ifaces, is_observable, is_secure, port;
-	GVariantIter *types_iter;
-	iotcon_resource_types_h res_types;
-	iotcon_client_h client;
 
 	g_variant_get(payload, "(&s&siasib&si)", &uri_path, &sid, &ifaces, &types_iter,
 			&is_observable, &is_secure, &addr, &port);
@@ -305,16 +314,22 @@ static iotcon_client_h _icl_client_from_gvariant(GVariant *payload,
 		snprintf(host_addr, sizeof(host_addr), "%s:%d", addr, port);
 	}
 
-	res_types = iotcon_resource_types_new();
+	ret = iotcon_resource_types_create(&res_types);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_types_create() Fail(%d)", ret);
+		return NULL;
+	}
+
 	while (g_variant_iter_loop(types_iter, "s", &res_type))
 		iotcon_resource_types_insert(res_types, res_type);
 
-	client = iotcon_client_new(host_addr, uri_path, !!is_observable, res_types, ifaces);
+	ret = iotcon_client_create(host_addr, uri_path, !!is_observable, res_types, ifaces,
+			&client);
 	if (res_types)
-		iotcon_resource_types_free(res_types);
+		iotcon_resource_types_destroy(res_types);
 
-	if (NULL == client) {
-		ERR("iotcon_client_new() Fail");
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_client_create() Fail");
 		return NULL;
 	}
 	client->ref_count = 1;
@@ -322,7 +337,7 @@ static iotcon_client_h _icl_client_from_gvariant(GVariant *payload,
 	client->sid = strdup(sid);
 	if (NULL == client->sid) {
 		ERR("strdup(sid) Fail(%d)", errno);
-		iotcon_client_free(client);
+		iotcon_client_destroy(client);
 		return NULL;
 	}
 	client->conn_type = conn_type;

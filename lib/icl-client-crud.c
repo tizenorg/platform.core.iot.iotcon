@@ -51,8 +51,8 @@ typedef struct {
 
 static void _icl_on_cru_cb(GVariant *result, icl_on_cru_s *cb_container)
 {
-	int res;
-	iotcon_repr_h repr;
+	int res, ret;
+	iotcon_representation_h repr;
 	GVariantIter *options;
 	unsigned short option_id;
 	char *option_data;
@@ -63,19 +63,24 @@ static void _icl_on_cru_cb(GVariant *result, icl_on_cru_s *cb_container)
 	g_variant_get(result, "(a(qs)vi)", &options, &repr_gvar, &res);
 
 	if (IOTCON_ERROR_NONE == res && g_variant_iter_n_children(options)) {
-		header_options = iotcon_options_new();
+		ret = iotcon_options_create(&header_options);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_options_create() Fail(%d)", ret);
+			return;
+		}
+
 		while (g_variant_iter_loop(options, "(q&s)", &option_id, &option_data))
 			iotcon_options_insert(header_options, option_id, option_data);
 	}
 	g_variant_iter_free(options);
 
-	repr = icl_repr_from_gvariant(repr_gvar);
+	repr = icl_representation_from_gvariant(repr_gvar);
 	if (NULL == repr) {
-		ERR("icl_repr_from_gvariant() Fail");
+		ERR("icl_representation_from_gvariant() Fail");
 		if (header_options)
-			iotcon_options_free(header_options);
+			iotcon_options_destroy(header_options);
 
-		iotcon_client_free(cb_container->resource);
+		iotcon_client_destroy(cb_container->resource);
 		free(cb_container);
 		return;
 	}
@@ -83,14 +88,15 @@ static void _icl_on_cru_cb(GVariant *result, icl_on_cru_s *cb_container)
 	res = icl_dbus_convert_daemon_error(res);
 
 	if (cb)
-		cb(cb_container->resource, repr, header_options, res, cb_container->user_data);
+		cb(cb_container->resource, repr, header_options, res,
+				cb_container->user_data);
 
 	if (repr)
-		iotcon_repr_free(repr);
+		iotcon_representation_destroy(repr);
 	if (header_options)
-		iotcon_options_free(header_options);
+		iotcon_options_destroy(header_options);
 
-	iotcon_client_free(cb_container->resource);
+	iotcon_client_destroy(cb_container->resource);
 	free(cb_container);
 }
 
@@ -106,7 +112,7 @@ static void _icl_on_get_cb(GObject *object, GAsyncResult *g_async_res,
 	if (error) {
 		ERR("ic_dbus_call_get_finish() Fail(%s)", error->message);
 		g_error_free(error);
-		iotcon_client_free(cb_container->resource);
+		iotcon_client_destroy(cb_container->resource);
 		free(cb_container);
 		return;
 	}
@@ -126,7 +132,7 @@ static void _icl_on_put_cb(GObject *object, GAsyncResult *g_async_res,
 	if (error) {
 		ERR("ic_dbus_call_put_finish() Fail(%s)", error->message);
 		g_error_free(error);
-		iotcon_client_free(cb_container->resource);
+		iotcon_client_destroy(cb_container->resource);
 		free(cb_container);
 		return;
 	}
@@ -146,7 +152,7 @@ static void _icl_on_post_cb(GObject *object, GAsyncResult *g_async_res,
 	if (error) {
 		ERR("ic_dbus_call_post_finish() Fail(%s)", error->message);
 		g_error_free(error);
-		iotcon_client_free(cb_container->resource);
+		iotcon_client_destroy(cb_container->resource);
 		free(cb_container);
 		return;
 	}
@@ -155,11 +161,12 @@ static void _icl_on_post_cb(GObject *object, GAsyncResult *g_async_res,
 }
 
 
-API int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
-		iotcon_on_cru_cb cb, void *user_data)
+API int iotcon_get(iotcon_client_h resource, iotcon_query_h query, iotcon_on_cru_cb cb,
+		void *user_data)
 {
-	GVariant *arg_client;
+	int ret;
 	GVariant *arg_query;
+	GVariant *arg_client;
 	icl_on_cru_s *cb_container;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -172,8 +179,8 @@ API int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	cb_container->resource = iotcon_client_ref(resource);
-	if (NULL == cb_container->resource) {
+	ret = iotcon_client_ref(resource, &cb_container->resource);
+	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_client_ref() Fail");
 		free(cb_container);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
@@ -192,9 +199,10 @@ API int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
 }
 
 
-API int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr,
+API int iotcon_put(iotcon_client_h resource, iotcon_representation_h repr,
 		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data)
 {
+	int ret;
 	GVariant *arg_repr;
 	GVariant *arg_client;
 	GVariant *arg_query;
@@ -211,8 +219,8 @@ API int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	cb_container->resource = iotcon_client_ref(resource);
-	if (NULL == cb_container->resource) {
+	ret = iotcon_client_ref(resource, &cb_container->resource);
+	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_client_ref() Fail");
 		free(cb_container);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
@@ -221,10 +229,10 @@ API int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr,
 	cb_container->cb = cb;
 	cb_container->user_data = user_data;
 
-	arg_repr = icl_repr_to_gvariant(repr);
+	arg_repr = icl_representation_to_gvariant(repr);
 	if (NULL == arg_repr) {
-		ERR("icl_repr_to_gvariant() Fail");
-		iotcon_client_free(cb_container->resource);
+		ERR("icl_representation_to_gvariant() Fail");
+		iotcon_client_destroy(cb_container->resource);
 		free(cb_container);
 		return IOTCON_ERROR_REPRESENTATION;
 	}
@@ -232,19 +240,20 @@ API int iotcon_put(iotcon_client_h resource, iotcon_repr_h repr,
 	arg_client = icl_dbus_client_to_gvariant(resource);
 	arg_query = icl_dbus_query_to_gvariant(query);
 
-	ic_dbus_call_put(icl_dbus_get_object(), arg_client, arg_repr, arg_query, NULL,
-			_icl_on_put_cb, cb_container);
+	ic_dbus_call_put(icl_dbus_get_object(), arg_client, arg_repr, arg_query,
+			NULL, _icl_on_put_cb, cb_container);
 
 	return IOTCON_ERROR_NONE;
 }
 
 
-API int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr,
+API int iotcon_post(iotcon_client_h resource, iotcon_representation_h repr,
 		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data)
 {
+	int ret;
 	GVariant *arg_repr;
-	GVariant *arg_client;
 	GVariant *arg_query;
+	GVariant *arg_client;
 	icl_on_cru_s *cb_container;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -258,8 +267,8 @@ API int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	cb_container->resource = iotcon_client_ref(resource);
-	if (NULL == cb_container->resource) {
+	ret = iotcon_client_ref(resource, &cb_container->resource);
+	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_client_ref() Fail");
 		free(cb_container);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
@@ -268,10 +277,10 @@ API int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr,
 	cb_container->cb = cb;
 	cb_container->user_data = user_data;
 
-	arg_repr = icl_repr_to_gvariant(repr);
+	arg_repr = icl_representation_to_gvariant(repr);
 	if (NULL == arg_repr) {
-		ERR("icl_repr_to_gvariant() Fail");
-		iotcon_client_free(cb_container->resource);
+		ERR("icl_representation_to_gvariant() Fail");
+		iotcon_client_destroy(cb_container->resource);
 		free(cb_container);
 		return IOTCON_ERROR_REPRESENTATION;
 	}
@@ -279,8 +288,8 @@ API int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr,
 	arg_client = icl_dbus_client_to_gvariant(resource);
 	arg_query = icl_dbus_query_to_gvariant(query);
 
-	ic_dbus_call_post(icl_dbus_get_object(), arg_client, arg_repr, arg_query, NULL,
-			_icl_on_post_cb, cb_container);
+	ic_dbus_call_post(icl_dbus_get_object(), arg_client, arg_repr, arg_query,
+			NULL, _icl_on_post_cb, cb_container);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -289,7 +298,7 @@ API int iotcon_post(iotcon_client_h resource, iotcon_repr_h repr,
 static void _icl_on_delete_cb(GObject *object, GAsyncResult *g_async_res,
 		gpointer user_data)
 {
-	int res;
+	int res, ret;
 	GVariant *result;
 	char *option_data;
 	GError *error = NULL;
@@ -304,14 +313,22 @@ static void _icl_on_delete_cb(GObject *object, GAsyncResult *g_async_res,
 	if (error) {
 		ERR("ic_dbus_call_delete_finish() Fail(%s)", error->message);
 		g_error_free(error);
-		iotcon_client_free(cb_container->resource);
+		iotcon_client_destroy(cb_container->resource);
 		free(cb_container);
 		return;
 	}
 	g_variant_get(result, "(a(qs)i)", &options, &res);
 
 	if (IOTCON_ERROR_NONE == res && g_variant_iter_n_children(options)) {
-		header_options = iotcon_options_new();
+		ret = iotcon_options_create(&header_options);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_options_create() Fail(%d)", ret);
+			g_variant_iter_free(options);
+			iotcon_client_destroy(cb_container->resource);
+			free(cb_container);
+			return;
+		}
+
 		while (g_variant_iter_loop(options, "(q&s)", &option_id, &option_data))
 			iotcon_options_insert(header_options, option_id, option_data);
 	}
@@ -323,15 +340,16 @@ static void _icl_on_delete_cb(GObject *object, GAsyncResult *g_async_res,
 		cb(cb_container->resource, header_options, res, cb_container->user_data);
 
 	if (header_options)
-		iotcon_options_free(header_options);
+		iotcon_options_destroy(header_options);
 
-	iotcon_client_free(cb_container->resource);
+	iotcon_client_destroy(cb_container->resource);
 	free(cb_container);
 }
 
 
 API int iotcon_delete(iotcon_client_h resource, iotcon_on_delete_cb cb, void *user_data)
 {
+	int ret;
 	GVariant *arg_client;
 	icl_on_delete_s *cb_container;
 
@@ -345,8 +363,8 @@ API int iotcon_delete(iotcon_client_h resource, iotcon_on_delete_cb cb, void *us
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	cb_container->resource = iotcon_client_ref(resource);
-	if (NULL == cb_container->resource) {
+	ret = iotcon_client_ref(resource, &cb_container->resource);
+	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_client_ref() Fail");
 		free(cb_container);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
@@ -372,9 +390,9 @@ static void _icl_on_observe_cb(GDBusConnection *connection,
 		GVariant *parameters,
 		gpointer user_data)
 {
-	int res;
+	int res, ret;
 	int seq_num;
-	iotcon_repr_h repr;
+	iotcon_representation_h repr;
 	GVariantIter *options;
 	unsigned short option_id;
 	char *option_data;
@@ -384,22 +402,31 @@ static void _icl_on_observe_cb(GDBusConnection *connection,
 	icl_on_observe_s *cb_container = user_data;
 	iotcon_on_observe_cb cb = cb_container->cb;
 
-	g_variant_get(parameters, "(a(qs)vii)", &options, &repr_gvar, &res, &seq_num);
+	g_variant_get(parameters, "(a(qs)vii)", &options, &repr_gvar, &res,
+			&seq_num);
 
 	if (IOTCON_ERROR_NONE == res && g_variant_iter_n_children(options)) {
-		header_options = iotcon_options_new();
+		ret = iotcon_options_create(&header_options);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_options_create() Fail(%d)", ret);
+			g_variant_iter_free(options);
+			iotcon_client_destroy(cb_container->resource);
+			free(cb_container);
+			return;
+		}
+
 		while (g_variant_iter_loop(options, "(q&s)", &option_id, &option_data))
 			iotcon_options_insert(header_options, option_id, option_data);
 	}
 	g_variant_iter_free(options);
 
-	repr = icl_repr_from_gvariant(repr_gvar);
+	repr = icl_representation_from_gvariant(repr_gvar);
 	if (NULL == repr) {
-		ERR("icl_repr_from_gvariant() Fail");
+		ERR("icl_representation_from_gvariant() Fail");
 		if (header_options)
-			iotcon_options_free(header_options);
+			iotcon_options_destroy(header_options);
 
-		iotcon_client_free(cb_container->resource);
+		iotcon_client_destroy(cb_container->resource);
 		free(cb_container);
 		return;
 	}
@@ -411,9 +438,9 @@ static void _icl_on_observe_cb(GDBusConnection *connection,
 				cb_container->user_data);
 
 	if (repr)
-		iotcon_repr_free(repr);
+		iotcon_representation_destroy(repr);
 	if (header_options)
-		iotcon_options_free(header_options);
+		iotcon_options_destroy(header_options);
 }
 
 
@@ -421,25 +448,22 @@ static void _icl_observe_conn_cleanup(icl_on_observe_s *cb_container)
 {
 	cb_container->resource->observe_handle = 0;
 	cb_container->resource->observe_sub_id = 0;
-	iotcon_client_free(cb_container->resource);
+	iotcon_client_destroy(cb_container->resource);
 	free(cb_container);
 }
 
 
-API int iotcon_observer_start(iotcon_client_h resource,
-		iotcon_observe_type_e observe_type,
-		iotcon_query_h query,
-		iotcon_on_observe_cb cb,
-		void *user_data)
+API int iotcon_observer_start(iotcon_client_h resource, int observe_type,
+		iotcon_query_h query, iotcon_on_observe_cb cb, void *user_data)
 {
-	int64_t observe_handle;
-	GError *error = NULL;
-	unsigned int sub_id;
-	int signal_number;
-	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
-	icl_on_observe_s *cb_container;
-	GVariant *arg_client;
 	GVariant *arg_query;
+	unsigned int sub_id;
+	GVariant *arg_client;
+	GError *error = NULL;
+	icl_on_observe_s *cb_container;
+	int ret, signal_number;
+	int64_t observe_handle;
+	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
@@ -474,8 +498,8 @@ API int iotcon_observer_start(iotcon_client_h resource,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	cb_container->resource = iotcon_client_ref(resource);
-	if (NULL == cb_container->resource) {
+	ret = iotcon_client_ref(resource, &cb_container->resource);
+	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_client_ref() Fail");
 		free(cb_container);
 		return IOTCON_ERROR_OUT_OF_MEMORY;

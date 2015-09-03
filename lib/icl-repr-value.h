@@ -17,6 +17,7 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_VALUE_H__
 
 #include <stdbool.h>
+#include <glib.h>
 
 #include "iotcon-struct.h"
 
@@ -41,16 +42,35 @@ typedef struct {
 
 typedef struct {
 	int type;
-	struct icl_repr_s *repr;
-} icl_val_repr_s;
+	struct icl_state_s *state;
+} icl_val_state_s;
 
-iotcon_value_h icl_value_new_null();
-iotcon_value_h icl_value_new_int(int val);
-iotcon_value_h icl_value_new_bool(bool val);
-iotcon_value_h icl_value_new_double(double val);
-iotcon_value_h icl_value_new_str(const char *val);
-iotcon_value_h icl_value_new_list(iotcon_list_h val);
-iotcon_value_h icl_value_new_repr(iotcon_repr_h val);
+/**
+ * @ingroup CAPI_IOT_CONNECTIVITY_REPRESENTATION_MODULE
+ * @brief The handle of representation value.
+ * @details iotcon_value_h is an opaque data structure to have variant datatype and
+ * store values along with information about the type of that value.\n
+ * The range of possible values is determined by the type.\n
+ * The type of iotcon_value_h should be one of them\n
+ * #IOTCON_TYPE_INT\n
+ * #IOTCON_TYPE_BOOL\n
+ * #IOTCON_TYPE_DOUBLE\n
+ * #IOTCON_TYPE_STR\n
+ * #IOTCON_TYPE_NULL\n
+ * #IOTCON_TYPE_LIST\n
+ * #IOTCON_TYPE_STATE
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_value_s* iotcon_value_h;
+
+iotcon_value_h icl_value_create_null();
+iotcon_value_h icl_value_create_int(int val);
+iotcon_value_h icl_value_create_bool(bool val);
+iotcon_value_h icl_value_create_double(double val);
+iotcon_value_h icl_value_create_str(const char *val);
+iotcon_value_h icl_value_create_list(iotcon_list_h val);
+iotcon_value_h icl_value_create_state(iotcon_state_h val);
 
 
 int icl_value_get_int(iotcon_value_h value, int *val);
@@ -58,9 +78,9 @@ int icl_value_get_bool(iotcon_value_h value, bool *val);
 int icl_value_get_double(iotcon_value_h value, double *val);
 int icl_value_get_str(iotcon_value_h value, const char **val);
 int icl_value_get_list(iotcon_value_h value, iotcon_list_h *list);
-int icl_value_get_repr(iotcon_value_h value, iotcon_repr_h *repr);
+int icl_value_get_state(iotcon_value_h value, iotcon_state_h *state);
 
-void icl_value_free(gpointer data);
+void icl_value_destroy(gpointer data);
 
 iotcon_value_h icl_value_clone(iotcon_value_h src);
 

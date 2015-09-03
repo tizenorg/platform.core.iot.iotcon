@@ -32,17 +32,19 @@
  *
  * @since_tizen 3.0
  *
- * @return A newly allocated representation handle, otherwise NULL on failure.
- * @retval iotcon_repr_h Success
- * @retval NULL Failure
+ * @param[out] repr A newly allocated representation handle
  *
- * @see iotcon_repr_free()
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ *
+ * @see iotcon_representation_destroy()
  */
-iotcon_repr_h iotcon_repr_new();
+int iotcon_representation_create(iotcon_representation_h *ret_repr);
 
 /**
  * @brief Frees a representation.
- * @details Releases a @a repr and its internal data.
+ * @details Releases a @a representation and its internal data.
  *
  * @since_tizen 3.0
  *
@@ -50,9 +52,9 @@ iotcon_repr_h iotcon_repr_new();
  *
  * @return void
  *
- * @see iotcon_repr_new()
+ * @see iotcon_representation_create()
  */
-void iotcon_repr_free(iotcon_repr_h repr);
+void iotcon_representation_destroy(iotcon_representation_h repr);
 
 /**
  * @brief Clones from the source representation.
@@ -61,12 +63,13 @@ void iotcon_repr_free(iotcon_repr_h repr);
  * @since_tizen 3.0
  *
  * @param[in] src Source of representation to be copied
+ * @param[out] dest Clone of a source representation
  *
  * @return Clone of a source representation, otherwise NULL on failure
- * @retval iotcon_repr_h Success
+ * @retval iotcon_representation_h Success
  * @retval NULL Failure
  */
-iotcon_repr_h iotcon_repr_clone(const iotcon_repr_h src);
+int iotcon_representation_clone(const iotcon_representation_h src, iotcon_representation_h *dest);
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
@@ -84,7 +87,7 @@ iotcon_repr_h iotcon_repr_clone(const iotcon_repr_h src);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_set_uri_path(iotcon_repr_h repr, const char *uri_path);
+int iotcon_representation_set_uri_path(iotcon_representation_h repr, const char *uri_path);
 
 /**
  * @brief Gets an URI path from the representation.
@@ -98,7 +101,7 @@ int iotcon_repr_set_uri_path(iotcon_repr_h repr, const char *uri_path);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_get_uri_path(iotcon_repr_h repr, const char **uri_path);
+int iotcon_representation_get_uri_path(iotcon_representation_h repr, const char **uri_path);
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
@@ -114,7 +117,7 @@ int iotcon_repr_get_uri_path(iotcon_repr_h repr, const char **uri_path);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_set_resource_types(iotcon_repr_h repr, iotcon_resource_types_h types);
+int iotcon_representation_set_resource_types(iotcon_representation_h repr, iotcon_resource_types_h types);
 
 /**
  * @brief Gets list of resource type from the representation.
@@ -128,7 +131,7 @@ int iotcon_repr_set_resource_types(iotcon_repr_h repr, iotcon_resource_types_h t
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_get_resource_types(iotcon_repr_h repr, iotcon_resource_types_h *types);
+int iotcon_representation_get_resource_types(iotcon_representation_h repr, iotcon_resource_types_h *types);
 
 /**
  * @brief Sets interfaces to the representation.
@@ -145,7 +148,7 @@ int iotcon_repr_get_resource_types(iotcon_repr_h repr, iotcon_resource_types_h *
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_set_resource_interfaces(iotcon_repr_h repr, int ifaces);
+int iotcon_representation_set_resource_interfaces(iotcon_representation_h repr, int ifaces);
 
 /**
  * @brief Gets resource interfaces from the representation.
@@ -153,12 +156,84 @@ int iotcon_repr_set_resource_interfaces(iotcon_repr_h repr, int ifaces);
  * @since_tizen 3.0
  *
  * @param[in] repr The representation handle
+ * @param[out] ifaces The interfaces to get
  *
  * @return Interfaces to get. Interfaces may contain multiple interfaces.
  * @retval #IOTCON_INTERFACE_NONE  Not set
  * @retval Bitwise OR value which consists of iotcon_interface_e items
  */
-int iotcon_repr_get_resource_interfaces(iotcon_repr_h repr);
+int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr, int *ifaces);
+
+/**
+ * @brief Sets a new state handle into the representation.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] repr The representation handle
+ * @param[in] state The state handle to set newly
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ */
+int iotcon_representation_set_state(iotcon_representation_h repr, iotcon_state_h state);
+
+/**
+ * @brief Gets a state handle in the representation.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] repr The representation handle
+ * @param[in] state The state handle to get
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ */
+int iotcon_representation_get_state(iotcon_representation_h repr, iotcon_state_h *state);
+
+/**
+ * @brief Deletes state handle in the representation.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] repr The representation handle
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ */
+int iotcon_representation_del_state(iotcon_representation_h repr);
+
+/**
+ * @brief Creates a new state handle.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[out] state A newly allocated state handle
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ *
+ * @see iotcon_state_destroy()
+ */
+int iotcon_state_create(iotcon_state_h *ret_state);
+
+/**
+ * @brief Frees a state.
+ * @details Releases a @a state and its internal data.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] state The state handle to free
+ *
+ * @return void
+ *
+ * @see iotcon_state_create()
+ */
+void iotcon_state_destroy(iotcon_state_h state);
 
 /**
  * @brief Sets a new key and integer value into the representation.
@@ -166,7 +241,7 @@ int iotcon_repr_get_resource_interfaces(iotcon_repr_h repr);
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  * @param[in] val The value
  *
@@ -175,7 +250,7 @@ int iotcon_repr_get_resource_interfaces(iotcon_repr_h repr);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_set_int(iotcon_repr_h repr, const char *key, int val);
+int iotcon_state_set_int(iotcon_state_h state, const char *key, int val);
 
 /**
  * @brief Sets a new key and boolean value into the representation.
@@ -183,7 +258,7 @@ int iotcon_repr_set_int(iotcon_repr_h repr, const char *key, int val);
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  * @param[in] val The value
  *
@@ -192,7 +267,7 @@ int iotcon_repr_set_int(iotcon_repr_h repr, const char *key, int val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_set_bool(iotcon_repr_h repr, const char *key, bool val);
+int iotcon_state_set_bool(iotcon_state_h state, const char *key, bool val);
 
 /**
  * @brief Sets a new key and double value into the representation.
@@ -200,7 +275,7 @@ int iotcon_repr_set_bool(iotcon_repr_h repr, const char *key, bool val);
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  * @param[in] val The value
  *
@@ -209,7 +284,7 @@ int iotcon_repr_set_bool(iotcon_repr_h repr, const char *key, bool val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_set_double(iotcon_repr_h repr, const char *key, double val);
+int iotcon_state_set_double(iotcon_state_h state, const char *key, double val);
 
 /**
  * @brief Sets a new key and string value into the representation.
@@ -217,7 +292,7 @@ int iotcon_repr_set_double(iotcon_repr_h repr, const char *key, double val);
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  * @param[in] val The value
  *
@@ -226,15 +301,15 @@ int iotcon_repr_set_double(iotcon_repr_h repr, const char *key, double val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_set_str(iotcon_repr_h repr, const char *key, char *val);
+int iotcon_state_set_str(iotcon_state_h state, const char *key, char *val);
 
 /**
- * @brief Sets a new key and iotcon_list_h into the representation.
+ * @brief Sets a new key and list value into the representation.
  * @details If @a key is already exists, current list will be replaced with new @a list.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  * @param[in] list The value
  *
@@ -243,24 +318,24 @@ int iotcon_repr_set_str(iotcon_repr_h repr, const char *key, char *val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_set_list(iotcon_repr_h repr, const char *key, iotcon_list_h list);
+int iotcon_state_set_list(iotcon_state_h state, const char *key, iotcon_list_h list);
 
 /**
- * @brief Sets a new key and iotcon_repr_h into the representation.
- * @details If @a key is already exists, current reprsentation will be replaced with new @a src.
+ * @brief Sets a new key and state value into the representation.
+ * @details If @a key is already exists, current state will be replaced with new @a src.
  *
  * @since_tizen 3.0
  *
- * @param[in] dest The representation handle
+ * @param[in] dest The state handle
  * @param[in] key The key
- * @param[in] src The representation handle to set newly
+ * @param[in] src The state handle to set newly
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_set_repr(iotcon_repr_h dest, const char *key, iotcon_repr_h src);
+int iotcon_state_set_state(iotcon_state_h dest, const char *key, iotcon_state_h src);
 
 /**
  * @brief Sets a new key with NULL value into the representation.
@@ -268,7 +343,7 @@ int iotcon_repr_set_repr(iotcon_repr_h dest, const char *key, iotcon_repr_h src)
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key to be set NULL
  *
  * @return 0 on success, otherwise a negative error value.
@@ -276,14 +351,14 @@ int iotcon_repr_set_repr(iotcon_repr_h dest, const char *key, iotcon_repr_h src)
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_set_null(iotcon_repr_h repr, const char *key);
+int iotcon_state_set_null(iotcon_state_h state, const char *key);
 
 /**
  * @brief Gets the integer value from the given key.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  * @param[out] val The integer value
  *
@@ -293,14 +368,14 @@ int iotcon_repr_set_null(iotcon_repr_h repr, const char *key);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_get_int(iotcon_repr_h repr, const char *key, int *val);
+int iotcon_state_get_int(iotcon_state_h state, const char *key, int *val);
 
 /**
  * @brief Gets the boolean value from the given key.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  * @param[out] val The boolean value
  *
@@ -310,14 +385,14 @@ int iotcon_repr_get_int(iotcon_repr_h repr, const char *key, int *val);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_get_bool(iotcon_repr_h repr, const char *key, bool *val);
+int iotcon_state_get_bool(iotcon_state_h state, const char *key, bool *val);
 
 /**
  * @brief Gets the double value from the given key.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  * @param[out] val The double value
  *
@@ -327,14 +402,14 @@ int iotcon_repr_get_bool(iotcon_repr_h repr, const char *key, bool *val);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_get_double(iotcon_repr_h repr, const char *key, double *val);
+int iotcon_state_get_double(iotcon_state_h state, const char *key, double *val);
 
 /**
  * @brief Gets the string value from the given key.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  * @param[out] val The string value
  *
@@ -344,14 +419,14 @@ int iotcon_repr_get_double(iotcon_repr_h repr, const char *key, double *val);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_get_str(iotcon_repr_h repr, const char *key, char **val);
+int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val);
 
 /**
  * @brief Gets the list value from the given key.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  * @param[out] list The list value
  *
@@ -361,16 +436,16 @@ int iotcon_repr_get_str(iotcon_repr_h repr, const char *key, char **val);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_get_list(iotcon_repr_h repr, const char *key, iotcon_list_h *list);
+int iotcon_state_get_list(iotcon_state_h state, const char *key, iotcon_list_h *list);
 
 /**
- * @brief Gets the representation value from the given key.
+ * @brief Gets the state value from the given key.
  *
  * @since_tizen 3.0
  *
- * @param[in] src The representation handle
+ * @param[in] src The state handle
  * @param[in] key The key
- * @param[out] dest The representation value at the key
+ * @param[out] dest The state value at the key
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -378,26 +453,29 @@ int iotcon_repr_get_list(iotcon_repr_h repr, const char *key, iotcon_list_h *lis
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_get_repr(iotcon_repr_h src, const char *key, iotcon_repr_h *dest);
+int iotcon_state_get_state(iotcon_state_h src, const char *key, iotcon_state_h *dest);
 
 /**
  * @brief Checks whether the value of given key is NULL or not.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
+ * @param[out] is_null true if the type of the given key is null, otherwise false
  *
- * @return true if the type of the given key is null, otherwise false.
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-bool iotcon_repr_is_null(iotcon_repr_h repr, const char *key);
+int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null);
 
 /**
- * @brief Deletes the key and its associated integer value from the representation.
+ * @brief Deletes the key and its associated integer value from the state.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  *
  * @return 0 on success, otherwise a negative error value.
@@ -406,14 +484,14 @@ bool iotcon_repr_is_null(iotcon_repr_h repr, const char *key);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_del_int(iotcon_repr_h repr, const char *key);
+int iotcon_state_del_int(iotcon_state_h state, const char *key);
 
 /**
- * @brief Deletes the key and its associated boolean value from the representation.
+ * @brief Deletes the key and its associated boolean value from the state.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  *
  * @return 0 on success, otherwise a negative error value.
@@ -422,14 +500,14 @@ int iotcon_repr_del_int(iotcon_repr_h repr, const char *key);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_del_bool(iotcon_repr_h repr, const char *key);
+int iotcon_state_del_bool(iotcon_state_h state, const char *key);
 
 /**
- * @brief Deletes the key and its associated double value from the representation.
+ * @brief Deletes the key and its associated double value from the state.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  *
  * @return 0 on success, otherwise a negative error value.
@@ -438,14 +516,14 @@ int iotcon_repr_del_bool(iotcon_repr_h repr, const char *key);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_del_double(iotcon_repr_h repr, const char *key);
+int iotcon_state_del_double(iotcon_state_h state, const char *key);
 
 /**
- * @brief Deletes the key and its associated string value from the representation.
+ * @brief Deletes the key and its associated string value from the state.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  *
  * @return 0 on success, otherwise a negative error value.
@@ -454,14 +532,14 @@ int iotcon_repr_del_double(iotcon_repr_h repr, const char *key);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_del_str(iotcon_repr_h repr, const char *key);
+int iotcon_state_del_str(iotcon_state_h state, const char *key);
 
 /**
- * @brief Deletes the key and its associated list value from the representation.
+ * @brief Deletes the key and its associated list value from the state.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  *
  * @return 0 on success, otherwise a negative error value.
@@ -470,14 +548,14 @@ int iotcon_repr_del_str(iotcon_repr_h repr, const char *key);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_del_list(iotcon_repr_h repr, const char *key);
+int iotcon_state_del_list(iotcon_state_h state, const char *key);
 
 /**
- * @brief Deletes the key and its associated representation value from the representation.
+ * @brief Deletes the key and its associated state value from the state.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  *
  * @return 0 on success, otherwise a negative error value.
@@ -486,14 +564,14 @@ int iotcon_repr_del_list(iotcon_repr_h repr, const char *key);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_del_repr(iotcon_repr_h repr, const char *key);
+int iotcon_state_del_state(iotcon_state_h state, const char *key);
 
 /**
- * @brief Deletes the key from the representation.
+ * @brief Deletes the key from the state.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  *
  * @return 0 on success, otherwise a negative error value.
@@ -502,23 +580,25 @@ int iotcon_repr_del_repr(iotcon_repr_h repr, const char *key);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_repr_del_null(iotcon_repr_h repr, const char *key);
+int iotcon_state_del_null(iotcon_state_h state, const char *key);
 
 /**
  * @brief Gets the type of a value at the given key.
+ * @details It gets the data type of value related the @a key in @a state.
+ * The data type could be one of #iotcon_types_e.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
- * @param[out] type The type
+ * @param[out] type The data type of value related the key in state handle.
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
-int iotcon_repr_get_type(iotcon_repr_h repr, const char *key, int *type);
+int iotcon_state_get_type(iotcon_state_h state, const char *key, int *type);
 
 /**
  * @brief Appends a new child representation on to the end of the parent representation
@@ -533,10 +613,26 @@ int iotcon_repr_get_type(iotcon_repr_h repr, const char *key, int *type);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_repr_append_child(iotcon_repr_h parent, iotcon_repr_h child);
+int iotcon_representation_append_child(iotcon_representation_h parent,
+		iotcon_representation_h child);
 
 /**
- * @brief Specifies the type of function passed to iotcon_repr_foreach_children()
+ * @brief Removes a child representation from parent representation without freeing.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] parent The parent representation handle
+ * @param[in] child The child representation handle
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ */
+int iotcon_representation_remove_child(iotcon_representation_h parent,
+		iotcon_representation_h child);
+
+/**
+ * @brief Specifies the type of function passed to iotcon_representation_foreach_children()
  *
  * @since_tizen 3.0
  *
@@ -547,32 +643,32 @@ int iotcon_repr_append_child(iotcon_repr_h parent, iotcon_repr_h child);
  * @retval #IOTCON_FUNC_CONTINUE  Continue to iterate next child representation
  * @retval #IOTCON_FUNC_STOP  Stop to iterate children representation
  *
- * @pre iotcon_repr_foreach_children() will invoke this callback function.
+ * @pre iotcon_representation_foreach_children() will invoke this callback function.
  *
- * @see iotcon_repr_foreach_children()
+ * @see iotcon_representation_foreach_children()
  *
  */
-typedef bool (*iotcon_children_fn)(iotcon_repr_h child, void *user_data);
+typedef bool (*iotcon_children_cb)(iotcon_representation_h child, void *user_data);
 
 /**
  * @brief Call a function for each children representation of parent.
- * @details iotcon_children_fn() will be called for each child.
+ * @details iotcon_children_cb() will be called for each child.
  *
  * @since_tizen 3.0
  *
  * @param[in] parent The parent representation handle
- * @param[in] fn The callback function to invoke
+ * @param[in] cb The callback function to invoke
  * @param[in] user_data The user data to pass to the function
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @post iotcon_children_fn() will be called for each child.
+ * @post iotcon_children_cb() will be called for each child.
  *
- * @see iotcon_children_fn()
+ * @see iotcon_children_cb()
  */
-int iotcon_repr_foreach_children(iotcon_repr_h parent, iotcon_children_fn fn,
+int iotcon_representation_foreach_children(iotcon_representation_h parent, iotcon_children_cb cb,
 		void *user_data);
 
 /**
@@ -581,10 +677,13 @@ int iotcon_repr_foreach_children(iotcon_repr_h parent, iotcon_children_fn fn,
  * @since_tizen 3.0
  *
  * @param[in] parent The parent representation handle
+ * @param[out] count The number of children representation
  *
- * @return the number of children representation, otherwise 0 on failure
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-unsigned int iotcon_repr_get_children_count(iotcon_repr_h parent);
+int iotcon_representation_get_children_count(iotcon_representation_h parent, unsigned int *count);
 
 /**
  * @brief Gets the child representation at the given position.
@@ -601,14 +700,14 @@ unsigned int iotcon_repr_get_children_count(iotcon_repr_h parent);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
-int iotcon_repr_get_nth_child(iotcon_repr_h parent, int pos, iotcon_repr_h *child);
+int iotcon_representation_get_nth_child(iotcon_representation_h parent, int pos, iotcon_representation_h *child);
 
 /**
- * @brief Specifies the type of function passed to iotcon_repr_foreach()
+ * @brief Specifies the type of function passed to iotcon_state_foreach()
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
  * @param[in] key The key
  * @param[in] user_data The user data to pass to the function
  *
@@ -617,42 +716,45 @@ int iotcon_repr_get_nth_child(iotcon_repr_h parent, int pos, iotcon_repr_h *chil
  * @retval #IOTCON_FUNC_CONTINUE  Continue to iterate next key
  * @retval #IOTCON_FUNC_STOP  Stop to iterate key
  *
- * @pre iotcon_repr_foreach() will invoke this callback function.
+ * @pre iotcon_state_foreach() will invoke this callback function.
  *
- * @see iotcon_repr_foreach_keys()
+ * @see iotcon_state_foreach()
  */
-typedef int (*iotcon_repr_fn)(iotcon_repr_h repr, const char *key, void *user_data);
+typedef int (*iotcon_state_cb)(iotcon_state_h state, const char *key, void *user_data);
 
 /**
- * @brief Call a function for each element of representation.
- * @details iotcon_repr_fn() will be called for each child.
+ * @brief Call a function for each element of state.
+ * @details iotcon_state_cb() will be called for each child.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
- * @param[in] fn The callback function to invoke
+ * @param[in] state The state handle
+ * @param[in] cb The callback function to invoke
  * @param[in] user_data The user data to pass to the function
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @post iotcon_repr_fn() will be called for each child.
+ * @post iotcon_state_cb() will be called for each child.
  *
- * @see iotcon_repr_fn()
+ * @see iotcon_state_cb()
  */
-int iotcon_repr_foreach(iotcon_repr_h repr, iotcon_repr_fn fn, void *user_data);
+int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb, void *user_data);
 
 /**
- * @brief  Gets the number of keys in the parent representation.
+ * @brief  Gets the number of keys in the state.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
+ * @param[in] state The state handle
+ * @param[out] count The number of keys
  *
- * @return the number of keys, otherwise 0 on failure.
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-unsigned int iotcon_repr_get_keys_count(iotcon_repr_h repr);
+int iotcon_state_get_keys_count(iotcon_state_h state, unsigned int *count);
 
 /**
  * @brief Creates a new list handle.
@@ -660,12 +762,13 @@ unsigned int iotcon_repr_get_keys_count(iotcon_repr_h repr);
  * @since_tizen 3.0
  *
  * @param[in] type The type of list
+ * @param[out] list A newly allocated list handle
  *
  * @return A newly allocated list handle, otherwise NULL on failure.
  * @retval iotcon_list_h Success
  * @retval NULL Failure
  */
-iotcon_list_h iotcon_list_new(iotcon_types_e type);
+int iotcon_list_create(iotcon_types_e type, iotcon_list_h *list);
 
 /**
  * @brief Frees a list handle.
@@ -677,7 +780,7 @@ iotcon_list_h iotcon_list_new(iotcon_types_e type);
  *
  * @return void
  */
-void iotcon_list_free(iotcon_list_h list);
+void iotcon_list_destroy(iotcon_list_h list);
 
 /**
  * @brief Inserts a new element integer value into the list at the given position.
@@ -687,7 +790,7 @@ void iotcon_list_free(iotcon_list_h list);
  * @since_tizen 3.0
  *
  * @param[in] list The list handle
- * @param[in] val The new value
+ * @param[in] val The new integer value
  * @param[in] pos The position to insert value
  *
  * @return 0 on success, otherwise a negative error value.
@@ -706,7 +809,7 @@ int iotcon_list_insert_int(iotcon_list_h list, int val, int pos);
  * @since_tizen 3.0
  *
  * @param[in] list The list handle
- * @param[in] val The new value
+ * @param[in] val The new boolean value
  * @param[in] pos The position to insert value
  *
  * @return 0 on success, otherwise a negative error value.
@@ -725,7 +828,7 @@ int iotcon_list_insert_bool(iotcon_list_h list, bool val, int pos);
  * @since_tizen 3.0
  *
  * @param[in] list The list handle
- * @param[in] val The new value
+ * @param[in] val The new double value
  * @param[in] pos The position to insert value
  *
  * @return 0 on success, otherwise a negative error value.
@@ -744,7 +847,7 @@ int iotcon_list_insert_double(iotcon_list_h list, double val, int pos);
  * @since_tizen 3.0
  *
  * @param[in] list The list handle
- * @param[in] val The new value
+ * @param[in] val The new char value
  * @param[in] pos The position to insert value
  *
  * @return 0 on success, otherwise a negative error value.
@@ -763,7 +866,7 @@ int iotcon_list_insert_str(iotcon_list_h list, char *val, int pos);
  * @since_tizen 3.0
  *
  * @param[in] list The list handle
- * @param[in] val The new value
+ * @param[in] val The new list value
  * @param[in] pos The position to insert value
  *
  * @return 0 on success, otherwise a negative error value.
@@ -775,14 +878,14 @@ int iotcon_list_insert_str(iotcon_list_h list, char *val, int pos);
 int iotcon_list_insert_list(iotcon_list_h list, iotcon_list_h val, int pos);
 
 /**
- * @brief Inserts a new element representation value into the list at the given position.
+ * @brief Inserts a new element state value into the list at the given position.
  * @details If @a pos is negative, or is larger than the number of elements in the list,
  * the new value is added on to the end of the list.
  *
  * @since_tizen 3.0
  *
  * @param[in] list The list handle
- * @param[in] val The new value
+ * @param[in] val The new state value
  * @param[in] pos The position to insert value
  *
  * @return 0 on success, otherwise a negative error value.
@@ -791,7 +894,7 @@ int iotcon_list_insert_list(iotcon_list_h list, iotcon_list_h val, int pos);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_list_insert_repr(iotcon_list_h list, iotcon_repr_h val, int pos);
+int iotcon_list_insert_state(iotcon_list_h list, iotcon_state_h val, int pos);
 
 /**
  * @brief Gets the integer value at the given position.
@@ -884,14 +987,14 @@ int iotcon_list_get_nth_str(iotcon_list_h list, int pos, const char **val);
 int iotcon_list_get_nth_list(iotcon_list_h src, int pos, iotcon_list_h *dest);
 
 /**
- * @brief Gets the representation value at the given position.
+ * @brief Gets the state value at the given position.
  * @details Iterates over the list until it reaches the @a pos-1 position.
  *
  * @since_tizen 3.0
  *
  * @param[in] list The list handle
  * @param[in] pos The position
- * @param[out] repr The representation value to get
+ * @param[out] state The state value to get
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -899,7 +1002,7 @@ int iotcon_list_get_nth_list(iotcon_list_h src, int pos, iotcon_list_h *dest);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
  */
-int iotcon_list_get_nth_repr(iotcon_list_h list, int pos, iotcon_repr_h *repr);
+int iotcon_list_get_nth_state(iotcon_list_h list, int pos, iotcon_state_h *state);
 
 /**
  * @brief Deletes the integer value at the given position.
@@ -987,7 +1090,7 @@ int iotcon_list_del_nth_str(iotcon_list_h list, int pos);
 int iotcon_list_del_nth_list(iotcon_list_h list, int pos);
 
 /**
- * @brief Deletes the representation value at the given position.
+ * @brief Deletes the state value at the given position.
  * @details Iterates over the list until it reaches the @a pos-1 position.
  *
  * @since_tizen 3.0
@@ -1001,15 +1104,17 @@ int iotcon_list_del_nth_list(iotcon_list_h list, int pos);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_list_del_nth_repr(iotcon_list_h list, int pos);
+int iotcon_list_del_nth_state(iotcon_list_h list, int pos);
 
 /**
  * @brief Gets the type of the list.
+ * @details It gets the data type of value related the @a key in @a state.
+ * The data type could be one of #iotcon_types_e.
  *
  * @since_tizen 3.0
  *
  * @param[in] list The list handle
- * @param[out] type The type
+ * @param[out] type The data type of list.
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -1023,10 +1128,13 @@ int iotcon_list_get_type(iotcon_list_h list, int *type);
  * @since_tizen 3.0
  *
  * @param[in] list The handle to the list
+ * @param[out] length The length of list
  *
- * @return the length of list, otherwise 0 on failure
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-unsigned int iotcon_list_get_length(iotcon_list_h list);
+int iotcon_list_get_length(iotcon_list_h list, unsigned int *length);
 
 /**
  * @brief Specifies the type of function passed to iotcon_list_foreach_int()
@@ -1046,27 +1154,27 @@ unsigned int iotcon_list_get_length(iotcon_list_h list);
  *
  * @see iotcon_list_foreach_int()
  */
-typedef int (*iotcon_list_int_fn)(int pos, const int value, void *user_data);
+typedef int (*iotcon_list_int_cb)(int pos, const int value, void *user_data);
 
 /**
  * @brief Gets all integer values of the given list by invoking the callback function.
- * @details iotcon_list_int_fn() will be called for each child.
+ * @details iotcon_list_int_cb() will be called for each child.
  *
  * @since_tizen 3.0
  *
  * @param[in] list The handle to the list
- * @param[in] fn The callback function to get each integer value
+ * @param[in] cb The callback function to get each integer value
  * @param[in] user_data The user data to be passed to the callback function
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @post iotcon_list_int_fn() will be called for each item.
+ * @post iotcon_list_int_cb() will be called for each item.
  *
- * @see iotcon_list_int_fn()
+ * @see iotcon_list_int_cb()
  */
-int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_fn fn, void *user_data);
+int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_cb cb, void *user_data);
 
 /**
  * @brief Specifies the type of function passed to iotcon_list_foreach_bool()
@@ -1086,27 +1194,27 @@ int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_fn fn, void *use
  *
  * @see iotcon_list_foreach_bool()
  */
-typedef int (*iotcon_list_bool_fn)(int pos, const bool value, void *user_data);
+typedef int (*iotcon_list_bool_cb)(int pos, const bool value, void *user_data);
 
 /**
  * @brief Gets all boolean values of the given list by invoking the callback function.
- * @details iotcon_list_bool_fn() will be called for each child.
+ * @details iotcon_list_bool_cb() will be called for each child.
  *
  * @since_tizen 3.0
  *
  * @param[in] list The handle to the list
- * @param[in] fn The callback function to get each boolean value
+ * @param[in] cb The callback function to get each boolean value
  * @param[in] user_data The user data to be passed to the callback function
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @post iotcon_list_bool_fn() will be called for each item.
+ * @post iotcon_list_bool_cb() will be called for each item.
  *
- * @see iotcon_list_bool_fn()
+ * @see iotcon_list_bool_cb()
  */
-int iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_fn fn, void *user_data);
+int iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_cb cb, void *user_data);
 
 /**
  * @brief Specifies the type of function passed to iotcon_list_foreach_double()
@@ -1126,27 +1234,27 @@ int iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_fn fn, void *u
  *
  * @see iotcon_list_foreach_double()
  */
-typedef int (*iotcon_list_double_fn)(int pos, const double value, void *user_data);
+typedef int (*iotcon_list_double_cb)(int pos, const double value, void *user_data);
 
 /**
  * @brief Gets all double values of the given list by invoking the callback function.
- * @details iotcon_list_double_fn() will be called for each child.
+ * @details iotcon_list_double_cb() will be called for each child.
  *
  * @since_tizen 3.0
  *
  * @param[in] list The handle to the list
- * @param[in] fn The callback function to get each double value
+ * @param[in] cb The callback function to get each double value
  * @param[in] user_data The user data to be passed to the callback function
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @post iotcon_list_double_fn() will be called for each item.
+ * @post iotcon_list_double_cb() will be called for each item.
  *
- * @see iotcon_list_double_fn()
+ * @see iotcon_list_double_cb()
  */
-int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_fn fn,
+int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_cb cb,
 		void *user_data);
 
 /**
@@ -1167,27 +1275,27 @@ int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_fn fn,
  *
  * @see iotcon_list_foreach_str()
  */
-typedef int (*iotcon_list_str_fn)(int pos, const char *value, void *user_data);
+typedef int (*iotcon_list_str_cb)(int pos, const char *value, void *user_data);
 
 /**
  * @brief Gets all string values of the given list by invoking the callback function.
- * @details iotcon_list_str_fn() will be called for each child.
+ * @details iotcon_list_str_cb() will be called for each child.
  *
  * @since_tizen 3.0
  *
  * @param[in] list The handle to the list
- * @param[in] fn The callback function to get each string value
+ * @param[in] cb The callback function to get each string value
  * @param[in] user_data The user data to be passed to the callback function
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @post iotcon_list_str_fn() will be called for each item.
+ * @post iotcon_list_str_cb() will be called for each item.
  *
- * @see iotcon_list_str_fn()
+ * @see iotcon_list_str_cb()
  */
-int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_fn fn, void *user_data);
+int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_cb cb, void *user_data);
 
 /**
  * @brief Specifies the type of function passed to iotcon_list_foreach_list()
@@ -1207,35 +1315,35 @@ int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_fn fn, void *use
  *
  * @see iotcon_list_foreach_list()
  */
-typedef int (*iotcon_list_list_fn)(int pos, iotcon_list_h value, void *user_data);
+typedef int (*iotcon_list_list_cb)(int pos, iotcon_list_h value, void *user_data);
 
 /**
  * @brief Gets all sub lists of the given list by invoking the callback function.
- * @details iotcon_list_list_fn() will be called for each child.
+ * @details iotcon_list_list_cb() will be called for each child.
  *
  * @since_tizen 3.0
  *
  * @param[in] list The handle to the origin list
- * @param[in] fn The callback function to get each sub list
+ * @param[in] cb The callback function to get each sub list
  * @param[in] user_data The user data to be passed to the callback function
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @post iotcon_list_list_fn() will be called for each item.
+ * @post iotcon_list_list_cb() will be called for each item.
  *
- * @see iotcon_list_list_fn()
+ * @see iotcon_list_list_cb()
  */
-int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_fn fn, void *user_data);
+int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_cb cb, void *user_data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_list_foreach_repr()
+ * @brief Specifies the type of function passed to iotcon_list_foreach_state()
  *
  * @since_tizen 3.0
  *
- * @param[in] pos The number of the representation value (0 being the first)
- * @param[in] value The representation value
+ * @param[in] pos The number of the state value (0 being the first)
+ * @param[in] value The state value
  * @param[in] user_data The user data to pass to the function
  *
  * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
@@ -1243,31 +1351,31 @@ int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_fn fn, void *u
  * @retval #IOTCON_FUNC_STOP  stop to call next function
  * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
  *
- * @pre iotcon_list_foreach_repr() will invoke this callback function.
+ * @pre iotcon_list_foreach_state() will invoke this callback function.
  *
- * @see iotcon_list_foreach_repr()
+ * @see iotcon_list_foreach_state()
  */
-typedef int (*iotcon_list_repr_fn)(int pos, iotcon_repr_h value, void *user_data);
+typedef int (*iotcon_list_state_cb)(int pos, iotcon_state_h value, void *user_data);
 
 /**
- * @brief Gets all representations of the given list by invoking the callback function.
- * @details iotcon_list_repr_fn() will be called for each child.
+ * @brief Gets all state of the given list by invoking the callback function.
+ * @details iotcon_list_state_cb() will be called for each child.
  *
  * @since_tizen 3.0
  *
  * @param[in] list The handle to the list
- * @param[in] fn The callback function to get each representation
+ * @param[in] cb The callback function to get each state
  * @param[in] user_data The user data to be passed to the callback function
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @post iotcon_list_repr_fn() will be called for each item.
+ * @post iotcon_list_state_cb() will be called for each item.
  *
- * @see iotcon_list_repr_fn()
+ * @see iotcon_list_state_cb()
  */
-int iotcon_list_foreach_repr(iotcon_list_h list, iotcon_list_repr_fn fn, void *user_data);
+int iotcon_list_foreach_state(iotcon_list_h list, iotcon_list_state_cb cb, void *user_data);
 
 /**
  * @}

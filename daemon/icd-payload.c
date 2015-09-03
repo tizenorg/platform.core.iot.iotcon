@@ -27,19 +27,19 @@
 #include "icd.h"
 #include "icd-payload.h"
 
-union icd_repr_value_u {
+union icd_state_value_u {
 	int i;
 	double d;
 	bool b;
 };
 
-struct icd_repr_list_s {
+struct icd_state_list_s {
 	OCRepPayloadPropType type;
 	size_t dimensions[MAX_REP_ARRAY_DEPTH];
 	GList *list;
 };
 
-static GVariant* _icd_payload_repr_to_gvariant(OCRepPayload *repr, gboolean is_parent);
+static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr, gboolean is_parent);
 
 GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 {
@@ -125,7 +125,7 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 }
 
 
-static GVariant* _icd_repr_array_attr_to_gvariant(OCRepPayloadValueArray *arr, int len,
+static GVariant* _icd_state_array_attr_to_gvariant(OCRepPayloadValueArray *arr, int len,
 		int index)
 {
 	int i;
@@ -157,7 +157,7 @@ static GVariant* _icd_repr_array_attr_to_gvariant(OCRepPayloadValueArray *arr, i
 		break;
 	case OCREP_PROP_OBJECT:
 		for (i = 0; i < len; i++) {
-			var = _icd_payload_repr_to_gvariant(arr->objArray[index + i], TRUE);
+			var = _icd_payload_representation_to_gvariant(arr->objArray[index + i], TRUE);
 			g_variant_builder_add(&builder, "v", var);
 		}
 		break;
@@ -170,7 +170,7 @@ static GVariant* _icd_repr_array_attr_to_gvariant(OCRepPayloadValueArray *arr, i
 }
 
 
-static GVariant* _icd_repr_array_to_gvariant(OCRepPayloadValueArray *arr,
+static GVariant* _icd_state_array_to_gvariant(OCRepPayloadValueArray *arr,
 		int current_depth, int current_len, int index)
 {
 	int i, next_len;
@@ -179,7 +179,7 @@ static GVariant* _icd_repr_array_to_gvariant(OCRepPayloadValueArray *arr,
 
 	if ((MAX_REP_ARRAY_DEPTH - 1) == current_depth
 			|| 0 == arr->dimensions[current_depth + 1])
-		return _icd_repr_array_attr_to_gvariant(arr, current_len, index);
+		return _icd_state_array_attr_to_gvariant(arr, current_len, index);
 
 	i = current_len + index;
 
@@ -189,7 +189,7 @@ static GVariant* _icd_repr_array_to_gvariant(OCRepPayloadValueArray *arr,
 	g_variant_builder_init(&builder, G_VARIANT_TYPE_ARRAY);
 
 	while ((index += next_len) < i) {
-		arr_var = _icd_repr_array_to_gvariant(arr, current_depth + 1, next_len, index);
+		arr_var = _icd_state_array_to_gvariant(arr, current_depth + 1, next_len, index);
 		g_variant_builder_add(&builder, "v", arr_var);
 	}
 
@@ -197,7 +197,7 @@ static GVariant* _icd_repr_array_to_gvariant(OCRepPayloadValueArray *arr,
 }
 
 
-static GVariantBuilder* _icd_repr_value_to_gvariant(OCRepPayload *repr)
+static GVariantBuilder* _icd_state_value_to_gvariant(OCRepPayload *repr)
 {
 	int total_len;
 	GVariant *var = NULL;
@@ -225,10 +225,10 @@ static GVariantBuilder* _icd_repr_value_to_gvariant(OCRepPayload *repr)
 			break;
 		case OCREP_PROP_ARRAY:
 			total_len = calcDimTotal(val->arr.dimensions);
-			var = _icd_repr_array_to_gvariant(&(val->arr), 0, total_len, 0);
+			var = _icd_state_array_to_gvariant(&(val->arr), 0, total_len, 0);
 			break;
 		case OCREP_PROP_OBJECT:
-			var = _icd_payload_repr_to_gvariant(val->obj, TRUE);
+			var = _icd_payload_representation_to_gvariant(val->obj, TRUE);
 			break;
 		default:
 			ERR("Invalid Type");
@@ -244,7 +244,7 @@ static GVariantBuilder* _icd_repr_value_to_gvariant(OCRepPayload *repr)
 }
 
 
-static GVariant* _icd_payload_repr_to_gvariant(OCRepPayload *repr, gboolean is_parent)
+static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr, gboolean is_parent)
 {
 	OCStringLL *node;
 	int ret, ifaces = 0;
@@ -279,7 +279,7 @@ static GVariant* _icd_payload_repr_to_gvariant(OCRepPayload *repr, gboolean is_p
 	}
 
 	/* Representation */
-	repr_gvar = _icd_repr_value_to_gvariant(repr);
+	repr_gvar = _icd_state_value_to_gvariant(repr);
 
 	/* Children */
 	g_variant_builder_init(&children, G_VARIANT_TYPE("av"));
@@ -287,7 +287,7 @@ static GVariant* _icd_payload_repr_to_gvariant(OCRepPayload *repr, gboolean is_p
 	child_node = repr->next;
 	while (is_parent && child_node) {
 		/* generate recursively */
-		child = _icd_payload_repr_to_gvariant(child_node, FALSE);
+		child = _icd_payload_representation_to_gvariant(child_node, FALSE);
 		g_variant_builder_add(&children, "v", child);
 		child_node = child_node->next;
 	}
@@ -349,7 +349,7 @@ GVariant* icd_payload_to_gvariant(OCPayload *repr)
 
 	switch (repr->type) {
 	case PAYLOAD_TYPE_REPRESENTATION:
-		value = _icd_payload_repr_to_gvariant((OCRepPayload*)repr, TRUE);
+		value = _icd_payload_representation_to_gvariant((OCRepPayload*)repr, TRUE);
 		break;
 	case PAYLOAD_TYPE_PLATFORM:
 		value = _icd_payload_platform_to_gvariant((OCPlatformPayload*)repr);
@@ -367,12 +367,12 @@ GVariant* icd_payload_to_gvariant(OCPayload *repr)
 }
 
 
-static void _icd_repr_list_from_gvariant(GVariant *var,
-		struct icd_repr_list_s *value_list, int depth)
+static void _icd_state_list_from_gvariant(GVariant *var,
+		struct icd_state_list_s *value_list, int depth)
 {
 	GVariantIter iter;
 	const GVariantType *type;
-	union icd_repr_value_u *value;
+	union icd_state_value_u *value;
 
 	type = g_variant_get_type(var);
 
@@ -385,7 +385,7 @@ static void _icd_repr_list_from_gvariant(GVariant *var,
 		bool b;
 		value_list->type = OCREP_PROP_BOOL;
 		while (g_variant_iter_loop(&iter, "b", &b)) {
-			value = calloc(1, sizeof(union icd_repr_value_u));
+			value = calloc(1, sizeof(union icd_state_value_u));
 			if (NULL == value) {
 				ERR("calloc() Fail(%d)", errno);
 				return;
@@ -397,7 +397,7 @@ static void _icd_repr_list_from_gvariant(GVariant *var,
 		int i;
 		value_list->type = OCREP_PROP_INT;
 		while (g_variant_iter_loop(&iter, "i", &i)) {
-			value = calloc(1, sizeof(union icd_repr_value_u));
+			value = calloc(1, sizeof(union icd_state_value_u));
 			if (NULL == value) {
 				ERR("calloc() Fail(%d)", errno);
 				return;
@@ -409,7 +409,7 @@ static void _icd_repr_list_from_gvariant(GVariant *var,
 		double d;
 		value_list->type = OCREP_PROP_DOUBLE;
 		while (g_variant_iter_loop(&iter, "d", &d)) {
-			value = calloc(1, sizeof(union icd_repr_value_u));
+			value = calloc(1, sizeof(union icd_state_value_u));
 			if (NULL == value) {
 				ERR("calloc() Fail(%d)", errno);
 				return;
@@ -430,14 +430,14 @@ static void _icd_repr_list_from_gvariant(GVariant *var,
 				OCRepPayload *repr_value;
 				value_list->type = OCREP_PROP_OBJECT;
 				do {
-					repr_value = icd_payload_repr_from_gvariant(value);
+					repr_value = icd_payload_representation_from_gvariant(value);
 					value_list->list = g_list_append(value_list->list, repr_value);
 
 				} while (g_variant_iter_loop(&iter, "v", &value));
 
 			} else if (g_variant_is_of_type(value, G_VARIANT_TYPE_ARRAY)) {
 				do {
-					_icd_repr_list_from_gvariant(value, value_list, depth + 1);
+					_icd_state_list_from_gvariant(value, value_list, depth + 1);
 				} while (g_variant_iter_loop(&iter, "v", &value));
 			}
 		}
@@ -447,14 +447,14 @@ static void _icd_repr_list_from_gvariant(GVariant *var,
 }
 
 
-static void _icd_repr_list_free(gpointer node)
+static void _icd_state_list_free(gpointer node)
 {
 	OCRepPayloadDestroy(node);
 }
 
 
-static void _icd_repr_array_from_list(OCRepPayload *repr,
-		struct icd_repr_list_s *value_list, const char *key)
+static void _icd_state_array_from_list(OCRepPayload *repr,
+		struct icd_state_list_s *value_list, const char *key)
 {
 	int i, len;
 	GList *node;
@@ -462,8 +462,8 @@ static void _icd_repr_array_from_list(OCRepPayload *repr,
 	double *d_arr;
 	char **str_arr;
 	int64_t *i_arr;
-	union icd_repr_value_u *value;
-	struct OCRepPayload **repr_arr;
+	union icd_state_value_u *value;
+	struct OCRepPayload **state_arr;
 
 	len = calcDimTotal(value_list->dimensions);
 
@@ -519,15 +519,15 @@ static void _icd_repr_array_from_list(OCRepPayload *repr,
 		OCRepPayloadSetStringArrayAsOwner(repr, key, str_arr, value_list->dimensions);
 		break;
 	case OCREP_PROP_OBJECT:
-		repr_arr = calloc(len, sizeof(struct OCRepPayload *));
-		if (NULL == repr_arr) {
+		state_arr = calloc(len, sizeof(struct OCRepPayload *));
+		if (NULL == state_arr) {
 			ERR("calloc() Fail(%d)", errno);
 			return;
 		}
 		for (node = value_list->list, i = 0; node; node = node->next, i++)
-			repr_arr[i] = OCRepPayloadClone(node->data);
-		g_list_free_full(value_list->list, _icd_repr_list_free);
-		OCRepPayloadSetPropObjectArrayAsOwner(repr, key, repr_arr,
+			state_arr[i] = OCRepPayloadClone(node->data);
+		g_list_free_full(value_list->list, _icd_state_list_free);
+		OCRepPayloadSetPropObjectArrayAsOwner(repr, key, state_arr,
 				value_list->dimensions);
 		break;
 	case OCREP_PROP_ARRAY:
@@ -538,13 +538,13 @@ static void _icd_repr_array_from_list(OCRepPayload *repr,
 }
 
 
-static void _icd_repr_value_from_gvariant(OCRepPayload *repr, GVariantIter *iter)
+static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *iter)
 {
 	char *key;
 	GVariant *var;
 	const char *str_value;
 	OCRepPayload *repr_value;
-	struct icd_repr_list_s value_list = {0};
+	struct icd_state_list_s value_list = {0};
 
 	while (g_variant_iter_loop(iter, "{sv}", &key, &var)) {
 
@@ -565,12 +565,12 @@ static void _icd_repr_value_from_gvariant(OCRepPayload *repr, GVariantIter *iter
 				OCRepPayloadSetPropString(repr, key, str_value);
 
 		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_ARRAY)) {
-			memset(&value_list, 0, sizeof(struct icd_repr_list_s));
-			_icd_repr_list_from_gvariant(var, &value_list, 0);
-			_icd_repr_array_from_list(repr, &value_list, key);
+			memset(&value_list, 0, sizeof(struct icd_state_list_s));
+			_icd_state_list_from_gvariant(var, &value_list, 0);
+			_icd_state_array_from_list(repr, &value_list, key);
 
 		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE("(siasa{sv}av)"))) {
-			repr_value = icd_payload_repr_from_gvariant(var);
+			repr_value = icd_payload_representation_from_gvariant(var);
 			OCRepPayloadSetPropObjectAsOwner(repr, key, repr_value);
 		}
 	}
@@ -579,7 +579,7 @@ static void _icd_repr_value_from_gvariant(OCRepPayload *repr, GVariantIter *iter
 }
 
 
-OCRepPayload* icd_payload_repr_from_gvariant(GVariant *var)
+OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var)
 {
 	GVariant *child;
 	int ret, i, ifaces = 0;
@@ -609,11 +609,11 @@ OCRepPayload* icd_payload_repr_from_gvariant(GVariant *var)
 	while (g_variant_iter_loop(resource_types, "s", &resource_type))
 		OCRepPayloadAddResourceType(repr, resource_type);
 
-	_icd_repr_value_from_gvariant(repr, repr_gvar);
+	_icd_state_value_from_gvariant(repr, repr_gvar);
 
 	cur = repr;
 	while (g_variant_iter_loop(children, "v", &child)) {
-		cur->next = icd_payload_repr_from_gvariant(child);
+		cur->next = icd_payload_representation_from_gvariant(child);
 		cur = cur->next;
 	}
 

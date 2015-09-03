@@ -20,17 +20,25 @@
 #include <glib.h>
 
 #include "iotcon-struct.h"
+#include "icl-repr-value.h"
 
-struct icl_repr_s {
+struct icl_representation_s {
 	char *uri_path;
 	int ref_count;
 	int interfaces;
 	int visibility;
-	GHashTable *hash_table;
 	GList *children;
 	iotcon_resource_types_h res_types;
+	struct icl_state_s *state;
 };
 
-void icl_repr_inc_ref_count(iotcon_repr_h val);
+struct icl_state_s {
+	int ref_count;
+	GHashTable *hash_table;
+};
+
+void icl_representation_inc_ref_count(iotcon_representation_h val);
+
+void icl_state_clone(char *key, iotcon_value_h src_val, iotcon_state_h dest_state);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__ */

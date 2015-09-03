@@ -20,23 +20,24 @@
 
 int main()
 {
+	FN_CALL;
 	int ret;
 	GMainLoop *loop;
 	char *device_name;
 
-	iotcon_platform_info_s platform_info = {0};
+	iotcon_platform_info_s *platform_info = calloc(1, sizeof(iotcon_platform_info_s));
 
-	platform_info.platform_id = "platform_id";
-	platform_info.manuf_name = "manuf_name";
-	platform_info.manuf_url = "manuf_url";
-	platform_info.model_number = "model_number";
-	platform_info.date_of_manufacture = "date_of_manufacture";
-	platform_info.platform_ver = "platform_ver";
-	platform_info.os_ver = "os_ver";
-	platform_info.hardware_ver = "hardware_ver";
-	platform_info.firmware_ver = "firmware_ver";
-	platform_info.support_url = "support_url";
-	platform_info.system_time = "system_time";
+	platform_info->platform_id = "platform_id";
+	platform_info->manuf_name = "manuf_name";
+	platform_info->manuf_url = "manuf_url";
+	platform_info->model_number = "model_number";
+	platform_info->date_of_manufacture = "date_of_manufacture";
+	platform_info->platform_ver = "platform_ver";
+	platform_info->os_ver = "os_ver";
+	platform_info->hardware_ver = "hardware_ver";
+	platform_info->firmware_ver = "firmware_ver";
+	platform_info->support_url = "support_url";
+	platform_info->system_time = "system_time";
 
 	device_name = "device_name";
 

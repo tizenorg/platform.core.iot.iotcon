@@ -19,7 +19,7 @@
 #include "icl.h"
 #include "icl-dbus.h"
 
-API int iotcon_open()
+API int iotcon_open(void)
 {
 	int ret;
 
@@ -35,11 +35,13 @@ API int iotcon_open()
 }
 
 
-API void iotcon_close()
+API int iotcon_close(void)
 {
 	int ret;
 
 	ret = icl_dbus_stop();
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icl_dbus_stop() Fail(%d)", ret);
+
+	return ret;
 }

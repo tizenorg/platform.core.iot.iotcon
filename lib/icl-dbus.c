@@ -104,8 +104,8 @@ static void _icl_dbus_connection_changed_cb(GObject *object, GParamSpec *pspec,
 }
 
 
-static icl_cb_container_s* _icl_dbus_find_connection_changed_cb(
-		iotcon_connection_changed_cb cb, void *user_data)
+static icl_cb_container_s* _dbus_find_conn_changed_cb(iotcon_connection_changed_cb cb,
+		void *user_data)
 {
 	GList *node;
 
@@ -127,7 +127,7 @@ API int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *
 
 	icl_cb_container_s *cb_container;
 
-	if (_icl_dbus_find_connection_changed_cb(cb, user_data)) {
+	if (_dbus_find_conn_changed_cb(cb, user_data)) {
 		ERR("This callback is already registered.");
 		return IOTCON_ERROR_ALREADY;
 	}
@@ -163,7 +163,7 @@ API int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
 
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	cb_container = _icl_dbus_find_connection_changed_cb(cb, user_data);
+	cb_container = _dbus_find_conn_changed_cb(cb, user_data);
 	if (NULL == cb_container) {
 		ERR("This callback is not registered");
 		return IOTCON_ERROR_INVALID_PARAMETER;

@@ -31,14 +31,14 @@
  *
  * @since_tizen 3.0
  */
-#define IOTCON_MANUFACTURER_NAME_LENGTH_MAX 15
+#define ICL_MANUFACTURER_NAME_LENGTH_MAX 15
 
 /**
  * @brief The maximum length which can be held in a manufacturer url.
  *
  * @since_tizen 3.0
  */
-#define IOTCON_MANUFACTURER_URL_LENGTH_MAX 32
+#define ICL_MANUFACTURER_URL_LENGTH_MAX 32
 
 
 typedef struct {
@@ -158,7 +158,7 @@ API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb c
 
 /* The length of manufacturer_name should be less than and equal to 16.
  * The length of manufacturer_url should be less than and equal to 32. */
-API int iotcon_register_platform_info(iotcon_platform_info_s platform_info)
+API int iotcon_register_platform_info(iotcon_platform_info_s *platform_info)
 {
 	int ret;
 	GError *error = NULL;
@@ -166,34 +166,34 @@ API int iotcon_register_platform_info(iotcon_platform_info_s platform_info)
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 
-	if (NULL == platform_info.platform_id
-			|| NULL == platform_info.manuf_name
-			|| NULL == platform_info.manuf_url
-			|| NULL == platform_info.model_number
-			|| NULL == platform_info.date_of_manufacture
-			|| NULL == platform_info.platform_ver
-			|| NULL == platform_info.os_ver
-			|| NULL == platform_info.hardware_ver
-			|| NULL == platform_info.firmware_ver
-			|| NULL == platform_info.support_url
-			|| NULL == platform_info.system_time) {
+	if (NULL == platform_info->platform_id
+			|| NULL == platform_info->manuf_name
+			|| NULL == platform_info->manuf_url
+			|| NULL == platform_info->model_number
+			|| NULL == platform_info->date_of_manufacture
+			|| NULL == platform_info->platform_ver
+			|| NULL == platform_info->os_ver
+			|| NULL == platform_info->hardware_ver
+			|| NULL == platform_info->firmware_ver
+			|| NULL == platform_info->support_url
+			|| NULL == platform_info->system_time) {
 		ERR("one of parameter is NULL");
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	if (platform_info.manuf_name
-			&& (IOTCON_MANUFACTURER_NAME_LENGTH_MAX < strlen(platform_info.manuf_name))) {
-		ERR("The length of manufacturer_name(%s) is invalid.", platform_info.manuf_name);
+	if (platform_info->manuf_name
+			&& (ICL_MANUFACTURER_NAME_LENGTH_MAX < strlen(platform_info->manuf_name))) {
+		ERR("The length of manufacturer_name(%s) is invalid.", platform_info->manuf_name);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	if (platform_info.manuf_url
-			&& (IOTCON_MANUFACTURER_URL_LENGTH_MAX < strlen(platform_info.manuf_url))) {
-		ERR("The length of manufacturer_url(%s) is invalid.", platform_info.manuf_url);
+	if (platform_info->manuf_url
+			&& (ICL_MANUFACTURER_URL_LENGTH_MAX < strlen(platform_info->manuf_url))) {
+		ERR("The length of manufacturer_url(%s) is invalid.", platform_info->manuf_url);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	arg_info = icl_dbus_platform_info_to_gvariant(&platform_info);
+	arg_info = icl_dbus_platform_info_to_gvariant(platform_info);
 	ic_dbus_call_register_platform_info_sync(icl_dbus_get_object(), arg_info, &ret,
 			NULL, &error);
 	if (error) {
@@ -221,23 +221,23 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 		gpointer user_data)
 {
 	char *uri_path;
-	iotcon_platform_info_s info = {0};
+	iotcon_platform_info_s *info = calloc(1, sizeof(iotcon_platform_info_s));
 	icl_platform_info_s *cb_container = user_data;
 	iotcon_platform_info_cb cb = cb_container->cb;
 
 	g_variant_get(parameters, "(&s&s&s&s&s&s&s&s&s&s&s&s)",
 			&uri_path,
-			&info.platform_id,
-			&info.manuf_name,
-			&info.manuf_url,
-			&info.model_number,
-			&info.date_of_manufacture,
-			&info.platform_ver,
-			&info.os_ver,
-			&info.hardware_ver,
-			&info.firmware_ver,
-			&info.support_url,
-			&info.system_time);
+			&info->platform_id,
+			&info->manuf_name,
+			&info->manuf_url,
+			&info->model_number,
+			&info->date_of_manufacture,
+			&info->platform_ver,
+			&info->os_ver,
+			&info->hardware_ver,
+			&info->firmware_ver,
+			&info->support_url,
+			&info->system_time);
 
 	/* From iotivity, we can get uri_path. But, the value is always "/oic/p". */
 
@@ -298,3 +298,4 @@ API int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_
 
 	return ret;
 }
+

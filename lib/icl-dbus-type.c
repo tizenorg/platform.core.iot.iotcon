@@ -29,8 +29,8 @@
 #include "icl-response.h"
 #include "icl-client.h"
 #include "icl-repr.h"
-#include "icl-dbus-type.h"
 #include "icl-payload.h"
+#include "icl-dbus-type.h"
 
 const char** icl_dbus_resource_types_to_array(iotcon_resource_types_h types)
 {
@@ -60,9 +60,9 @@ GVariant* icl_dbus_notimsg_to_gvariant(struct icl_notify_msg *msg)
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("a(iv)"));
 
 	if (msg) {
-		repr_gvar = icl_repr_to_gvariant(msg->repr);
+		repr_gvar = icl_representation_to_gvariant(msg->repr);
 		if (NULL == repr_gvar) {
-			ERR("icl_repr_to_gvariant() Fail");
+			ERR("icl_representation_to_gvariant() Fail");
 			g_variant_builder_clear(&builder);
 			return NULL;
 		}
@@ -91,9 +91,9 @@ GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 		}
 	}
 
-	repr_gvar = icl_repr_to_gvariant(response->repr);
+	repr_gvar = icl_representation_to_gvariant(response->repr);
 	if (NULL == repr_gvar) {
-		ERR("icl_repr_to_gvariant() Fail");
+		ERR("icl_representation_to_gvariant() Fail");
 		g_variant_builder_clear(&options);
 		return NULL;
 	}

@@ -251,7 +251,7 @@ int icd_ioty_notify_list_of_observers(OCResourceHandle handle, GVariant *msg,
 	g_variant_iter_loop(&msg_iter, "(iv)", &error_code, &repr_gvar);
 	/* TODO : How to use error_code. */
 
-	payload = icd_payload_repr_from_gvariant(repr_gvar);
+	payload = icd_payload_representation_from_gvariant(repr_gvar);
 
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. */
@@ -358,7 +358,7 @@ int icd_ioty_send_response(GVariant *resp)
 	}
 	g_variant_iter_free(options);
 
-	response.payload = (OCPayload*)icd_payload_repr_from_gvariant(repr_gvar);
+	response.payload = (OCPayload*)icd_payload_representation_from_gvariant(repr_gvar);
 
 	/* related to block transfer */
 	response.persistentBufferFlag = 0;
@@ -403,7 +403,7 @@ int icd_ioty_find_resource(const char *host_address, const char *resource_type,
 	}
 	if (len <= 0 || sizeof(uri) <= len) {
 		ERR("snprintf() Fail(%d)", len);
-		return IOTCON_ERROR_UNKNOWN;
+		return IOTCON_ERROR_IO_ERROR;
 	}
 
 	if (IC_STR_EQUAL != strcmp(IC_STR_NULL, resource_type))
@@ -601,7 +601,7 @@ static gboolean _icd_ioty_crud(int type, icDbus *object, GDBusMethodInvocation *
 	g_variant_iter_free(options);
 
 	if (repr)
-		payload = (OCPayload*)icd_payload_repr_from_gvariant(repr);
+		payload = (OCPayload*)icd_payload_representation_from_gvariant(repr);
 
 	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
 

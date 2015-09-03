@@ -26,14 +26,16 @@
 #include "icl-response.h"
 #include "icl-payload.h"
 
-static GVariantBuilder* _icl_repr_value_to_gvariant(GHashTable *hash);
+static GVariant* _icl_state_value_to_gvariant(GHashTable *hash);
+static iotcon_list_h _icl_state_list_from_gvariant(GVariant *var);
 
-static GVariant* _icl_repr_list_to_gvariant(iotcon_list_h list)
+static GVariant* _icl_state_list_to_gvariant(iotcon_list_h list)
 {
 	GList *node;
 	GVariant *var = NULL;
 	GVariantBuilder builder;
-	struct icl_value_s *repr_value = NULL;
+	iotcon_state_h state;
+	struct icl_value_s *state_value = NULL;
 
 	RETV_IF(NULL == list, NULL);
 
@@ -42,39 +44,40 @@ static GVariant* _icl_repr_list_to_gvariant(iotcon_list_h list)
 	switch (list->type) {
 	case IOTCON_TYPE_INT:
 		for (node = list->list; node; node = node->next) {
-			repr_value = node->data;
-			g_variant_builder_add(&builder, "i", ((icl_basic_s*)repr_value)->val.i);
+			state_value = node->data;
+			g_variant_builder_add(&builder, "i", ((icl_basic_s*)state_value)->val.i);
 		}
 		break;
 	case IOTCON_TYPE_BOOL:
 		for (node = list->list; node; node = node->next) {
-			repr_value = node->data;
-			g_variant_builder_add(&builder, "b", ((icl_basic_s*)repr_value)->val.b);
+			state_value = node->data;
+			g_variant_builder_add(&builder, "b", ((icl_basic_s*)state_value)->val.b);
 		}
 		break;
 	case IOTCON_TYPE_DOUBLE:
 		for (node = list->list; node; node = node->next) {
-			repr_value = node->data;
-			g_variant_builder_add(&builder, "d", ((icl_basic_s*)repr_value)->val.d);
+			state_value = node->data;
+			g_variant_builder_add(&builder, "d", ((icl_basic_s*)state_value)->val.d);
 		}
 		break;
 	case IOTCON_TYPE_STR:
 		for (node = list->list; node; node = node->next) {
-			repr_value = node->data;
-			g_variant_builder_add(&builder, "s", ((icl_basic_s*)repr_value)->val.s);
+			state_value = node->data;
+			g_variant_builder_add(&builder, "s", ((icl_basic_s*)state_value)->val.s);
 		}
 		break;
 	case IOTCON_TYPE_LIST:
 		for (node = list->list; node; node = node->next) {
-			repr_value = node->data;
-			var = _icl_repr_list_to_gvariant(((icl_val_list_s*)repr_value)->list);
+			state_value = node->data;
+			var = _icl_state_list_to_gvariant(((icl_val_list_s*)state_value)->list);
 			g_variant_builder_add(&builder, "v", var);
 		}
 		break;
-	case IOTCON_TYPE_REPR:
+	case IOTCON_TYPE_STATE:
 		for (node = list->list; node; node = node->next) {
-			repr_value = node->data;
-			var = icl_repr_to_gvariant(((icl_val_repr_s*)repr_value)->repr);
+			state_value = node->data;
+			state = ((icl_val_state_s*)state_value)->state;
+			var = _icl_state_value_to_gvariant(state->hash_table);
 			g_variant_builder_add(&builder, "v", var);
 		}
 		break;
@@ -87,13 +90,16 @@ static GVariant* _icl_repr_list_to_gvariant(iotcon_list_h list)
 
 }
 
-static GVariantBuilder* _icl_repr_value_to_gvariant(GHashTable *hash)
+
+static GVariantBuilder* _icl_state_value_to_gvariant_builder(GHashTable *hash)
 {
 	gpointer key, value;
 	GHashTableIter iter;
 	GVariant *var = NULL;
+	iotcon_state_h state;
 	GVariantBuilder *builder;
-	struct icl_value_s *repr_value = NULL;
+//	GVariantBuilder *state_builder;
+	struct icl_value_s *state_value = NULL;
 
 	if (NULL == hash)
 		return NULL;
@@ -102,28 +108,30 @@ static GVariantBuilder* _icl_repr_value_to_gvariant(GHashTable *hash)
 
 	g_hash_table_iter_init(&iter, hash);
 	while (g_hash_table_iter_next(&iter, &key, &value)) {
-		repr_value = value;
-		switch (repr_value->type) {
+		state_value = value;
+		switch (state_value->type) {
 		case IOTCON_TYPE_INT:
-			var = g_variant_new_int32(((icl_basic_s*)repr_value)->val.i);
+			var = g_variant_new_int32(((icl_basic_s*)state_value)->val.i);
 			break;
 		case IOTCON_TYPE_BOOL:
-			var = g_variant_new_boolean(((icl_basic_s*)repr_value)->val.b);
+			var = g_variant_new_boolean(((icl_basic_s*)state_value)->val.b);
 			break;
 		case IOTCON_TYPE_DOUBLE:
-			var = g_variant_new_double(((icl_basic_s*)repr_value)->val.d);
+			var = g_variant_new_double(((icl_basic_s*)state_value)->val.d);
 			break;
 		case IOTCON_TYPE_STR:
-			var = g_variant_new_string(((icl_basic_s*)repr_value)->val.s);
+			var = g_variant_new_string(((icl_basic_s*)state_value)->val.s);
 			break;
 		case IOTCON_TYPE_NULL:
 			var = g_variant_new_string(IC_STR_NULL);
 			break;
 		case IOTCON_TYPE_LIST:
-			var = _icl_repr_list_to_gvariant(((icl_val_list_s*)repr_value)->list);
+			var = _icl_state_list_to_gvariant(((icl_val_list_s*)state_value)->list);
 			break;
-		case IOTCON_TYPE_REPR:
-			var = icl_repr_to_gvariant(((icl_val_repr_s*)repr_value)->repr);
+		case IOTCON_TYPE_STATE:
+			state = ((icl_val_state_s*)state_value)->state;
+			var = _icl_state_value_to_gvariant(state->hash_table);
+//			var = g_variant_new("a{sv}", state_builder);
 			break;
 		case IOTCON_TYPE_NONE:
 		default:
@@ -140,12 +148,23 @@ static GVariantBuilder* _icl_repr_value_to_gvariant(GHashTable *hash)
 }
 
 
-GVariant* icl_repr_to_gvariant(iotcon_repr_h repr)
+static GVariant* _icl_state_value_to_gvariant(GHashTable *hash)
+{
+	GVariantBuilder* builder;
+
+	builder = _icl_state_value_to_gvariant_builder(hash);
+
+	return g_variant_builder_end(builder);
+}
+
+
+GVariant* icl_representation_to_gvariant(iotcon_representation_h repr)
 {
 	GList *node;
 	int ifaces = 0;
 	const char *uri_path;
 	GVariant *value, *child;
+	iotcon_state_h state;
 	GVariantBuilder *repr_gvar = NULL;
 	GVariantBuilder children, resource_types;
 
@@ -167,15 +186,16 @@ GVariant* icl_repr_to_gvariant(iotcon_repr_h repr)
 	}
 
 	/* Representation */
-	if (ICL_VISIBILITY_REPR & repr->visibility)
-		repr_gvar = _icl_repr_value_to_gvariant(repr->hash_table);
+	state = repr->state;
+	if (state && (ICL_VISIBILITY_REPR & repr->visibility))
+		repr_gvar = _icl_state_value_to_gvariant_builder(state->hash_table);
 
 	/* Children */
 	g_variant_builder_init(&children, G_VARIANT_TYPE("av"));
 
 	for (node = repr->children; node; node = node->next) {
 		/* generate recursively */
-		child = icl_repr_to_gvariant(node->data);
+		child = icl_representation_to_gvariant(node->data);
 		g_variant_builder_add(&children, "v", child);
 	}
 
@@ -186,8 +206,53 @@ GVariant* icl_repr_to_gvariant(iotcon_repr_h repr)
 }
 
 
-static iotcon_list_h _icl_repr_list_from_gvariant(GVariant *var)
+static void _icl_state_from_gvariant(iotcon_state_h state, GVariantIter *iter)
 {
+	char *key;
+	GVariant *var;
+	const char *str_value;
+	iotcon_list_h list_value;
+	iotcon_value_h value = NULL;
+	iotcon_state_h state_value = NULL;
+
+	while (g_variant_iter_loop(iter, "{sv}", &key, &var)) {
+
+		if (g_variant_is_of_type(var, G_VARIANT_TYPE_BOOLEAN)) {
+			value = icl_value_create_bool(g_variant_get_boolean(var));
+
+		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_INT32)) {
+			value = icl_value_create_int(g_variant_get_int32(var));
+
+		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_DOUBLE)) {
+			value = icl_value_create_double(g_variant_get_double(var));
+
+		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_STRING)) {
+			str_value = g_variant_get_string(var, NULL);
+			if (IC_STR_EQUAL == strcmp(IC_STR_NULL, str_value))
+				value = icl_value_create_null();
+			else
+				value = icl_value_create_str(str_value);
+
+		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_ARRAY)) {
+			list_value = _icl_state_list_from_gvariant(var);
+			value = icl_value_create_list(list_value);
+		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE("a{sv}"))) {
+			GVariantIter *state_iter;
+			g_variant_get(var, "(&a{sv})", &state_iter);
+			_icl_state_from_gvariant(state_value, state_iter);
+			value = icl_value_create_state(state_value);
+		}
+
+		g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
+	}
+
+	return;
+}
+
+
+static iotcon_list_h _icl_state_list_from_gvariant(GVariant *var)
+{
+	int ret;
 	GVariantIter iter;
 	const GVariantType *type;
 	iotcon_list_h list = NULL;
@@ -198,36 +263,58 @@ static iotcon_list_h _icl_repr_list_from_gvariant(GVariant *var)
 
 	if (g_variant_type_equal(G_VARIANT_TYPE("ab"), type)) {
 		bool b;
-		list = iotcon_list_new(IOTCON_TYPE_BOOL);
+		ret = iotcon_list_create(IOTCON_TYPE_BOOL, &list);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_list_create() Fail(%d)", ret);
+			return NULL;
+		}
+
 		while (g_variant_iter_loop(&iter, "b", &b))
 			iotcon_list_insert_bool(list, b, -1);
 	} else if (g_variant_type_equal(G_VARIANT_TYPE("ai"), type)) {
 		int i;
-		list = iotcon_list_new(IOTCON_TYPE_INT);
+		ret = iotcon_list_create(IOTCON_TYPE_INT, &list);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_list_create() Fail(%d)", ret);
+			return NULL;
+		}
+
 		while (g_variant_iter_loop(&iter, "i", &i))
 			iotcon_list_insert_int(list, i, -1);
 	} else if (g_variant_type_equal(G_VARIANT_TYPE("ad"), type)) {
 		double d;
-		list = iotcon_list_new(IOTCON_TYPE_DOUBLE);
+		ret = iotcon_list_create(IOTCON_TYPE_DOUBLE, &list);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_list_create() Fail(%d)", ret);
+			return NULL;
+		}
+
 		while (g_variant_iter_loop(&iter, "d", &d))
 			iotcon_list_insert_double(list, d, -1);
 	} else if (g_variant_type_equal(G_VARIANT_TYPE("as"), type)) {
 		char *s;
-		list = iotcon_list_new(IOTCON_TYPE_STR);
+		ret = iotcon_list_create(IOTCON_TYPE_STR, &list);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_list_create() Fail(%d)", ret);
+			return NULL;
+		}
+
 		while (g_variant_iter_loop(&iter, "s", &s))
 			iotcon_list_insert_str(list, s, -1);
 	} else if (g_variant_type_equal(G_VARIANT_TYPE("v"), type)) {
 		GVariant *value;
 		iotcon_list_h list_value;
-		iotcon_repr_h repr_value;
+		iotcon_state_h state_value = NULL;
 
 		while (g_variant_iter_loop(&iter, "v", &value)) {
 			if (g_variant_is_of_type(value, G_VARIANT_TYPE_ARRAY)) {
-				list_value = _icl_repr_list_from_gvariant(value);
+				list_value = _icl_state_list_from_gvariant(value);
 				iotcon_list_insert_list(list, list_value, -1);
-			} else if (g_variant_is_of_type(value, G_VARIANT_TYPE("(siasa{sv}av)"))) {
-				repr_value = icl_repr_from_gvariant(value);
-				iotcon_list_insert_repr(list, repr_value, -1);
+			} else if (g_variant_is_of_type(value, G_VARIANT_TYPE("a{sv}"))) {
+				GVariantIter *state_iter;
+				g_variant_get(value, "(&a{sv})", &state_iter);
+				_icl_state_from_gvariant(state_value, state_iter);
+				iotcon_list_insert_state(list, state_value, -1);
 			}
 		}
 	}
@@ -236,66 +323,37 @@ static iotcon_list_h _icl_repr_list_from_gvariant(GVariant *var)
 }
 
 
-static void _icl_repr_value_from_gvariant(iotcon_repr_h repr, GVariantIter *iter)
+iotcon_representation_h icl_representation_from_gvariant(GVariant *var)
 {
-	char *key;
-	GVariant *var;
-	const char *str_value;
-	iotcon_list_h list_value;
-	iotcon_repr_h repr_value;
-	iotcon_value_h value = NULL;
-
-	while (g_variant_iter_loop(iter, "{sv}", &key, &var)) {
-
-		if (g_variant_is_of_type(var, G_VARIANT_TYPE_BOOLEAN)) {
-			value = icl_value_new_bool(g_variant_get_boolean(var));
-
-		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_INT32)) {
-			value = icl_value_new_int(g_variant_get_int32(var));
-
-		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_DOUBLE)) {
-			value = icl_value_new_double(g_variant_get_double(var));
-
-		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_STRING)) {
-			str_value = g_variant_get_string(var, NULL);
-			if (IC_STR_EQUAL == strcmp(IC_STR_NULL, str_value))
-				value = icl_value_new_null();
-			else
-				value = icl_value_new_str(str_value);
-
-		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_ARRAY)) {
-			list_value = _icl_repr_list_from_gvariant(var);
-			value = icl_value_new_list(list_value);
-
-		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE("(siasa{sv}av)"))) {
-			repr_value = icl_repr_from_gvariant(var);
-			value = icl_value_new_repr(repr_value);
-		}
-
-		g_hash_table_replace(repr->hash_table, ic_utils_strdup(key), value);
-	}
-
-	return;
-}
-
-
-iotcon_repr_h icl_repr_from_gvariant(GVariant *var)
-{
-	iotcon_repr_h repr;
+	int ret;
 	GVariant *child;
+	iotcon_representation_h repr;
+	iotcon_state_h state;
 	char *uri_path, *resource_type;
 	GVariantIter *children, *repr_gvar, *resource_types;
 
-	repr = iotcon_repr_new();
-	if (NULL == repr) {
-		ERR("iotcon_repr_new() Fail");
+	ret = iotcon_representation_create(&repr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_create() Fail(%d)", ret);
+		return NULL;
+	}
+
+	ret = iotcon_state_create(&state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_state_create() Fail(%d)", ret);
+		return NULL;
+	}
+
+	ret = iotcon_representation_set_state(repr, state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_set_state() Fail(%d)", ret);
 		return NULL;
 	}
 
 	DBG("repr : %s", g_variant_print(var, FALSE));
 
-	g_variant_get(var, "(&siasa{sv}av)", &uri_path, &repr->interfaces, &resource_types,
-			&repr_gvar, &children);
+	g_variant_get(var, "(&siasa{sv}av)", &uri_path, &repr->interfaces,
+			&resource_types, &repr_gvar, &children);
 
 	/* uri path */
 	if (IC_STR_EQUAL != strcmp(IC_STR_NULL, uri_path))
@@ -303,18 +361,27 @@ iotcon_repr_h icl_repr_from_gvariant(GVariant *var)
 
 	/* resource types */
 	if (g_variant_iter_n_children(resource_types)) {
-		repr->res_types = iotcon_resource_types_new();
+		ret = iotcon_resource_types_create(&repr->res_types);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_resource_types_create() Fail(%d)", ret);
+			g_variant_iter_free(resource_types);
+			g_variant_iter_free(children);
+			return NULL;
+		}
+
 		while (g_variant_iter_loop(resource_types, "s", &resource_type))
 			iotcon_resource_types_insert(repr->res_types, resource_type);
 	}
 	g_variant_iter_free(resource_types);
 
 	/* attribute */
-	_icl_repr_value_from_gvariant(repr, repr_gvar);
+	_icl_state_from_gvariant(state, repr_gvar);
 
 	/* children */
-	while (g_variant_iter_loop(children, "v", &child))
-		repr->children = g_list_append(repr->children, icl_repr_from_gvariant(child));
+	while (g_variant_iter_loop(children, "v", &child)) {
+		repr->children = g_list_append(repr->children,
+				icl_representation_from_gvariant(child));
+	}
 	g_variant_iter_free(children);
 
 	return repr;
