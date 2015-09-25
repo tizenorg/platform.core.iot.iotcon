@@ -220,6 +220,19 @@ inline int icl_dbus_convert_daemon_error(int error)
 }
 
 
+inline int icl_dbus_convert_dbus_error(int error)
+{
+	int ret;
+
+	if (G_DBUS_ERROR_ACCESS_DENIED == error)
+		ret = IOTCON_ERROR_PERMISSION_DENIED;
+	else
+		ret = IOTCON_ERROR_DBUS;
+
+	return ret;
+}
+
+
 int icl_dbus_start()
 {
 	unsigned int id;

@@ -37,8 +37,7 @@ typedef struct icl_presence {
 
 API int iotcon_start_presence(unsigned int time_to_live)
 {
-	FN_CALL;
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -48,8 +47,9 @@ API int iotcon_start_presence(unsigned int time_to_live)
 			&error);
 	if (error) {
 		ERR("ic_dbus_call_start_presence_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
@@ -64,7 +64,7 @@ API int iotcon_start_presence(unsigned int time_to_live)
 API int iotcon_stop_presence(void)
 {
 	FN_CALL;
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -72,8 +72,9 @@ API int iotcon_stop_presence(void)
 	ic_dbus_call_stop_presence_sync(icl_dbus_get_object(), &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_stop_presence_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
@@ -129,7 +130,7 @@ API int iotcon_subscribe_presence(const char *host_address, const char *resource
 	FN_CALL;
 	GError *error = NULL;
 	unsigned int sub_id;
-	int signal_number;
+	int signal_number, error_code;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	icl_presence_s *presence_container;
 
@@ -156,9 +157,10 @@ API int iotcon_subscribe_presence(const char *host_address, const char *resource
 			resource_type, signal_number, &(presence_container->handle), NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_subscribe_presence_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
 		free(presence_container);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (0 == presence_container->handle) {
@@ -192,7 +194,7 @@ API int iotcon_subscribe_presence(const char *host_address, const char *resource
 API int iotcon_unsubscribe_presence(iotcon_presence_h presence)
 {
 	FN_CALL;
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -208,8 +210,9 @@ API int iotcon_unsubscribe_presence(iotcon_presence_h presence)
 			&ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_unsubscribe_presence_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {

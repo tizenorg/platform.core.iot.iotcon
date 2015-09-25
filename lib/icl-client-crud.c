@@ -460,9 +460,9 @@ API int iotcon_observer_start(iotcon_client_h resource, int observe_type,
 	unsigned int sub_id;
 	GVariant *arg_client;
 	GError *error = NULL;
-	icl_on_observe_s *cb_container;
-	int ret, signal_number;
 	int64_t observe_handle;
+	icl_on_observe_s *cb_container;
+	int ret, signal_number, error_code;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -478,10 +478,11 @@ API int iotcon_observer_start(iotcon_client_h resource, int observe_type,
 			arg_query, signal_number, &observe_handle, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_observer_start_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
 		g_variant_unref(arg_query);
 		g_variant_unref(arg_client);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (0 == observe_handle) {
@@ -523,7 +524,7 @@ API int iotcon_observer_start(iotcon_client_h resource, int observe_type,
 
 API int iotcon_observer_stop(iotcon_client_h resource)
 {
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 	GVariant *arg_options;
 
@@ -540,8 +541,9 @@ API int iotcon_observer_stop(iotcon_client_h resource)
 			arg_options, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_observer_stop_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon-daemon Fail(%d)", ret);

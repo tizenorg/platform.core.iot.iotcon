@@ -79,10 +79,9 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 API int iotcon_find_resource(const char *host_address, const char *resource_type,
 		iotcon_found_resource_cb cb, void *user_data)
 {
-	int ret;
-	int signal_number;
 	unsigned int sub_id;
 	GError *error = NULL;
+	int ret, error_code, signal_number;
 	icl_found_resource_s *cb_container;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
@@ -100,8 +99,9 @@ API int iotcon_find_resource(const char *host_address, const char *resource_type
 			ic_utils_dbus_encode_str(resource_type), signal_number, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_find_resource_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {

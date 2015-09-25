@@ -56,7 +56,7 @@ typedef struct {
 
 API int iotcon_register_device_info(const char *device_name)
 {
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 	GVariant *arg_info;
 
@@ -68,9 +68,10 @@ API int iotcon_register_device_info(const char *device_name)
 			NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_register_device_info_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
 		g_variant_unref(arg_info);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
@@ -105,10 +106,9 @@ static void _icl_device_info_cb(GDBusConnection *connection,
 API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 		void *user_data)
 {
-	int ret;
 	GError *error = NULL;
 	unsigned int sub_id;
-	int signal_number;
+	int ret, signal_number, error_code;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	icl_device_info_s *cb_container;
 
@@ -122,8 +122,9 @@ API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb c
 			signal_number, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_get_device_info_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
@@ -160,7 +161,7 @@ API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb c
  * The length of manufacturer_url should be less than and equal to 32. */
 API int iotcon_register_platform_info(iotcon_platform_info_s *platform_info)
 {
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 	GVariant *arg_info;
 
@@ -198,9 +199,10 @@ API int iotcon_register_platform_info(iotcon_platform_info_s *platform_info)
 			NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_register_platform_info_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
 		g_variant_unref(arg_info);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
@@ -249,10 +251,9 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 API int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_cb cb,
 		void *user_data)
 {
-	int ret;
 	GError *error = NULL;
 	unsigned int sub_id;
-	int signal_number;
+	int ret, signal_number, error_code;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	icl_platform_info_s *cb_container;
 
@@ -266,8 +267,9 @@ API int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_
 			signal_number, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_get_platform_info_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {

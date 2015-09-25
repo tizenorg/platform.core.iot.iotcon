@@ -6,8 +6,11 @@ Group:      Network & Connectivity/Other
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    %{name}.service
-Source1001: %{name}.manifest
-Source1002: lib%{name}.manifest
+Source1001: %{name}-v3.manifest
+Source1002: %{name}-v2.manifest
+Source1003: lib%{name}-v2.manifest
+Source1004: %{name}-test-v2.manifest
+Source2001: %{name}.conf.in
 BuildRequires:  cmake
 BuildRequires:  boost-devel
 BuildRequires:  iotivity-devel
@@ -53,13 +56,22 @@ IoT Connectivity Manager Test Programs
 
 %prep
 %setup -q
-cp %{SOURCE1001} .
-cp %{SOURCE1002} .
+%if %tizen_version_major == 3
+cp %{SOURCE1001} ./%{name}.manifest
+cp %{SOURCE1001} ./lib%{name}.manifest
+cp %{SOURCE1001} ./%{name}-test.manifest
+cp %{SOURCE2001} .
+%else
+cp %{SOURCE1002} ./%{name}.manifest
+cp %{SOURCE1003} ./lib%{name}.manifest
+cp %{SOURCE1004} ./%{name}-test.manifest
+%endif
 
 
 %build
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
-%cmake . -DMAJORVER=${MAJORVER} -DFULLVER=%{version} -DBIN_INSTALL_DIR:PATH=%{_bindir}
+%cmake . -DMAJORVER=${MAJORVER} -DFULLVER=%{version} -DBIN_INSTALL_DIR:PATH=%{_bindir} \
+		-DTZ_VER=%{tizen_version_major}
 
 
 %install
@@ -105,6 +117,7 @@ systemctl daemon-reload
 %if 0%{?tizen_version_major} < 3
 %{_datadir}/license/%{name}
 %else
+%config %{_sysconfdir}/dbus-1/system.d/%{name}.conf
 %license LICENSE.APLv2
 %endif
 
@@ -125,6 +138,7 @@ systemctl daemon-reload
 %{_includedir}/%{name}/*.h
 
 %files test
+%manifest %{name}-test.manifest
 %defattr(-,root,root,-)
 %{_bindir}/crud-test-client
 %{_bindir}/crud-test-server

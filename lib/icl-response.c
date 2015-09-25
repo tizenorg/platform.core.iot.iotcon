@@ -209,7 +209,7 @@ static int _icl_response_check_representation_visibility(iotcon_response_h resp)
 API int iotcon_response_send(iotcon_response_h resp)
 {
 	FN_CALL;
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 	GVariant *arg_response;
 
@@ -228,9 +228,10 @@ API int iotcon_response_send(iotcon_response_h resp)
 			&error);
 	if (error) {
 		ERR("ic_dbus_call_send_response_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
 		g_variant_unref(arg_response);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {

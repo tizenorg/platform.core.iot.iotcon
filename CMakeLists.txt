@@ -16,6 +16,11 @@ SET(OCLOGGER_CORE "oc_logger_core")
 SET(CA "connectivity_abstraction")
 SET(OCTBSTACK "octbstack")
 
+IF(${TZ_VER} EQUAL "3")
+CONFIGURE_FILE(${PROJECT_NAME}.conf.in ${PROJECT_NAME}.conf @ONLY)
+INSTALL(FILES ${PROJECT_NAME}.conf DESTINATION ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)
+ENDIF(${TZ_VER} EQUAL "3")
+
 ADD_SUBDIRECTORY(common)
 ADD_SUBDIRECTORY(lib)
 ADD_SUBDIRECTORY(daemon)

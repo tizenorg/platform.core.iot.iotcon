@@ -154,12 +154,12 @@ API int iotcon_register_resource(const char *uri_path,
 		void *user_data,
 		iotcon_resource_h *resource_handle)
 {
-	int signal_number;
 	unsigned int sub_id;
 	GError *error = NULL;
 	const gchar **types;
-	char sig_name[IC_DBUS_SIGNAL_LENGTH];
 	iotcon_resource_h resource;
+	int signal_number, error_code;
+	char sig_name[IC_DBUS_SIGNAL_LENGTH];
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
@@ -187,10 +187,11 @@ API int iotcon_register_resource(const char *uri_path,
 			properties, signal_number, &(resource->handle), NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_register_resource_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
 		free(types);
 		free(resource);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 	free(types);
 
@@ -230,7 +231,7 @@ API int iotcon_register_resource(const char *uri_path,
 API int iotcon_unregister_resource(iotcon_resource_h resource)
 {
 	FN_CALL;
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -248,8 +249,9 @@ API int iotcon_unregister_resource(iotcon_resource_h resource)
 			&ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_unregister_resource_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
@@ -267,7 +269,7 @@ API int iotcon_unregister_resource(iotcon_resource_h resource)
 API int iotcon_resource_bind_interface(iotcon_resource_h resource, int iface)
 {
 	FN_CALL;
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -281,8 +283,9 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource, int iface)
 			iface, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_bind_interface_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
@@ -297,7 +300,7 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource, int iface)
 API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resource_type)
 {
 	FN_CALL;
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -317,8 +320,9 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resour
 			&ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_bind_type_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
@@ -346,10 +350,8 @@ API int iotcon_resource_bind_request_handler(iotcon_resource_h resource,
 API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
-	FN_CALL;
-	int ret;
-	int i;
 	GError *error = NULL;
+	int i, ret, error_code;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
@@ -378,8 +380,9 @@ API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 					child->handle, &ret, NULL, &error);
 			if (error) {
 				ERR("ic_dbus_call_bind_resource_sync() Fail(%s)", error->message);
+				error_code = icl_dbus_convert_dbus_error(error->code);
 				g_error_free(error);
-				return IOTCON_ERROR_DBUS;
+				return error_code;
 			}
 
 			if (IOTCON_ERROR_NONE != ret) {
@@ -401,9 +404,8 @@ API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
-	int ret;
-	int i;
 	GError *error = NULL;
+	int i, ret, error_code;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
@@ -422,8 +424,9 @@ API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 			child->handle, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_unbind_resource_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
@@ -556,7 +559,7 @@ API void iotcon_notimsg_destroy(iotcon_notimsg_h msg)
 API int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notimsg_h msg,
 		iotcon_observers_h observers)
 {
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 	GVariant *noti_msg;
 	GVariant *obs;
@@ -581,10 +584,11 @@ API int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notim
 			noti_msg, obs, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_notify_list_of_observers_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
 		g_variant_unref(obs);
 		g_variant_unref(noti_msg);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
@@ -598,7 +602,7 @@ API int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notim
 
 API int iotcon_resource_notify_all(iotcon_resource_h resource)
 {
-	int ret;
+	int ret, error_code;
 	GError *error = NULL;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -612,8 +616,9 @@ API int iotcon_resource_notify_all(iotcon_resource_h resource)
 			&error);
 	if (error) {
 		ERR("ic_dbus_call_notify_all_sync() Fail(%s)", error->message);
+		error_code = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+		return error_code;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {

@@ -1,0 +1,31 @@
+<manifest>
+	<define>
+		<domain name="iotcon" />
+		<permit>
+			<smack permit="system::use_internet" type="w" />
+			<smack permit="dbus" type="rwx" />
+		</permit>
+		<request>
+			<smack request="system::use_internet" type="w" />
+			<smack request="connman::get" type="w" />
+			<smack request="dbus" type="rwx" />
+			<smack request="device::app_logging" type="w" />
+			<smack request="device::sys_logging" type="w" />
+		</request>
+	</define>
+	<assign>
+		<filesystem path="/usr/share/license/iotcon" label="_" />
+		<filesystem path="/usr/share/dbus-1/services/org.tizen.iotcon.dbus.service" label="_" />
+
+		<dbus name="org.tizen.iotcon.dbus" own="iotcon" bus="system">
+			<node name="/org/tizen/iotcon/dbus">
+				<interface name="org.tizen.iotcon.dbus">
+					<annotation name="com.tizen.smack" value="iotcon"/>
+				</interface>
+			</node>
+		</dbus>
+	</assign>
+	<request>
+		<domain name="iotcon" />
+	</request>
+</manifest>
