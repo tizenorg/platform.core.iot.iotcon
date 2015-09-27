@@ -204,7 +204,7 @@ int icl_value_get_double(iotcon_value_h value, double *val)
 	return IOTCON_ERROR_NONE;
 }
 
-int icl_value_get_str(iotcon_value_h value, const char **val)
+int icl_value_get_str(iotcon_value_h value, char **val)
 {
 	icl_basic_s *real = (icl_basic_s*)value;
 

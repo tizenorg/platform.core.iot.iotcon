@@ -688,7 +688,7 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVarian
 	OCConnectivityType oic_conn_type;
 	OCDevAddr dev_addr = {0};
 
-	g_variant_get(resource, "(&s&sba(qs)i)", &uri_path, &host, &is_secure,  &options,
+	g_variant_get(resource, "(&s&sba(qs)i)", &uri_path, &host, &is_secure, &options,
 			&conn_type);
 
 	uri = _icd_ioty_resource_generate_uri(uri_path, query);

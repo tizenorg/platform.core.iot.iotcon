@@ -33,6 +33,6 @@ int icl_dbus_convert_daemon_error(int error);
 int icl_dbus_convert_dbus_error(int error);
 
 int icl_dbus_start();
-int icl_dbus_stop();
+void icl_dbus_stop();
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_DBUS_H__ */

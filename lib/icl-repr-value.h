@@ -76,7 +76,7 @@ iotcon_value_h icl_value_create_state(iotcon_state_h val);
 int icl_value_get_int(iotcon_value_h value, int *val);
 int icl_value_get_bool(iotcon_value_h value, bool *val);
 int icl_value_get_double(iotcon_value_h value, double *val);
-int icl_value_get_str(iotcon_value_h value, const char **val);
+int icl_value_get_str(iotcon_value_h value, char **val);
 int icl_value_get_list(iotcon_value_h value, iotcon_list_h *list);
 int icl_value_get_state(iotcon_value_h value, iotcon_state_h *state);
 

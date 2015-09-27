@@ -81,7 +81,7 @@ API int iotcon_find_resource(const char *host_address, const char *resource_type
 {
 	unsigned int sub_id;
 	GError *error = NULL;
-	int ret, error_code, signal_number;
+	int ret, signal_number;
 	icl_found_resource_s *cb_container;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
@@ -99,9 +99,9 @@ API int iotcon_find_resource(const char *host_address, const char *resource_type
 			ic_utils_dbus_encode_str(resource_type), signal_number, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_find_resource_sync() Fail(%s)", error->message);
-		error_code = icl_dbus_convert_dbus_error(error->code);
+		ret = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		return error_code;
+		return ret;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
@@ -148,6 +148,7 @@ API int iotcon_client_create(const char *host,
 	RETV_IF(NULL == host, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_types, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == client_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
 	resource = calloc(1, sizeof(struct icl_remote_resource));
 	if (NULL == resource) {

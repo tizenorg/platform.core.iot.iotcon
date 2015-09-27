@@ -27,6 +27,8 @@
 
 API int iotcon_query_create(iotcon_query_h *ret_query)
 {
+	RETV_IF(NULL == ret_query, IOTCON_ERROR_INVALID_PARAMETER);
+
 	iotcon_query_h query = calloc(1, sizeof(struct icl_query));
 	if (NULL == query) {
 		ERR("calloc() Fail(%d)", errno);
@@ -76,7 +78,7 @@ API int iotcon_query_insert(iotcon_query_h query, const char *key, const char *v
 
 API int iotcon_query_delete(iotcon_query_h query, const char *key)
 {
-	gboolean ret;
+	gboolean is_removed;
 	int query_len;
 	char *value;
 
@@ -91,8 +93,8 @@ API int iotcon_query_delete(iotcon_query_h query, const char *key)
 
 	query_len = strlen(key) + strlen(value) + 2;
 
-	ret = g_hash_table_remove(query->hash, key);
-	if (FALSE == ret) {
+	is_removed = g_hash_table_remove(query->hash, key);
+	if (FALSE == is_removed) {
 		ERR("g_hash_table_remove() Fail");
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
@@ -102,16 +104,19 @@ API int iotcon_query_delete(iotcon_query_h query, const char *key)
 }
 
 
-API int iotcon_query_lookup(iotcon_query_h query, const char *key, const char **data)
+API int iotcon_query_lookup(iotcon_query_h query, const char *key, char **data)
 {
-	const char *value = NULL;
+	char *value = NULL;
 
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == data, IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = g_hash_table_lookup(query->hash, key);
-	if (NULL == value)
+	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
 
 	*data = value;
 

@@ -254,7 +254,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
-			ret = iotcon_observers_append(observers, observer_id, &observers);
+			ret = iotcon_observers_insert(observers, observer_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
@@ -263,7 +263,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
-			ret = iotcon_observers_remove(observers, observer_id, &observers);
+			ret = iotcon_observers_delete(observers, observer_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}

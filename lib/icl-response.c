@@ -36,7 +36,8 @@ API int iotcon_response_create(iotcon_request_h request,
 {
 	FN_CALL;
 
-	RETV_IF(NULL == request, TIZEN_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
 
 	iotcon_response_h resp = calloc(1, sizeof(struct icl_resource_response));
 	if (NULL == resp) {
@@ -209,7 +210,7 @@ static int _icl_response_check_representation_visibility(iotcon_response_h resp)
 API int iotcon_response_send(iotcon_response_h resp)
 {
 	FN_CALL;
-	int ret, error_code;
+	int ret;
 	GError *error = NULL;
 	GVariant *arg_response;
 
@@ -228,10 +229,10 @@ API int iotcon_response_send(iotcon_response_h resp)
 			&error);
 	if (error) {
 		ERR("ic_dbus_call_send_response_sync() Fail(%s)", error->message);
-		error_code = icl_dbus_convert_dbus_error(error->code);
+		ret = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
 		g_variant_unref(arg_response);
-		return error_code;
+		return ret;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {

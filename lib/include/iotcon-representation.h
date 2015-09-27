@@ -37,6 +37,7 @@
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_representation_destroy()
  */
@@ -69,7 +70,8 @@ void iotcon_representation_destroy(iotcon_representation_h repr);
  * @retval iotcon_representation_h Success
  * @retval NULL Failure
  */
-int iotcon_representation_clone(const iotcon_representation_h src, iotcon_representation_h *dest);
+int iotcon_representation_clone(const iotcon_representation_h src,
+		iotcon_representation_h *dest);
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
@@ -87,7 +89,8 @@ int iotcon_representation_clone(const iotcon_representation_h src, iotcon_repres
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_representation_set_uri_path(iotcon_representation_h repr, const char *uri_path);
+int iotcon_representation_set_uri_path(iotcon_representation_h repr,
+		const char *uri_path);
 
 /**
  * @brief Gets an URI path from the representation.
@@ -101,7 +104,7 @@ int iotcon_representation_set_uri_path(iotcon_representation_h repr, const char 
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_representation_get_uri_path(iotcon_representation_h repr, const char **uri_path);
+int iotcon_representation_get_uri_path(iotcon_representation_h repr, char **uri_path);
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
@@ -117,7 +120,8 @@ int iotcon_representation_get_uri_path(iotcon_representation_h repr, const char 
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_representation_set_resource_types(iotcon_representation_h repr, iotcon_resource_types_h types);
+int iotcon_representation_set_resource_types(iotcon_representation_h repr,
+		iotcon_resource_types_h types);
 
 /**
  * @brief Gets list of resource type from the representation.
@@ -131,7 +135,8 @@ int iotcon_representation_set_resource_types(iotcon_representation_h repr, iotco
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_representation_get_resource_types(iotcon_representation_h repr, iotcon_resource_types_h *types);
+int iotcon_representation_get_resource_types(iotcon_representation_h repr,
+		iotcon_resource_types_h *types);
 
 /**
  * @brief Sets interfaces to the representation.
@@ -148,7 +153,8 @@ int iotcon_representation_get_resource_types(iotcon_representation_h repr, iotco
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_representation_set_resource_interfaces(iotcon_representation_h repr, int ifaces);
+int iotcon_representation_set_resource_interfaces(iotcon_representation_h repr,
+		int ifaces);
 
 /**
  * @brief Gets resource interfaces from the representation.
@@ -162,7 +168,8 @@ int iotcon_representation_set_resource_interfaces(iotcon_representation_h repr, 
  * @retval #IOTCON_INTERFACE_NONE  Not set
  * @retval Bitwise OR value which consists of iotcon_interface_e items
  */
-int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr, int *ifaces);
+int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr,
+		int *ifaces);
 
 /**
  * @brief Sets a new state handle into the representation.
@@ -216,6 +223,7 @@ int iotcon_representation_del_state(iotcon_representation_h repr);
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_state_destroy()
  */
@@ -668,8 +676,8 @@ typedef bool (*iotcon_children_cb)(iotcon_representation_h child, void *user_dat
  *
  * @see iotcon_children_cb()
  */
-int iotcon_representation_foreach_children(iotcon_representation_h parent, iotcon_children_cb cb,
-		void *user_data);
+int iotcon_representation_foreach_children(iotcon_representation_h parent,
+		iotcon_children_cb cb, void *user_data);
 
 /**
  * @brief Gets the number of children representation in the parent representation
@@ -683,7 +691,8 @@ int iotcon_representation_foreach_children(iotcon_representation_h parent, iotco
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_representation_get_children_count(iotcon_representation_h parent, unsigned int *count);
+int iotcon_representation_get_children_count(iotcon_representation_h parent,
+		unsigned int *count);
 
 /**
  * @brief Gets the child representation at the given position.
@@ -700,7 +709,8 @@ int iotcon_representation_get_children_count(iotcon_representation_h parent, uns
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
-int iotcon_representation_get_nth_child(iotcon_representation_h parent, int pos, iotcon_representation_h *child);
+int iotcon_representation_get_nth_child(iotcon_representation_h parent, int pos,
+		iotcon_representation_h *child);
 
 /**
  * @brief Specifies the type of function passed to iotcon_state_foreach()
@@ -764,9 +774,11 @@ int iotcon_state_get_keys_count(iotcon_state_h state, unsigned int *count);
  * @param[in] type The type of list
  * @param[out] list A newly allocated list handle
  *
- * @return A newly allocated list handle, otherwise NULL on failure.
- * @retval iotcon_list_h Success
- * @retval NULL Failure
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
 int iotcon_list_create(iotcon_types_e type, iotcon_list_h *list);
 
@@ -966,7 +978,7 @@ int iotcon_list_get_nth_double(iotcon_list_h list, int pos, double *val);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
  */
-int iotcon_list_get_nth_str(iotcon_list_h list, int pos, const char **val);
+int iotcon_list_get_nth_str(iotcon_list_h list, int pos, char **val);
 
 /**
  * @brief Gets the list value at the given position.

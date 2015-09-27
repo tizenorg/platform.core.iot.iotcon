@@ -16,6 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_TYPES_H__
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_TYPES_H__
 
+#include <glib.h>
 #include "iotcon-struct.h"
 #include "icl-query.h"
 

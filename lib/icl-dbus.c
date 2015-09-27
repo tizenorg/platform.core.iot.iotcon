@@ -42,7 +42,7 @@ icDbus* icl_dbus_get_object()
 }
 
 
-inline unsigned int icl_dbus_generate_signal_number()
+unsigned int icl_dbus_generate_signal_number()
 {
 	static unsigned int i = 0;
 
@@ -267,17 +267,17 @@ int icl_dbus_start()
 }
 
 
-int icl_dbus_stop()
+void icl_dbus_stop()
 {
 	if (0 == icl_dbus_count) {
-		ERR("dbus not initialized");
-		return IOTCON_ERROR_DBUS;
+		WARN("dbus not initialized");
+		return;
 	}
 
 	icl_dbus_count--;
 
 	if (0 < icl_dbus_count)
-		return IOTCON_ERROR_NONE;
+		return;
 
 	DBG("All connection is closed");
 
@@ -289,5 +289,5 @@ int icl_dbus_stop()
 	g_object_unref(icl_dbus_object);
 	icl_dbus_object = NULL;
 
-	return IOTCON_ERROR_NONE;
+	return;
 }

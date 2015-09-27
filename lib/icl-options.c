@@ -68,7 +68,11 @@ iotcon_options_h icl_options_ref(iotcon_options_h options)
 
 API int iotcon_options_create(iotcon_options_h *ret_options)
 {
-	iotcon_options_h options = calloc(1, sizeof(struct icl_options));
+	iotcon_options_h options;
+
+	RETV_IF(NULL == ret_options, IOTCON_ERROR_INVALID_PARAMETER);
+
+	options = calloc(1, sizeof(struct icl_options));
 	if (NULL == options) {
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
@@ -123,14 +127,14 @@ API int iotcon_options_insert(iotcon_options_h options, unsigned short id,
 
 API int iotcon_options_delete(iotcon_options_h options, unsigned short id)
 {
-	gboolean ret;
+	gboolean is_removed;
 
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(1 < options->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
 
-	ret = g_hash_table_remove(options->hash, GUINT_TO_POINTER(id));
-	if (FALSE == ret) {
+	is_removed = g_hash_table_remove(options->hash, GUINT_TO_POINTER(id));
+	if (FALSE == is_removed) {
 		ERR("g_hash_table_remove() Fail");
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
@@ -138,18 +142,20 @@ API int iotcon_options_delete(iotcon_options_h options, unsigned short id)
 }
 
 
-API int iotcon_options_lookup(iotcon_options_h options, unsigned short id,
-		const char **data)
+API int iotcon_options_lookup(iotcon_options_h options, unsigned short id, char **data)
 {
-	const char *ret;
+	char *value;
 
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == data, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = g_hash_table_lookup(options->hash, GUINT_TO_POINTER(id));
-	if (NULL == ret)
+	value = g_hash_table_lookup(options->hash, GUINT_TO_POINTER(id));
+	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
 
-	*data = ret;
+	*data = value;
 
 	return IOTCON_ERROR_NONE;
 }

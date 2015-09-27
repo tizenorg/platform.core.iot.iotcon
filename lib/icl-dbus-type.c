@@ -30,6 +30,7 @@
 #include "icl-client.h"
 #include "icl-repr.h"
 #include "icl-payload.h"
+#include "icl-observation.h"
 #include "icl-dbus-type.h"
 
 const char** icl_dbus_resource_types_to_array(iotcon_resource_types_h types)
@@ -201,7 +202,7 @@ GVariant* icl_dbus_options_to_gvariant(iotcon_options_h options)
 		}
 	}
 
-	return g_variant_new("a(qs)", builder);
+	return g_variant_builder_end(&builder);
 }
 
 
@@ -211,7 +212,7 @@ GVariant* icl_dbus_observers_to_gvariant(iotcon_observers_h observers)
 	GVariantBuilder builder;
 
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("ai"));
-	for (node = observers; node; node = node->next)
+	for (node = observers->observers_list; node; node = node->next)
 		g_variant_builder_add(&builder, "i", GPOINTER_TO_INT(node->data));
 
 	return g_variant_builder_end(&builder);

@@ -16,7 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_QUERY_H__
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_QUERY_H__
 
-#include "iotcon-struct.h"
+#include <glib.h>
 
 /**
  * @brief The maximum length which can be held in a query.

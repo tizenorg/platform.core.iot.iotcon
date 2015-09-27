@@ -72,9 +72,11 @@ API int iotcon_list_create(iotcon_types_e type, iotcon_list_h *ret_list)
 	int ret;
 	iotcon_list_h list;
 
+	RETV_IF(NULL == ret_list, IOTCON_ERROR_INVALID_PARAMETER);
+
 	if (type < IOTCON_TYPE_INT || IOTCON_TYPE_STATE < type) {
 		ERR("Invalid Type(%d)", type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+		return IOTCON_ERROR_INVALID_TYPE;
 	}
 
 	ret = _icl_list_create(type, &list);
@@ -286,10 +288,10 @@ API int iotcon_list_get_nth_double(iotcon_list_h list, int pos, double *val)
 }
 
 
-API int iotcon_list_get_nth_str(iotcon_list_h list, int pos, const char **val)
+API int iotcon_list_get_nth_str(iotcon_list_h list, int pos, char **val)
 {
 	int ret;
-	const char *strval;
+	char *strval;
 	iotcon_value_h value;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);

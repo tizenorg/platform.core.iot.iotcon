@@ -19,29 +19,50 @@
 
 #include "iotcon-struct.h"
 #include "icl.h"
+#include "icl-observation.h"
 
-API void iotcon_observers_destroy(iotcon_observers_h observers)
+API int iotcon_observers_create(iotcon_observers_h *ret_observers)
 {
-	RET_IF(NULL == observers);
+	RETV_IF(NULL == ret_observers, IOTCON_ERROR_INVALID_PARAMETER);
 
-	g_list_free(observers);
-}
+	iotcon_observers_h observers = calloc(1, sizeof(struct icl_observers));
+	if (NULL == observers) {
+		ERR("calloc() Fail(%d)", errno);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
 
-
-/* If you want to make a new list, then you should set observers is NULL. */
-API int iotcon_observers_append(iotcon_observers_h observers, int obs_id,
-		iotcon_observers_h *ret_observers)
-{
-	*ret_observers = g_list_append(observers, GUINT_TO_POINTER(obs_id));
+	*ret_observers = observers;
 
 	return IOTCON_ERROR_NONE;
 }
 
 
-API int iotcon_observers_remove(iotcon_observers_h observers, int obs_id,
-		iotcon_observers_h *ret_observers)
+API void iotcon_observers_destroy(iotcon_observers_h observers)
 {
-	*ret_observers = g_list_remove(observers, GUINT_TO_POINTER(obs_id));
+	RET_IF(NULL == observers);
+
+	g_list_free(observers->observers_list);
+	free(observers);
+}
+
+
+API int iotcon_observers_insert(iotcon_observers_h observers, int obs_id)
+{
+	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
+
+	observers->observers_list = g_list_append(observers->observers_list,
+			GUINT_TO_POINTER(obs_id));
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_observers_delete(iotcon_observers_h observers, int obs_id)
+{
+	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
+
+	observers->observers_list = g_list_remove(observers->observers_list,
+			GUINT_TO_POINTER(obs_id));
 
 	return IOTCON_ERROR_NONE;
 }

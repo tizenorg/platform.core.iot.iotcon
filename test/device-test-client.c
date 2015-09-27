@@ -46,16 +46,31 @@ static void _get_device_info(const char *device_name, const char *sid,
 
 int main()
 {
+	int ret;
 	GMainLoop *loop;
 
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* iotcon open */
-	iotcon_open();
+	ret = iotcon_open();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_open() Fail(%d)", ret);
+		return -1;
+	}
 
-	iotcon_get_platform_info(IOTCON_MULTICAST_ADDRESS, _get_platform_info, NULL);
+	ret = iotcon_get_platform_info(IOTCON_MULTICAST_ADDRESS, _get_platform_info, NULL);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_get_platform_info() Fail(%d)", ret);
+		iotcon_close();
+		return -1;
+	}
 
-	iotcon_get_device_info(IOTCON_MULTICAST_ADDRESS, _get_device_info, NULL);
+	ret = iotcon_get_device_info(IOTCON_MULTICAST_ADDRESS, _get_device_info, NULL);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_get_device_info() Fail(%d)", ret);
+		iotcon_close();
+		return -1;
+	}
 
 	g_main_loop_run(loop);
 

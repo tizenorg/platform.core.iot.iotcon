@@ -15,6 +15,7 @@
  */
 
 #include <stdlib.h>
+#include <errno.h>
 #include <glib.h>
 #include <iotcon.h>
 #include "test.h"
@@ -28,7 +29,7 @@ int main()
 
 	iotcon_platform_info_s *platform_info = calloc(1, sizeof(iotcon_platform_info_s));
 	if (NULL == platform_info) {
-		ERR("calloc() Fail(%d)", errno);
+		ERR("calloc(platform_info) Fail(%d)", errno);
 		return -1;
 	}
 
@@ -49,11 +50,17 @@ int main()
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* iotcon open */
-	iotcon_open();
+	ret = iotcon_open();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_open() Fail(%d)", ret);
+		free(platform_info);
+		return -1;
+	}
 
 	ret = iotcon_register_platform_info(platform_info);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_register_platform_info() Fail(%d)", ret);
+		iotcon_close();
 		free(platform_info);
 		return -1;
 	}
@@ -63,6 +70,7 @@ int main()
 	ret = iotcon_register_device_info(device_name);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_register_platform_info() Fail(%d)", ret);
+		iotcon_close();
 		return -1;
 	}
 

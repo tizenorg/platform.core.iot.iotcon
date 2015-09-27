@@ -13,29 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_OBSERVATION_H__
+#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_OBSERVATION_H__
+
 #include <glib.h>
-#include <glib-object.h>
 
-#include "icl.h"
-#include "icl-dbus.h"
+struct icl_observers {
+	GList *observers_list;
+};
 
-API int iotcon_open(void)
-{
-	int ret;
-
-#if !GLIB_CHECK_VERSION(2,35,0)
-	g_type_init();
-#endif
-
-	ret = icl_dbus_start();
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icl_dbus_start() Fail(%d)", ret);
-
-	return ret;
-}
-
-
-API void iotcon_close(void)
-{
-	icl_dbus_stop();
-}
+#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_OBSERVATION_H__ */

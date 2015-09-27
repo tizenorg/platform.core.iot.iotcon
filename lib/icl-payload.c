@@ -345,14 +345,6 @@ iotcon_representation_h icl_representation_from_gvariant(GVariant *var)
 		return NULL;
 	}
 
-	ret = iotcon_representation_set_state(repr, state);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_set_state() Fail(%d)", ret);
-		iotcon_state_destroy(state);
-		iotcon_representation_destroy(repr);
-		return NULL;
-	}
-
 	DBG("repr : %s", g_variant_print(var, FALSE));
 
 	g_variant_get(var, "(&siasa{sv}av)", &uri_path, &repr->interfaces,
@@ -382,14 +374,21 @@ iotcon_representation_h icl_representation_from_gvariant(GVariant *var)
 	/* attribute */
 	_icl_state_from_gvariant(state, repr_gvar);
 
+	ret = iotcon_representation_set_state(repr, state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_set_state() Fail(%d)", ret);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+	iotcon_state_destroy(state);
+
 	/* children */
 	while (g_variant_iter_loop(children, "v", &child)) {
 		repr->children = g_list_append(repr->children,
 				icl_representation_from_gvariant(child));
 	}
 	g_variant_iter_free(children);
-
-	iotcon_state_destroy(state);
 
 	return repr;
 }

@@ -67,7 +67,7 @@ int iotcon_open(void);
  *
  * @see iotcon_open()
  */
-int iotcon_close(void);
+void iotcon_close(void);
 
 /**
  * @brief Specifies the type of function passed to iotcon_add_connection_changed_cb() and
@@ -181,6 +181,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @post When the resource receive CRUD request, iotcon_request_handler_cb() will be called.
  *
@@ -207,12 +208,17 @@ int iotcon_register_resource(const char *uri_path,
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
  *
+ * @remarks When a normal variable is used, there are only dbus error and permission\n
+ * denied error. If the errors of this API are not handled, then you must check\n
+ * whether dbus is running and an application have the privileges for the API.
+ *
  * @param[in] resource_handle The handle of the resource to be unregistered
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_register_resource()
  * @see iotcon_resource_bind_interface()
@@ -242,6 +248,7 @@ int iotcon_unregister_resource(iotcon_resource_h resource_handle);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_register_resource()
  * @see iotcon_unregister_resource()
@@ -268,6 +275,7 @@ int iotcon_resource_bind_interface(iotcon_resource_h resource, int iface);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_register_resource()
  * @see iotcon_unregister_resource()
@@ -277,7 +285,8 @@ int iotcon_resource_bind_interface(iotcon_resource_h resource, int iface);
  * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_resource_bind_type(iotcon_resource_h resource_handle, const char *resource_type);
+int iotcon_resource_bind_type(iotcon_resource_h resource_handle,
+		const char *resource_type);
 
 /**
  * @brief Binds a request handler to the resource
@@ -303,7 +312,8 @@ int iotcon_resource_bind_type(iotcon_resource_h resource_handle, const char *res
  * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_resource_bind_request_handler(iotcon_resource_h resource, iotcon_request_handler_cb cb);
+int iotcon_resource_bind_request_handler(iotcon_resource_h resource,
+		iotcon_request_handler_cb cb);
 
 /**
  * @brief Binds a child resource into the parent resource.
@@ -321,6 +331,7 @@ int iotcon_resource_bind_request_handler(iotcon_resource_h resource, iotcon_requ
  * @retval #IOTCON_ERROR_ALREADY  Already done
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_register_resource()
  * @see iotcon_unregister_resource()
@@ -330,7 +341,8 @@ int iotcon_resource_bind_request_handler(iotcon_resource_h resource, iotcon_requ
  * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_resource_bind_child_resource(iotcon_resource_h parent, iotcon_resource_h child);
+int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
+		iotcon_resource_h child);
 
 /**
  * @brief Unbinds a child resource from the parent resource.
@@ -347,6 +359,7 @@ int iotcon_resource_bind_child_resource(iotcon_resource_h parent, iotcon_resourc
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_register_resource()
  * @see iotcon_unregister_resource()
@@ -356,7 +369,8 @@ int iotcon_resource_bind_child_resource(iotcon_resource_h parent, iotcon_resourc
  * @see iotcon_resource_bind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_resource_unbind_child_resource(iotcon_resource_h parent, iotcon_resource_h child);
+int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
+		iotcon_resource_h child);
 
 /**
  * @brief Register device information in a server.
@@ -407,6 +421,7 @@ typedef void (*iotcon_device_info_cb)(const char *device_name, const char *sid,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @post iotcon_device_info_cb() will be called when success on getting device information.
  *
@@ -464,6 +479,7 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_s *info, void *user
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @post iotcon_platform_info_cb() will be called when success on getting device information.
  *
@@ -491,6 +507,7 @@ int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_cb c
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_stop_presence()
  * @see iotcon_subscribe_presence()
@@ -511,6 +528,7 @@ int iotcon_start_presence(unsigned int time_to_live);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_start_presence()
  * @see iotcon_subscribe_presence()
@@ -558,6 +576,7 @@ typedef void (*iotcon_presence_cb)(int result, unsigned int nonce,
  * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @post When the resource receive presence, iotcon_presence_cb() will be called.
  *
@@ -584,6 +603,7 @@ int iotcon_subscribe_presence(const char *host_address, const char *resource_typ
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_start_presence()
  * @see iotcon_stop_presence()
@@ -627,6 +647,7 @@ typedef void (*iotcon_found_resource_cb)(iotcon_client_h resource, void *user_da
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @post When the resource is found, iotcon_found_resource_cb() will be called.
  *
@@ -747,6 +768,7 @@ typedef void (*iotcon_on_observe_cb)(iotcon_client_h resource,
  * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @post When the @a resource receive notification message, iotcon_on_observe_cb() will be called.
  *
@@ -773,6 +795,7 @@ int iotcon_observer_start(iotcon_client_h resource, int observe_type,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_on_observe_cb()
  * @see iotcon_observer_start()
@@ -796,6 +819,7 @@ int iotcon_observer_stop(iotcon_client_h resource);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  */
 int iotcon_response_send(iotcon_response_h resp);
 
@@ -853,6 +877,7 @@ void iotcon_notimsg_destroy(iotcon_notimsg_h msg);
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation error
  * @retval #IOTCON_ERROR_SYSTEM  System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_on_observe_cb()
  * @see iotcon_observer_start()
@@ -877,6 +902,7 @@ int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notimsg_h
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM  System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_on_observe_cb()
  * @see iotcon_observer_start()
@@ -925,6 +951,7 @@ typedef void (*iotcon_on_cru_cb)(iotcon_client_h resource, iotcon_representation
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @post When the client receive get response, iotcon_on_cru_cb() will be called.
  *
@@ -954,6 +981,7 @@ int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @post When the client receive put response, iotcon_on_cru_cb() will be called.
  *
@@ -961,8 +989,8 @@ int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
  * @see iotcon_get()
  * @see iotcon_post()
  */
-int iotcon_put(iotcon_client_h resource, iotcon_representation_h repr, iotcon_query_h query,
-		iotcon_on_cru_cb cb, void *user_data);
+int iotcon_put(iotcon_client_h resource, iotcon_representation_h repr,
+		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data);
 
 /**
  * @brief Posts on a resource
@@ -983,6 +1011,7 @@ int iotcon_put(iotcon_client_h resource, iotcon_representation_h repr, iotcon_qu
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @post When the client receive post response, iotcon_on_cru_cb() will be called.
  *
@@ -990,8 +1019,8 @@ int iotcon_put(iotcon_client_h resource, iotcon_representation_h repr, iotcon_qu
  * @see iotcon_get()
  * @see iotcon_put()
  */
-int iotcon_post(iotcon_client_h resource, iotcon_representation_h repr, iotcon_query_h query,
-		iotcon_on_cru_cb cb, void *user_data);
+int iotcon_post(iotcon_client_h resource, iotcon_representation_h repr,
+		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data);
 
 /**
  * @brief Specifies the type of function passed to iotcon_delete()
@@ -1028,6 +1057,7 @@ typedef void (*iotcon_on_delete_cb)(iotcon_client_h resource, iotcon_options_h o
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @post When the client receive delete response, iotcon_on_delete_cb() will be called.
  *

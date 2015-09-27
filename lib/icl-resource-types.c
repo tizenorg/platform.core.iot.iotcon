@@ -37,7 +37,11 @@ iotcon_resource_types_h icl_resource_types_ref(iotcon_resource_types_h types)
 
 API int iotcon_resource_types_create(iotcon_resource_types_h *ret_types)
 {
-	iotcon_resource_types_h types = calloc(1, sizeof(struct icl_resource_types));
+	iotcon_resource_types_h types;
+
+	RETV_IF(NULL == ret_types, IOTCON_ERROR_INVALID_PARAMETER);
+
+	types = calloc(1, sizeof(struct icl_resource_types));
 	if (NULL == types) {
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
@@ -73,13 +77,13 @@ static int _icl_resource_types_strcmp(const void *a, const void *b)
 static bool _icl_resource_types_duplicate_check(iotcon_resource_types_h types,
 		const char *type)
 {
-	GList *ret = NULL;
+	GList *found_node = NULL;
 
 	RETV_IF(NULL == types, false);
 	RETV_IF(NULL == type, false);
 
-	ret = g_list_find_custom(types->type_list, type, _icl_resource_types_strcmp);
-	if (NULL == ret)
+	found_node = g_list_find_custom(types->type_list, type, _icl_resource_types_strcmp);
+	if (NULL == found_node)
 		return false;
 
 	return true;

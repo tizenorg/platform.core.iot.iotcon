@@ -65,6 +65,8 @@ API int iotcon_representation_create(iotcon_representation_h *ret_repr)
 	errno = 0;
 	iotcon_representation_h repr;
 
+	RETV_IF(NULL == ret_repr, IOTCON_ERROR_INVALID_PARAMETER);
+
 	repr = calloc(1, sizeof(struct icl_representation_s));
 	if (NULL == repr) {
 		ERR("calloc() Fail(%d)", errno);
@@ -104,7 +106,7 @@ API void iotcon_representation_destroy(iotcon_representation_h repr)
 }
 
 
-API int iotcon_representation_get_uri_path(iotcon_representation_h repr, const char **uri_path)
+API int iotcon_representation_get_uri_path(iotcon_representation_h repr, char **uri_path)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
@@ -114,7 +116,8 @@ API int iotcon_representation_get_uri_path(iotcon_representation_h repr, const c
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_representation_set_uri_path(iotcon_representation_h repr, const char *uri_path)
+API int iotcon_representation_set_uri_path(iotcon_representation_h repr,
+		const char *uri_path)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 

@@ -10,7 +10,6 @@
 		</method>
 		<method name="unregisterResource">
 			<arg type="x" name="resource" direction="in"/>
-			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="bindInterface">
 			<arg type="x" name="resource" direction="in"/>

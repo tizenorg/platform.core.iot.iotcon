@@ -388,7 +388,7 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 	FN_CALL;
 	int ret;
 	const gchar *sender;
-	OCResourceHandle handle = NULL;
+	OCResourceHandle handle;
 
 	handle = icd_ioty_register_resource(uri_path, resource_types, ifaces, properties);
 	if (handle) {
@@ -401,6 +401,8 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 			ret = icd_ioty_unregister_resource(handle);
 			if (IOTCON_ERROR_NONE != ret)
 				ERR("icd_ioty_unregister_resource(%u) Fail(%d)", handle, ret);
+
+			handle = NULL;
 		}
 	}
 
@@ -423,7 +425,7 @@ static gboolean _dbus_handle_unregister_resource(icDbus *object,
 
 	_icd_dbus_resource_handle_free(ICD_INT64_TO_POINTER(resource));
 
-	ic_dbus_complete_unregister_resource(object, invocation, ret);
+	ic_dbus_complete_unregister_resource(object, invocation);
 
 	return TRUE;
 }

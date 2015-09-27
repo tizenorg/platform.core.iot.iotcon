@@ -130,6 +130,7 @@ typedef struct icl_options* iotcon_options_h;
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
  *
  * @see iotcon_options_destroy()
  * @see iotcon_options_insert()
@@ -216,7 +217,7 @@ int iotcon_options_delete(iotcon_options_h options, unsigned short id);
  * @see iotcon_options_insert()
  * @see iotcon_options_delete()
  */
-int iotcon_options_lookup(iotcon_options_h options, unsigned short id, const char **data);
+int iotcon_options_lookup(iotcon_options_h options, unsigned short id, char **data);
 
 /**
  * @brief Specifies the type of function passed to iotcon_options_foreach()
@@ -368,7 +369,7 @@ int iotcon_query_delete(iotcon_query_h query, const char *key);
  * @see iotcon_query_insert()
  * @see iotcon_query_delete()
  */
-int iotcon_query_lookup(iotcon_query_h query, const char *key, const char **data);
+int iotcon_query_lookup(iotcon_query_h query, const char *key, char **data);
 
 /**
  * @brief Specifies the type of function passed to iotcon_query_foreach()
@@ -432,6 +433,7 @@ typedef struct icl_resource_types* iotcon_resource_types_h;
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_resource_types_destroy()
  * @see iotcon_resource_types_insert()
@@ -565,7 +567,25 @@ int iotcon_resource_types_clone(iotcon_resource_types_h src,
  *
  * @since_tizen 3.0
  */
-typedef void* iotcon_observers_h;
+typedef struct icl_observers* iotcon_observers_h;
+
+/**
+ * @brief Creates a new observers handle.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[out] ret_observers A newly allocated list of observers handle
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ *
+ * @see iotcon_observers_destroy()
+ * @see iotcon_observers_insert()
+ * @see iotcon_observers_delete()
+ */
+int iotcon_observers_create(iotcon_observers_h *ret_observers);
 
 /**
  * @brief Free a observers handle.
@@ -576,8 +596,9 @@ typedef void* iotcon_observers_h;
  *
  * @return void
  *
- * @see iotcon_observers_append()
- * @see iotcon_observers_remove()
+ * @see iotcon_observers_create()
+ * @see iotcon_observers_insert()
+ * @see iotcon_observers_delete()
  */
 void iotcon_observers_destroy(iotcon_observers_h observers);
 
@@ -593,12 +614,13 @@ void iotcon_observers_destroy(iotcon_observers_h observers);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
+ * @see iotcon_observers_create()
  * @see iotcon_observers_destroy()
- * @see iotcon_observers_remove()
+ * @see iotcon_observers_delete()
  */
-int iotcon_observers_append(iotcon_observers_h observers, int obs_id,
-		iotcon_observers_h *ret_observers);
+int iotcon_observers_insert(iotcon_observers_h observers, int obs_id);
 
 /**
  * @brief Remove id from the observers.
@@ -611,12 +633,13 @@ int iotcon_observers_append(iotcon_observers_h observers, int obs_id,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
+ * @see iotcon_observers_create()
  * @see iotcon_observers_destroy()
- * @see iotcon_observers_append()
+ * @see iotcon_observers_insert()
  */
-int iotcon_observers_remove(iotcon_observers_h observers, int obs_id,
-		iotcon_observers_h *ret_observers);
+int iotcon_observers_delete(iotcon_observers_h observers, int obs_id);
 
 /**
  * @brief The handle of resource.
@@ -968,7 +991,8 @@ int iotcon_request_get_uri_path(iotcon_request_h request, char **uri_path);
  * @see iotcon_request_get_observer_action()
  * @see iotcon_request_get_observer_id()
  */
-int iotcon_request_get_representation(iotcon_request_h request, iotcon_representation_h *repr);
+int iotcon_request_get_representation(iotcon_request_h request,
+		iotcon_representation_h *repr);
 
 /**
  * @brief Get types of the request
@@ -1171,7 +1195,8 @@ int iotcon_response_set_result(iotcon_response_h resp, int result);
  * @see iotcon_response_create()
  * @see iotcon_response_destroy()
  */
-int iotcon_response_set_representation(iotcon_response_h resp, iotcon_representation_h repr);
+int iotcon_response_set_representation(iotcon_response_h resp,
+		iotcon_representation_h repr);
 
 /**
  * @brief Sets header options into the response
