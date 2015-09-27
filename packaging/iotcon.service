@@ -1,5 +1,5 @@
 [Unit]
-Description=IoT Connectivity Manager
+Description=Tizen IoT Connectivity
 After=system-server.service
 Requires=system-server.service
 

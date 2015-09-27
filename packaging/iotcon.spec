@@ -1,15 +1,15 @@
 Name:       iotcon
-Summary:    IoT Connectivity Manager
+Summary:    Tizen IoT Connectivity
 Version:    0.0.1
 Release:    0
-Group:      Network & Connectivity/Other
+Group:      Network & Connectivity/Service
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    %{name}.service
-Source1001: %{name}-v3.manifest
-Source1002: %{name}-v2.manifest
-Source1003: lib%{name}-v2.manifest
-Source1004: %{name}-test-v2.manifest
+Source1001: %{name}.manifest
+Source1002: %{name}-old.manifest
+Source1003: lib%{name}-old.manifest
+Source1004: %{name}-test-old.manifest
 Source2001: %{name}.conf.in
 BuildRequires:  cmake
 BuildRequires:  boost-devel
@@ -24,20 +24,20 @@ BuildRequires:  python-xml
 %define _unitdir /usr/lib/systemd/system
 
 %description
-IoT Connectivity Manager Daemon
+Tizen IoT Connectivity based on Iotivity
 
 
 %package lib
-Summary:    IoT Connectivity Library
+Summary:    Tizen IoT Connectivity Library
 Group:      Network & Connectivity/Libraries
 Requires:   %{name} = %{version}
 
 %description lib
-Tizen event notification service Client library for applications.
+Tizen IoT Connectivity Library(Client) for applications.
 
 
 %package devel
-Summary:    IoT Connectivity Manager (devel)
+Summary:    TizenIoT Connectivity(devel)
 Group:      Network & Connectivity/Development
 Requires:   %{name}-lib = %{version}
 
@@ -46,32 +46,39 @@ IoT Connectivity Manager development Kit
 
 
 %package test
-Summary:    IoT Connectivity Manager (test)
-Group:      Network & Connectivity/Development
+Summary:    Tizen IoT Connectivity(test)
+Group:      Network & Connectivity/Testing
 Requires:   %{name}-lib = %{version}
 
 %description test
-IoT Connectivity Manager Test Programs
+Tizen IoT Connectivity Test Programs
 
 
 %prep
 %setup -q
-%if %tizen_version_major == 3
+chmod g-w %_sourcedir/*
+%if %tizen_version_major < 3
+cp %{SOURCE1002} ./%{name}.manifest
+cp %{SOURCE1003} ./lib%{name}.manifest
+cp %{SOURCE1004} ./%{name}-test.manifest
+%else
 cp %{SOURCE1001} ./%{name}.manifest
 cp %{SOURCE1001} ./lib%{name}.manifest
 cp %{SOURCE1001} ./%{name}-test.manifest
 cp %{SOURCE2001} .
-%else
-cp %{SOURCE1002} ./%{name}.manifest
-cp %{SOURCE1003} ./lib%{name}.manifest
-cp %{SOURCE1004} ./%{name}-test.manifest
 %endif
 
 
 %build
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
+%if 0%{?tizen_version_major} < 3
+NEW_SECURE=0
+%else
+NEW_SECURE=1
+%endif
+
 %cmake . -DMAJORVER=${MAJORVER} -DFULLVER=%{version} -DBIN_INSTALL_DIR:PATH=%{_bindir} \
-		-DTZ_VER=%{tizen_version_major}
+		-DNEW_SECURE=${NEW_SECURE}
 
 
 %install
