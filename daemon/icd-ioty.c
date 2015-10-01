@@ -407,7 +407,7 @@ int icd_ioty_find_resource(const char *host_address, const char *resource_type,
 	}
 
 	if (IC_STR_EQUAL != strcmp(IC_STR_NULL, resource_type))
-		snprintf(uri + len, sizeof(uri), "?rt=%s", resource_type);
+		snprintf(uri + len, sizeof(uri) - len, "?rt=%s", resource_type);
 
 	context = calloc(1, sizeof(icd_sig_ctx_s));
 	if (NULL == context) {
@@ -468,10 +468,10 @@ static char* _icd_ioty_resource_generate_uri(char *uri_path, GVariant *query)
 		DBG("query exist. key(%s), value(%s)", key, value);
 
 		if (true == loop_first) {
-			query_len = snprintf(uri_buf + len, sizeof(uri_buf), "?%s=%s", key, value);
+			query_len = snprintf(uri_buf + len, sizeof(uri_buf) - len, "?%s=%s", key, value);
 			loop_first = false;
 		} else {
-			query_len = snprintf(uri_buf + len, sizeof(uri_buf), "&%s=%s", key, value);
+			query_len = snprintf(uri_buf + len, sizeof(uri_buf) - len, "&%s=%s", key, value);
 		}
 
 		len += query_len;
@@ -534,7 +534,7 @@ static gboolean _icd_ioty_crud(int type, icDbus *object, GDBusMethodInvocation *
 	GVariantIter *options;
 	OCCallbackData cbdata = {0};
 	int conn_type, options_size;
-	char *uri_path, *host, *uri, *dev_host, *ptr;
+	char *uri_path, *host, *uri, *dev_host, *ptr = NULL;
 	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
 	OCHeaderOption *oic_options_ptr = NULL;
 	OCPayload *payload = NULL;
@@ -622,6 +622,7 @@ static gboolean _icd_ioty_crud(int type, icDbus *object, GDBusMethodInvocation *
 	default:
 		ERR("Invalid Connectivitiy Type");
 		icd_ioty_complete_error(type, invocation, IOTCON_ERROR_IOTIVITY);
+		free(uri);
 		return TRUE;
 	}
 
@@ -681,7 +682,7 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVarian
 	icd_sig_ctx_s *context;
 	OCCallbackData cbdata = {0};
 	int conn_type, options_size;
-	char *uri_path, *host, *uri, *dev_host, *ptr;
+	char *uri_path, *host, *uri, *dev_host, *ptr = NULL;
 	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
 	OCHeaderOption *oic_options_ptr = NULL;
 	OCConnectivityType oic_conn_type;
@@ -750,6 +751,9 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVarian
 		break;
 	default:
 		ERR("Invalid Connectivitiy Type");
+		free(context->bus_name);
+		free(context);
+		free(uri);
 		return NULL;
 	}
 
@@ -925,7 +929,7 @@ OCDoHandle icd_ioty_subscribe_presence(const char *host_address,
 	}
 
 	if (IC_STR_EQUAL != strcmp(IC_STR_NULL, resource_type))
-		snprintf(uri + len, sizeof(uri), "?rt=%s", resource_type);
+		snprintf(uri + len, sizeof(uri) - len, "?rt=%s", resource_type);
 
 	context = calloc(1, sizeof(icd_sig_ctx_s));
 	if (NULL == context) {

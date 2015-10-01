@@ -101,6 +101,8 @@ static void _room_request_handler_get(iotcon_request_h request,
 	ret = iotcon_list_create(IOTCON_TYPE_INT, &temperature_list);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_list_create() Fail(%d)", ret);
+		iotcon_state_destroy(room_state);
+		iotcon_representation_destroy(room_repr);
 		return;
 	}
 

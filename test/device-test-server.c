@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <stdlib.h>
 #include <glib.h>
 #include <iotcon.h>
 #include "test.h"
@@ -26,6 +27,10 @@ int main()
 	char *device_name;
 
 	iotcon_platform_info_s *platform_info = calloc(1, sizeof(iotcon_platform_info_s));
+	if (NULL == platform_info) {
+		ERR("calloc() Fail(%d)", errno);
+		return -1;
+	}
 
 	platform_info->platform_id = "platform_id";
 	platform_info->manuf_name = "manuf_name";
@@ -49,8 +54,11 @@ int main()
 	ret = iotcon_register_platform_info(platform_info);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_register_platform_info() Fail(%d)", ret);
+		free(platform_info);
 		return -1;
 	}
+
+	free(platform_info);
 
 	ret = iotcon_register_device_info(device_name);
 	if (IOTCON_ERROR_NONE != ret) {

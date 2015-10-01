@@ -93,6 +93,8 @@ static void _icl_request_handler(GDBusConnection *connection,
 			ERR("iotcon_query_create() Fail(%d)", ret);
 			g_variant_iter_free(query);
 			g_variant_iter_free(repr_iter);
+			if (request.header_options)
+				iotcon_options_destroy(request.header_options);
 			return;
 		}
 

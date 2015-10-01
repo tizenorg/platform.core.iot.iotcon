@@ -164,6 +164,7 @@ static void _on_get(iotcon_client_h resource, iotcon_representation_h recv_repr,
 	ret = iotcon_state_create(&send_state);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_state_create() Fail(%d)", ret);
+		iotcon_representation_destroy(send_repr);
 		return;
 	}
 
@@ -174,6 +175,7 @@ static void _on_get(iotcon_client_h resource, iotcon_representation_h recv_repr,
 	/* send PUT request */
 	iotcon_put(resource, send_repr, NULL, _on_put, NULL);
 
+	iotcon_state_destroy(send_state);
 	iotcon_representation_destroy(send_repr);
 }
 

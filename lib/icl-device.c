@@ -223,9 +223,15 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 		gpointer user_data)
 {
 	char *uri_path;
-	iotcon_platform_info_s *info = calloc(1, sizeof(iotcon_platform_info_s));
+	iotcon_platform_info_s *info = NULL;
 	icl_platform_info_s *cb_container = user_data;
 	iotcon_platform_info_cb cb = cb_container->cb;
+
+	info = calloc(1, sizeof(iotcon_platform_info_s));
+	if (NULL == info) {
+		ERR("calloc(client) Fail(%d)", errno);
+		return;
+	}
 
 	g_variant_get(parameters, "(&s&s&s&s&s&s&s&s&s&s&s&s)",
 			&uri_path,
@@ -245,6 +251,8 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 
 	if (cb)
 		cb(info, cb_container->user_data);
+
+	free(info);
 }
 
 
