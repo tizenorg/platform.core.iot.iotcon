@@ -120,7 +120,6 @@ systemctl daemon-reload
 %{_unitdir}/%{name}.service
 %{_unitdir}/multi-user.target.wants/%{name}.service
 %{_bindir}/%{name}-daemon
-%{_datadir}/dbus-1/services/org.tizen.%{name}.dbus.service
 %if 0%{?tizen_version_major} < 3
 %{_datadir}/license/%{name}
 %else

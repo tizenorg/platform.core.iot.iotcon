@@ -1,12 +1,10 @@
 [Unit]
 Description=Tizen IoT Connectivity
-After=system-server.service
-Requires=system-server.service
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/iotcon-daemon
-KillSignal=SIGKILL
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
