@@ -51,9 +51,9 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 	GVariantBuilder types;
 	OCRandomUuidResult random_res;
 	OCDiscoveryPayload *discovered;
-	char sid[UUID_STRING_SIZE] = {0};
 	struct OCResourcePayload *resource;
 	int i, is_observable, ret, res_count;
+	char device_id[UUID_STRING_SIZE] = {0};
 
 	discovered = (OCDiscoveryPayload*)payload;
 	resource = discovered->resources;
@@ -72,8 +72,8 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 			resource = resource->next;
 		}
 
-		/* sid */
-		random_res = OCConvertUuidToString(resource->sid, sid);
+		/* device id */
+		random_res = OCConvertUuidToString(resource->sid, device_id);
 		if (RAND_UUID_OK != random_res) {
 			ERR("OCConvertUuidToString() Fail(%d)", random_res);
 			resource = resource->next;
@@ -114,7 +114,7 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 		/* port */
 		port = (resource->port)? resource->port:dev_addr->port;
 
-		value[i] = g_variant_new("(ssiasibsi)", resource->uri, sid, ifaces, &types,
+		value[i] = g_variant_new("(ssiasibsi)", resource->uri, device_id, ifaces, &types,
 				is_observable, resource->secure, dev_addr->addr, port);
 		DBG("found resource[%d] : %s", i, g_variant_print(value[i], FALSE));
 
@@ -325,16 +325,16 @@ static GVariant* _icd_payload_device_to_gvariant(OCDevicePayload *repr)
 {
 	GVariant *value;
 	OCRandomUuidResult random_res;
-	char sid[UUID_STRING_SIZE] = {0};
+	char device_id[UUID_STRING_SIZE] = {0};
 
-	random_res = OCConvertUuidToString(repr->sid, sid);
+	random_res = OCConvertUuidToString(repr->sid, device_id);
 	if (RAND_UUID_OK != random_res) {
 		ERR("OCConvertUuidToString() Fail(%d)", random_res);
 		return NULL;
 	}
 
-	value = g_variant_new("(ssss)", repr->deviceName, sid, repr->specVersion,
-			repr->dataModelVersion);
+	value = g_variant_new("(sssss)", repr->uri, repr->deviceName, repr->specVersion,
+			device_id, repr->dataModelVersion);
 
 	return value;
 }

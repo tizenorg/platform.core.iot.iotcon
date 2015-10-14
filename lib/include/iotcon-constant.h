@@ -173,6 +173,37 @@ typedef enum {
 } iotcon_types_e;
 
 /**
+ * @brief Enumeration for properties of device information.
+ *
+ * @since_tizen 3.0
+ */
+typedef enum {
+	IOTCON_DEVICE_INFO_NAME = 0, /**< Indicates human friendly name for device */
+	IOTCON_DEVICE_INFO_SPEC_VER, /**< Indicates spec version of the core specification */
+	IOTCON_DEVICE_INFO_ID, /**< Indicates unique identifier for OIC device */
+	IOTCON_DEVICE_INFO_DATA_MODEL_VER, /**< Indicates version of the specs this device data model is implemented to */
+} iotcon_device_info_e;
+
+/**
+ * @brief Enumeration for properties of platform information.
+ *
+ * @since_tizen 3.0
+ */
+typedef enum {
+	IOTCON_PLATFORM_INFO_ID = 0, /**< Indicates platform identifier */
+	IOTCON_PLATFORM_INFO_MANUF_NAME, /**< Indicates name of manufacturer */
+	IOTCON_PLATFORM_INFO_MANUF_URL, /**< Indicates URL to manufacturer */
+	IOTCON_PLATFORM_INFO_MODEL_NUMBER, /**< Indicates model number as designated by manufacturer */
+	IOTCON_PLATFORM_INFO_DATE_OF_MANUF, /**< Indicates manufacturing date of device */
+	IOTCON_PLATFORM_INFO_PLATFORM_VER, /**< Indicates version of platform defined by manufacturer */
+	IOTCON_PLATFORM_INFO_OS_VER, /**< Indicates version of platform resident OS */
+	IOTCON_PLATFORM_INFO_HARDWARE_VER, /**< Indicates version of platform hardware */
+	IOTCON_PLATFORM_INFO_FIRMWARE_VER, /**< Indicates version of device firmware */
+	IOTCON_PLATFORM_INFO_SUPPORT_URL, /**< Indicates URL that points to support information from manufacturer */
+	IOTCON_PLATFORM_INFO_SYSTEM_TIME, /**< Indicates reference time for the device */
+} iotcon_platform_info_e;
+
+/**
  * @}
  */
 

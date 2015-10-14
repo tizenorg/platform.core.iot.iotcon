@@ -20,32 +20,153 @@
 #include <iotcon.h>
 #include "test.h"
 
+static int _set_device_info()
+{
+	int ret;
+	char *device_name = "device name";
+	iotcon_device_info_h device_info;
+
+	ret = iotcon_device_info_create(&device_info);
+	if (NULL == device_info) {
+		ERR("iotcon_device_info_create() Fail(%d)", ret);
+		return -1;
+	}
+
+	ret = iotcon_device_info_set_property(device_info, IOTCON_DEVICE_INFO_NAME,
+			device_name);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_device_info_set_property() Fail(%d)", ret);
+		iotcon_device_info_destroy(device_info);
+		return -1;
+	}
+
+	ret = iotcon_set_device_info(device_info);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_set_device_info() Fail(%d)", ret);
+		iotcon_device_info_destroy(device_info);
+		return -1;
+	}
+
+	iotcon_device_info_destroy(device_info);
+
+	return 0;
+}
+
+static int _set_platform_info()
+{
+	int ret;
+	char *platform_id = "platform_id";
+	char *manuf_name = "manuf_name";
+	char *manuf_url = "manuf_url";
+	char *model_number = "model_number";
+	char *date_of_manuf = "date_of_manuf";
+	char *platform_ver = "platform_ver";
+	char *os_ver = "os_ver";
+	char *hardware_ver = "hardware_ver";
+	char *firmware_ver = "firmware_ver";
+	char *support_url = "support_url";
+	char *system_time = "system_time";
+	iotcon_platform_info_h platform_info;
+
+	ret = iotcon_platform_info_create(&platform_info);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_create() Fail(%d)", ret);
+		return -1;
+	}
+
+	ret = iotcon_platform_info_set_property(platform_info, IOTCON_PLATFORM_INFO_ID,
+			platform_id);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_set_property() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+	ret = iotcon_platform_info_set_property(platform_info,
+			IOTCON_PLATFORM_INFO_MANUF_NAME, manuf_name);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_set_property() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+	ret = iotcon_platform_info_set_property(platform_info, IOTCON_PLATFORM_INFO_MANUF_URL,
+			manuf_url);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_set_property() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+	ret = iotcon_platform_info_set_property(platform_info,
+			IOTCON_PLATFORM_INFO_MODEL_NUMBER, model_number);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_set_property() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+	ret = iotcon_platform_info_set_property(platform_info,
+			IOTCON_PLATFORM_INFO_DATE_OF_MANUF, date_of_manuf);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_set_property() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+	ret = iotcon_platform_info_set_property(platform_info,
+			IOTCON_PLATFORM_INFO_PLATFORM_VER, platform_ver);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_set_property() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+	ret = iotcon_platform_info_set_property(platform_info, IOTCON_PLATFORM_INFO_OS_VER,
+			os_ver);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_set_property() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+	ret = iotcon_platform_info_set_property(platform_info,
+			IOTCON_PLATFORM_INFO_HARDWARE_VER, hardware_ver);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_set_property() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+	ret = iotcon_platform_info_set_property(platform_info,
+			IOTCON_PLATFORM_INFO_FIRMWARE_VER, firmware_ver);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_set_property() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+	ret = iotcon_platform_info_set_property(platform_info,
+			IOTCON_PLATFORM_INFO_SUPPORT_URL, support_url);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_set_property() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+	ret = iotcon_platform_info_set_property(platform_info,
+			IOTCON_PLATFORM_INFO_SYSTEM_TIME, system_time);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_platform_info_set_property() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+
+	ret = iotcon_set_platform_info(platform_info);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_set_platform_info() Fail(%d)", ret);
+		iotcon_platform_info_destroy(platform_info);
+		return -1;
+	}
+
+	return 0;
+}
+
 int main()
 {
 	FN_CALL;
 	int ret;
 	GMainLoop *loop;
-	char *device_name;
-
-	iotcon_platform_info_s *platform_info = calloc(1, sizeof(iotcon_platform_info_s));
-	if (NULL == platform_info) {
-		ERR("calloc(platform_info) Fail(%d)", errno);
-		return -1;
-	}
-
-	platform_info->platform_id = "platform_id";
-	platform_info->manuf_name = "manuf_name";
-	platform_info->manuf_url = "manuf_url";
-	platform_info->model_number = "model_number";
-	platform_info->date_of_manufacture = "date_of_manufacture";
-	platform_info->platform_ver = "platform_ver";
-	platform_info->os_ver = "os_ver";
-	platform_info->hardware_ver = "hardware_ver";
-	platform_info->firmware_ver = "firmware_ver";
-	platform_info->support_url = "support_url";
-	platform_info->system_time = "system_time";
-
-	device_name = "device_name";
 
 	loop = g_main_loop_new(NULL, FALSE);
 
@@ -53,23 +174,18 @@ int main()
 	ret = iotcon_open();
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_open() Fail(%d)", ret);
-		free(platform_info);
 		return -1;
 	}
 
-	ret = iotcon_register_platform_info(platform_info);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_register_platform_info() Fail(%d)", ret);
+	ret = _set_device_info();
+	if (0 != ret) {
+		ERR("_set_device_info() Fail");
 		iotcon_close();
-		free(platform_info);
 		return -1;
 	}
-
-	free(platform_info);
-
-	ret = iotcon_register_device_info(device_name);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_register_platform_info() Fail(%d)", ret);
+	ret = _set_platform_info();
+	if (0 != ret) {
+		ERR("_set_platform_info() Fail");
 		iotcon_close();
 		return -1;
 	}
@@ -83,7 +199,4 @@ int main()
 
 	return 0;
 }
-
-
-
 

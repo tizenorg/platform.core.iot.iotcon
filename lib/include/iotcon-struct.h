@@ -74,7 +74,7 @@ typedef struct icl_state_s* iotcon_state_h;
 typedef struct icl_notify_msg* iotcon_notimsg_h;
 
 /**
- * @brief The handle of presence handle
+ * @brief The handle of presence.
  * @details iotcon_presence_h is a handle of presence subscription.\n
  * It is used to cancel presence.
  *
@@ -83,32 +83,20 @@ typedef struct icl_notify_msg* iotcon_notimsg_h;
 typedef struct icl_presence* iotcon_presence_h;
 
 /**
- * @brief The structure of device information
+ * @brief The handle of device information.
+ * @details iotcon_device_info_h is a handle of device information.\n
  *
  * @since_tizen 3.0
  */
-typedef struct _device_info {
-	char *device_name; /**< Name of the device */
-} iotcon_device_info_s;
+typedef struct icl_device_info* iotcon_device_info_h;
 
 /**
- * @brief The structure of platform information
+ * @brief The handle of platform information.
+ * @details iotcon_platform_info_h is a handle of platform information.\n
  *
  * @since_tizen 3.0
  */
-typedef struct _platform_info {
-	char *platform_id; /**< ID of the platform */
-	char *manuf_name; /**< Manufacurer name of the platform */
-	char *manuf_url; /**< Manufacurer url of the platform */
-	char *model_number; /**< Model number of the platform */
-	char *date_of_manufacture; /**< Date of manufacture of the platform */
-	char *platform_ver; /**< Platform version of the platform */
-	char *os_ver; /**< OS version of the platform */
-	char *hardware_ver; /**< Hardware version of the platform */
-	char *firmware_ver; /**< Firmware version of the platform */
-	char *support_url; /**< Support url of the platform */
-	char *system_time; /**< System time of the platform */
-} iotcon_platform_info_s;
+typedef struct icl_platform_info* iotcon_platform_info_h;
 
 /**
  * @brief The handle of options
@@ -1239,6 +1227,85 @@ int iotcon_response_set_header_options(iotcon_response_h resp, iotcon_options_h 
  */
 int iotcon_response_set_interface(iotcon_response_h resp, int iface);
 
+/**
+ * @brief Sets device properties into the device information handle
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] device_info The handle of the device information
+ * @param[in] property The properties of the device information
+ * @param[in] value The value of the property
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ *
+ * @see iotcon_device_info_create()
+ * @see iotcon_device_info_destroy()
+ * @see iotcon_set_device_info()
+ */
+int iotcon_device_info_set_property(iotcon_device_info_h device_info,
+		iotcon_device_info_e property, const char *value);
+
+/**
+ * @brief Get device properties from the device information handle
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] device_info The handle of the device information
+ * @param[in] property The properties of the device information
+ * @param[in] value The value of the property
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_device_info_cb()
+ * @see iotcon_get_device_info()
+ */
+int iotcon_device_info_get_property(iotcon_device_info_h device_info,
+		iotcon_device_info_e property, char **value);
+
+/**
+ * @brief Sets platform properties into the platform information handle
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] platform_info The handle of the platform information
+ * @param[in] property The properties of the platform information
+ * @param[out] value The value of the property
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ *
+ * @see iotcon_platform_info_create()
+ * @see iotcon_platform_info_destroy()
+ * @see iotcon_set_platform_info()
+ */
+int iotcon_platform_info_set_property(iotcon_platform_info_h platform_info,
+		iotcon_platform_info_e property, const char *value);
+
+/**
+ * @brief Get platform properties from the platform information handle
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] platform_info The handle of the platform information
+ * @param[in] property The properties of the platform information
+ * @param[out] value The value of the property
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_platform_info_cb()
+ * @see iotcon_get_platform_info()
+ */
+int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
+		iotcon_platform_info_e property, char **value);
 /**
  * @}
  */

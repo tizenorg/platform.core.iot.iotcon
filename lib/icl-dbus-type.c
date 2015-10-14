@@ -29,6 +29,7 @@
 #include "icl-response.h"
 #include "icl-remote-resource.h"
 #include "icl-repr.h"
+#include "icl-device.h"
 #include "icl-payload.h"
 #include "icl-observation.h"
 #include "icl-dbus-type.h"
@@ -138,17 +139,17 @@ GVariant* icl_dbus_remote_resource_to_gvariant(struct icl_remote_resource *resou
 }
 
 
-GVariant* icl_dbus_device_info_to_gvariant(const char *device_name)
+GVariant* icl_dbus_device_info_to_gvariant(iotcon_device_info_h device_info)
 {
 	GVariant *value;
 
-	value = g_variant_new("(s)", device_name);
+	value = g_variant_new("(s)", device_info->device_name);
 
 	return value;
 }
 
 
-GVariant* icl_dbus_platform_info_to_gvariant(iotcon_platform_info_s *platform_info)
+GVariant* icl_dbus_platform_info_to_gvariant(iotcon_platform_info_h platform_info)
 {
 	GVariant *value;
 
@@ -157,7 +158,7 @@ GVariant* icl_dbus_platform_info_to_gvariant(iotcon_platform_info_s *platform_in
 			platform_info->manuf_name,
 			platform_info->manuf_url,
 			platform_info->model_number,
-			platform_info->date_of_manufacture,
+			platform_info->date_of_manuf,
 			platform_info->platform_ver,
 			platform_info->os_ver,
 			platform_info->hardware_ver,
