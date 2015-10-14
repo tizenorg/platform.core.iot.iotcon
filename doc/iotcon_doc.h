@@ -170,7 +170,7 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		return;
 	}
 
-	ret = iotcon_client_get_server_id(resource, &resource_sid);
+	ret = iotcon_client_get_device_id(resource, &resource_sid);
 	if (IOTCON_ERROR_NONE != ret) {
 		return;
 	}

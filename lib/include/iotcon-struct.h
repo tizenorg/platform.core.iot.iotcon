@@ -803,7 +803,7 @@ typedef struct icl_remote_resource* iotcon_client_h;
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_client_get_host()
- * @see iotcon_client_get_server_id()
+ * @see iotcon_client_get_device_id()
  * @see iotcon_client_get_types()
  * @see iotcon_client_get_interfaces()
  * @see iotcon_client_is_observable()
@@ -825,7 +825,7 @@ int iotcon_client_get_uri_path(iotcon_client_h resource, char **uri_path);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_client_get_uri_path()
- * @see iotcon_client_get_server_id()
+ * @see iotcon_client_get_device_id()
  * @see iotcon_client_get_types()
  * @see iotcon_client_get_interfaces()
  * @see iotcon_client_is_observable()
@@ -840,7 +840,7 @@ int iotcon_client_get_host(iotcon_client_h resource, char **host);
  * @remarks @a sid must not be released using free().
  *
  * @param[in] resource The handle of the client
- * @param[out] sid The server id of the client
+ * @param[out] device_id The device id of the client
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -853,7 +853,7 @@ int iotcon_client_get_host(iotcon_client_h resource, char **host);
  * @see iotcon_client_is_observable()
  * @see iotcon_client_set_options()
  */
-int iotcon_client_get_server_id(iotcon_client_h resource, char **sid);
+int iotcon_client_get_device_id(iotcon_client_h resource, char **device_id);
 
 /**
  * @brief Gets resource types of the client
@@ -869,7 +869,7 @@ int iotcon_client_get_server_id(iotcon_client_h resource, char **sid);
  *
  * @see iotcon_client_get_uri_path()
  * @see iotcon_client_get_host()
- * @see iotcon_client_get_server_id()
+ * @see iotcon_client_get_device_id()
  * @see iotcon_client_get_interfaces()
  * @see iotcon_client_is_observable()
  * @see iotcon_client_set_options()
@@ -890,7 +890,7 @@ int iotcon_client_get_types(iotcon_client_h resource, iotcon_resource_types_h *t
  *
  * @see iotcon_client_get_uri_path()
  * @see iotcon_client_get_host()
- * @see iotcon_client_get_server_id()
+ * @see iotcon_client_get_device_id()
  * @see iotcon_client_get_types()
  * @see iotcon_client_is_observable()
  * @see iotcon_client_set_options()
@@ -911,7 +911,7 @@ int iotcon_client_get_interfaces(iotcon_client_h resource, int *ifaces);
  *
  * @see iotcon_client_get_uri_path()
  * @see iotcon_client_get_host()
- * @see iotcon_client_get_server_id()
+ * @see iotcon_client_get_device_id()
  * @see iotcon_client_get_types()
  * @see iotcon_client_get_interfaces()
  * @see iotcon_client_set_options()
@@ -932,7 +932,7 @@ int iotcon_client_is_observable(iotcon_client_h resource, bool *observable);
  *
  * @see iotcon_client_get_uri_path()
  * @see iotcon_client_get_host()
- * @see iotcon_client_get_server_id()
+ * @see iotcon_client_get_device_id()
  * @see iotcon_client_get_types()
  * @see iotcon_client_get_interfaces()
  * @see iotcon_client_is_observable()

@@ -181,7 +181,7 @@ API void iotcon_client_destroy(iotcon_client_h resource)
 
 	free(resource->uri_path);
 	free(resource->host);
-	free(resource->sid);
+	free(resource->device_id);
 	iotcon_resource_types_destroy(resource->types);
 
 	/* null COULD be allowed */
@@ -230,12 +230,12 @@ API int iotcon_client_get_host(iotcon_client_h resource, char **host)
 
 
 /* The content of the resource should not be freed by user. */
-API int iotcon_client_get_server_id(iotcon_client_h resource, char **sid)
+API int iotcon_client_get_device_id(iotcon_client_h resource, char **device_id)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == sid, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == device_id, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*sid = resource->sid;
+	*device_id = resource->device_id;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -335,8 +335,8 @@ static iotcon_client_h _icl_client_from_gvariant(GVariant *payload,
 	}
 	client->ref_count = 1;
 
-	client->sid = strdup(sid);
-	if (NULL == client->sid) {
+	client->device_id = strdup(sid);
+	if (NULL == client->device_id) {
 		ERR("strdup(sid) Fail(%d)", errno);
 		iotcon_client_destroy(client);
 		return NULL;

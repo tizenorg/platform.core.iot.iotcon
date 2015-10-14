@@ -24,7 +24,7 @@ struct icl_remote_resource {
 	int ref_count;
 	char *uri_path;
 	char *host;
-	char *sid;
+	char *device_id;
 	bool is_secure;
 	bool is_observable;
 	iotcon_options_h header_options;
