@@ -108,4 +108,17 @@ int icd_ioty_start_presence(unsigned int time_to_live);
 
 int icd_ioty_stop_presence();
 
+static inline int icd_ioty_convert_error(int ret)
+{
+	switch (ret) {
+	case OC_STACK_NO_MEMORY:
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	case OC_STACK_NO_RESOURCE:
+		return IOTCON_ERROR_NO_DATA;
+	default:
+		break;
+	}
+	return IOTCON_ERROR_IOTIVITY;
+}
+
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_H__*/

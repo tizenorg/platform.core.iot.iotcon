@@ -148,9 +148,10 @@ int icd_ioty_unregister_resource(OCResourceHandle handle)
 	icd_ioty_csdk_lock();
 	ret = OCDeleteResource(handle);
 	icd_ioty_csdk_unlock();
+
 	if (OC_STACK_OK != ret) {
 		ERR("OCDeleteResource() Fail(%d)", ret);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -172,9 +173,10 @@ int icd_ioty_bind_interface(OCResourceHandle handle, iotcon_interface_e iface)
 	icd_ioty_csdk_lock();
 	result = OCBindResourceInterfaceToResource(handle, resource_interface);
 	icd_ioty_csdk_unlock();
+
 	if (OC_STACK_OK != result) {
 		ERR("OCBindResourceInterfaceToResource() Fail(%d)", result);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -188,9 +190,10 @@ int icd_ioty_bind_type(OCResourceHandle handle, const char *resource_type)
 	icd_ioty_csdk_lock();
 	ret = OCBindResourceTypeToResource(handle, resource_type);
 	icd_ioty_csdk_unlock();
+
 	if (OC_STACK_OK != ret) {
 		ERR("OCBindResourceTypeToResource() Fail(%d)", ret);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -204,9 +207,10 @@ int icd_ioty_bind_resource(OCResourceHandle parent, OCResourceHandle child)
 	icd_ioty_csdk_lock();
 	ret = OCBindResource(parent, child);
 	icd_ioty_csdk_unlock();
+
 	if (OC_STACK_OK != ret) {
 		ERR("OCBindResource() Fail(%d)", ret);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -220,9 +224,10 @@ int icd_ioty_unbind_resource(OCResourceHandle parent, OCResourceHandle child)
 	icd_ioty_csdk_lock();
 	ret = OCUnBindResource(parent, child);
 	icd_ioty_csdk_unlock();
+
 	if (OC_STACK_OK != ret) {
 		ERR("OCUnBindResource() Fail(%d)", ret);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -263,7 +268,7 @@ int icd_ioty_notify_list_of_observers(OCResourceHandle handle, GVariant *msg,
 		return IOTCON_ERROR_NONE;
 	} else if (OC_STACK_OK != ret) {
 		ERR("OCNotifyListOfObservers() Fail(%d)", ret);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -284,7 +289,7 @@ int icd_ioty_notify_all(OCResourceHandle handle)
 		return IOTCON_ERROR_NONE;
 	} else if (OC_STACK_OK != ret) {
 		ERR("OCNotifyAllObservers() Fail(%d)", ret);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -369,7 +374,7 @@ int icd_ioty_send_response(GVariant *resp)
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCDoResponse() Fail(%d)", ret);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -434,7 +439,7 @@ int icd_ioty_find_resource(const char *host_address, const char *resource_type,
 		ERR("OCDoResource() Fail(%d)", result);
 		free(context->bus_name);
 		free(context);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -636,7 +641,7 @@ static gboolean _icd_ioty_crud(int type, icDbus *object, GDBusMethodInvocation *
 
 	if (OC_STACK_OK != result) {
 		ERR("OCDoResource() Fail(%d)", result);
-		icd_ioty_complete_error(type, invocation, IOTCON_ERROR_IOTIVITY);
+		return icd_ioty_convert_error(result);
 		return TRUE;
 	}
 
@@ -800,7 +805,7 @@ int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options)
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCCancel() Fail(%d)", ret);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -820,7 +825,7 @@ int icd_ioty_register_device_info(GVariant *value)
 
 	if (OC_STACK_OK != result) {
 		ERR("OCSetDeviceInfo() Fail(%d)", result);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -851,7 +856,7 @@ int icd_ioty_register_platform_info(GVariant *value)
 
 	if (OC_STACK_OK != result) {
 		ERR("OCSetPlatformInfo() Fail(%d)", result);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -905,7 +910,7 @@ int icd_ioty_get_info(int type, const char *host_address, unsigned int signal_nu
 		ERR("OCDoResource() Fail(%d)", result);
 		free(context->bus_name);
 		free(context);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -968,7 +973,7 @@ int icd_ioty_unsubscribe_presence(OCDoHandle handle)
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCCancel() Fail(%d)", ret);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -984,7 +989,7 @@ int icd_ioty_start_presence(unsigned int time_to_live)
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCStartPresence() Fail(%d)", ret);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -1000,7 +1005,7 @@ int icd_ioty_stop_presence()
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCStopPresence() Fail(%d)", ret);
-		return IOTCON_ERROR_IOTIVITY;
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
