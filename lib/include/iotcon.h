@@ -126,8 +126,8 @@ int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *user
 int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb, void *user_data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_register_resource() and
- * iotcon_resource_bind_request_handler()
+ * @brief Specifies the type of function passed to iotcon_resource_create() and
+ * iotcon_resource_set_request_handler()
  * @details Called when server receive request from the client.
  *
  * @since_tizen 3.0
@@ -136,16 +136,16 @@ int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb, void *u
  * @param[in] request The request from client
  * @param[in] user_data The user data to pass to the function
  *
- * @pre The callback must be registered using iotcon_register_resource()
+ * @pre The callback must be registered using iotcon_resource_create()
  *
- * @see iotcon_register_resource()
- * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_create()
+ * @see iotcon_resource_set_request_handler()
  */
 typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
 		iotcon_request_h request, void *user_data);
 
 /**
- * @brief Registers a resource in server
+ * @brief Create a resource handle and registers the resource in server
  * @details Registers a resource specified by @a uri_path, @a res_types, @a ifaces which have
  * @a properties in Iotcon server.\n
  * When client find the registered resource, iotcon_request_handler_cb() will be called automatically.\n
@@ -164,7 +164,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks @a uri_path length must be less than or equal 36.\n
- * You must unregister resource by calling iotcon_unregister_resource()
+ * You must unregister resource by calling iotcon_resource_destroy()
  * if resource is no longer needed.
  *
  * @param[in] uri_path The URI path of the resource.
@@ -185,15 +185,15 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  *
  * @post When the resource receive CRUD request, iotcon_request_handler_cb() will be called.
  *
- * @see iotcon_unregister_resource()
+ * @see iotcon_resource_destroy()
  * @see iotcon_resource_bind_interface()
  * @see iotcon_resource_bind_type()
- * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_set_request_handler()
  * @see iotcon_resource_bind_child_resource()
  * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_register_resource(const char *uri_path,
+int iotcon_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int ifaces,
 		uint8_t properties,
@@ -202,7 +202,7 @@ int iotcon_register_resource(const char *uri_path,
 		iotcon_resource_h *resource_handle);
 
 /**
- * @brief Unregisters a resource and releases its data.
+ * @brief Destroy the resource and releases its data.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -220,15 +220,15 @@ int iotcon_register_resource(const char *uri_path,
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @see iotcon_register_resource()
+ * @see iotcon_resource_create()
  * @see iotcon_resource_bind_interface()
  * @see iotcon_resource_bind_type()
- * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_set_request_handler()
  * @see iotcon_resource_bind_child_resource()
  * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_unregister_resource(iotcon_resource_h resource_handle);
+int iotcon_resource_destroy(iotcon_resource_h resource_handle);
 
 /**
  * @brief Binds an interface to the resource
@@ -250,10 +250,10 @@ int iotcon_unregister_resource(iotcon_resource_h resource_handle);
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @see iotcon_register_resource()
- * @see iotcon_unregister_resource()
+ * @see iotcon_resource_create()
+ * @see iotcon_resource_destroy()
  * @see iotcon_resource_bind_type()
- * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_set_request_handler()
  * @see iotcon_resource_bind_child_resource()
  * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
@@ -277,10 +277,10 @@ int iotcon_resource_bind_interface(iotcon_resource_h resource, int iface);
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @see iotcon_register_resource()
- * @see iotcon_unregister_resource()
+ * @see iotcon_resource_create()
+ * @see iotcon_resource_destroy()
  * @see iotcon_resource_bind_interface()
- * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_set_request_handler()
  * @see iotcon_resource_bind_child_resource()
  * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
@@ -304,15 +304,15 @@ int iotcon_resource_bind_type(iotcon_resource_h resource_handle,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_register_resource()
- * @see iotcon_unregister_resource()
+ * @see iotcon_resource_create()
+ * @see iotcon_resource_destroy()
  * @see iotcon_resource_bind_interface()
  * @see iotcon_resource_bind_type()
  * @see iotcon_resource_bind_child_resource()
  * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_resource_bind_request_handler(iotcon_resource_h resource,
+int iotcon_resource_set_request_handler(iotcon_resource_h resource,
 		iotcon_request_handler_cb cb);
 
 /**
@@ -333,11 +333,11 @@ int iotcon_resource_bind_request_handler(iotcon_resource_h resource,
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @see iotcon_register_resource()
- * @see iotcon_unregister_resource()
+ * @see iotcon_resource_create()
+ * @see iotcon_resource_destroy()
  * @see iotcon_resource_bind_interface()
  * @see iotcon_resource_bind_type()
- * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_set_request_handler()
  * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
@@ -361,11 +361,11 @@ int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @see iotcon_register_resource()
- * @see iotcon_unregister_resource()
+ * @see iotcon_resource_create()
+ * @see iotcon_resource_destroy()
  * @see iotcon_resource_bind_interface()
  * @see iotcon_resource_bind_type()
- * @see iotcon_resource_bind_request_handler()
+ * @see iotcon_resource_set_request_handler()
  * @see iotcon_resource_bind_child_resource()
  * @see iotcon_request_handler_cb()
  */
@@ -625,7 +625,7 @@ int iotcon_unsubscribe_presence(iotcon_presence_h presence_handle);
  *
  * @see iotcon_find_resource()
  */
-typedef void (*iotcon_found_resource_cb)(iotcon_client_h resource, void *user_data);
+typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource, void *user_data);
 
 /**
  * @brief Finds resources.
@@ -680,15 +680,15 @@ int iotcon_find_resource(const char *host_address, const char *resource_type,
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
- * @see iotcon_client_destroy()
- * @see iotcon_client_ref()
+ * @see iotcon_remote_resource_destroy()
+ * @see iotcon_remote_resource_ref()
  */
-int iotcon_client_create(const char *host,
+int iotcon_remote_resource_create(const char *host,
 		const char *uri_path,
 		bool is_observable,
 		iotcon_resource_types_h resource_types,
 		int resource_ifs,
-		iotcon_client_h *client_handle);
+		iotcon_remote_resource_h *client_handle);
 
 /**
  * @brief Releases a resource handle.
@@ -701,10 +701,10 @@ int iotcon_client_create(const char *host,
  *
  * @return void
  *
- * @see iotcon_client_create()
- * @see iotcon_client_ref()
+ * @see iotcon_remote_resource_create()
+ * @see iotcon_remote_resource_ref()
  */
-void iotcon_client_destroy(iotcon_client_h resource);
+void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource);
 
 /**
  * @brief Increments reference count of the source resource.
@@ -718,13 +718,13 @@ void iotcon_client_destroy(iotcon_client_h resource);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_client_create()
- * @see iotcon_client_destroy()
+ * @see iotcon_remote_resource_create()
+ * @see iotcon_remote_resource_destroy()
  */
-int iotcon_client_ref(iotcon_client_h src, iotcon_client_h *dest);
+int iotcon_remote_resource_ref(iotcon_remote_resource_h src, iotcon_remote_resource_h *dest);
 
 /**
- * @brief Specifies the type of function passed to iotcon_observer_start().
+ * @brief Specifies the type of function passed to iotcon_remote_resource_observer_start().
  * @details Called when a client receive notifications from a server. The @a response_result could be one of #iotcon_response_result_e.
  *
  * @since_tizen 3.0
@@ -736,11 +736,11 @@ int iotcon_client_ref(iotcon_client_h src, iotcon_client_h *dest);
  * @param[in] sequence_number The sequence of notifications from server.
  * @param[in] user_data The user data passed from the callback registration function
  *
- * @pre The callback must be registered using iotcon_observer_start()
+ * @pre The callback must be registered using iotcon_remote_resource_observer_start()
  *
- * @see iotcon_observer_start()
+ * @see iotcon_remote_resource_observer_start()
  */
-typedef void (*iotcon_on_observe_cb)(iotcon_client_h resource,
+typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resource,
 		iotcon_representation_h repr,
 		iotcon_options_h options,
 		int response_result,
@@ -749,7 +749,7 @@ typedef void (*iotcon_on_observe_cb)(iotcon_client_h resource,
 
 /**
  * @brief Sets observation on the resource
- * @details When server sends notification message, iotcon_on_observe_cb() will be called.
+ * @details When server sends notification message, iotcon_remote_resource_observe_cb() will be called.
  * The @a observe_type could be one of #iotcon_observe_type_e.
  *
  * @since_tizen 3.0
@@ -770,16 +770,19 @@ typedef void (*iotcon_on_observe_cb)(iotcon_client_h resource,
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @post When the @a resource receive notification message, iotcon_on_observe_cb() will be called.
+ * @post When the @a resource receive notification message, iotcon_remote_resource_observe_cb() will be called.
  *
- * @see iotcon_on_observe_cb()
- * @see iotcon_observer_stop()
+ * @see iotcon_remote_resource_observe_cb()
+ * @see iotcon_remote_resource_observer_stop()
  * @see iotcon_notimsg_create()
  * @see iotcon_notify_list_of_observers()
  * @see iotcon_resource_notify_all()
  */
-int iotcon_observer_start(iotcon_client_h resource, int observe_type,
-		iotcon_query_h query, iotcon_on_observe_cb cb, void *user_data);
+int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
+		int observe_type,
+		iotcon_query_h query,
+		iotcon_remote_resource_observe_cb cb,
+		void *user_data);
 
 /**
  * @brief Cancels the observation on the resource
@@ -797,13 +800,13 @@ int iotcon_observer_start(iotcon_client_h resource, int observe_type,
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @see iotcon_on_observe_cb()
- * @see iotcon_observer_start()
+ * @see iotcon_remote_resource_observe_cb()
+ * @see iotcon_remote_resource_observer_start()
  * @see iotcon_notimsg_create()
  * @see iotcon_notify_list_of_observers()
  * @see iotcon_resource_notify_all()
  */
-int iotcon_observer_stop(iotcon_client_h resource);
+int iotcon_remote_resource_observer_stop(iotcon_remote_resource_h resource);
 
 /**
  * @brief Send response for incoming request.
@@ -838,9 +841,9 @@ int iotcon_response_send(iotcon_response_h resp);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
- * @see iotcon_on_observe_cb()
- * @see iotcon_observer_start()
- * @see iotcon_observer_stop()
+ * @see iotcon_remote_resource_observe_cb()
+ * @see iotcon_remote_resource_observer_start()
+ * @see iotcon_remote_resource_observer_stop()
  * @see iotcon_notify_list_of_observers()
  * @see iotcon_resource_notify_all()
  */
@@ -879,9 +882,9 @@ void iotcon_notimsg_destroy(iotcon_notimsg_h msg);
  * @retval #IOTCON_ERROR_SYSTEM  System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @see iotcon_on_observe_cb()
- * @see iotcon_observer_start()
- * @see iotcon_observer_stop()
+ * @see iotcon_remote_resource_observe_cb()
+ * @see iotcon_remote_resource_observer_start()
+ * @see iotcon_remote_resource_observer_stop()
  * @see iotcon_notimsg_create()
  * @see iotcon_resource_notify_all()
  */
@@ -904,16 +907,16 @@ int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notimsg_h
  * @retval #IOTCON_ERROR_SYSTEM  System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @see iotcon_on_observe_cb()
- * @see iotcon_observer_start()
- * @see iotcon_observer_stop()
+ * @see iotcon_remote_resource_observe_cb()
+ * @see iotcon_remote_resource_observer_start()
+ * @see iotcon_remote_resource_observer_stop()
  * @see iotcon_notimsg_create()
  * @see iotcon_notify_list_of_observers()
  */
 int iotcon_resource_notify_all(iotcon_resource_h resource);
 
 /**
- * @brief Specifies the type of function passed to iotcon_get(), iotcon_put(), iotcon_post()
+ * @brief Specifies the type of function passed to iotcon_remote_resource_get(), iotcon_remote_resource_put(), iotcon_remote_resource_post()
  * @details The @a response_result could be one of #iotcon_response_result_e.
  *
  * @since_tizen 3.0
@@ -924,18 +927,21 @@ int iotcon_resource_notify_all(iotcon_resource_h resource);
  * @param[in] response_result The response result code
  * @param[in] user_data The user data to pass to the function
  *
- * @pre The callback must be registered using iotcon_get(), iotcon_put(), iotcon_post()
+ * @pre The callback must be registered using iotcon_remote_resource_get(), iotcon_remote_resource_put(), iotcon_remote_resource_post()
  *
- * @see iotcon_get()
- * @see iotcon_put()
- * @see iotcon_post()
+ * @see iotcon_remote_resource_get()
+ * @see iotcon_remote_resource_put()
+ * @see iotcon_remote_resource_post()
  */
-typedef void (*iotcon_on_cru_cb)(iotcon_client_h resource, iotcon_representation_h repr,
-		iotcon_options_h options, int response_result, void *user_data);
+typedef void (*iotcon_remote_resource_cru_cb)(iotcon_remote_resource_h resource,
+		iotcon_representation_h repr,
+		iotcon_options_h options,
+		int response_result,
+		void *user_data);
 
 /**
  * @brief Gets the attributes of a resource.
- * @details When server sends response on get request, iotcon_on_cru_cb() will be called.
+ * @details When server sends response on get request, iotcon_remote_resource_cru_cb() will be called.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -953,18 +959,18 @@ typedef void (*iotcon_on_cru_cb)(iotcon_client_h resource, iotcon_representation
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @post When the client receive get response, iotcon_on_cru_cb() will be called.
+ * @post When the client receive get response, iotcon_remote_resource_cru_cb() will be called.
  *
- * @see iotcon_on_cru_cb()
- * @see iotcon_put()
- * @see iotcon_post()
+ * @see iotcon_remote_resource_cru_cb()
+ * @see iotcon_remote_resource_put()
+ * @see iotcon_remote_resource_post()
  */
-int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
-		iotcon_on_cru_cb cb, void *user_data);
+int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h query,
+		iotcon_remote_resource_cru_cb cb, void *user_data);
 
 /**
  * @brief Sets the representation of a resource (via PUT)
- * @details When server sends response on put request, iotcon_on_cru_cb() will be called.
+ * @details When server sends response on put request, iotcon_remote_resource_cru_cb() will be called.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -983,18 +989,21 @@ int iotcon_get(iotcon_client_h resource, iotcon_query_h query,
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @post When the client receive put response, iotcon_on_cru_cb() will be called.
+ * @post When the client receive put response, iotcon_remote_resource_cru_cb() will be called.
  *
- * @see iotcon_on_cru_cb()
- * @see iotcon_get()
- * @see iotcon_post()
+ * @see iotcon_remote_resource_cru_cb()
+ * @see iotcon_remote_resource_get()
+ * @see iotcon_remote_resource_post()
  */
-int iotcon_put(iotcon_client_h resource, iotcon_representation_h repr,
-		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data);
+int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
+		iotcon_representation_h repr,
+		iotcon_query_h query,
+		iotcon_remote_resource_cru_cb cb,
+		void *user_data);
 
 /**
  * @brief Posts on a resource
- * @details When server sends response on post request, iotcon_on_cru_cb() will be called.
+ * @details When server sends response on post request, iotcon_remote_resource_cru_cb() will be called.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -1013,17 +1022,20 @@ int iotcon_put(iotcon_client_h resource, iotcon_representation_h repr,
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @post When the client receive post response, iotcon_on_cru_cb() will be called.
+ * @post When the client receive post response, iotcon_remote_resource_cru_cb() will be called.
  *
- * @see iotcon_on_cru_cb()
- * @see iotcon_get()
- * @see iotcon_put()
+ * @see iotcon_remote_resource_cru_cb()
+ * @see iotcon_remote_resource_get()
+ * @see iotcon_remote_resource_put()
  */
-int iotcon_post(iotcon_client_h resource, iotcon_representation_h repr,
-		iotcon_query_h query, iotcon_on_cru_cb cb, void *user_data);
+int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
+		iotcon_representation_h repr,
+		iotcon_query_h query,
+		iotcon_remote_resource_cru_cb cb,
+		void *user_data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_delete()
+ * @brief Specifies the type of function passed to iotcon_remote_resource_delete()
  * @details The @a response_result could be one of #iotcon_response_result_e.
  *
  * @since_tizen 3.0
@@ -1033,16 +1045,18 @@ int iotcon_post(iotcon_client_h resource, iotcon_representation_h repr,
  * @param[in] response_result The response result code
  * @param[in] user_data The user data to pass to the function
  *
- * @pre The callback must be registered using iotcon_delete()
+ * @pre The callback must be registered using iotcon_remote_resource_delete()
  *
- * @see iotcon_delete()
+ * @see iotcon_remote_resource_delete()
  */
-typedef void (*iotcon_on_delete_cb)(iotcon_client_h resource, iotcon_options_h options,
-		int response_result, void *user_data);
+typedef void (*iotcon_remote_resource_delete_cb)(iotcon_remote_resource_h resource,
+		iotcon_options_h options,
+		int response_result,
+		void *user_data);
 
 /**
  * @brief Deletes a resource.
- * @details When server sends response on delete request, iotcon_on_delete_cb() will be called.
+ * @details When server sends response on delete request, iotcon_remote_resource_delete_cb() will be called.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -1059,12 +1073,12 @@ typedef void (*iotcon_on_delete_cb)(iotcon_client_h resource, iotcon_options_h o
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @post When the client receive delete response, iotcon_on_delete_cb() will be called.
+ * @post When the client receive delete response, iotcon_remote_resource_delete_cb() will be called.
  *
- * @see iotcon_on_delete_cb()
+ * @see iotcon_remote_resource_delete_cb()
  */
-int iotcon_delete(iotcon_client_h resource, iotcon_on_delete_cb cb, void *user_data);
-
+int iotcon_remote_resource_delete(iotcon_remote_resource_h resource,
+		iotcon_remote_resource_delete_cb cb, void *user_data);
 
 /**
  * @}

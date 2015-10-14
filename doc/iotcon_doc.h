@@ -31,7 +31,7 @@
  * RESTful API.\n\n
  *
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_RESOURCE Resource
- * A Resrouce is a component in a server that can be viewed and conrolled by another client.\n
+ * A Resource is a component in a server that can be viewed and conrolled by another client.\n
  * There are different resource types, for example a temperature sensor, a light controller etc.\n\n
  *
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_RESOURCE_REGISTRATION Resource registration
@@ -130,7 +130,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 		return;
 	}
 
-	iotcon_resource_h handle = iotcon_register_resource(uri_path, resource_types,
+	iotcon_resource_h handle = iotcon_resource_create(uri_path, resource_types,
 			interfaces, properties, _request_handler, NULL);
 	if (NULL == handle) {
 		iotcon_resource_types_destroy(resource_types);
@@ -155,37 +155,37 @@ static void _on_get(iotcon_options_h header_options, iotcon_representation_h rec
 	// handle get from response
 }
 ...
-static void _found_resource(iotcon_client_h resource, void *user_data)
+static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 {
 	int ret;
 	int resource_interfaces;
 	char *resource_uri_path;
 	char *resource_host;
-	char *resource_sid;
+	char *device_id;
 	iotcon_query_h query;
 	iotcon_resource_types_h resource_types;
 
-	ret = iotcon_client_get_uri_path(resource, &resource_uri_path);
+	ret = iotcon_remote_resource_get_uri_path(resource, &resource_uri_path);
 	if (IOTCON_ERROR_NONE != ret) {
 		return;
 	}
 
-	ret = iotcon_client_get_device_id(resource, &resource_sid);
+	ret = iotcon_remote_resource_get_device_id(resource, &device_id);
 	if (IOTCON_ERROR_NONE != ret) {
 		return;
 	}
 
-	ret = iotcon_client_get_host(resource, &resource_host);
+	ret = iotcon_remote_resource_get_host(resource, &resource_host);
 	if (IOTCON_ERROR_NONE != ret) {
 		return;
 	}
 
-	ret = iotcon_client_get_interfaces(resource, &resource_interfaces);
+	ret = iotcon_remote_resource_get_interfaces(resource, &resource_interfaces);
 	if (IOTCON_ERROR_NONE != ret) {
 		return;
 	}
 
-	ret = iotcon_client_get_types(resource, &resource_types);
+	ret = iotcon_remote_resource_get_types(resource, &resource_types);
 	if (IOTCON_ERROR_NONE != ret) {
 		return;
 	}
@@ -197,7 +197,7 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 
 	iotcon_query_insert(query, "key", "value");
 
-	iotcon_get(resource, query, &_on_get, NULL);
+	iotcon_remote_resource_get(resource, query, &_on_get, NULL);
 	iotcon_query_destroy(query);
 }
 ...
@@ -291,7 +291,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 		return;
 	}
 
-	ret = iotcon_register_resource(uri_path, resource_types,
+	ret = iotcon_resource_create(uri_path, resource_types,
 			interfaces, properties, _request_handler, NULL, door_handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(resource_types);
@@ -333,7 +333,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
  * @code
 #include <iotcon.h>
 ...
-static iotcon_client_h door_resource;
+static iotcon_remote_resource_h door_resource;
 ...
 static void _on_observe(iotcon_options_h header_options, iotcon_representation_h recv_repr,
 		int response_result, int sequence_number, void *user_data)
@@ -342,8 +342,8 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
 ...
 {
 	int ret;
-	ret = iotcon_observer_start(door_resource, IOTCON_OBSERVE_ALL, NULL, &_on_observe, NULL);
-
+	ret = iotcon_remote_resource_observer_start(door_resource, IOTCON_OBSERVE_ALL, NULL,
+			&_on_observe, NULL);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 }
@@ -359,11 +359,11 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
  *         <td><b>Client</b></td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_register_resource</td>
+ *         <td>iotcon_resource_create</td>
  *         <td>iotcon_get_device_info</td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_unregister_resource</td>
+ *         <td>iotcon_resource_destroy</td>
  *         <td>iotcon_subscribe_presence</td>
  *     </tr>
  *     <tr>
@@ -376,27 +376,27 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
  *     </tr>
  *     <tr>
  *         <td>iotcon_resource_bind_request_handler</td>
- *         <td>iotcon_observer_start</td>
+ *         <td>iotcon_remote_resource_observer_start</td>
  *     </tr>
  *     <tr>
  *         <td>iotcon_resource_bind_child_resource</td>
- *         <td>iotcon_observer_stop</td>
+ *         <td>iotcon_remote_resource_observer_stop</td>
  *     </tr>
  *     <tr>
  *         <td>iotcon_resource_unbind_child_resource</td>
- *         <td>iotcon_get</td>
+ *         <td>iotcon_remote_resource_get</td>
  *     </tr>
  *     <tr>
  *         <td>iotcon_register_device_info</td>
- *         <td>iotcon_put</td>
+ *         <td>iotcon_remote_resource_put</td>
  *     </tr>
  *     <tr>
  *         <td>iotcon_start_presence</td>
- *         <td>iotcon_post</td>
+ *         <td>iotcon_remote_resource_post</td>
  *     </tr>
  *     <tr>
  *         <td>iotcon_stop_presence</td>
- *         <td>iotcon_delete</td>
+ *         <td>iotcon_remote_resource_delete</td>
  *     </tr>
  *     <tr>
  *         <td>iotcon_response_send</td>

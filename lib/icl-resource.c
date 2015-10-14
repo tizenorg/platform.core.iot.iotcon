@@ -148,7 +148,7 @@ static void _icl_resource_conn_cleanup(iotcon_resource_h resource)
 
 
 /* The length of uri_path should be less than or equal to 36. */
-API int iotcon_register_resource(const char *uri_path,
+API int iotcon_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int ifaces,
 		uint8_t properties,
@@ -232,7 +232,7 @@ API int iotcon_register_resource(const char *uri_path,
 }
 
 
-API int iotcon_unregister_resource(iotcon_resource_h resource)
+API int iotcon_resource_destroy(iotcon_resource_h resource)
 {
 	FN_CALL;
 	int ret;
@@ -334,7 +334,7 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resour
 }
 
 
-API int iotcon_resource_bind_request_handler(iotcon_resource_h resource,
+API int iotcon_resource_set_request_handler(iotcon_resource_h resource,
 		iotcon_request_handler_cb cb)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);

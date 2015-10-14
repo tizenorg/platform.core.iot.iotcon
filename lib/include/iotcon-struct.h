@@ -39,8 +39,8 @@ typedef struct icl_list_s* iotcon_list_h;
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_REPRESENTATION_MODULE
  * @brief The handle of representation.
- * @details iotcon_representation_h is an opaque data structure to have uri_path, list of resource types
- * and interfaces.\n
+ * @details iotcon_representation_h is an opaque data structure to have uri_path,\n
+ * list of resource types and interfaces.\n
  * It could contain other representation as children.\n
  *
  * @since_tizen 3.0
@@ -416,8 +416,8 @@ int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
 
 /**
  * @brief The handle of resource types
- * @details iotcon_resource_types_h is an opaque data structure to have list of resource types.\n
- * A resource type is datatype of string.
+ * @details iotcon_resource_types_h is an opaque data structure to have list\n
+ * of resource types. A resource type is datatype of string.
  *
  * @since_tizen 3.0
  */
@@ -643,11 +643,11 @@ int iotcon_observers_delete(iotcon_observers_h observers, int obs_id);
 
 /**
  * @brief The handle of resource.
- * @details iotcon_resource_h is an opaque data structure to represent registered resource by server.
- * A resource has host, uri_path, resource types, interfaces and internal handle.\n
- * If observable attribute of resource is true, client can observe this resource.\n
- * When client request by CRUD functions, handler will be invoked if registered.
- * It could contain other resource as children.\n
+ * @details iotcon_resource_h is an opaque data structure to represent registered\n
+ * resource by server. A resource has host, uri_path, resource types, interfaces\n
+ * and internal handle. If observable attribute of resource is true, client can observe\n
+ * this resource. When client request by CRUD functions, handler will be invoked\n
+ * if registered. It could contain other resource as children.\n
  *
  * @since_tizen 3.0
  */
@@ -776,129 +776,132 @@ int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces);
 int iotcon_resource_is_observable(iotcon_resource_h resource, bool *observable);
 
 /**
- * @brief The handle of client
+ * @brief The handle of remote resource
  * @details When Client success to find out resource from remote server,
- * server's resource information is reorganized as iotcon_client_h by Iotcon.
+ * server's resource information is reorganized as iotcon_remote_resource_h by Iotcon.
  * Client can request CRUD to server by using this.\n
- * iotcon_client_h is an opaque data structure to have host, uri_path, resource types, interfaces,
- * options and server id.\n
+ * iotcon_remote_resource_h is an opaque data structure to have host, uri_path,\n
+ * resource types, interfaces, options and device id.\n
  * If observable attribute is true, remote resource is observable.\n
  * When you observe remote resource, observe_handle will be set.
  *
  * @since_tizen 3.0
  */
-typedef struct icl_remote_resource* iotcon_client_h;
+typedef struct icl_remote_resource* iotcon_remote_resource_h;
 
 /**
- * @brief Gets an URI path of the client
+ * @brief Gets an URI path of the remote resource
  *
  * @since_tizen 3.0
  * @remarks @a uri_path must not be released using free().
  *
- * @param[in] resource The handle of the client
- * @param[out] uri_path The URI path of the client
+ * @param[in] resource The handle of the remote resource
+ * @param[out] uri_path The URI path of the remote resource
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_client_get_host()
- * @see iotcon_client_get_device_id()
- * @see iotcon_client_get_types()
- * @see iotcon_client_get_interfaces()
- * @see iotcon_client_is_observable()
- * @see iotcon_client_set_options()
+ * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_types()
+ * @see iotcon_remote_resource_get_interfaces()
+ * @see iotcon_remote_resource_is_observable()
+ * @see iotcon_remote_resource_set_options()
  */
-int iotcon_client_get_uri_path(iotcon_client_h resource, char **uri_path);
+int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource,
+		char **uri_path);
 
 /**
- * @brief Gets an host address of the client
+ * @brief Gets an host address of the remote resource
  *
  * @since_tizen 3.0
  * @remarks @a host must not be released using free().
  *
- * @param[in] resource The handle of the client
- * @param[out] host The host address of the client
+ * @param[in] resource The handle of the remote resource
+ * @param[out] host The host address of the remote resource
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_client_get_uri_path()
- * @see iotcon_client_get_device_id()
- * @see iotcon_client_get_types()
- * @see iotcon_client_get_interfaces()
- * @see iotcon_client_is_observable()
- * @see iotcon_client_set_options()
+ * @see iotcon_remote_resource_get_uri_path()
+ * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_types()
+ * @see iotcon_remote_resource_get_interfaces()
+ * @see iotcon_remote_resource_is_observable()
+ * @see iotcon_remote_resource_set_options()
  */
-int iotcon_client_get_host(iotcon_client_h resource, char **host);
+int iotcon_remote_resource_get_host(iotcon_remote_resource_h resource, char **host);
 
 /**
- * @brief Gets an server id of the client
+ * @brief Gets an device id of the remote resource
  *
  * @since_tizen 3.0
- * @remarks @a sid must not be released using free().
+ * @remarks @a device_id must not be released using free().
  *
- * @param[in] resource The handle of the client
- * @param[out] device_id The device id of the client
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- *
- * @see iotcon_client_get_uri_path()
- * @see iotcon_client_get_host()
- * @see iotcon_client_get_types()
- * @see iotcon_client_get_interfaces()
- * @see iotcon_client_is_observable()
- * @see iotcon_client_set_options()
- */
-int iotcon_client_get_device_id(iotcon_client_h resource, char **device_id);
-
-/**
- * @brief Gets resource types of the client
- *
- * @since_tizen 3.0
- *
- * @param[in] resource The handle of the client
- * @param[out] types The resource types of the client
+ * @param[in] resource The handle of the remote resource
+ * @param[out] device_id The device id of the remote resource
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_client_get_uri_path()
- * @see iotcon_client_get_host()
- * @see iotcon_client_get_device_id()
- * @see iotcon_client_get_interfaces()
- * @see iotcon_client_is_observable()
- * @see iotcon_client_set_options()
+ * @see iotcon_remote_resource_get_uri_path()
+ * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_types()
+ * @see iotcon_remote_resource_get_interfaces()
+ * @see iotcon_remote_resource_is_observable()
+ * @see iotcon_remote_resource_set_options()
  */
-int iotcon_client_get_types(iotcon_client_h resource, iotcon_resource_types_h *types);
+int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
+		char **device_id);
 
 /**
- * @brief Gets resource interfaces of the client
+ * @brief Gets resource types of the remote resource
  *
  * @since_tizen 3.0
  *
- * @param[in] resource The handle of the client
- * @param[out] ifaces The resource interfaces of the client
+ * @param[in] resource The handle of the remote resource
+ * @param[out] types The resource types of the remote resource
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_client_get_uri_path()
- * @see iotcon_client_get_host()
- * @see iotcon_client_get_device_id()
- * @see iotcon_client_get_types()
- * @see iotcon_client_is_observable()
- * @see iotcon_client_set_options()
+ * @see iotcon_remote_resource_get_uri_path()
+ * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_interfaces()
+ * @see iotcon_remote_resource_is_observable()
+ * @see iotcon_remote_resource_set_options()
  */
-int iotcon_client_get_interfaces(iotcon_client_h resource, int *ifaces);
+int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
+		iotcon_resource_types_h *types);
 
 /**
- * @brief Checks whether the client is observable or not.
+ * @brief Gets resource interfaces of the remote resource
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] resource The handle of the remote resource
+ * @param[out] ifaces The resource interfaces of the remote resource
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_remote_resource_get_uri_path()
+ * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_types()
+ * @see iotcon_remote_resource_is_observable()
+ * @see iotcon_remote_resource_set_options()
+ */
+int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource, int *ifaces);
+
+/**
+ * @brief Checks whether the remote resource is observable or not.
  *
  * @since_tizen 3.0
  *
@@ -909,35 +912,37 @@ int iotcon_client_get_interfaces(iotcon_client_h resource, int *ifaces);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_client_get_uri_path()
- * @see iotcon_client_get_host()
- * @see iotcon_client_get_device_id()
- * @see iotcon_client_get_types()
- * @see iotcon_client_get_interfaces()
- * @see iotcon_client_set_options()
+ * @see iotcon_remote_resource_get_uri_path()
+ * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_types()
+ * @see iotcon_remote_resource_get_interfaces()
+ * @see iotcon_remote_resource_set_options()
  */
-int iotcon_client_is_observable(iotcon_client_h resource, bool *observable);
+int iotcon_remote_resource_is_observable(iotcon_remote_resource_h resource,
+		bool *observable);
 
 /**
- * @brief Sets options into the client
+ * @brief Sets options into the remote resource
  *
  * @since_tizen 3.0
  *
- * @param[in] resource The handle of the client
+ * @param[in] resource The handle of the remote resource
  * @param[in] options The handle of the header options
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_client_get_uri_path()
- * @see iotcon_client_get_host()
- * @see iotcon_client_get_device_id()
- * @see iotcon_client_get_types()
- * @see iotcon_client_get_interfaces()
- * @see iotcon_client_is_observable()
+ * @see iotcon_remote_resource_get_uri_path()
+ * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_types()
+ * @see iotcon_remote_resource_get_interfaces()
+ * @see iotcon_remote_resource_is_observable()
  */
-int iotcon_client_set_options(iotcon_client_h resource, iotcon_options_h options);
+int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
+		iotcon_options_h options);
 
 /**
 * @brief The handle of request

@@ -52,28 +52,28 @@
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="get">
-			<arg type="(ssba(qs)i)" name="client" direction="in"/>
+			<arg type="(ssba(qs)i)" name="remote_resource" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
 			<arg type="(a(qs)vi)" name="ret" direction="out"/>
 		</method>
 		<method name="put">
-			<arg type="(ssba(qs)i)" name="client" direction="in"/>
+			<arg type="(ssba(qs)i)" name="remote_resource" direction="in"/>
 			<arg type="(siasa{sv}av)" name="repr" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
 			<arg type="(a(qs)vi)" name="ret" direction="out"/>
 		</method>
 		<method name="post">
-			<arg type="(ssba(qs)i)" name="client" direction="in"/>
+			<arg type="(ssba(qs)i)" name="remote_resource" direction="in"/>
 			<arg type="(siasa{sv}av)" name="repr" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
 			<arg type="(a(qs)vi)" name="ret" direction="out"/>
 		</method>
 		<method name="delete">
-			<arg type="(ssba(qs)i)" name="client" direction="in"/>
+			<arg type="(ssba(qs)i)" name="remote_resource" direction="in"/>
 			<arg type="(a(qs)i)" name="ret" direction="out"/>
 		</method>
 		<method name="observerStart">
-			<arg type="(ssba(qs)i)" name="client" direction="in"/>
+			<arg type="(ssba(qs)i)" name="remote_resource" direction="in"/>
 			<arg type="i" name="observe_type" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
 			<arg type="u" name="signal_number" direction="in"/>

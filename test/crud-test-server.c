@@ -107,11 +107,11 @@ static iotcon_resource_h _create_door_resource(char *uri_path, char *type, int i
 	}
 
 	/* register door resource */
-	ret = iotcon_register_resource(uri_path, resource_types, ifaces, properties,
+	ret = iotcon_resource_create(uri_path, resource_types, ifaces, properties,
 			_request_handler, user_data, &handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(resource_types);
-		ERR("iotcon_register_resource() Fail");
+		ERR("iotcon_resource_create() Fail");
 		return NULL;
 	}
 
@@ -393,7 +393,7 @@ static void _request_handler_delete(iotcon_resource_h resource,
 	iotcon_response_result_e result = IOTCON_RESPONSE_RESULT_OK;
 	INFO("DELETE request");
 
-	ret = iotcon_unregister_resource(resource);
+	ret = iotcon_resource_destroy(resource);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_unregiser_resource() Fail(%d)", ret);
 		return;
@@ -557,7 +557,7 @@ int main(int argc, char **argv)
 	g_main_loop_run(loop);
 	g_main_loop_unref(loop);
 
-	iotcon_unregister_resource(my_door.handle);
+	iotcon_resource_destroy(my_door.handle);
 
 	_free_door_resource(&my_door);
 

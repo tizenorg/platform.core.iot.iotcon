@@ -27,7 +27,7 @@
 #include "icl-query.h"
 #include "icl-request.h"
 #include "icl-response.h"
-#include "icl-client.h"
+#include "icl-remote-resource.h"
 #include "icl-repr.h"
 #include "icl-payload.h"
 #include "icl-observation.h"
@@ -114,7 +114,7 @@ GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 }
 
 
-GVariant* icl_dbus_client_to_gvariant(struct icl_remote_resource *resource)
+GVariant* icl_dbus_remote_resource_to_gvariant(struct icl_remote_resource *resource)
 {
 	FN_CALL;
 	GVariant *value;

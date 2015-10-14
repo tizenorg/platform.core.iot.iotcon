@@ -26,7 +26,7 @@
 #include "icl-options.h"
 #include "icl-dbus.h"
 #include "icl-repr.h"
-#include "icl-client.h"
+#include "icl-remote-resource.h"
 #include "icl-resource-types.h"
 #include "icl-payload.h"
 
@@ -36,7 +36,7 @@ typedef struct {
 	unsigned int id;
 } icl_found_resource_s;
 
-static iotcon_client_h _icl_client_from_gvariant(GVariant *payload,
+static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *payload,
 		iotcon_connectivity_type_e conn_type);
 
 static void _icl_found_resource_cb(GDBusConnection *connection,
@@ -49,7 +49,7 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 {
 	FN_CALL;
 	int conn_type;
-	iotcon_client_h client;
+	iotcon_remote_resource_h resource;
 
 	GVariant *payload;
 	icl_found_resource_s *cb_container = user_data;
@@ -57,16 +57,16 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 
 	g_variant_get(parameters, "(vi)", &payload, &conn_type);
 
-	client = _icl_client_from_gvariant(payload, conn_type);
-	if (NULL == client) {
-		ERR("icl_client_parse_resource_object() Fail");
+	resource = _icl_remote_resource_from_gvariant(payload, conn_type);
+	if (NULL == resource) {
+		ERR("icl_remote_resource_from_gvariant() Fail");
 		return;
 	}
 
 	if (cb)
-		cb(client, cb_container->user_data);
+		cb(resource, cb_container->user_data);
 
-	iotcon_client_destroy(client);
+	iotcon_remote_resource_destroy(resource);
 
 	/* TODO
 	 * When is callback removed?
@@ -135,20 +135,20 @@ API int iotcon_find_resource(const char *host_address, const char *resource_type
 
 
 /* If you know the information of resource, then you can make a proxy of the resource. */
-API int iotcon_client_create(const char *host,
+API int iotcon_remote_resource_create(const char *host,
 		const char *uri_path,
 		bool is_observable,
 		iotcon_resource_types_h resource_types,
 		int resource_ifs,
-		iotcon_client_h *client_handle)
+		iotcon_remote_resource_h *resource_handle)
 {
 	FN_CALL;
-	iotcon_client_h resource = NULL;
+	iotcon_remote_resource_h resource = NULL;
 
 	RETV_IF(NULL == host, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_types, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == client_handle, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
 	resource = calloc(1, sizeof(struct icl_remote_resource));
 	if (NULL == resource) {
@@ -164,13 +164,13 @@ API int iotcon_client_create(const char *host,
 
 	resource->ref_count = 1;
 
-	*client_handle = resource;
+	*resource_handle = resource;
 
 	return IOTCON_ERROR_NONE;
 }
 
 
-API void iotcon_client_destroy(iotcon_client_h resource)
+API void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource)
 {
 	RET_IF(NULL == resource);
 
@@ -192,7 +192,7 @@ API void iotcon_client_destroy(iotcon_client_h resource)
 }
 
 
-API int iotcon_client_ref(iotcon_client_h src, iotcon_client_h *dest)
+API int iotcon_remote_resource_ref(iotcon_remote_resource_h src, iotcon_remote_resource_h *dest)
 {
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(src->ref_count <= 0, IOTCON_ERROR_INVALID_PARAMETER);
@@ -206,7 +206,7 @@ API int iotcon_client_ref(iotcon_client_h src, iotcon_client_h *dest)
 
 
 /* The content of the resource should not be freed by user. */
-API int iotcon_client_get_uri_path(iotcon_client_h resource, char **uri_path)
+API int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource, char **uri_path)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
@@ -218,7 +218,7 @@ API int iotcon_client_get_uri_path(iotcon_client_h resource, char **uri_path)
 
 
 /* The content of the resource should not be freed by user. */
-API int iotcon_client_get_host(iotcon_client_h resource, char **host)
+API int iotcon_remote_resource_get_host(iotcon_remote_resource_h resource, char **host)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == host, IOTCON_ERROR_INVALID_PARAMETER);
@@ -230,7 +230,7 @@ API int iotcon_client_get_host(iotcon_client_h resource, char **host)
 
 
 /* The content of the resource should not be freed by user. */
-API int iotcon_client_get_device_id(iotcon_client_h resource, char **device_id)
+API int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource, char **device_id)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == device_id, IOTCON_ERROR_INVALID_PARAMETER);
@@ -241,7 +241,7 @@ API int iotcon_client_get_device_id(iotcon_client_h resource, char **device_id)
 }
 
 /* The content of the resource should not be freed by user. */
-API int iotcon_client_get_types(iotcon_client_h resource, iotcon_resource_types_h *types)
+API int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource, iotcon_resource_types_h *types)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
@@ -252,7 +252,7 @@ API int iotcon_client_get_types(iotcon_client_h resource, iotcon_resource_types_
 }
 
 
-API int iotcon_client_get_interfaces(iotcon_client_h resource, int *ifaces)
+API int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource, int *ifaces)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
@@ -263,7 +263,8 @@ API int iotcon_client_get_interfaces(iotcon_client_h resource, int *ifaces)
 }
 
 
-API int iotcon_client_is_observable(iotcon_client_h resource, bool *observable)
+API int iotcon_remote_resource_is_observable(iotcon_remote_resource_h resource,
+		bool *observable)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == observable, IOTCON_ERROR_INVALID_PARAMETER);
@@ -275,7 +276,7 @@ API int iotcon_client_is_observable(iotcon_client_h resource, bool *observable)
 
 
 /* if header_options is NULL, then client's header_options is unset */
-API int iotcon_client_set_options(iotcon_client_h resource,
+API int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
 		iotcon_options_h header_options)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
@@ -292,18 +293,18 @@ API int iotcon_client_set_options(iotcon_client_h resource,
 }
 
 
-static iotcon_client_h _icl_client_from_gvariant(GVariant *payload,
+static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *payload,
 		iotcon_connectivity_type_e conn_type)
 {
 	int ret;
-	iotcon_client_h client;
+	iotcon_remote_resource_h resource;
 	GVariantIter *types_iter;
 	char host_addr[PATH_MAX] = {0};
 	iotcon_resource_types_h res_types;
-	char *uri_path, *sid, *res_type, *addr;
+	char *uri_path, *device_id, *res_type, *addr;
 	int ifaces, is_observable, is_secure, port;
 
-	g_variant_get(payload, "(&s&siasib&si)", &uri_path, &sid, &ifaces, &types_iter,
+	g_variant_get(payload, "(&s&siasib&si)", &uri_path, &device_id, &ifaces, &types_iter,
 			&is_observable, &is_secure, &addr, &port);
 
 	switch (conn_type) {
@@ -324,26 +325,26 @@ static iotcon_client_h _icl_client_from_gvariant(GVariant *payload,
 	while (g_variant_iter_loop(types_iter, "s", &res_type))
 		iotcon_resource_types_insert(res_types, res_type);
 
-	ret = iotcon_client_create(host_addr, uri_path, !!is_observable, res_types, ifaces,
-			&client);
+	ret = iotcon_remote_resource_create(host_addr, uri_path, !!is_observable, res_types, ifaces,
+			&resource);
 	if (res_types)
 		iotcon_resource_types_destroy(res_types);
 
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_create() Fail");
+		ERR("iotcon_remote_resource_create() Fail");
 		return NULL;
 	}
-	client->ref_count = 1;
+	resource->ref_count = 1;
 
-	client->device_id = strdup(sid);
-	if (NULL == client->device_id) {
-		ERR("strdup(sid) Fail(%d)", errno);
-		iotcon_client_destroy(client);
+	resource->device_id = strdup(device_id);
+	if (NULL == resource->device_id) {
+		ERR("strdup(device_id) Fail(%d)", errno);
+		iotcon_remote_resource_destroy(resource);
 		return NULL;
 	}
-	client->conn_type = conn_type;
-	client->is_secure = is_secure;
+	resource->conn_type = conn_type;
+	resource->is_secure = is_secure;
 
-	return client;
+	return resource;
 }
 

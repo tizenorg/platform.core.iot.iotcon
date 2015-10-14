@@ -512,12 +512,12 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	ret = iotcon_register_resource("/a/room", room_rtypes,
+	ret = iotcon_resource_create("/a/room", room_rtypes,
 			(IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_BATCH),
 			(IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE), _room_request_handler,
 			NULL, &room_handle);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_register_resource() Fail(%d)", ret);
+		ERR("iotcon_resource_create() Fail(%d)", ret);
 		iotcon_resource_types_destroy(room_rtypes);
 		iotcon_close();
 		return -1;
@@ -528,7 +528,7 @@ int main(int argc, char **argv)
 	ret = iotcon_resource_types_create(&light_rtypes);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_types_create() Fail(%d)", ret);
-		iotcon_unregister_resource(room_handle);
+		iotcon_resource_destroy(room_handle);
 		iotcon_close();
 		return -1;
 	}
@@ -536,19 +536,19 @@ int main(int argc, char **argv)
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_types_insert(%s) Fail(%d)", "core.light", ret);
 		iotcon_resource_types_destroy(light_rtypes);
-		iotcon_unregister_resource(room_handle);
+		iotcon_resource_destroy(room_handle);
 		iotcon_close();
 		return -1;
 	}
 
-	ret = iotcon_register_resource("/a/light", light_rtypes,
+	ret = iotcon_resource_create("/a/light", light_rtypes,
 			(IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_BATCH),
 			(IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE), _light_request_handler,
 			NULL, &light_handle);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_register_resource() Fail");
+		ERR("iotcon_resource_create() Fail");
 		iotcon_resource_types_destroy(light_rtypes);
-		iotcon_unregister_resource(room_handle);
+		iotcon_resource_destroy(room_handle);
 		iotcon_close();
 		return -1;
 	}
@@ -557,8 +557,8 @@ int main(int argc, char **argv)
 	ret = iotcon_resource_bind_child_resource(room_handle, light_handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_bind_child_resource() Fail");
-		iotcon_unregister_resource(light_handle);
-		iotcon_unregister_resource(room_handle);
+		iotcon_resource_destroy(light_handle);
+		iotcon_resource_destroy(room_handle);
 		iotcon_close();
 		return -1;
 	}
@@ -566,8 +566,8 @@ int main(int argc, char **argv)
 	g_main_loop_run(loop);
 	g_main_loop_unref(loop);
 
-	iotcon_unregister_resource(light_handle);
-	iotcon_unregister_resource(room_handle);
+	iotcon_resource_destroy(light_handle);
+	iotcon_resource_destroy(room_handle);
 
 	/* iotcon close */
 	iotcon_close();

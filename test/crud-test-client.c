@@ -20,12 +20,12 @@
 #include <iotcon.h>
 #include "test.h"
 
-static char *door_resource_sid;
-static GList *resource_sid_list;
+static char *door_resource_device_id;
+static GList *device_id_list;
 
 static const char* const door_uri_path = "/a/door";
 
-static void _on_observe(iotcon_client_h resource,
+static void _on_observe(iotcon_remote_resource_h resource,
 		iotcon_representation_h recv_repr,
 		iotcon_options_h header_options,
 		int response_result,
@@ -38,14 +38,14 @@ static void _on_observe(iotcon_client_h resource,
 	i++;
 
 	if (2 == i)
-		iotcon_observer_stop(resource);
+		iotcon_remote_resource_observer_stop(resource);
 }
 
-static void _on_delete(iotcon_client_h resource, iotcon_options_h header_options,
+static void _on_delete(iotcon_remote_resource_h resource, iotcon_options_h header_options,
 		int response_result, void *user_data)
 {
 	int ret;
-	iotcon_client_h door_resource = user_data;
+	iotcon_remote_resource_h door_resource = user_data;
 
 	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result
 			&& IOTCON_RESPONSE_RESULT_RESOURCE_DELETED != response_result,
@@ -54,22 +54,22 @@ static void _on_delete(iotcon_client_h resource, iotcon_options_h header_options
 
 	/* delete callback operations */
 
-	ret = iotcon_observer_start(door_resource, IOTCON_OBSERVE_ALL, NULL, _on_observe,
-			NULL);
+	ret = iotcon_remote_resource_observer_start(door_resource, IOTCON_OBSERVE_ALL, NULL,
+			_on_observe, NULL);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("iotcon_observer_start() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_observer_start() Fail(%d)", ret);
 
-	iotcon_client_destroy(door_resource);
+	iotcon_remote_resource_destroy(door_resource);
 }
 
-static void _on_post(iotcon_client_h resource, iotcon_representation_h recv_repr,
+static void _on_post(iotcon_remote_resource_h resource, iotcon_representation_h recv_repr,
 		iotcon_options_h header_options, int response_result, void *user_data)
 {
 	int ret, ifaces = 0;
 	iotcon_state_h recv_state;
 	char *host, *created_uri_path;
 	iotcon_resource_types_h types = NULL;
-	iotcon_client_h new_door_resource, door_resource;
+	iotcon_remote_resource_h new_door_resource, door_resource;
 
 	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result
 			&& IOTCON_RESPONSE_RESULT_RESOURCE_CREATED != response_result,
@@ -89,50 +89,50 @@ static void _on_post(iotcon_client_h resource, iotcon_representation_h recv_repr
 	}
 	DBG("New resource created : %s", created_uri_path);
 
-	ret = iotcon_client_get_host(resource, &host);
+	ret = iotcon_remote_resource_get_host(resource, &host);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_get_host() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_get_host() Fail(%d)", ret);
 		return;
 	}
 
-	ret = iotcon_client_get_types(resource, &types);
+	ret = iotcon_remote_resource_get_types(resource, &types);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_get_types() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_get_types() Fail(%d)", ret);
 		return;
 	}
 
-	ret = iotcon_client_get_interfaces(resource, &ifaces);
+	ret = iotcon_remote_resource_get_interfaces(resource, &ifaces);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_get_ifaces() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_get_interfaces() Fail(%d)", ret);
 		return;
 	}
 
-	ret = iotcon_client_create(host, created_uri_path, true, types, ifaces,
+	ret = iotcon_remote_resource_create(host, created_uri_path, true, types, ifaces,
 			&new_door_resource);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_create() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_create() Fail(%d)", ret);
 		return;
 	}
 
-	ret = iotcon_client_ref(resource, &door_resource);
+	ret = iotcon_remote_resource_ref(resource, &door_resource);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_ref() Fail(%d)", ret);
-		iotcon_client_destroy(new_door_resource);
+		ERR("iotcon_remote_resource_ref() Fail(%d)", ret);
+		iotcon_remote_resource_destroy(new_door_resource);
 		return;
 	}
 
-	ret = iotcon_delete(new_door_resource, _on_delete, door_resource);
+	ret = iotcon_remote_resource_delete(new_door_resource, _on_delete, door_resource);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_delete() Fail(%d)", ret);
-		iotcon_client_destroy(door_resource);
-		iotcon_client_destroy(new_door_resource);
+		ERR("iotcon_remote_resource_delete() Fail(%d)", ret);
+		iotcon_remote_resource_destroy(door_resource);
+		iotcon_remote_resource_destroy(new_door_resource);
 		return;
 	}
 
-	iotcon_client_destroy(new_door_resource);
+	iotcon_remote_resource_destroy(new_door_resource);
 }
 
-static void _on_put(iotcon_client_h resource, iotcon_representation_h recv_repr,
+static void _on_put(iotcon_remote_resource_h resource, iotcon_representation_h recv_repr,
 		iotcon_options_h header_options, int response_result, void *user_data)
 {
 	int ret;
@@ -149,14 +149,14 @@ static void _on_put(iotcon_client_h resource, iotcon_representation_h recv_repr,
 	}
 
 	/* send POST request */
-	ret = iotcon_post(resource, send_repr, NULL, _on_post, NULL);
+	ret = iotcon_remote_resource_post(resource, send_repr, NULL, _on_post, NULL);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("iotcon_post() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_post() Fail(%d)", ret);
 
 	iotcon_representation_destroy(send_repr);
 }
 
-static void _on_get(iotcon_client_h resource, iotcon_representation_h recv_repr,
+static void _on_get(iotcon_remote_resource_h resource, iotcon_representation_h recv_repr,
 		iotcon_options_h header_options, int response_result, void *user_data)
 {
 	int ret;
@@ -213,9 +213,9 @@ static void _on_get(iotcon_client_h resource, iotcon_representation_h recv_repr,
 	iotcon_state_destroy(send_state);
 
 	/* send PUT request */
-	ret = iotcon_put(resource, send_repr, NULL, _on_put, NULL);
+	ret = iotcon_remote_resource_put(resource, send_repr, NULL, _on_put, NULL);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("iotcon_put() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_put() Fail(%d)", ret);
 
 	iotcon_representation_destroy(send_repr);
 }
@@ -238,19 +238,18 @@ static void _presence_handler(int result, unsigned int nonce,
 	INFO("host_address : %s", host_address);
 }
 
-static int _sid_compare(const void *a, const void *b)
+static int _device_id_compare(const void *a, const void *b)
 {
 	return strcmp(a, b);
 }
 
-static void _found_resource(iotcon_client_h resource, void *user_data)
+static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 {
-	int ret;
 	GList *node;
-	char *resource_sid;
 	char *resource_host;
 	char *resource_uri_path;
-	int resource_interfaces;
+	char *resource_device_id;
+	int ret, resource_interfaces;
 	iotcon_presence_h presence_handle;
 	iotcon_resource_types_h resource_types;
 
@@ -260,52 +259,52 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 	INFO("===== resource found =====");
 
 	/* get the resource URI */
-	ret = iotcon_client_get_uri_path(resource, &resource_uri_path);
+	ret = iotcon_remote_resource_get_uri_path(resource, &resource_uri_path);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_get_uri_path() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_get_uri_path() Fail(%d)", ret);
 		return;
 	}
 
-	/* get the resource unique id.
+	/* get the device unique id.
 	 * this is unique per-server independent on how it was discovered. */
-	ret = iotcon_client_get_device_id(resource, &resource_sid);
+	ret = iotcon_remote_resource_get_device_id(resource, &resource_device_id);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_get_device_id() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_get_device_id() Fail(%d)", ret);
 		return;
 	}
-	DBG("[%s] resource server id : %s", resource_uri_path, resource_sid);
+	DBG("[%s] resource device id : %s", resource_uri_path, resource_device_id);
 
-	node = g_list_find_custom(resource_sid_list, resource_sid, _sid_compare);
+	node = g_list_find_custom(device_id_list, resource_device_id, _device_id_compare);
 
 	if (node && TEST_STR_EQUAL == strcmp(door_uri_path, resource_uri_path)) {
 		DBG("uri_path \"%s\" already found. skip !", resource_uri_path);
 		return;
 	}
 
-	door_resource_sid = strdup(resource_sid);
-	if (NULL == door_resource_sid) {
-		ERR("strdup(door_resource_sid) Fail");
+	door_resource_device_id = strdup(resource_device_id);
+	if (NULL == door_resource_device_id) {
+		ERR("strdup(door_resource_device_id) Fail");
 		return;
 	}
 
-	resource_sid_list = g_list_append(resource_sid_list, door_resource_sid);
+	device_id_list = g_list_append(device_id_list, door_resource_device_id);
 
 	/* get the resource host address */
-	ret = iotcon_client_get_host(resource, &resource_host);
+	ret = iotcon_remote_resource_get_host(resource, &resource_host);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_get_host() Fail(%d)", ret);
-		resource_sid_list = g_list_remove(resource_sid_list, door_resource_sid);
-		free(door_resource_sid);
+		ERR("iotcon_remote_resource_get_host() Fail(%d)", ret);
+		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
+		free(door_resource_device_id);
 		return;
 	}
 	DBG("[%s] resource host : %s", resource_uri_path, resource_host);
 
 	/* get the resource interfaces */
-	ret = iotcon_client_get_interfaces(resource, &resource_interfaces);
+	ret = iotcon_remote_resource_get_interfaces(resource, &resource_interfaces);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_get_interfaces() Fail(%d)", ret);
-		resource_sid_list = g_list_remove(resource_sid_list, door_resource_sid);
-		free(door_resource_sid);
+		ERR("iotcon_remote_resource_get_interfaces() Fail(%d)", ret);
+		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
+		free(door_resource_device_id);
 		return;
 	}
 	if (IOTCON_INTERFACE_DEFAULT & resource_interfaces)
@@ -318,11 +317,11 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		DBG("[%s] resource interface : GROUP_INTERFACE", resource_uri_path);
 
 	/* get the resource types */
-	ret = iotcon_client_get_types(resource, &resource_types);
+	ret = iotcon_remote_resource_get_types(resource, &resource_types);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_client_get_types() Fail(%d)", ret);
-		resource_sid_list = g_list_remove(resource_sid_list, door_resource_sid);
-		free(door_resource_sid);
+		ERR("iotcon_remote_resource_get_types() Fail(%d)", ret);
+		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
+		free(door_resource_device_id);
 		return;
 	}
 
@@ -330,8 +329,8 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 			resource_uri_path);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_types_foreach() Fail(%d)", ret);
-		resource_sid_list = g_list_remove(resource_sid_list, door_resource_sid);
-		free(door_resource_sid);
+		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
+		free(door_resource_device_id);
 		return;
 	}
 
@@ -344,8 +343,8 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		ret = iotcon_query_create(&query);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_query_create() Fail(%d)", ret);
-			resource_sid_list = g_list_remove(resource_sid_list, door_resource_sid);
-			free(door_resource_sid);
+			device_id_list = g_list_remove(device_id_list, door_resource_device_id);
+			free(door_resource_device_id);
 			return;
 		}
 
@@ -353,21 +352,21 @@ static void _found_resource(iotcon_client_h resource, void *user_data)
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_query_insert() Fail(%d)", ret);
 			iotcon_query_destroy(query);
-			resource_sid_list = g_list_remove(resource_sid_list, door_resource_sid);
-			free(door_resource_sid);
+			device_id_list = g_list_remove(device_id_list, door_resource_device_id);
+			free(door_resource_device_id);
 			return;
 		}
 
 		/* send GET Request */
-		ret = iotcon_get(resource, query, _on_get, NULL);
+		ret = iotcon_remote_resource_get(resource, query, _on_get, NULL);
 		if (IOTCON_ERROR_NONE != ret)
-			ERR("iotcon_get() Fail(%d)", ret);
+			ERR("iotcon_remote_resource_get() Fail(%d)", ret);
 
 		iotcon_query_destroy(query);
 	}
 
-	resource_sid_list = g_list_remove(resource_sid_list, door_resource_sid);
-	free(door_resource_sid);
+	device_id_list = g_list_remove(device_id_list, door_resource_device_id);
+	free(door_resource_device_id);
 }
 
 int main(int argc, char **argv)
@@ -397,7 +396,7 @@ int main(int argc, char **argv)
 	g_main_loop_run(loop);
 	g_main_loop_unref(loop);
 
-	g_list_free_full(resource_sid_list, free);
+	g_list_free_full(device_id_list, free);
 
 	/* iotcon close */
 	iotcon_close();

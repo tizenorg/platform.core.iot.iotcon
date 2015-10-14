@@ -230,7 +230,7 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 
 	info = calloc(1, sizeof(iotcon_platform_info_s));
 	if (NULL == info) {
-		ERR("calloc(client) Fail(%d)", errno);
+		ERR("calloc(info) Fail(%d)", errno);
 		return;
 	}
 
