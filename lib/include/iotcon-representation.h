@@ -479,7 +479,7 @@ int iotcon_state_get_state(iotcon_state_h src, const char *key, iotcon_state_h *
 int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null);
 
 /**
- * @brief Deletes the key and its associated integer value from the state.
+ * @brief Deletes the key and its associated value from the state.
  *
  * @since_tizen 3.0
  *
@@ -490,105 +490,8 @@ int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_state_del_int(iotcon_state_h state, const char *key);
-
-/**
- * @brief Deletes the key and its associated boolean value from the state.
- *
- * @since_tizen 3.0
- *
- * @param[in] state The state handle
- * @param[in] key The key
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
- */
-int iotcon_state_del_bool(iotcon_state_h state, const char *key);
-
-/**
- * @brief Deletes the key and its associated double value from the state.
- *
- * @since_tizen 3.0
- *
- * @param[in] state The state handle
- * @param[in] key The key
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
- */
-int iotcon_state_del_double(iotcon_state_h state, const char *key);
-
-/**
- * @brief Deletes the key and its associated string value from the state.
- *
- * @since_tizen 3.0
- *
- * @param[in] state The state handle
- * @param[in] key The key
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
- */
-int iotcon_state_del_str(iotcon_state_h state, const char *key);
-
-/**
- * @brief Deletes the key and its associated list value from the state.
- *
- * @since_tizen 3.0
- *
- * @param[in] state The state handle
- * @param[in] key The key
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
- */
-int iotcon_state_del_list(iotcon_state_h state, const char *key);
-
-/**
- * @brief Deletes the key and its associated state value from the state.
- *
- * @since_tizen 3.0
- *
- * @param[in] state The state handle
- * @param[in] key The key
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
- */
-int iotcon_state_del_state(iotcon_state_h state, const char *key);
-
-/**
- * @brief Deletes the key from the state.
- *
- * @since_tizen 3.0
- *
- * @param[in] state The state handle
- * @param[in] key The key
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
- */
-int iotcon_state_del_null(iotcon_state_h state, const char *key);
+int iotcon_state_del(iotcon_state_h state, const char *key);
 
 /**
  * @brief Gets the type of a value at the given key.

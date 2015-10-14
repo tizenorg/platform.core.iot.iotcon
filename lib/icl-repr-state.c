@@ -80,7 +80,7 @@ API void iotcon_state_destroy(iotcon_state_h state)
 }
 
 
-int icl_state_del_value(iotcon_state_h state, const char *key, iotcon_types_e value_type)
+int icl_state_del_value(iotcon_state_h state, const char *key)
 {
 	gboolean ret = FALSE;
 	iotcon_value_h value = NULL;
@@ -92,11 +92,6 @@ int icl_state_del_value(iotcon_state_h state, const char *key, iotcon_types_e va
 	if (NULL == value) {
 		ERR("g_hash_table_lookup(%s) Fail", key);
 		return IOTCON_ERROR_NO_DATA;
-	}
-
-	if (value_type != value->type) {
-		ERR("Type matching Fail(input:%d, saved:%d)", value_type, value->type);
-		return IOTCON_ERROR_INVALID_TYPE;
 	}
 
 	ret = g_hash_table_remove(state->hash_table, key);
@@ -151,14 +146,14 @@ API int iotcon_state_set_int(iotcon_state_h state, const char *key, int val)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_del_int(iotcon_state_h state, const char *key)
+API int iotcon_state_del(iotcon_state_h state, const char *key)
 {
 	int ret;
 
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = icl_state_del_value(state, key, IOTCON_TYPE_INT);
+	ret = icl_state_del_value(state, key);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icl_state_del_value() Fail(%d)", ret);
 
@@ -209,20 +204,6 @@ API int iotcon_state_set_bool(iotcon_state_h state, const char *key, bool val)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_del_bool(iotcon_state_h state, const char *key)
-{
-	int ret;
-
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
-
-	ret = icl_state_del_value(state, key, IOTCON_TYPE_BOOL);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icl_state_del_value() Fail(%d)", ret);
-
-	return ret;
-}
-
 API int iotcon_state_get_double(iotcon_state_h state, const char *key, double *val)
 {
 	icl_basic_s *real = NULL;
@@ -265,20 +246,6 @@ API int iotcon_state_set_double(iotcon_state_h state, const char *key, double va
 	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
-}
-
-API int iotcon_state_del_double(iotcon_state_h state, const char *key)
-{
-	int ret;
-
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
-
-	ret = icl_state_del_value(state, key, IOTCON_TYPE_DOUBLE);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icl_state_del_value() Fail(%d)", ret);
-
-	return ret;
 }
 
 API int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val)
@@ -326,20 +293,6 @@ API int iotcon_state_set_str(iotcon_state_h state, const char *key, char *val)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_del_str(iotcon_state_h state, const char *key)
-{
-	int ret;
-
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
-
-	ret = icl_state_del_value(state, key, IOTCON_TYPE_STR);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icl_state_del_value() Fail(%d)", ret);
-
-	return ret;
-}
-
 API int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null)
 {
 	icl_basic_s *real = NULL;
@@ -376,20 +329,6 @@ API int iotcon_state_set_null(iotcon_state_h state, const char *key)
 	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
-}
-
-API int iotcon_state_del_null(iotcon_state_h state, const char *key)
-{
-	int ret;
-
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
-
-	ret = icl_state_del_value(state, key, IOTCON_TYPE_NULL);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icl_state_del_value() Fail(%d)", ret);
-
-	return ret;
 }
 
 API int iotcon_state_get_list(iotcon_state_h state, const char *key, iotcon_list_h *list)
@@ -438,21 +377,6 @@ API int iotcon_state_set_list(iotcon_state_h state, const char *key, iotcon_list
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_del_list(iotcon_state_h state, const char *key)
-{
-	int ret;
-
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
-
-	ret = icl_state_del_value(state, key, IOTCON_TYPE_LIST);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icl_state_del_value() Fail(%d)", ret);
-
-	return ret;
-}
-
-
 API int iotcon_state_get_state(iotcon_state_h src, const char *key, iotcon_state_h *dest)
 {
 	icl_val_state_s *real = NULL;
@@ -497,20 +421,6 @@ API int iotcon_state_set_state(iotcon_state_h state, const char *key, iotcon_sta
 	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
-}
-
-API int iotcon_state_del_state(iotcon_state_h state, const char *key)
-{
-	int ret;
-
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
-
-	ret = icl_state_del_value(state, key, IOTCON_TYPE_STATE);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icl_state_del_value() Fail(%d)", ret);
-
-	return ret;
 }
 
 API int iotcon_state_get_type(iotcon_state_h state, const char *key, int *type)

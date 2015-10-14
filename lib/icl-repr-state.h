@@ -23,8 +23,7 @@
 void icl_state_inc_ref_count(iotcon_state_h val);
 int icl_state_dec_ref_count(iotcon_state_h val);
 
-int icl_state_del_value(iotcon_state_h state, const char *key,
-		iotcon_types_e value_type);
+int icl_state_del_value(iotcon_state_h state, const char *key);
 
 int icl_state_set_value(iotcon_state_h state, const char *key, iotcon_value_h value);
 
