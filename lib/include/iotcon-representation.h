@@ -1017,7 +1017,7 @@ int iotcon_list_get_nth_list(iotcon_list_h src, int pos, iotcon_list_h *dest);
 int iotcon_list_get_nth_state(iotcon_list_h list, int pos, iotcon_state_h *state);
 
 /**
- * @brief Deletes the integer value at the given position.
+ * @brief Deletes the value at the given position.
  * @details Iterates over the list until it reaches the @a pos-1 position.
  *
  * @since_tizen 3.0
@@ -1029,94 +1029,8 @@ int iotcon_list_get_nth_state(iotcon_list_h list, int pos, iotcon_state_h *state
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_list_del_nth_int(iotcon_list_h list, int pos);
-
-/**
- * @brief Deletes the boolean value at the given position.
- * @details Iterates over the list until it reaches the @a pos-1 position.
- *
- * @since_tizen 3.0
- *
- * @param[in] list The list handle
- * @param[in] pos The position to delete
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
- */
-int iotcon_list_del_nth_bool(iotcon_list_h list, int pos);
-
-/**
- * @brief Deletes the double value at the given position.
- * @details Iterates over the list until it reaches the @a pos-1 position.
- *
- * @since_tizen 3.0
- *
- * @param[in] list The list handle
- * @param[in] pos The position to delete
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
- */
-int iotcon_list_del_nth_double(iotcon_list_h list, int pos);
-
-/**
- * @brief Deletes the string value at the given position.
- * @details Iterates over the list until it reaches the @a pos-1 position.
- *
- * @since_tizen 3.0
- *
- * @param[in] list The list handle
- * @param[in] pos The position to delete
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
- */
-int iotcon_list_del_nth_str(iotcon_list_h list, int pos);
-
-/**
- * @brief Deletes the list value at the given position.
- * @details Iterates over the list until it reaches the @a pos-1 position.
- *
- * @since_tizen 3.0
- *
- * @param[in] list The list handle
- * @param[in] pos The position to delete
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
- */
-int iotcon_list_del_nth_list(iotcon_list_h list, int pos);
-
-/**
- * @brief Deletes the state value at the given position.
- * @details Iterates over the list until it reaches the @a pos-1 position.
- *
- * @since_tizen 3.0
- *
- * @param[in] list The list handle
- * @param[in] pos The position to delete
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
- */
-int iotcon_list_del_nth_state(iotcon_list_h list, int pos);
+int iotcon_list_del_nth(iotcon_list_h list, int pos);
 
 /**
  * @brief Gets the type of the list.

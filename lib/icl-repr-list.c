@@ -372,14 +372,12 @@ API int iotcon_list_get_nth_state(iotcon_list_h list, int pos, iotcon_state_h *s
 }
 
 
-static int _icl_list_del_nth_value(iotcon_list_h list, int pos, iotcon_types_e value_type)
+static int _icl_list_del_nth_value(iotcon_list_h list, int pos)
 {
 	iotcon_value_h value;
 
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == list->list, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(value_type != list->type, IOTCON_ERROR_INVALID_TYPE,
-			"Type Mismatching(list:%d, value:%d)", list->type, value_type);
 
 	value = g_list_nth_data(list->list, pos);
 	if (NULL == value) {
@@ -403,77 +401,16 @@ static int _icl_list_del_nth_value(iotcon_list_h list, int pos, iotcon_types_e v
 }
 
 
-API int iotcon_list_del_nth_int(iotcon_list_h list, int pos)
+API int iotcon_list_del_nth(iotcon_list_h list, int pos)
 {
 	int ret;
 
-	ret = _icl_list_del_nth_value(list, pos, IOTCON_TYPE_INT);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("iotcon_list_del_nth_int() Fail(%d)", ret);
-
-	return ret;
-}
-
-
-API int iotcon_list_del_nth_bool(iotcon_list_h list, int pos)
-{
-	int ret;
-
-	ret = _icl_list_del_nth_value(list, pos, IOTCON_TYPE_BOOL);
+	ret = _icl_list_del_nth_value(list, pos);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_icl_list_del_nth_value() Fail(%d)", ret);
 
 	return ret;
 }
-
-
-API int iotcon_list_del_nth_double(iotcon_list_h list, int pos)
-{
-	int ret;
-
-	ret = _icl_list_del_nth_value(list, pos, IOTCON_TYPE_DOUBLE);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("_icl_list_del_nth_value() Fail(%d)", ret);
-
-	return ret;
-}
-
-
-API int iotcon_list_del_nth_str(iotcon_list_h list, int pos)
-{
-	int ret;
-
-	ret = _icl_list_del_nth_value(list, pos, IOTCON_TYPE_STR);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("_icl_list_del_nth_value() Fail(%d)", ret);
-
-	return ret;
-}
-
-
-API int iotcon_list_del_nth_list(iotcon_list_h list, int pos)
-{
-	int ret;
-
-	ret = _icl_list_del_nth_value(list, pos, IOTCON_TYPE_LIST);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("_icl_list_del_nth_value() Fail(%d)", ret);
-
-	return ret;
-}
-
-
-API int iotcon_list_del_nth_state(iotcon_list_h list, int pos)
-{
-	int ret;
-
-	ret = _icl_list_del_nth_value(list, pos, IOTCON_TYPE_STATE);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("_icl_list_del_nth_value() Fail(%d)", ret);
-
-	return ret;
-}
-
 
 API int iotcon_list_get_type(iotcon_list_h list, int *type)
 {
