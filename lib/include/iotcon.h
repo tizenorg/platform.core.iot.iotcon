@@ -568,6 +568,52 @@ int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_cb c
 		void *user_data);
 
 /**
+ * @brief Specifies the type of function passed to iotcon_get_tizen_info().
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] tizen_info The information of tizen device from remote server.
+ * @param[in] response_result The response result code
+ * @param[in] user_data The user data to pass to the function
+ *
+ * @pre iotcon_get_tizen_info() will invoke this callback function.
+ *
+ * @see iotcon_get_tizen_info()
+ * @see iotcon_tizen_info_get_property()
+ */
+typedef void (*iotcon_tizen_info_cb)(iotcon_tizen_info_h tizen_info,
+		int response_result, void *user_data);
+
+/**
+ * @brief Calls a function for tizen device information of remote server.
+ * @details Request tizen device information to server and pass the information by calling
+ * iotcon_tizen_info_cb().\n
+ * iotcon_tizen_info_cb() will be called when success on getting tizen device information.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/internet
+ *
+ * @param[in] host_address The host address of remote server
+ * @param[in] cb The callback function to invoke
+ * @param[in] user_data The user data to pass to the function
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_DBUS  Dbus error
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @post iotcon_tizen_info_cb() will be called when success on getting tizen device information.
+ *
+ * @see iotcon_tizen_info_cb()
+ * @see iotcon_tizen_info_get_property()
+ */
+int iotcon_get_tizen_info(const char *host_address, iotcon_tizen_info_cb cb,
+		void *user_data);
+
+/**
  * @brief Starts presence of a server.
  * @details Use this function to send server's announcements to clients.\n
  * Server can call this function when online for the first time or come back from offline to online.

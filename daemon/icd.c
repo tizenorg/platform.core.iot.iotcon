@@ -25,6 +25,7 @@
 
 int main(int argc, char **argv)
 {
+	int ret;
 	guint id;
 	GThread *thread;
 	GMainLoop *loop;
@@ -39,6 +40,14 @@ int main(int argc, char **argv)
 	thread = icd_ioty_init(ICD_ALL_INTERFACES, ICD_RANDOM_PORT);
 	if (NULL == thread) {
 		ERR("icd_ioty_init() Fail");
+		icd_dbus_deinit(id);
+		return -1;
+	}
+
+	ret = icd_ioty_set_tizen_info();
+	if (IOTCON_ERROR_NONE) {
+		ERR("icd_ioty_set_tizen_info() Fail(%d)", ret);
+		icd_ioty_deinit(thread);
 		icd_dbus_deinit(id);
 		return -1;
 	}

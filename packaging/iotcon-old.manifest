@@ -11,6 +11,7 @@
 			<smack request="dbus" type="rwx" />
 			<smack request="device::app_logging" type="w" />
 			<smack request="device::sys_logging" type="w" />
+			<smack request="system::homedir" type="x" />
 		</request>
 	</define>
 	<assign>

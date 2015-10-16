@@ -20,6 +20,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <glib.h>
+#include <system_info.h>
 
 #include <octypes.h>
 #include <ocstack.h>
@@ -33,6 +34,17 @@
 #include "icd-ioty.h"
 #include "icd-ioty-type.h"
 #include "icd-ioty-ocprocess.h"
+
+#define ICD_UUID_LENGTH 37
+
+static const char *ICD_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
+
+typedef struct {
+	char *device_name;
+	char *tizen_device_id;
+} icd_tizen_info_s;
+
+static icd_tizen_info_s icd_tizen_info;
 
 static GMutex icd_csdk_mutex;
 
@@ -485,6 +497,9 @@ void icd_ioty_complete(int type, GDBusMethodInvocation *invocation, GVariant *va
 	case ICD_CRUD_DELETE:
 		ic_dbus_complete_delete(icd_dbus_get_object(), invocation, value);
 		break;
+	case ICD_TIZEN_INFO:
+		ic_dbus_complete_get_tizen_info(icd_dbus_get_object(), invocation, value);
+		break;
 	}
 }
 
@@ -509,6 +524,10 @@ void icd_ioty_complete_error(int type, GDBusMethodInvocation *invocation, int re
 	case ICD_CRUD_DELETE:
 		value = g_variant_new("(a(qs)i)", NULL, ret_val);
 		ic_dbus_complete_delete(icd_dbus_get_object(), invocation, value);
+		break;
+	case ICD_TIZEN_INFO:
+		value = g_variant_new("(ssi)", IC_STR_NULL, IC_STR_NULL, ret_val);
+		ic_dbus_complete_get_tizen_info(icd_dbus_get_object(), invocation, value);
 		break;
 	}
 }
@@ -625,7 +644,7 @@ static gboolean _icd_ioty_crud(int type, icDbus *object, GDBusMethodInvocation *
 
 	if (OC_STACK_OK != result) {
 		ERR("OCDoResource() Fail(%d)", result);
-		return icd_ioty_convert_error(result);
+		icd_ioty_complete_error(type, invocation, icd_ioty_convert_error(result));
 		return TRUE;
 	}
 
@@ -798,10 +817,17 @@ int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options)
 
 int icd_ioty_register_device_info(GVariant *value)
 {
+	char *device_name;
 	OCStackResult result;
 	OCDeviceInfo device_info = {0};
 
 	g_variant_get(value, "(&s)", &device_info.deviceName);
+
+	device_name = strdup(device_info.deviceName);
+	if (NULL == device_name) {
+		ERR("strdup() Fail(%d)", errno);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
 
 	icd_ioty_csdk_lock();
 	result = OCSetDeviceInfo(device_info);
@@ -809,8 +835,11 @@ int icd_ioty_register_device_info(GVariant *value)
 
 	if (OC_STACK_OK != result) {
 		ERR("OCSetDeviceInfo() Fail(%d)", result);
+		free(device_name);
 		return icd_ioty_convert_error(result);
 	}
+
+	icd_tizen_info.device_name = device_name;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -896,6 +925,119 @@ int icd_ioty_get_info(int type, const char *host_address, unsigned int signal_nu
 		free(context);
 		return icd_ioty_convert_error(result);
 	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+static int _icd_ioty_get_tizen_id(char **tizen_device_id)
+{
+	int ret;
+	char *tizen_id = NULL;
+
+	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_TIZEN_ID, &tizen_id);
+	if (SYSTEM_INFO_ERROR_NONE != ret) {
+		ERR("system_info_get_platform_string() Fail(%d)", ret);
+		return IOTCON_ERROR_SYSTEM;
+	}
+	*tizen_device_id = tizen_id;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+int icd_ioty_set_tizen_info()
+{
+	int result;
+	OCStackResult ret;
+	OCResourceHandle handle;
+	char *tizen_device_id = NULL;
+
+	result = _icd_ioty_get_tizen_id(&tizen_device_id);
+	if (IOTCON_ERROR_NONE != result) {
+		ERR("_icd_ioty_get_tizen_id() Fail(%d)", result);
+		return result;
+	}
+
+	icd_tizen_info.tizen_device_id = tizen_device_id;
+	DBG("tizen_device_id : %s", icd_tizen_info.tizen_device_id);
+
+	icd_ioty_csdk_lock();
+	ret = OCCreateResource(&handle,
+			ICD_IOTY_TIZEN_INFO_TYPE,
+			IC_INTERFACE_DEFAULT,
+			ICD_IOTY_TIZEN_INFO_URI,
+			icd_ioty_ocprocess_tizen_info_handler,
+			NULL,
+			OC_RES_PROP_NONE);
+	icd_ioty_csdk_unlock();
+	if (OC_STACK_OK != ret) {
+		ERR("OCCreateResource() Fail(%d)", ret);
+		return icd_ioty_convert_error(ret);
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+gboolean icd_ioty_get_tizen_info(icDbus *object, GDBusMethodInvocation *invocation,
+		const gchar *host_address)
+{
+	OCStackResult result;
+	OCDevAddr dev_addr = {0};
+	OCCallbackData cbdata = {0};
+	OCConnectivityType oic_conn_type;
+	char host[PATH_MAX] = {0};
+	char *dev_host, *ptr = NULL;
+	int conn_type = IOTCON_CONNECTIVITY_IPV4;
+
+	snprintf(host, sizeof(host), "%s", host_address);
+
+	cbdata.cb = icd_ioty_ocprocess_get_tizen_info_cb;
+	cbdata.context = invocation;
+
+	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
+	icd_ioty_conn_type_to_oic_transport_type(conn_type, &dev_addr.adapter,
+			&dev_addr.flags);
+
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+		dev_host = strtok_r(host, ":", &ptr);
+		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
+		dev_addr.port = atoi(strtok_r(NULL, ":", &ptr));
+		break;
+	case IOTCON_CONNECTIVITY_IPV6:
+		dev_host = strtok_r(host, "]", &ptr);
+		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
+		dev_addr.port = atoi(strtok_r(NULL, "]", &ptr));
+		break;
+	default:
+		ERR("Invalid Connectivitiy Type");
+		icd_ioty_complete_error(ICD_TIZEN_INFO, invocation, IOTCON_ERROR_IOTIVITY);
+		return TRUE;
+	}
+
+	icd_ioty_csdk_lock();
+	result = OCDoResource(NULL, OC_REST_GET, ICD_IOTY_TIZEN_INFO_URI, &dev_addr, NULL,
+			oic_conn_type, OC_LOW_QOS, &cbdata, NULL, 0);
+	icd_ioty_csdk_unlock();
+
+	if (OC_STACK_OK != result) {
+		ERR("OCDoResource() Fail(%d)", result);
+		icd_ioty_complete_error(ICD_TIZEN_INFO, invocation, icd_ioty_convert_error(result));
+		return TRUE;
+	}
+
+	return TRUE;
+}
+
+
+int icd_ioty_tizen_info_get_property(char **device_name, char **tizen_device_id)
+{
+	RETV_IF(NULL == device_name, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == tizen_device_id, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*device_name = icd_tizen_info.device_name;
+	*tizen_device_id = icd_tizen_info.tizen_device_id;
 
 	return IOTCON_ERROR_NONE;
 }

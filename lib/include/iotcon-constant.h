@@ -204,6 +204,16 @@ typedef enum {
 } iotcon_platform_info_e;
 
 /**
+ * @brief Enumeration for properties of tizen device information.
+ *
+ * @since_tizen 3.0
+ */
+typedef enum {
+	IOTCON_TIZEN_INFO_DEVICE_NAME = 0, /**< Indicates human friendly name for device */
+	IOTCON_TIZEN_INFO_TIZEN_DEVICE_ID, /**< Indicates unique identifier for tizen device */
+} iotcon_tizen_info_e;
+
+/**
  * @}
  */
 

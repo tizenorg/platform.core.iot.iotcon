@@ -771,6 +771,8 @@ static void _dbus_on_bus_acquired(GDBusConnection *conn, const gchar *name,
 			G_CALLBACK(_dbus_handle_register_platform_info), NULL);
 	g_signal_connect(icd_dbus_object, "handle-get-platform-info",
 			G_CALLBACK(_dbus_handle_get_platform_info), NULL);
+	g_signal_connect(icd_dbus_object, "handle-get-tizen-info",
+			G_CALLBACK(icd_ioty_get_tizen_info), NULL);
 	g_signal_connect(icd_dbus_object, "handle-start-presence",
 			G_CALLBACK(_dbus_handle_start_presence), NULL);
 	g_signal_connect(icd_dbus_object, "handle-stop-presence",

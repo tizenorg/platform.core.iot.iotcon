@@ -19,13 +19,22 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <glib.h>
+#include <gio/gio.h>
 
 #include <octypes.h>
 
 #include "iotcon.h"
+#include "ic-dbus.h"
 
 #define ICD_IOTY_COAP "coap://"
 #define ICD_IOTY_COAPS "coaps://"
+
+/* TODO Define Tizen Information Resource(uri, resource type) */
+#define ICD_IOTY_TIZEN_INFO_URI "/org/tizen/iot/devInfo"
+#define ICD_IOTY_TIZEN_INFO_TYPE "org.tizen.iot.devInfo"
+
+#define ICD_IOTY_TIZEN_INFO_DEVICE_NAME "device_name"
+#define ICD_IOTY_TIZEN_INFO_TIZEN_DEVICE_ID "tizen_device_id"
 
 typedef struct {
 	unsigned int signum;
@@ -39,6 +48,7 @@ enum {
 	ICD_CRUD_DELETE,
 	ICD_DEVICE_INFO,
 	ICD_PLATFORM_INFO,
+	ICD_TIZEN_INFO,
 };
 
 void icd_ioty_csdk_lock();
@@ -95,6 +105,13 @@ int icd_ioty_register_platform_info(GVariant *value);
 
 int icd_ioty_get_info(int type, const char *host_address, unsigned int signal_number,
 		const char *bus_name);
+
+int icd_ioty_set_tizen_info();
+
+gboolean icd_ioty_get_tizen_info(icDbus *object, GDBusMethodInvocation *invocation,
+		const gchar *host_address);
+
+int icd_ioty_tizen_info_get_property(char **device_name, char **tizen_device_id);
 
 OCDoHandle icd_ioty_subscribe_presence(const char *host_address,
 		const char *resource_type, unsigned int signal_number, const char *bus_name);

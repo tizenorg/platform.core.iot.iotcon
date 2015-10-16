@@ -25,6 +25,7 @@
 #include "iotcon.h"
 #include "ic-utils.h"
 #include "icd.h"
+#include "icd-ioty.h"
 #include "icd-payload.h"
 
 union icd_state_value_u {

@@ -81,6 +81,13 @@ struct icd_info_context {
 };
 
 
+struct icd_tizen_info_context {
+	OCRequestHandle request_h;
+	OCResourceHandle resource_h;
+	GDBusMethodInvocation *invocation;
+};
+
+
 struct icd_observe_context {
 	unsigned int signum;
 	int res;
@@ -955,3 +962,129 @@ OCStackApplicationResult icd_ioty_ocprocess_info_cb(void *ctx, OCDoHandle handle
 }
 
 
+static int _worker_tizen_info_handler(void *context)
+{
+	int ret;
+	char *device_name;
+	char *tizen_device_id;
+	OCStackResult result;
+	OCRepPayload *payload;
+	OCEntityHandlerResponse response = {0};
+	struct icd_tizen_info_context *ctx = context;
+
+	response.requestHandle = ctx->request_h;
+	response.resourceHandle = ctx->resource_h;
+	response.ehResult = OC_EH_OK;
+
+	/* Get Tizen Info */
+	ret = icd_ioty_tizen_info_get_property(&device_name, &tizen_device_id);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_ioty_tizen_info_get_property() Fail(%d)", ret);
+		response.ehResult = OC_EH_ERROR;
+	}
+
+	/* payload */
+	payload = OCRepPayloadCreate();
+	OCRepPayloadSetUri(payload, ICD_IOTY_TIZEN_INFO_URI);
+	OCRepPayloadAddResourceType(payload, ICD_IOTY_TIZEN_INFO_TYPE);
+	OCRepPayloadAddInterface(payload, IC_INTERFACE_DEFAULT);
+
+	OCRepPayloadSetPropString(payload, ICD_IOTY_TIZEN_INFO_DEVICE_NAME,
+			ic_utils_dbus_encode_str(device_name));
+	OCRepPayloadSetPropString(payload, ICD_IOTY_TIZEN_INFO_TIZEN_DEVICE_ID,
+			ic_utils_dbus_encode_str(tizen_device_id));
+	response.payload = (OCPayload*)payload;
+
+	icd_ioty_csdk_lock();
+	result = OCDoResponse(&response);
+	icd_ioty_csdk_unlock();
+
+	if (OC_STACK_OK != result) {
+		ERR("OCDoResponse() Fail(%d)", result);
+		free(ctx);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
+	free(ctx);
+	return IOTCON_ERROR_NONE;
+}
+
+
+OCEntityHandlerResult icd_ioty_ocprocess_tizen_info_handler(OCEntityHandlerFlag flag,
+		OCEntityHandlerRequest *request, void *user_data)
+{
+	int ret;
+	struct icd_tizen_info_context *tizen_info_ctx;
+
+	if ((0 == (OC_REQUEST_FLAG & flag)) || (OC_REST_GET != request->method)) {
+		ERR("Prohibited Action");
+		return OC_EH_FORBIDDEN;
+	}
+
+	tizen_info_ctx = calloc(1, sizeof(struct icd_tizen_info_context));
+	if (NULL == tizen_info_ctx) {
+		ERR("calloc() Fail(%d)", errno);
+		return OC_EH_ERROR;
+	}
+
+	tizen_info_ctx->request_h = request->requestHandle;
+	tizen_info_ctx->resource_h = request->resource;
+
+	ret = _ocprocess_worker_start(_worker_tizen_info_handler, tizen_info_ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker_start() Fail(%d)", ret);
+		free(tizen_info_ctx);
+		return OC_EH_ERROR;
+	}
+
+	return OC_EH_OK;
+}
+
+
+OCStackApplicationResult icd_ioty_ocprocess_get_tizen_info_cb(void *ctx,
+		OCDoHandle handle, OCClientResponse *resp)
+{
+	int res;
+	char *device_name;
+	char *tizen_device_id;
+	GVariant *tizen_info;
+	OCRepPayload *payload;
+	OCRepPayloadValue *val;
+
+	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
+
+	if (NULL == resp->payload) {
+		ERR("payload is empty");
+		icd_ioty_complete_error(ICD_TIZEN_INFO, ctx, IOTCON_ERROR_IOTIVITY);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	payload = (OCRepPayload*)resp->payload;
+	val = payload->values;
+	if (NULL == val) {
+		ERR("Invalid payload");
+		icd_ioty_complete_error(ICD_TIZEN_INFO, ctx, IOTCON_ERROR_IOTIVITY);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+	device_name = val->str;
+
+	val = val->next;
+	if (NULL == val) {
+		ERR("Invalid Payload");
+		icd_ioty_complete_error(ICD_TIZEN_INFO, ctx, IOTCON_ERROR_IOTIVITY);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	tizen_device_id = val->str;
+
+	if (OC_STACK_OK == resp->result)
+		res = IOTCON_RESPONSE_RESULT_OK;
+	else
+		res = IOTCON_RESPONSE_RESULT_ERROR;
+
+	tizen_info = g_variant_new("(ssi)", device_name, tizen_device_id, res);
+
+	icd_ioty_complete(ICD_TIZEN_INFO, ctx, tizen_info);
+
+	return OC_STACK_DELETE_TRANSACTION;
+}

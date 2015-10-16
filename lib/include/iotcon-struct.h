@@ -83,22 +83,6 @@ typedef struct icl_notify_msg* iotcon_notimsg_h;
 typedef struct icl_presence* iotcon_presence_h;
 
 /**
- * @brief The handle of device information.
- * @details iotcon_device_info_h is a handle of device information.\n
- *
- * @since_tizen 3.0
- */
-typedef struct icl_device_info* iotcon_device_info_h;
-
-/**
- * @brief The handle of platform information.
- * @details iotcon_platform_info_h is a handle of platform information.\n
- *
- * @since_tizen 3.0
- */
-typedef struct icl_platform_info* iotcon_platform_info_h;
-
-/**
  * @brief The handle of options
  * @details iotcon_options_h is an opaque data structure to have attribute value map
  * which consists of a key and a value.\n
@@ -1228,6 +1212,14 @@ int iotcon_response_set_header_options(iotcon_response_h resp, iotcon_options_h 
 int iotcon_response_set_interface(iotcon_response_h resp, int iface);
 
 /**
+ * @brief The handle of device information.
+ * @details iotcon_device_info_h is a handle of device information.\n
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_device_info* iotcon_device_info_h;
+
+/**
  * @brief Sets device properties into the device information handle
  *
  * @since_tizen 3.0
@@ -1255,7 +1247,7 @@ int iotcon_device_info_set_property(iotcon_device_info_h device_info,
  *
  * @param[in] device_info The handle of the device information
  * @param[in] property The properties of the device information
- * @param[in] value The value of the property
+ * @param[out] value The value of the property
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -1268,13 +1260,21 @@ int iotcon_device_info_get_property(iotcon_device_info_h device_info,
 		iotcon_device_info_e property, char **value);
 
 /**
+ * @brief The handle of platform information.
+ * @details iotcon_platform_info_h is a handle of platform information.\n
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_platform_info* iotcon_platform_info_h;
+
+/**
  * @brief Sets platform properties into the platform information handle
  *
  * @since_tizen 3.0
  *
  * @param[in] platform_info The handle of the platform information
  * @param[in] property The properties of the platform information
- * @param[out] value The value of the property
+ * @param[in] value The value of the property
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -1306,6 +1306,34 @@ int iotcon_platform_info_set_property(iotcon_platform_info_h platform_info,
  */
 int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
 		iotcon_platform_info_e property, char **value);
+
+/**
+ * @brief The handle of tizen device information.
+ * @details iotcon_tizen_info_h is a handle of tizen device information.\n
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_tizen_info* iotcon_tizen_info_h;
+
+/**
+ * @brief Get tizen device properties from the tizen device information handle
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] tizen_info The handle of the tizen device information
+ * @param[in] property The properties of the tizen device information
+ * @param[out] value The value of the property
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_tizen_info_cb()
+ * @see iotcon_get_tizen_info()
+ */
+int iotcon_tizen_info_get_property(iotcon_tizen_info_h tizen_info,
+				iotcon_tizen_info_e property, char **value);
+
 /**
  * @}
  */

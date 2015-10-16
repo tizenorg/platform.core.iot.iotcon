@@ -50,4 +50,10 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 OCStackApplicationResult icd_ioty_ocprocess_info_cb(void *ctx, OCDoHandle handle,
 		OCClientResponse *resp);
 
+OCEntityHandlerResult icd_ioty_ocprocess_tizen_info_handler(OCEntityHandlerFlag flag,
+		OCEntityHandlerRequest *request, void *user_data);
+
+OCStackApplicationResult icd_ioty_ocprocess_get_tizen_info_cb(void *ctx,
+		OCDoHandle handle, OCClientResponse* resp);
+
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_OCPROCESS_H__*/
