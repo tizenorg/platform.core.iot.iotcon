@@ -317,7 +317,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 		return;
 	}
 
-	ret = iotcon_notify_list_of_observers(door_handle, msg, observers);
+	ret = iotcon_resource_notify(door_handle, msg, observers);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_notimsg_destroy(msg);
 		iotcon_representation_destroy(resp_repr);
@@ -403,11 +403,7 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
  *         <td></td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_notify_list_of_observers</td>
- *         <td></td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_resource_notify_all</td>
+ *         <td>iotcon_resource_notify</td>
  *         <td></td>
  *     </tr>
  *     <tr>

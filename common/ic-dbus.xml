@@ -31,14 +31,10 @@
 			<arg type="x" name="child" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
-		<method name="notifyListOfObservers">
+		<method name="notify">
 			<arg type="x" name="resource" direction="in"/>
 			<arg type="a(iv)" name="notify_msg" direction="in"/>
 			<arg type="ai" name="observers" direction="in"/>
-			<arg type="i" name="ret" direction="out"/>
-		</method>
-		<method name="notifyAll">
-			<arg type="x" name="resource" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="sendResponse">

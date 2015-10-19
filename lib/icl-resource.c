@@ -119,6 +119,18 @@ static void _icl_request_handler(GDBusConnection *connection,
 	/* TODO remove request.uri */
 	request.uri_path = "temp_uri_path";
 
+	/* for iotcon_resource_notify */
+	if (IOTCON_REQUEST_OBSERVE & request.types) {
+		int observer_id = request.observation_info.observer_id;
+		if (IOTCON_OBSERVE_REGISTER == request.observation_info.action) {
+			if (NULL == resource->observers)
+				iotcon_observers_create(&resource->observers);
+			iotcon_observers_insert(resource->observers, observer_id);
+		} else if (IOTCON_OBSERVE_DEREGISTER == request.observation_info.action) {
+			iotcon_observers_delete(resource->observers, observer_id);
+		}
+	}
+
 	if (cb)
 		cb(resource, &request, resource->user_data);
 
@@ -142,6 +154,7 @@ static void _icl_resource_conn_cleanup(iotcon_resource_h resource)
 	}
 
 	iotcon_resource_types_destroy(resource->types);
+	iotcon_observers_destroy(resource->observers);
 	free(resource->uri_path);
 	free(resource);
 }
@@ -244,6 +257,7 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 	if (0 == resource->sub_id) {
 		WARN("Invalid Resource handle");
 		iotcon_resource_types_destroy(resource->types);
+		iotcon_observers_destroy(resource->observers);
 		free(resource->uri_path);
 		free(resource);
 		return IOTCON_ERROR_NONE;
@@ -556,8 +570,7 @@ API void iotcon_notimsg_destroy(iotcon_notimsg_h msg)
 	free(msg);
 }
 
-
-API int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notimsg_h msg,
+API int iotcon_resource_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
 		iotcon_observers_h observers)
 {
 	int ret;
@@ -567,24 +580,28 @@ API int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notim
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (0 == resource->sub_id) {
 		ERR("Invalid Resource handle");
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
+	/* TODO: Get default message if msg parameter is NULL */
 	noti_msg = icl_dbus_notimsg_to_gvariant(msg);
 	if (NULL == noti_msg) {
 		ERR("icl_dbus_notimsg_to_gvariant() Fail");
 		return IOTCON_ERROR_REPRESENTATION;
 	}
-	obs = icl_dbus_observers_to_gvariant(observers);
 
-	ic_dbus_call_notify_list_of_observers_sync(icl_dbus_get_object(), resource->handle,
-			noti_msg, obs, &ret, NULL, &error);
+	if (observers)
+		obs = icl_dbus_observers_to_gvariant(observers);
+	else
+		obs = icl_dbus_observers_to_gvariant(resource->observers);
+
+	ic_dbus_call_notify_sync(icl_dbus_get_object(), resource->handle, noti_msg, obs, &ret,
+			NULL, &error);
 	if (error) {
-		ERR("ic_dbus_call_notify_list_of_observers_sync() Fail(%s)", error->message);
+		ERR("ic_dbus_call_notify_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
 		g_variant_unref(obs);
@@ -600,32 +617,3 @@ API int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notim
 	return IOTCON_ERROR_NONE;
 }
 
-
-API int iotcon_resource_notify_all(iotcon_resource_h resource)
-{
-	int ret;
-	GError *error = NULL;
-
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	if (0 == resource->sub_id) {
-		ERR("Invalid Resource handle");
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-
-	ic_dbus_call_notify_all_sync(icl_dbus_get_object(), resource->handle, &ret, NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_notify_all_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return ret;
-	}
-
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
-	}
-
-	return IOTCON_ERROR_NONE;
-}

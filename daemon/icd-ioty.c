@@ -234,10 +234,9 @@ int icd_ioty_unbind_resource(OCResourceHandle parent, OCResourceHandle child)
 }
 
 
-int icd_ioty_notify_list_of_observers(OCResourceHandle handle, GVariant *msg,
-		GVariant *observers)
+int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers)
 {
-	int i, error_code, obs_length;
+	int i, error_code, obs_length, msg_length;
 	GVariant *repr_gvar;
 	GVariantIter obs_iter, msg_iter;
 	OCStackResult ret;
@@ -253,14 +252,20 @@ int icd_ioty_notify_list_of_observers(OCResourceHandle handle, GVariant *msg,
 		g_variant_iter_loop(&obs_iter, "i", &obs_ids[i]);
 
 	g_variant_iter_init(&msg_iter, msg);
-	g_variant_iter_loop(&msg_iter, "(iv)", &error_code, &repr_gvar);
-	/* TODO : How to use error_code. */
-
-	payload = icd_payload_representation_from_gvariant(repr_gvar);
+	msg_length = g_variant_iter_n_children(&msg_iter);
+	if (msg_length) {
+		g_variant_iter_loop(&msg_iter, "(iv)", &error_code, &repr_gvar);
+		/* TODO : How to use error_code. */
+		payload = icd_payload_representation_from_gvariant(repr_gvar);
+	}
 
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. */
-	ret = OCNotifyListOfObservers(handle, obs_ids, obs_length, payload, OC_LOW_QOS);
+	if (msg_length) {
+		ret = OCNotifyListOfObservers(handle, obs_ids, obs_length, payload, OC_LOW_QOS);
+	} else {
+		ret = OCNotifyAllObservers(handle, OC_LOW_QOS);
+	}
 	icd_ioty_csdk_unlock();
 
 	if (OC_STACK_NO_OBSERVERS == ret) {
@@ -268,27 +273,6 @@ int icd_ioty_notify_list_of_observers(OCResourceHandle handle, GVariant *msg,
 		return IOTCON_ERROR_NONE;
 	} else if (OC_STACK_OK != ret) {
 		ERR("OCNotifyListOfObservers() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
-	}
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-int icd_ioty_notify_all(OCResourceHandle handle)
-{
-	OCStackResult ret;
-
-	icd_ioty_csdk_lock();
-	/* TODO : QoS is come from lib. */
-	ret = OCNotifyAllObservers(handle, OC_LOW_QOS);
-	icd_ioty_csdk_unlock();
-
-	if (OC_STACK_NO_OBSERVERS == ret) {
-		WARN("No Observers. Stop Notifying");
-		return IOTCON_ERROR_NONE;
-	} else if (OC_STACK_OK != ret) {
-		ERR("OCNotifyAllObservers() Fail(%d)", ret);
 		return icd_ioty_convert_error(ret);
 	}
 

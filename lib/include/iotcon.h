@@ -854,8 +854,7 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
  * @see iotcon_remote_resource_observe_cb()
  * @see iotcon_remote_resource_observer_stop()
  * @see iotcon_notimsg_create()
- * @see iotcon_notify_list_of_observers()
- * @see iotcon_resource_notify_all()
+ * @see iotcon_resource_notify()
  */
 int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
 		int observe_type,
@@ -882,8 +881,7 @@ int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_observe_cb()
  * @see iotcon_remote_resource_observer_start()
  * @see iotcon_notimsg_create()
- * @see iotcon_notify_list_of_observers()
- * @see iotcon_resource_notify_all()
+ * @see iotcon_resource_notify()
  */
 int iotcon_remote_resource_observer_stop(iotcon_remote_resource_h resource);
 
@@ -923,8 +921,7 @@ int iotcon_response_send(iotcon_response_h resp);
  * @see iotcon_remote_resource_observe_cb()
  * @see iotcon_remote_resource_observer_start()
  * @see iotcon_remote_resource_observer_stop()
- * @see iotcon_notify_list_of_observers()
- * @see iotcon_resource_notify_all()
+ * @see iotcon_resource_notify()
  */
 int iotcon_notimsg_create(iotcon_representation_h repr, int iface,
 		iotcon_notimsg_h *notimsg_handle);
@@ -943,7 +940,8 @@ int iotcon_notimsg_create(iotcon_representation_h repr, int iface,
 void iotcon_notimsg_destroy(iotcon_notimsg_h msg);
 
 /**
- * @brief Notifies only specific clients that resource's attributes have changed.
+ * @brief Notifies specific clients that resource's attributes have changed.
+ * @details If @a observers is @c NULL, the @a msg will notify to all observers.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -951,7 +949,7 @@ void iotcon_notimsg_destroy(iotcon_notimsg_h msg);
  *
  * @param[in] resource The handle of the resource
  * @param[in] msg The handle of the notifications message
- * @param[in] observers The handle of the observers
+ * @param[in] observers The handle of the observers.
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -965,34 +963,14 @@ void iotcon_notimsg_destroy(iotcon_notimsg_h msg);
  * @see iotcon_remote_resource_observer_start()
  * @see iotcon_remote_resource_observer_stop()
  * @see iotcon_notimsg_create()
- * @see iotcon_resource_notify_all()
+ * @see iotcon_notimsg_destroy()
+ * @see iotcon_observers_create()
+ * @see iotcon_observers_destroy()
+ * @see iotcon_observers_insert()
+ * @see iotcon_observers_delete()
  */
-int iotcon_notify_list_of_observers(iotcon_resource_h resource, iotcon_notimsg_h msg,
+int iotcon_resource_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
 		iotcon_observers_h observers);
-
-/**
- * @brief Notifies all that attributes of the resource have changed.
- *
- * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/internet
- *
- * @param[in] resource The handle of the resource
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
- * @retval #IOTCON_ERROR_SYSTEM  System error
- * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
- *
- * @see iotcon_remote_resource_observe_cb()
- * @see iotcon_remote_resource_observer_start()
- * @see iotcon_remote_resource_observer_stop()
- * @see iotcon_notimsg_create()
- * @see iotcon_notify_list_of_observers()
- */
-int iotcon_resource_notify_all(iotcon_resource_h resource);
 
 /**
  * @brief Specifies the type of function passed to iotcon_remote_resource_get(), iotcon_remote_resource_put(), iotcon_remote_resource_post()

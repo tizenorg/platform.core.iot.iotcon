@@ -552,7 +552,7 @@ static gboolean _dbus_handle_observer_stop(icDbus *object,
 }
 
 
-static gboolean _dbus_handle_notify_list_of_observers(icDbus *object,
+static gboolean _dbus_handle_notify(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		gint64 resource,
 		GVariant *notify_msg,
@@ -560,27 +560,11 @@ static gboolean _dbus_handle_notify_list_of_observers(icDbus *object,
 {
 	int ret;
 
-	ret = icd_ioty_notify_list_of_observers(ICD_INT64_TO_POINTER(resource), notify_msg,
-			observers);
+	ret = icd_ioty_notify(ICD_INT64_TO_POINTER(resource), notify_msg, observers);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("icd_ioty_notify_list_of_observers() Fail(%d)", ret);
+		ERR("icd_ioty_notify() Fail(%d)", ret);
 
-	ic_dbus_complete_notify_list_of_observers(object, invocation, ret);
-
-	return TRUE;
-}
-
-
-static gboolean _dbus_handle_notify_all(icDbus *object, GDBusMethodInvocation *invocation,
-		gint64 resource)
-{
-	int ret;
-
-	ret = icd_ioty_notify_all(ICD_INT64_TO_POINTER(resource));
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icd_ioty_notify_all() Fail(%d)", ret);
-
-	ic_dbus_complete_notify_all(object, invocation, ret);
+	ic_dbus_complete_notify(object, invocation, ret);
 
 	return TRUE;
 }
@@ -775,10 +759,8 @@ static void _dbus_on_bus_acquired(GDBusConnection *conn, const gchar *name,
 			G_CALLBACK(_dbus_handle_observer_start), NULL);
 	g_signal_connect(icd_dbus_object, "handle-observer-stop",
 			G_CALLBACK(_dbus_handle_observer_stop), NULL);
-	g_signal_connect(icd_dbus_object, "handle-notify-list-of-observers",
-			G_CALLBACK(_dbus_handle_notify_list_of_observers), NULL);
-	g_signal_connect(icd_dbus_object, "handle-notify-all",
-			G_CALLBACK(_dbus_handle_notify_all), NULL);
+	g_signal_connect(icd_dbus_object, "handle-notify",
+			G_CALLBACK(_dbus_handle_notify), NULL);
 	g_signal_connect(icd_dbus_object, "handle-send-response",
 			G_CALLBACK(_dbus_handle_send_response), NULL);
 	g_signal_connect(icd_dbus_object, "handle-register-device-info",

@@ -305,9 +305,9 @@ static gboolean _notifier(gpointer user_data)
 		return FALSE;
 	}
 
-	ret = iotcon_notify_list_of_observers(door->handle, msg, door->observers);
+	ret = iotcon_resource_notify(door->handle, msg, door->observers);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_notify_list_of_observers() Fail(%d)", ret);
+		ERR("iotcon_resource_notify() Fail(%d)", ret);
 		iotcon_notimsg_destroy(msg);
 		iotcon_representation_destroy(repr);
 		return FALSE;

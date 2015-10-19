@@ -44,6 +44,7 @@ struct icl_resource {
 	unsigned int sub_id;
 	int64_t handle;
 	iotcon_resource_h children[ICL_CONTAINED_RESOURCES_MAX];
+	iotcon_observers_h observers;
 };
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_H__*/
