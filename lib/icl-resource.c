@@ -243,10 +243,9 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 	int ret;
 	GError *error = NULL;
 
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (0 == resource->sub_id) {
+	if (0 == resource->handle) { /* iotcon dbus disconnected */
 		WARN("Invalid Resource handle");
 		iotcon_resource_types_destroy(resource->types);
 		if (resource->observers)
@@ -254,6 +253,11 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 		free(resource->uri_path);
 		free(resource);
 		return IOTCON_ERROR_NONE;
+	}
+
+	if (NULL == icl_dbus_get_object()) {
+		ERR("icl_dbus_get_object() return NULL");
+		return IOTCON_ERROR_DBUS;
 	}
 
 	ic_dbus_call_unregister_resource_sync(icl_dbus_get_object(), resource->handle, NULL,
@@ -264,9 +268,7 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 		g_error_free(error);
 		return ret;
 	}
-
 	resource->handle = 0;
-
 	icl_dbus_unsubscribe_signal(resource->sub_id);
 
 	return IOTCON_ERROR_NONE;

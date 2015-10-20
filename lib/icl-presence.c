@@ -209,13 +209,17 @@ API int iotcon_unsubscribe_presence(iotcon_presence_h presence)
 	int ret;
 	GError *error = NULL;
 
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (0 == presence->id) {
+	if (0 == presence->id) { /* disconnected iotcon dbus */
 		WARN("Invalid Presence handle");
 		free(presence);
 		return IOTCON_ERROR_NONE;
+	}
+
+	if (NULL == icl_dbus_get_object()) {
+		ERR("icl_dbus_get_object() return NULL");
+		return IOTCON_ERROR_DBUS;
 	}
 
 	ic_dbus_call_unsubscribe_presence_sync(icl_dbus_get_object(), presence->handle,
