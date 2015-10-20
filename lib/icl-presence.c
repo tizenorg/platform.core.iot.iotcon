@@ -38,6 +38,7 @@ typedef struct icl_presence {
 
 API int iotcon_start_presence(unsigned int time_to_live)
 {
+	FN_CALL;
 	int ret;
 	GError *error = NULL;
 

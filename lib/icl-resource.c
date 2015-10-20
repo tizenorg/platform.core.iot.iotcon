@@ -32,14 +32,6 @@
 #include "icl-resource.h"
 #include "icl-payload.h"
 
-/**
- * @brief The maximum length of uri_path path which can be held in a resource.
- *
- * @since_tizen 3.0
- */
-#define ICL_URI_PATH_LENGTH_MAX 36
-
-
 static void _icl_request_handler(GDBusConnection *connection,
 		const gchar *sender_name,
 		const gchar *object_path,
@@ -191,7 +183,7 @@ API int iotcon_resource_create(const char *uri_path,
 	if (NULL == types) {
 		ERR("icl_dbus_resource_types_to_array() Fail");
 		free(resource);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
 	signal_number = icl_dbus_generate_signal_number();

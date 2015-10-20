@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <glib.h>
+#include <gio/gio.h>
 
 #include "iotcon.h"
 #include "ic-utils.h"
@@ -477,25 +478,21 @@ static void _icl_observe_conn_cleanup(icl_on_observe_s *cb_container)
 }
 
 
-API int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
+int icl_remote_resource_observer_start(iotcon_remote_resource_h resource,
 		iotcon_observe_type_e observe_type,
 		iotcon_query_h query,
-		iotcon_remote_resource_observe_cb cb,
-		void *user_data)
+		GDBusSignalCallback sig_handler,
+		void *cb_container,
+		void *cb_free,
+		unsigned int *sub_id,
+		int64_t *observe_handle)
 {
-	GVariant *arg_query;
-	unsigned int sub_id;
-	GVariant *arg_remote_resource;
 	GError *error = NULL;
-	int64_t observe_handle;
-	icl_on_observe_s *cb_container;
 	int ret, signal_number;
+	GVariant *arg_query, *arg_remote_resource;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(resource->observe_handle || resource->observe_sub_id, IOTCON_ERROR_ALREADY);
 
 	signal_number = icl_dbus_generate_signal_number();
 
@@ -503,7 +500,7 @@ API int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
 	arg_query = icl_dbus_query_to_gvariant(query);
 
 	ic_dbus_call_observer_start_sync(icl_dbus_get_object(), arg_remote_resource,
-			observe_type, arg_query, signal_number, &observe_handle, NULL, &error);
+			observe_type, arg_query, signal_number, observe_handle, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_observer_start_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
@@ -513,13 +510,38 @@ API int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
 		return ret;
 	}
 
-	if (0 == observe_handle) {
+	if (0 == *observe_handle) {
 		ERR("iotcon-daemon Fail");
 		return IOTCON_ERROR_IOTIVITY;
 	}
 
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_OBSERVE,
 			signal_number);
+
+	*sub_id = icl_dbus_subscribe_signal(signal_name, cb_container, cb_free, sig_handler);
+	if (0 == *sub_id) {
+		ERR("icl_dbus_subscribe_signal() Fail");
+		return IOTCON_ERROR_DBUS;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
+		iotcon_observe_type_e observe_type,
+		iotcon_query_h query,
+		iotcon_remote_resource_observe_cb cb,
+		void *user_data)
+{
+	int ret;
+	unsigned int sub_id;
+	int64_t observe_handle;
+	icl_on_observe_s *cb_container;
+
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(resource->observe_handle || resource->observe_sub_id, IOTCON_ERROR_ALREADY);
 
 	cb_container = calloc(1, sizeof(icl_on_observe_s));
 	if (NULL == cb_container) {
@@ -531,13 +553,20 @@ API int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
 	cb_container->cb = cb;
 	cb_container->user_data = user_data;
 
-	sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
-			_icl_observe_conn_cleanup, _icl_on_observe_cb);
-	if (0 == sub_id) {
-		ERR("icl_dbus_subscribe_signal() Fail");
+	ret = icl_remote_resource_observer_start(resource,
+			observe_type,
+			query,
+			_icl_on_observe_cb,
+			cb_container,
+			_icl_observe_conn_cleanup,
+			&sub_id,
+			&observe_handle);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_remote_resource_observer_start() Fail(%d)", ret);
 		free(cb_container);
-		return IOTCON_ERROR_DBUS;
+		return ret;
 	}
+
 	resource->observe_sub_id = sub_id;
 	resource->observe_handle = observe_handle;
 
@@ -545,23 +574,19 @@ API int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
 }
 
 
-API int iotcon_remote_resource_observer_stop(iotcon_remote_resource_h resource)
+int icl_remote_resource_observer_stop(iotcon_remote_resource_h resource,
+		iotcon_options_h options, int64_t handle, unsigned int sub_id)
 {
 	int ret;
 	GError *error = NULL;
 	GVariant *arg_options;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	if (0 == resource->observe_handle) {
-		ERR("It doesn't have a observe_handle");
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
 
-	arg_options = icl_dbus_options_to_gvariant(resource->header_options);
+	arg_options = icl_dbus_options_to_gvariant(options);
 
-	ic_dbus_call_observer_stop_sync(icl_dbus_get_object(), resource->observe_handle,
-			arg_options, &ret, NULL, &error);
+	ic_dbus_call_observer_stop_sync(icl_dbus_get_object(), handle, arg_options,
+			&ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_observer_stop_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
@@ -575,6 +600,27 @@ API int iotcon_remote_resource_observer_stop(iotcon_remote_resource_h resource)
 
 	icl_dbus_unsubscribe_signal(resource->observe_sub_id);
 
-	return ret;
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_remote_resource_observer_stop(iotcon_remote_resource_h resource)
+{
+	int ret;
+
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	if (0 == resource->observe_handle) {
+		ERR("It doesn't have a observe_handle");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = icl_remote_resource_observer_stop(resource, resource->header_options,
+			resource->observe_handle, resource->observe_sub_id);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_remote_resource_observer_stop() Fail(%d)", ret);
+		return ret;
+	}
+
+	return IOTCON_ERROR_NONE;
 }
 

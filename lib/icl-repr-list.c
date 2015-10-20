@@ -723,7 +723,7 @@ static int _icl_list_clone_state(iotcon_list_h list, iotcon_list_h ret_list)
 
 
 		if (state_val->hash_table) {
-			g_hash_table_foreach(state_val->hash_table, (GHFunc)icl_state_clone,
+			g_hash_table_foreach(state_val->hash_table, (GHFunc)icl_state_clone_foreach,
 					copied_state);
 		}
 

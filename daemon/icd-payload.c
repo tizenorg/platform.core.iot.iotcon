@@ -245,7 +245,8 @@ static GVariantBuilder* _icd_state_value_to_gvariant(OCRepPayload *repr)
 }
 
 
-static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr, gboolean is_parent)
+static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr,
+		gboolean is_parent)
 {
 	OCStringLL *node;
 	int ret, ifaces = 0;
@@ -295,6 +296,21 @@ static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr, gbo
 
 	value = g_variant_new("(siasa{sv}av)", ic_utils_dbus_encode_str(repr->uri), ifaces,
 			&types_builder, repr_gvar, &children);
+
+	return value;
+}
+
+
+GVariant* icd_payload_representation_empty_gvariant(void)
+{
+	GVariant *value;
+	GVariantBuilder types, repr, children;
+
+	g_variant_builder_init(&types, G_VARIANT_TYPE("as"));
+	g_variant_builder_init(&repr, G_VARIANT_TYPE("a{sv}"));
+	g_variant_builder_init(&children, G_VARIANT_TYPE("av"));
+
+	value = g_variant_new("(siasa{sv}av)", IC_STR_NULL, 0, &types, &repr, &children);
 
 	return value;
 }

@@ -147,8 +147,10 @@ systemctl daemon-reload
 %files test
 %manifest %{name}-test.manifest
 %defattr(-,root,root,-)
-%{_bindir}/crud-test-client
-%{_bindir}/crud-test-server
-%{_bindir}/device-test-client
-%{_bindir}/repr-test-client
-%{_bindir}/repr-test-server
+%{_bindir}/iotcon-test-basic-client
+%{_bindir}/iotcon-test-basic-server
+%{_bindir}/iotcon-test-device-client
+%{_bindir}/iotcon-test-repr-client
+%{_bindir}/iotcon-test-repr-server
+%{_bindir}/iotcon-test-encap-client
+%{_bindir}/iotcon-test-encap-server

@@ -629,7 +629,8 @@ int iotcon_unsubscribe_presence(iotcon_presence_h presence_handle);
  *
  * @see iotcon_find_resource()
  */
-typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource, int result, void *user_data);
+typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource, int result,
+		void *user_data);
 
 /**
  * @brief Finds resources.
@@ -1061,6 +1062,210 @@ typedef void (*iotcon_remote_resource_delete_cb)(iotcon_remote_resource_h resour
  */
 int iotcon_remote_resource_delete(iotcon_remote_resource_h resource,
 		iotcon_remote_resource_delete_cb cb, void *user_data);
+
+/**
+ * @brief Create a lite resource handle and registers the resource in server
+ * @details Registers a resource specified by @a uri_path, @a res_types, @a state which have
+ * @a properties in Iotcon server.\n
+ * When client requests some operations, it send a response to client, automatically.\n
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks @a uri_path length must be less than or equal 36.\n
+ * You must unregister resource by calling iotcon_resource_destroy()
+ * if resource is no longer needed.
+ *
+ * @param[in] uri_path The URI path of the resource.
+ * @param[in] res_types The list of type of the resource.
+ * @param[in] properties The property of the resource.
+ * @param[in] state The state handle to set.
+ * @param[out] resource_handle The handle of the resource
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ * @retval #IOTCON_ERROR_DBUS  Dbus errors
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @post When the resource receive CRUD request, iotcon_request_handler_cb() will be called.
+ *
+ * @see iotcon_lite_resource_destroy()
+ */
+int iotcon_lite_resource_create(const char *uri_path,
+		iotcon_resource_types_h res_types,
+		int properties,
+		iotcon_state_h state,
+		iotcon_lite_resource_h *resource_handle);
+
+/**
+ * @brief Destroy the resource and releases its data.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks When a normal variable is used, there are only dbus error and permission\n
+ * denied error. If the errors of this API are not handled, then you must check\n
+ * whether dbus is running and an application have the privileges for the API.
+ *
+ * @param[in] resource The handle of the lite resource to be unregistered
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_DBUS  Dbus error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @see iotcon_lite_resource_create()
+ */
+int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource);
+
+/**
+ * @brief Specifies the type of function passed to iotcon_remote_resource_start_caching().
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] resource The handle of the remote resource
+ * @param[in] representation The handle of the representation
+ * @param[in] user_data The user data to pass to the function
+ *
+ * @pre The callback must be registered using iotcon_remote_resource_start_caching()\n
+ *
+ * @see iotcon_remote_resource_start_caching()
+ * @see iotcon_remote_resource_stop_caching()
+ */
+typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
+		iotcon_remote_resource_h resource,
+		iotcon_representation_h representation,
+		void *user_data);
+
+/**
+ * @brief Start caching of a remote resource.
+ * @details Use this function to start caching the resource's attribute data (state).\n
+ * Default caching time interval is 10 seconds.
+ * Internally, it operates GET method, periodically, and it observes the remote resource.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/internet
+ *
+ * @param[in] resource The handle of the remote resource to be cached
+ * @param[in] caching_interval Seconds for caching time interval.\n
+ * If value is 0, then it sets 10 seconds(default caching time).
+ * @param[in] cb The callback function to add into callback list
+ * @param[in] user_data The user data to pass to the callback function
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_DBUS  Dbus error
+ * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_ALREADY Already done
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ *
+ * @see iotcon_remote_resource_stop_caching()
+ * @see iotcon_remote_resource_cached_representation_changed_cb()
+ */
+int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
+		int caching_interval,
+		iotcon_remote_resource_cached_representation_changed_cb cb,
+		void *user_data);
+
+/**
+ * @brief Stop caching of a remote resource.
+ * @details Use this function to stop caching the resource's attribute data (state).\n
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/internet
+ *
+ * @param[in] resource The handle of the remote resource
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_DBUS  Dbus error
+ * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @see iotcon_remote_resource_start_caching()
+ * @see iotcon_remote_resource_cached_representation_changed_cb()
+ */
+int iotcon_remote_resource_stop_caching(iotcon_remote_resource_h resource);
+
+/**
+ * @brief Specifies the type of function passed to iotcon_remote_resource_start_monitoring().
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] resource The handle of the remote resource
+ * @param[in] state The state of the remote resource
+ * @param[in] user_data The user data to pass to the function
+ *
+ * @pre The callback must be registered using iotcon_remote_resource_start_monitoring()\n
+ *
+ * @see iotcon_remote_resource_start_monitoring()
+ * @see iotcon_remote_resource_stop_monitoring()
+ */
+typedef void (*iotcon_remote_resource_state_changed_cb)(iotcon_remote_resource_h resource,
+		iotcon_remote_resource_state_e state, void *user_data);
+
+/**
+ * @brief Start monitoring of a remote resource.
+ * @details When remote resource's state are changed, registered callbacks will be called\n
+ * in turn. Default monitoring time interval is 10 seconds.
+ * Internally, it operates GET method, periodically, and it subscribes the devices's presence.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/internet
+ *
+ * @param[in] resource The handle of the remote resource
+ * @param[in] monitoring_interval Seconds for monitoring time interval.\n
+ * If value is 0, then it sets 10 seconds(default monitoring time).
+ * @param[in] cb The callback function to add into callback list
+ * @param[in] user_data The user data to pass to the callback function
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_ALREADY  Already done
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ *
+ * @see iotcon_remote_resource_stop_monitoring()
+ * @see iotcon_remote_resource_state_changed_cb()
+ */
+int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resource,
+		int monitoring_interval,
+		iotcon_remote_resource_state_changed_cb cb,
+		void *user_data);
+
+/**
+ * @brief Stop monitoring.
+ * @details Use this function to stop monitoring the remote resource.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/internet
+ *
+ * @param[in] resource The handle of the remote resource
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_DBUS  Dbus error
+ * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @see iotcon_remote_resource_start_monitoring()
+ * @see iotcon_remote_resource_state_changed_cb()
+ */
+int iotcon_remote_resource_stop_monitoring(iotcon_remote_resource_h resource);
 
 /**
  * @}

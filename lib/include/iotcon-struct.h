@@ -28,6 +28,18 @@
  */
 
 /**
+ * @brief The handle of lite resource.
+ * @details iotcon_lite_resource_h is an opaque data structure to represent registered\n
+ * resource by server. A resource has host, uri_path, resource types, and internal\n
+ * handle. If observable attribute of resource is true, client can observe\n
+ * this resource. When client request by GET / PUT / OBSERVE functions, handler will be\n
+ * invoked, internally. Then, it sends the response to client, automatically.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_lite_resource* iotcon_lite_resource_h;
+
+/**
  * @ingroup CAPI_IOT_CONNECTIVITY_REPRESENTATION_MODULE
  * @brief The handle of list which is consist of iotcon_value_h type values.
  * @details iotcon_list_h is an opaque data structure to have iotcon_value_h type values.
@@ -1356,6 +1368,57 @@ typedef struct icl_tizen_info* iotcon_tizen_info_h;
 int iotcon_tizen_info_get_property(iotcon_tizen_info_h tizen_info,
 				iotcon_tizen_info_e property, char **value);
 
+/**
+ * @brief Update state into the lite resource handle
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] resource The handle of the lite resource
+ * @param[in] state The state handle to update
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ *
+ * @see iotcon_lite_resource_get_state()
+ */
+int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
+		iotcon_state_h state);
+
+/**
+ * @brief Get state from the lite resource handle
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] resource The handle of the lite resource
+ * @param[out] state The state handle of the lite resource
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_lite_resource_update_state()
+ */
+int iotcon_lite_resource_get_state(iotcon_lite_resource_h resource,
+		iotcon_state_h *state);
+
+/**
+ * @brief Get cached representation from the remote resource
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] resource The handle of the remote resource
+ * @param[out] representation The handle of the representation
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA  No data
+ */
+int iotcon_remote_resource_get_cached_representation(
+		iotcon_remote_resource_h resource,
+		iotcon_representation_h *representation);
 /**
  * @}
  */

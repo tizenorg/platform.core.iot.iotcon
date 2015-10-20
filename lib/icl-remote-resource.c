@@ -203,6 +203,11 @@ API void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource)
 
 	icl_remote_resource_crud_stop(resource);
 
+	if (resource->caching_handle)
+		iotcon_remote_resource_stop_caching(resource);
+	if (resource->monitoring_handle)
+		iotcon_remote_resource_stop_monitoring(resource);
+
 	free(resource->uri_path);
 	free(resource->host);
 	free(resource->device_id);

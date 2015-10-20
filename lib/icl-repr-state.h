@@ -27,4 +27,6 @@ int icl_state_del_value(iotcon_state_h state, const char *key);
 
 int icl_state_set_value(iotcon_state_h state, const char *key, iotcon_value_h value);
 
+int icl_state_clone(iotcon_state_h src, iotcon_state_h *dest);
+
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_STATE_H__ */

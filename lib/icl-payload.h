@@ -18,6 +18,7 @@
 
 #include <glib.h>
 
+void icl_state_from_gvariant(iotcon_state_h state, GVariantIter *iter);
 GVariant* icl_representation_to_gvariant(iotcon_representation_h repr);
 iotcon_representation_h icl_representation_from_gvariant(GVariant *var);
 

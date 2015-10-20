@@ -451,3 +451,29 @@ int icl_state_set_value(iotcon_state_h state, const char *key, iotcon_value_h va
 
 	return IOTCON_ERROR_NONE;
 }
+
+
+int icl_state_clone(iotcon_state_h src, iotcon_state_h *dest)
+{
+	int ret;
+
+	iotcon_state_h cloned_state = NULL;
+
+	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (src->hash_table) {
+		ret = iotcon_state_create(&cloned_state);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_state_create() Fail(%d)", ret);
+			return ret;
+		}
+
+		g_hash_table_foreach(src->hash_table, (GHFunc)icl_state_clone_foreach,
+				cloned_state);
+	}
+
+	*dest = cloned_state;
+
+	return IOTCON_ERROR_NONE;
+}

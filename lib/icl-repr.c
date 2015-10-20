@@ -326,7 +326,7 @@ API int iotcon_state_get_keys_count(iotcon_state_h state, unsigned int *count)
 }
 
 
-void icl_state_clone(char *key, iotcon_value_h src_val, iotcon_state_h dest_state)
+void icl_state_clone_foreach(char *key, iotcon_value_h src_val, iotcon_state_h dest_state)
 {
 	FN_CALL;
 	int type, ret;
@@ -379,7 +379,7 @@ void icl_state_clone(char *key, iotcon_value_h src_val, iotcon_state_h dest_stat
 			return;
 		}
 
-		g_hash_table_foreach(child_state->hash_table, (GHFunc)icl_state_clone,
+		g_hash_table_foreach(child_state->hash_table, (GHFunc)icl_state_clone_foreach,
 				copied_state);
 
 		value = icl_value_create_state(copied_state);
@@ -450,14 +450,22 @@ API int iotcon_representation_clone(const iotcon_representation_h src,
 
 	ori_state = src->state;
 	if (ori_state->hash_table) {
-		g_hash_table_foreach(ori_state->hash_table, (GHFunc)icl_state_clone,
+		ret = iotcon_state_create(&cloned_state);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_state_create() Fail");
+			iotcon_representation_destroy(cloned_repr);
+			return ret;
+		}
+		g_hash_table_foreach(ori_state->hash_table, (GHFunc)icl_state_clone_foreach,
 				cloned_state);
 		ret = iotcon_representation_set_state(cloned_repr, cloned_state);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_representation_set_state() Fail");
+			iotcon_state_destroy(cloned_state);
 			iotcon_representation_destroy(cloned_repr);
 			return ret;
 		}
+		iotcon_state_destroy(cloned_state);
 	}
 
 	*dest = cloned_repr;

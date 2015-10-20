@@ -507,22 +507,31 @@ void icd_ioty_complete(int type, GDBusMethodInvocation *invocation, GVariant *va
 void icd_ioty_complete_error(int type, GDBusMethodInvocation *invocation, int ret_val)
 {
 	GVariant *value;
+	GVariant *payload;
+	GVariantBuilder options;
 
 	switch (type) {
 	case ICD_CRUD_GET:
-		value = g_variant_new("(a(qs)vi)", NULL, NULL, ret_val);
+		g_variant_builder_init(&options, G_VARIANT_TYPE("a(qs)"));
+		payload = icd_payload_representation_empty_gvariant();
+		value = g_variant_new("(a(qs)vi)", &options, payload, ret_val);
 		ic_dbus_complete_get(icd_dbus_get_object(), invocation, value);
 		break;
 	case ICD_CRUD_PUT:
-		value = g_variant_new("(a(qs)vi)", NULL, NULL, ret_val);
+		g_variant_builder_init(&options, G_VARIANT_TYPE("a(qs)"));
+		payload = icd_payload_representation_empty_gvariant();
+		value = g_variant_new("(a(qs)vi)", &options, payload, ret_val);
 		ic_dbus_complete_put(icd_dbus_get_object(), invocation, value);
 		break;
 	case ICD_CRUD_POST:
-		value = g_variant_new("(a(qs)vi)", NULL, NULL, ret_val);
+		g_variant_builder_init(&options, G_VARIANT_TYPE("a(qs)"));
+		payload = icd_payload_representation_empty_gvariant();
+		value = g_variant_new("(a(qs)vi)", &options, payload, ret_val);
 		ic_dbus_complete_post(icd_dbus_get_object(), invocation, value);
 		break;
 	case ICD_CRUD_DELETE:
-		value = g_variant_new("(a(qs)i)", NULL, ret_val);
+		g_variant_builder_init(&options, G_VARIANT_TYPE("a(qs)"));
+		value = g_variant_new("(a(qs)i)", &options, ret_val);
 		ic_dbus_complete_delete(icd_dbus_get_object(), invocation, value);
 		break;
 	case ICD_TIZEN_INFO:
@@ -530,6 +539,7 @@ void icd_ioty_complete_error(int type, GDBusMethodInvocation *invocation, int re
 		ic_dbus_complete_get_tizen_info(icd_dbus_get_object(), invocation, value);
 		break;
 	}
+
 }
 
 

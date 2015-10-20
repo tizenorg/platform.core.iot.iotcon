@@ -525,12 +525,38 @@ static int _ocprocess_worker(_ocprocess_cb cb, int type, OCPayload *payload, int
 }
 
 
+static int _ocprocess_parse_oic_result(OCStackResult result)
+{
+	int res;
+
+	switch (result) {
+	case OC_STACK_OK:
+		res = IOTCON_RESPONSE_RESULT_OK;
+		break;
+	case OC_STACK_RESOURCE_CREATED:
+		res = IOTCON_RESPONSE_RESULT_RESOURCE_CREATED;
+		break;
+	case OC_STACK_RESOURCE_DELETED:
+		res = IOTCON_RESPONSE_RESULT_RESOURCE_DELETED;
+		break;
+	case OC_STACK_UNAUTHORIZED_REQ:
+		res = IOTCON_RESPONSE_RESULT_FORBIDDEN;
+		break;
+	default:
+		WARN("response error(%d)", result);
+		res = IOTCON_RESPONSE_RESULT_ERROR;
+		break;
+	}
+
+	return res;
+}
+
+
 OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 		OCClientResponse *resp)
 {
 	FN_CALL;
 	int ret, res;
-	OCStackResult result;
 	GVariantBuilder *options;
 
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
@@ -541,16 +567,10 @@ OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	result = resp->result;
-	if (OC_STACK_OK == result) {
-		res = IOTCON_RESPONSE_RESULT_OK;
-		options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
-				resp->numRcvdVendorSpecificHeaderOptions);
-	} else {
-		WARN("resp error(%d)", result);
-		res = IOTCON_RESPONSE_RESULT_ERROR;
-		options = NULL;
-	}
+	res = _ocprocess_parse_oic_result(resp->result);
+
+	options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
+			resp->numRcvdVendorSpecificHeaderOptions);
 
 	ret = _ocprocess_worker(_worker_crud_cb, ICD_CRUD_GET, resp->payload, res,
 			options, ctx);
@@ -569,7 +589,6 @@ OCStackApplicationResult icd_ioty_ocprocess_put_cb(void *ctx, OCDoHandle handle,
 {
 	FN_CALL;
 	int ret, res;
-	OCStackResult result;
 	GVariantBuilder *options;
 
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
@@ -580,24 +599,10 @@ OCStackApplicationResult icd_ioty_ocprocess_put_cb(void *ctx, OCDoHandle handle,
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	result = resp->result;
-	switch (result) {
-	case OC_STACK_OK:
-		res = IOTCON_RESPONSE_RESULT_OK;
-		break;
-	case OC_STACK_RESOURCE_CREATED:
-		res = IOTCON_RESPONSE_RESULT_RESOURCE_CREATED;
-		break;
-	default:
-		WARN("resp error(%d)", result);
-		res = IOTCON_RESPONSE_RESULT_ERROR;
-		options = NULL;
-	}
+	res = _ocprocess_parse_oic_result(resp->result);
 
-	if (IOTCON_RESPONSE_RESULT_ERROR != res) {
-		options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
-				resp->numRcvdVendorSpecificHeaderOptions);
-	}
+	options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
+			resp->numRcvdVendorSpecificHeaderOptions);
 
 	ret = _ocprocess_worker(_worker_crud_cb, ICD_CRUD_PUT, resp->payload, res,
 			options, ctx);
@@ -616,7 +621,6 @@ OCStackApplicationResult icd_ioty_ocprocess_post_cb(void *ctx, OCDoHandle handle
 {
 	FN_CALL;
 	int ret, res;
-	OCStackResult result;
 	GVariantBuilder *options;
 
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
@@ -627,24 +631,10 @@ OCStackApplicationResult icd_ioty_ocprocess_post_cb(void *ctx, OCDoHandle handle
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	result = resp->result;
-	switch (result) {
-	case OC_STACK_OK:
-		res = IOTCON_RESPONSE_RESULT_OK;
-		break;
-	case OC_STACK_RESOURCE_CREATED:
-		res = IOTCON_RESPONSE_RESULT_RESOURCE_CREATED;
-		break;
-	default:
-		WARN("resp error(%d)", result);
-		res = IOTCON_RESPONSE_RESULT_ERROR;
-		options = NULL;
-	}
+	res = _ocprocess_parse_oic_result(resp->result);
 
-	if (IOTCON_RESPONSE_RESULT_ERROR != res) {
-		options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
-				resp->numRcvdVendorSpecificHeaderOptions);
-	}
+	options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
+			resp->numRcvdVendorSpecificHeaderOptions);
 
 	ret = _ocprocess_worker(_worker_crud_cb, ICD_CRUD_POST, resp->payload, res,
 			options, ctx);
@@ -663,7 +653,6 @@ OCStackApplicationResult icd_ioty_ocprocess_delete_cb(void *ctx, OCDoHandle hand
 {
 	FN_CALL;
 	int ret, res;
-	OCStackResult result;
 	GVariantBuilder *options;
 
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
@@ -674,24 +663,10 @@ OCStackApplicationResult icd_ioty_ocprocess_delete_cb(void *ctx, OCDoHandle hand
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	result = resp->result;
-	switch (result) {
-	case OC_STACK_OK:
-		res = IOTCON_RESPONSE_RESULT_OK;
-		break;
-	case OC_STACK_RESOURCE_DELETED:
-		res = IOTCON_RESPONSE_RESULT_RESOURCE_DELETED;
-		break;
-	default:
-		WARN("resp error(%d)", result);
-		res = IOTCON_RESPONSE_RESULT_ERROR;
-		options = NULL;
-	}
+	res = _ocprocess_parse_oic_result(resp->result);
 
-	if (IOTCON_RESPONSE_RESULT_ERROR != res) {
-		options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
-				resp->numRcvdVendorSpecificHeaderOptions);
-	}
+	options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
+			resp->numRcvdVendorSpecificHeaderOptions);
 
 	ret = _ocprocess_worker(_worker_crud_cb, ICD_CRUD_DELETE, NULL, res, options, ctx);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -733,8 +708,13 @@ static void _observe_cb_response_error(const char *dest, unsigned int signum, in
 {
 	int ret;
 	GVariant *value;
+	GVariant *payload;
+	GVariantBuilder options;
 
-	value = g_variant_new("(a(qs)vii)", NULL, NULL, ret_val, 0);
+	g_variant_builder_init(&options, G_VARIANT_TYPE("a(qs)"));
+	payload = icd_payload_representation_empty_gvariant();
+
+	value = g_variant_new("(a(qs)vii)", &options, payload, ret_val, 0);
 
 	ret = _ocprocess_response_signal(dest, IC_DBUS_SIGNAL_OBSERVE, signum, value);
 	if (IOTCON_ERROR_NONE != ret)
@@ -746,7 +726,6 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle han
 		OCClientResponse *resp)
 {
 	int ret, res;
-	OCStackResult result;
 	GVariantBuilder *options;
 	struct icd_observe_context *observe_ctx;
 	icd_sig_ctx_s *sig_context = ctx;
@@ -768,16 +747,10 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle han
 		return OC_STACK_KEEP_TRANSACTION;
 	}
 
-	result = resp->result;
-	if (OC_STACK_OK == result) {
-		res = IOTCON_RESPONSE_RESULT_OK;
-		options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
-				resp->numRcvdVendorSpecificHeaderOptions);
-	} else {
-		WARN("resp error(%d)", result);
-		res = IOTCON_RESPONSE_RESULT_ERROR;
-		options = NULL;
-	}
+	res = _ocprocess_parse_oic_result(resp->result);
+
+	options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
+			resp->numRcvdVendorSpecificHeaderOptions);
 
 	observe_ctx->payload = icd_payload_to_gvariant(resp->payload);
 	observe_ctx->signum = sig_context->signum;

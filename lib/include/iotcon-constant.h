@@ -214,6 +214,16 @@ typedef enum {
 } iotcon_tizen_info_e;
 
 /**
+ * @brief Enumeration for states of remote resource.
+ *
+ * @since_tizen 3.0
+ */
+typedef enum {
+	IOTCON_REMOTE_RESOURCE_STATE_ALIVE, /**< Indicates remote resource is alive */
+	IOTCON_REMOTE_RESOURCE_STATE_LOST_SIGNAL, /**< Indicates remote resource is lost */
+} iotcon_remote_resource_state_e;
+
+/**
  * @}
  */
 

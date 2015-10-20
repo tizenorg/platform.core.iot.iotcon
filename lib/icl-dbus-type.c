@@ -213,8 +213,10 @@ GVariant* icl_dbus_observers_to_gvariant(iotcon_observers_h observers)
 	GVariantBuilder builder;
 
 	g_variant_builder_init(&builder, G_VARIANT_TYPE("ai"));
-	for (node = observers->observers_list; node; node = node->next)
-		g_variant_builder_add(&builder, "i", GPOINTER_TO_INT(node->data));
+	if (observers) {
+		for (node = observers->observers_list; node; node = node->next)
+			g_variant_builder_add(&builder, "i", GPOINTER_TO_INT(node->data));
+	}
 
 	return g_variant_builder_end(&builder);
 }
