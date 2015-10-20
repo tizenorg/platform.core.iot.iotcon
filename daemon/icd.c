@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 	}
 
 	ret = icd_ioty_set_tizen_info();
-	if (IOTCON_ERROR_NONE) {
+	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icd_ioty_set_tizen_info() Fail(%d)", ret);
 		icd_ioty_deinit(thread);
 		icd_dbus_deinit(id);
