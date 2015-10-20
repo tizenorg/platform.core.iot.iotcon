@@ -584,22 +584,6 @@ static gboolean _dbus_handle_send_response(icDbus *object,
 	return TRUE;
 }
 
-
-static gboolean _dbus_handle_register_device_info(icDbus *object,
-		GDBusMethodInvocation *invocation, GVariant *device_info)
-{
-	int ret;
-
-	ret = icd_ioty_register_device_info(device_info);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icd_ioty_register_device_info() Fail(%d)", ret);
-
-	ic_dbus_complete_register_device_info(object, invocation, ret);
-
-	return TRUE;
-}
-
-
 static gboolean _dbus_handle_get_device_info(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
@@ -617,22 +601,6 @@ static gboolean _dbus_handle_get_device_info(icDbus *object,
 
 	return TRUE;
 }
-
-
-static gboolean _dbus_handle_register_platform_info(icDbus *object,
-		GDBusMethodInvocation *invocation, GVariant *platform_info)
-{
-	int ret;
-
-	ret = icd_ioty_register_platform_info(platform_info);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icd_ioty_register_platform_info() Fail(%d)", ret);
-
-	ic_dbus_complete_register_platform_info(object, invocation, ret);
-
-	return TRUE;
-}
-
 
 static gboolean _dbus_handle_get_platform_info(icDbus *object,
 		GDBusMethodInvocation *invocation,
@@ -763,12 +731,8 @@ static void _dbus_on_bus_acquired(GDBusConnection *conn, const gchar *name,
 			G_CALLBACK(_dbus_handle_notify), NULL);
 	g_signal_connect(icd_dbus_object, "handle-send-response",
 			G_CALLBACK(_dbus_handle_send_response), NULL);
-	g_signal_connect(icd_dbus_object, "handle-register-device-info",
-			G_CALLBACK(_dbus_handle_register_device_info), NULL);
 	g_signal_connect(icd_dbus_object, "handle-get-device-info",
 			G_CALLBACK(_dbus_handle_get_device_info), NULL);
-	g_signal_connect(icd_dbus_object, "handle-register-platform-info",
-			G_CALLBACK(_dbus_handle_register_platform_info), NULL);
 	g_signal_connect(icd_dbus_object, "handle-get-platform-info",
 			G_CALLBACK(_dbus_handle_get_platform_info), NULL);
 	g_signal_connect(icd_dbus_object, "handle-get-tizen-info",

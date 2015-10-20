@@ -387,28 +387,16 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
  *         <td>iotcon_remote_resource_get</td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_register_device_info</td>
+ *         <td>iotcon_response_send</td>
  *         <td>iotcon_remote_resource_put</td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_start_presence</td>
+ *         <td>iotcon_resource_notify</td>
  *         <td>iotcon_remote_resource_post</td>
  *     </tr>
  *     <tr>
- *         <td>iotcon_stop_presence</td>
+ *         <td></td>
  *         <td>iotcon_remote_resource_delete</td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_response_send</td>
- *         <td></td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_resource_notify</td>
- *         <td></td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_register_device_info</td>
- *         <td></td>
  *     </tr>
  * </table></div>
  *

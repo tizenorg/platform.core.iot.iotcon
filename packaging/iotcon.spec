@@ -150,6 +150,5 @@ systemctl daemon-reload
 %{_bindir}/crud-test-client
 %{_bindir}/crud-test-server
 %{_bindir}/device-test-client
-%{_bindir}/device-test-server
 %{_bindir}/repr-test-client
 %{_bindir}/repr-test-server

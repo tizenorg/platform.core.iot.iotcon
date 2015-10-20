@@ -373,58 +373,6 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child);
 
 /**
- * @brief Creates a new device information handle.
- *
- * @since_tizen 3.0
- *
- * @param[out] device_info The handle of the device information
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
- *
- * @see iotcon_device_info_destroy()
- * @see iotcon_set_device_info()
- * @see iotcon_device_info_set_property()
- */
-int iotcon_device_info_create(iotcon_device_info_h *device_info);
-
-/**
- * @brief Releases a device information handle.
- *
- * @since_tizen 3.0
- *
- * @param[in] device_info The handle of the device information
- *
- * @return void
- *
- * @see iotcon_device_info_create()
- * @see iotcon_set_device_info()
- * @see iotcon_device_info_set_property()
- */
-void iotcon_device_info_destroy(iotcon_device_info_h device_info);
-
-/**
- * @brief Set the device information in a server.
- *
- * @since_tizen 3.0
- *
- * @param[in] device_info The device information to set
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
- * @retval #IOTCON_ERROR_SYSTEM System error
- *
- * @see iotcon_device_info_create()
- * @see iotcon_device_info_destroy()
- * @see iotcon_device_info_set_property()
- */
-int iotcon_set_device_info(iotcon_device_info_h device_info);
-
-/**
  * @brief Specifies the type of function passed to iotcon_get_device_info().
  *
  * @since_tizen 3.0
@@ -467,58 +415,6 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info, void *us
  */
 int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 		void *user_data);
-
-/**
- * @brief Creates a new platform information handle.
- *
- * @since_tizen 3.0
- *
- * @param[out] platform_info The handle of the platform information
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
- *
- * @see iotcon_platform_info_destroy()
- * @see iotcon_set_platform_info()
- * @see iotcon_platform_info_set_property()
- */
-int iotcon_platform_info_create(iotcon_platform_info_h *platform_info);
-
-/**
- * @brief Releases a platform information handle.
- *
- * @since_tizen 3.0
- *
- * @param[in] platform_info The handle of the platform information
- *
- * @return void
- *
- * @see iotcon_platform_info_create()
- * @see iotcon_set_platform_info()
- * @see iotcon_platform_info_set_property()
- */
-void iotcon_platform_info_destroy(iotcon_platform_info_h platform_info);
-
-/**
- * @brief Set platform information in a server.
- *
- * @since_tizen 3.0
- *
- * @param[in] platform_info The platform information to set
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
- * @retval #IOTCON_ERROR_SYSTEM System error
- *
- * @see iotcon_platform_info_create()
- * @see iotcon_platform_info_destroy()
- * @see iotcon_platform_info_set_property()
- */
-int iotcon_set_platform_info(iotcon_platform_info_h platform_info);
 
 /**
  * @brief Specifies the type of function passed to iotcon_get_platform_info().
@@ -612,54 +508,6 @@ typedef void (*iotcon_tizen_info_cb)(iotcon_tizen_info_h tizen_info,
  */
 int iotcon_get_tizen_info(const char *host_address, iotcon_tizen_info_cb cb,
 		void *user_data);
-
-/**
- * @brief Starts presence of a server.
- * @details Use this function to send server's announcements to clients.\n
- * Server can call this function when online for the first time or come back from offline to online.
- *
- * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/internet
- *
- * @remarks If @a time_to_live is 0, server will set default value as 60 seconds.\n
- * If @a time_to_live is very big, server will set maximum value as (60 * 60 * 24) seconds.
- * (24 hours)
- *
- * @param[in] time_to_live The interval of announcing presence in seconds.
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_DBUS  Dbus error
- * @retval #IOTCON_ERROR_SYSTEM System error
- * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
- *
- * @see iotcon_stop_presence()
- * @see iotcon_subscribe_presence()
- * @see iotcon_unsubscribe_presence()
- */
-int iotcon_start_presence(unsigned int time_to_live);
-
-/**
- * @brief Stop presence of a server.
- * @details Use this function to stop sending server's announcements to clients.
- * Server can call this function when terminating, entering to offline or out of network.
- *
- * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/internet
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_DBUS  Dbus error
- * @retval #IOTCON_ERROR_SYSTEM System error
- * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
- *
- * @see iotcon_start_presence()
- * @see iotcon_subscribe_presence()
- * @see iotcon_unsubscribe_presence()
- */
-int iotcon_stop_presence(void);
 
 /**
  * @brief Specifies the type of function passed to iotcon_subscribe_presence().

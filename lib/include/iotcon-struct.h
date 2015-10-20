@@ -1220,27 +1220,6 @@ int iotcon_response_set_interface(iotcon_response_h resp, int iface);
 typedef struct icl_device_info* iotcon_device_info_h;
 
 /**
- * @brief Sets device properties into the device information handle
- *
- * @since_tizen 3.0
- *
- * @param[in] device_info The handle of the device information
- * @param[in] property The properties of the device information
- * @param[in] value The value of the property
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
- *
- * @see iotcon_device_info_create()
- * @see iotcon_device_info_destroy()
- * @see iotcon_set_device_info()
- */
-int iotcon_device_info_set_property(iotcon_device_info_h device_info,
-		iotcon_device_info_e property, const char *value);
-
-/**
  * @brief Get device properties from the device information handle
  *
  * @since_tizen 3.0
@@ -1266,27 +1245,6 @@ int iotcon_device_info_get_property(iotcon_device_info_h device_info,
  * @since_tizen 3.0
  */
 typedef struct icl_platform_info* iotcon_platform_info_h;
-
-/**
- * @brief Sets platform properties into the platform information handle
- *
- * @since_tizen 3.0
- *
- * @param[in] platform_info The handle of the platform information
- * @param[in] property The properties of the platform information
- * @param[in] value The value of the property
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
- *
- * @see iotcon_platform_info_create()
- * @see iotcon_platform_info_destroy()
- * @see iotcon_set_platform_info()
- */
-int iotcon_platform_info_set_property(iotcon_platform_info_h platform_info,
-		iotcon_platform_info_e property, const char *value);
 
 /**
  * @brief Get platform properties from the platform information handle

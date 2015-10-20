@@ -815,19 +815,14 @@ int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options)
 }
 
 
-int icd_ioty_register_device_info(GVariant *value)
+int icd_ioty_register_device_info(char *device_name)
 {
-	char *device_name;
 	OCStackResult result;
 	OCDeviceInfo device_info = {0};
 
-	g_variant_get(value, "(&s)", &device_info.deviceName);
+	RETV_IF(NULL == device_name, IOTCON_ERROR_INVALID_PARAMETER);
 
-	device_name = strdup(device_info.deviceName);
-	if (NULL == device_name) {
-		ERR("strdup() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
+	device_info.deviceName = device_name;
 
 	icd_ioty_csdk_lock();
 	result = OCSetDeviceInfo(device_info);
@@ -835,33 +830,41 @@ int icd_ioty_register_device_info(GVariant *value)
 
 	if (OC_STACK_OK != result) {
 		ERR("OCSetDeviceInfo() Fail(%d)", result);
-		free(device_name);
 		return icd_ioty_convert_error(result);
 	}
 
-	icd_tizen_info.device_name = device_name;
+	icd_tizen_info.device_name = strdup(device_name);
 
 	return IOTCON_ERROR_NONE;
 }
 
 
-int icd_ioty_register_platform_info(GVariant *value)
+int icd_ioty_register_platform_info(char *platform_id,
+		char *manufacturer_name,
+		char *manufacturer_url,
+		char *model_number,
+		char *date_of_manufacture,
+		char *platform_version,
+		char *os_version,
+		char *hw_version,
+		char *firmware_version,
+		char *support_url,
+		char *system_time)
 {
 	OCStackResult result;
 	OCPlatformInfo platform_info = {0};
 
-	g_variant_get(value, "(&s&s&s&s&s&s&s&s&s&s&s)",
-			&platform_info.platformID,
-			&platform_info.manufacturerName,
-			&platform_info.manufacturerUrl,
-			&platform_info.modelNumber,
-			&platform_info.dateOfManufacture,
-			&platform_info.platformVersion,
-			&platform_info.operatingSystemVersion,
-			&platform_info.hardwareVersion,
-			&platform_info.firmwareVersion,
-			&platform_info.supportUrl,
-			&platform_info.systemTime);
+	platform_info.platformID = platform_id;
+	platform_info.manufacturerName = manufacturer_name;
+	platform_info.manufacturerUrl = manufacturer_url;
+	platform_info.modelNumber = model_number;
+	platform_info.dateOfManufacture = date_of_manufacture;
+	platform_info.platformVersion = platform_version;
+	platform_info.operatingSystemVersion = os_version;
+	platform_info.hardwareVersion = hw_version;
+	platform_info.firmwareVersion = firmware_version;
+	platform_info.supportUrl = support_url;
+	platform_info.systemTime = system_time;
 
 	icd_ioty_csdk_lock();
 	result = OCSetPlatformInfo(platform_info);
