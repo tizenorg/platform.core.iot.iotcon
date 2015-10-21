@@ -154,7 +154,8 @@ static void _icl_resource_conn_cleanup(iotcon_resource_h resource)
 	}
 
 	iotcon_resource_types_destroy(resource->types);
-	iotcon_observers_destroy(resource->observers);
+	if (resource->observers)
+		iotcon_observers_destroy(resource->observers);
 	free(resource->uri_path);
 	free(resource);
 }
@@ -257,7 +258,8 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 	if (0 == resource->sub_id) {
 		WARN("Invalid Resource handle");
 		iotcon_resource_types_destroy(resource->types);
-		iotcon_observers_destroy(resource->observers);
+		if (resource->observers)
+			iotcon_observers_destroy(resource->observers);
 		free(resource->uri_path);
 		free(resource);
 		return IOTCON_ERROR_NONE;
