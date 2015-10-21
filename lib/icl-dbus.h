@@ -18,6 +18,10 @@
 
 #include "ic-dbus.h"
 
+#define ICL_DBUS_TIMEOUT_DEFAULT 10 /* 10 sec */
+#define ICL_DBUS_TIMEOUT_MAX 60 /* 60 sec */
+
+
 icDbus* icl_dbus_get_object();
 unsigned int icl_dbus_generate_signal_number();
 
@@ -31,6 +35,9 @@ int icl_dbus_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
 
 int icl_dbus_convert_daemon_error(int error);
 int icl_dbus_convert_dbus_error(int error);
+
+int icl_dbus_set_timeout(int timeout_seconds);
+int icl_dbus_get_timeout();
 
 int icl_dbus_start();
 void icl_dbus_stop();

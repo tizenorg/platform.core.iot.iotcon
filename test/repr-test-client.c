@@ -215,7 +215,7 @@ static int _device_id_compare(const void *a, const void *b)
 	return strcmp(a, b);
 }
 
-static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
+static void _found_resource(iotcon_remote_resource_h resource, int result, void *user_data)
 {
 	GList *node;
 	char *resource_host;
@@ -223,6 +223,8 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 	char *resource_device_id;
 	int ret, resource_interfaces;
 	iotcon_resource_types_h resource_types;
+
+	RETM_IF(IOTCON_ERROR_NONE != result, "Invalid result(%d)", result);
 
 	if (NULL == resource)
 		return;

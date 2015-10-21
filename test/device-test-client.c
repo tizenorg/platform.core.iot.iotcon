@@ -18,13 +18,15 @@
 #include <iotcon.h>
 #include "test.h"
 
-static void _get_device_info(iotcon_device_info_h info, void *user_data)
+static void _get_device_info(iotcon_device_info_h info, int result, void *user_data)
 {
 	int ret;
 	char *device_name = NULL;
 	char *spec_ver = NULL;
 	char *device_id = NULL;
 	char *data_model_ver = NULL;
+
+	RETM_IF(IOTCON_ERROR_NONE != result, "Invalid result (%d)", result);
 
 	ret = iotcon_device_info_get_property(info, IOTCON_DEVICE_INFO_NAME, &device_name);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -58,7 +60,7 @@ static void _get_device_info(iotcon_device_info_h info, void *user_data)
 	INFO("data_model_version : %s", data_model_ver);
 }
 
-static void _get_platform_info(iotcon_platform_info_h info, void *user_data)
+static void _get_platform_info(iotcon_platform_info_h info, int result, void *user_data)
 {
 	int ret;
 	char *platform_id = NULL;
@@ -72,6 +74,8 @@ static void _get_platform_info(iotcon_platform_info_h info, void *user_data)
 	char *firmware_ver = NULL;
 	char *support_url = NULL;
 	char *system_time = NULL;
+
+	RETM_IF(IOTCON_ERROR_NONE != result, "Invalid result (%d)", result);
 
 	ret = iotcon_platform_info_get_property(info, IOTCON_PLATFORM_INFO_ID, &platform_id);
 	if (IOTCON_ERROR_NONE != ret) {

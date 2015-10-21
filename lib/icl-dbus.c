@@ -226,12 +226,32 @@ inline int icl_dbus_convert_dbus_error(int error)
 
 	if (G_DBUS_ERROR_ACCESS_DENIED == error)
 		ret = IOTCON_ERROR_PERMISSION_DENIED;
+	else if (G_DBUS_ERROR_TIMEOUT == error)
+		ret = IOTCON_ERROR_TIMEOUT;
 	else
 		ret = IOTCON_ERROR_DBUS;
 
 	return ret;
 }
 
+int icl_dbus_set_timeout(int timeout_seconds)
+{
+	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
+
+	g_dbus_proxy_set_default_timeout(G_DBUS_PROXY(icl_dbus_object), timeout_seconds * 1000);
+
+	return IOTCON_ERROR_NONE;
+}
+
+int icl_dbus_get_timeout()
+{
+	gint timeout = g_dbus_proxy_get_default_timeout(G_DBUS_PROXY(icl_dbus_object));
+	if (timeout <= 0) {
+		ERR("Invalid timeout (%d)", timeout);
+		return ICL_DBUS_TIMEOUT_DEFAULT;
+	}
+	return timeout/1000;
+}
 
 int icl_dbus_start()
 {
@@ -261,6 +281,9 @@ int icl_dbus_start()
 		ERR("g_signal_connect() Fail");
 		return IOTCON_ERROR_DBUS;
 	}
+
+	g_dbus_proxy_set_default_timeout(G_DBUS_PROXY(icl_dbus_object),
+			ICL_DBUS_TIMEOUT_DEFAULT * 1000);
 
 	icl_dbus_count++;
 	return IOTCON_ERROR_NONE;

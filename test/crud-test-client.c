@@ -274,7 +274,7 @@ static void _get_tizen_info(iotcon_tizen_info_h info, int response_result,
 	INFO("- Tizen Device ID : %s", tizen_device_id);
 }
 
-static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
+static void _found_resource(iotcon_remote_resource_h resource, int result, void *user_data)
 {
 	GList *node;
 	char *resource_host;
@@ -284,6 +284,8 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 	iotcon_presence_h presence_handle;
 	iotcon_resource_types_h resource_types;
 	iotcon_remote_resource_h resource_clone = NULL;
+
+	RETM_IF(IOTCON_ERROR_NONE != result, "Invalid result(%d)", result);
 
 	if (NULL == resource)
 		return;

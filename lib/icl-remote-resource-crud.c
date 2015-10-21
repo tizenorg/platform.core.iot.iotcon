@@ -138,6 +138,11 @@ static void _icl_on_get_cb(GObject *object, GAsyncResult *g_async_res,
 	ic_dbus_call_get_finish(IC_DBUS(object), &result, g_async_res, &error);
 	if (error) {
 		ERR("ic_dbus_call_get_finish() Fail(%s)", error->message);
+		if (cb_container->cb) {
+			int ret = icl_dbus_convert_dbus_error(error->code);
+			cb_container->cb(cb_container->resource, NULL, NULL, ret,
+					cb_container->user_data);
+		}
 		g_error_free(error);
 		free(cb_container);
 		return;
@@ -157,6 +162,11 @@ static void _icl_on_put_cb(GObject *object, GAsyncResult *g_async_res,
 	ic_dbus_call_put_finish(IC_DBUS(object), &result, g_async_res, &error);
 	if (error) {
 		ERR("ic_dbus_call_put_finish() Fail(%s)", error->message);
+		if (cb_container->cb) {
+			int ret = icl_dbus_convert_dbus_error(error->code);
+			cb_container->cb(cb_container->resource, NULL, NULL, ret,
+					cb_container->user_data);
+		}
 		g_error_free(error);
 		free(cb_container);
 		return;
@@ -176,6 +186,11 @@ static void _icl_on_post_cb(GObject *object, GAsyncResult *g_async_res,
 	ic_dbus_call_post_finish(IC_DBUS(object), &result, g_async_res, &error);
 	if (error) {
 		ERR("ic_dbus_call_post_finish() Fail(%s)", error->message);
+		if (cb_container->cb) {
+			int ret = icl_dbus_convert_dbus_error(error->code);
+			cb_container->cb(cb_container->resource, NULL, NULL, ret,
+					cb_container->user_data);
+		}
 		g_error_free(error);
 		free(cb_container);
 		return;
@@ -327,6 +342,10 @@ static void _icl_on_delete_cb(GObject *object, GAsyncResult *g_async_res,
 	ic_dbus_call_delete_finish(IC_DBUS(object), &result, g_async_res, &error);
 	if (error) {
 		ERR("ic_dbus_call_delete_finish() Fail(%s)", error->message);
+		if (cb_container->cb) {
+			ret = icl_dbus_convert_dbus_error(error->code);
+			cb_container->cb(cb_container->resource, NULL, ret, cb_container->user_data);
+		}
 		g_error_free(error);
 		free(cb_container);
 		return;

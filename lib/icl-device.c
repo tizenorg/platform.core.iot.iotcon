@@ -46,12 +46,14 @@ typedef struct {
 	iotcon_device_info_cb cb;
 	void *user_data;
 	unsigned int id;
+	int timeout_id;
 } icl_device_info_s;
 
 typedef struct {
 	iotcon_platform_info_cb cb;
 	void *user_data;
 	unsigned int id;
+	int timeout_id;
 } icl_platform_info_s;
 
 typedef struct {
@@ -100,15 +102,38 @@ static void _icl_device_info_cb(GDBusConnection *connection,
 	icl_device_info_s *cb_container = user_data;
 	iotcon_device_info_cb cb = cb_container->cb;
 
+	if (cb_container->timeout_id) {
+		g_source_remove(cb_container->timeout_id);
+		cb_container->timeout_id = 0;
+	}
+
 	g_variant_get(parameters, "(&s&s&s&s&s)", &uri_path, &info.device_name,
 			&info.spec_ver, &info.device_id, &info.data_model_ver);
 
 	/* From iotivity, we can get uri_path. But, the value is always "/oic/d". */
 
 	if (cb)
-		cb(&info, cb_container->user_data);
+		cb(&info, IOTCON_ERROR_NONE, cb_container->user_data);
 }
 
+static gboolean _icl_timeout_get_device_info(gpointer p)
+{
+	FN_CALL;
+	icl_device_info_s *cb_container = p;
+	struct icl_device_info info = {0};
+
+	if (NULL == cb_container) {
+		ERR("cb_container is NULL");
+		return G_SOURCE_REMOVE;
+	}
+
+	if (cb_container->cb)
+		cb_container->cb(&info, IOTCON_ERROR_TIMEOUT, cb_container->user_data);
+
+	icl_dbus_unsubscribe_signal(cb_container->id);
+
+	return G_SOURCE_REMOVE;
+}
 
 API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
 		void *user_data)
@@ -160,6 +185,9 @@ API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb c
 	}
 
 	cb_container->id = sub_id;
+
+	cb_container->timeout_id = g_timeout_add_seconds(icl_dbus_get_timeout(),
+			_icl_timeout_get_device_info, cb_container);
 
 	return ret;
 }
@@ -226,6 +254,11 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 	icl_platform_info_s *cb_container = user_data;
 	iotcon_platform_info_cb cb = cb_container->cb;
 
+	if (cb_container->timeout_id) {
+		g_source_remove(cb_container->timeout_id);
+		cb_container->timeout_id = 0;
+	}
+
 	g_variant_get(parameters, "(&s&s&s&s&s&s&s&s&s&s&s&s)",
 			&uri_path,
 			&info.platform_id,
@@ -243,9 +276,27 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 	/* From iotivity, we can get uri_path. But, the value is always "/oic/p". */
 
 	if (cb)
-		cb(&info, cb_container->user_data);
+		cb(&info, IOTCON_ERROR_NONE, cb_container->user_data);
 }
 
+static gboolean _icl_timeout_get_platform_info(gpointer p)
+{
+	FN_CALL;
+	icl_platform_info_s *cb_container = p;
+	struct icl_platform_info info = {0};
+
+	if (NULL == cb_container) {
+		ERR("cb_container is NULL");
+		return G_SOURCE_REMOVE;
+	}
+
+	if (cb_container->cb)
+		cb_container->cb(&info, IOTCON_ERROR_TIMEOUT, cb_container->user_data);
+
+	icl_dbus_unsubscribe_signal(cb_container->id);
+
+	return G_SOURCE_REMOVE;
+}
 
 API int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_cb cb,
 		void *user_data)
@@ -297,6 +348,8 @@ API int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_
 	}
 
 	cb_container->id = sub_id;
+	cb_container->timeout_id = g_timeout_add_seconds(icl_dbus_get_timeout(),
+			_icl_timeout_get_platform_info, cb_container);
 
 	return ret;
 }
@@ -317,8 +370,11 @@ static void _icl_tizen_info_cb(GObject *object, GAsyncResult *g_async_res,
 	ic_dbus_call_get_tizen_info_finish(IC_DBUS(object), &result, g_async_res, &error);
 	if (error) {
 		ERR("ic_dbus_call_get_tizen_info_finish() Fail(%s)", error->message);
+		if (cb) {
+			int ret = icl_dbus_convert_dbus_error(error->code);
+			cb(&info, ret, cb_container->user_data);
+		}
 		g_error_free(error);
-		cb(&info, IOTCON_ERROR_DBUS, cb_container->user_data);
 		/* TODO contain time out error */
 		free(cb_container);
 		return;

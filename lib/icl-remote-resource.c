@@ -34,6 +34,7 @@ typedef struct {
 	iotcon_found_resource_cb cb;
 	void *user_data;
 	unsigned int id;
+	int timeout_id;
 } icl_found_resource_s;
 
 static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *payload,
@@ -55,6 +56,11 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 	icl_found_resource_s *cb_container = user_data;
 	iotcon_found_resource_cb cb = cb_container->cb;
 
+	if (cb_container->timeout_id) {
+		g_source_remove(cb_container->timeout_id);
+		cb_container->timeout_id = 0;
+	}
+
 	g_variant_get(parameters, "(vi)", &payload, &conn_type);
 
 	resource = _icl_remote_resource_from_gvariant(payload, conn_type);
@@ -64,13 +70,30 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 	}
 
 	if (cb)
-		cb(resource, cb_container->user_data);
+		cb(resource, IOTCON_ERROR_NONE, cb_container->user_data);
 
 	iotcon_remote_resource_destroy(resource);
 
 	/* TODO
 	 * When is callback removed?
 	 */
+}
+
+static gboolean _icl_timeout_find_resource(gpointer p)
+{
+	icl_found_resource_s *cb_container = p;
+
+	if (NULL == cb_container) {
+		ERR("cb_container is NULL");
+		return G_SOURCE_REMOVE;
+	}
+
+	if (cb_container->cb)
+		cb_container->cb(NULL, IOTCON_ERROR_TIMEOUT, cb_container->user_data);
+
+	icl_dbus_unsubscribe_signal(cb_container->id);
+
+	return G_SOURCE_REMOVE;
 }
 
 
@@ -129,6 +152,9 @@ API int iotcon_find_resource(const char *host_address, const char *resource_type
 	}
 
 	cb_container->id = sub_id;
+
+	cb_container->timeout_id = g_timeout_add_seconds(icl_dbus_get_timeout(),
+			_icl_timeout_find_resource, cb_container);
 
 	return ret;
 }

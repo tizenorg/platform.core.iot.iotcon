@@ -39,3 +39,19 @@ API void iotcon_close(void)
 {
 	icl_dbus_stop();
 }
+
+API int iotcon_set_timeout(int timeout_seconds)
+{
+	int ret;
+
+	if (ICL_DBUS_TIMEOUT_MAX < timeout_seconds || timeout_seconds <= 0) {
+		ERR("Invalid seconds (%d)", timeout_seconds);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = icl_dbus_set_timeout(timeout_seconds);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icl_dbus_set_timeout() Fail(%d)", ret);
+
+	return ret;
+}

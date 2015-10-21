@@ -69,6 +69,33 @@ int iotcon_open(void);
  */
 void iotcon_close(void);
 
+
+/**
+ * @brief Set timeout of asynchronize APIs.
+ * @details Default timeout is 10 seconds.
+ * Maximum timeout is 60 seconds.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] timeout_secods Seconds for timeout
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval  #IOTCON_ERROR_NONE Successful
+ * @retval  #IOTCON_ERROR_DBUS Dbus error
+ *
+ * @pre iotcon_open() should be called to open a connection to the iotcon.
+ *
+ * @see iotcon_get_device_info()
+ * @see iotcon_get_platform_info()
+ * @see iotcon_get_tizen_info()
+ * @see iotcon_find_resource()
+ * @see iotcon_remote_resource_get()
+ * @see iotcon_remote_resource_put()
+ * @see iotcon_remote_resource_post()
+ * @see iotcon_remote_resource_delete()
+ */
+int iotcon_set_timeout(int timeout_seconds);
+
 /**
  * @brief Specifies the type of function passed to iotcon_add_connection_changed_cb() and
  * iotcon_remove_connection_changed_cb().
@@ -378,6 +405,7 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  * @since_tizen 3.0
  *
  * @param[in] device_info the device information from remote server.
+ * @param[in] result The result code (0 on success, other wise a negative error value)
  * @param[in] user_data The user data to pass to the function
  *
  * @pre iotcon_get_device_info() will invoke this callback function.
@@ -385,7 +413,8 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  * @see iotcon_get_device_info()
  * @see iotcon_device_info_get_property()
  */
-typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info, void *user_data);
+typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info, int result,
+		void *user_data);
 
 /**
  * @brief Calls a function for device information of remote server.
@@ -422,6 +451,7 @@ int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
  * @since_tizen 3.0
  *
  * @param[in] platform_info The platform information from remote server.
+ * @param[in] result The result code (0 on success, other wise a negative error value)
  * @param[in] user_data The user data to pass to the function
  *
  * @pre iotcon_get_platform_info() will invoke this callback function.
@@ -429,7 +459,7 @@ int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
  * @see iotcon_get_platform_info()
  * @see iotcon_platform_info_get_property()
  */
-typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
+typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info, int result,
 		void *user_data);
 
 /**
@@ -469,7 +499,7 @@ int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_cb c
  * @since_tizen 3.0
  *
  * @param[in] tizen_info The information of tizen device from remote server.
- * @param[in] response_result The response result code
+ * @param[in] response_result The response result code (Lesser than 0 on fail, otherwise a response result value)
  * @param[in] user_data The user data to pass to the function
  *
  * @pre iotcon_get_tizen_info() will invoke this callback function.
@@ -592,13 +622,14 @@ int iotcon_unsubscribe_presence(iotcon_presence_h presence_handle);
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of resource which is found
+ * @param[in] result The result code (Lesser than 0 on fail, otherwise a response result value)
  * @param[in] user_data The user data to pass to the function
  *
  * @pre The callback must be registered using iotcon_find_resource()
  *
  * @see iotcon_find_resource()
  */
-typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource, void *user_data);
+typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource, int result, void *user_data);
 
 /**
  * @brief Finds resources.
@@ -875,7 +906,7 @@ int iotcon_resource_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
  * @param[in] resource The handle of the resource
  * @param[in] repr The handle of the representation
  * @param[in] options The handle of the header options
- * @param[in] response_result The response result code
+ * @param[in] response_result The response result code (Lesser than 0 on fail, otherwise a response result value)
  * @param[in] user_data The user data to pass to the function
  *
  * @pre The callback must be registered using iotcon_remote_resource_get(), iotcon_remote_resource_put(), iotcon_remote_resource_post()
