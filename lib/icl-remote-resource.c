@@ -162,8 +162,6 @@ API int iotcon_remote_resource_create(const char *host,
 	resource->types = icl_resource_types_ref(resource_types);
 	resource->ifaces = resource_ifs;
 
-	resource->ref_count = 1;
-
 	*resource_handle = resource;
 
 	return IOTCON_ERROR_NONE;
@@ -174,10 +172,10 @@ API void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource)
 {
 	RET_IF(NULL == resource);
 
-	resource->ref_count--;
+	if (resource->observe_handle)
+		iotcon_remote_resource_observer_stop(resource);
 
-	if (0 < resource->ref_count)
-		return;
+	icl_remote_resource_crud_stop(resource);
 
 	free(resource->uri_path);
 	free(resource->host);
@@ -191,15 +189,73 @@ API void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource)
 	free(resource);
 }
 
-
-API int iotcon_remote_resource_ref(iotcon_remote_resource_h src, iotcon_remote_resource_h *dest)
+static int _icl_remote_resource_header_foreach_cb(unsigned short id,
+		const char *data, void *user_data)
 {
+	int ret;
+	iotcon_remote_resource_h resource = user_data;
+
+	RETV_IF(NULL == resource, IOTCON_FUNC_STOP);
+
+	if (NULL == resource->header_options) {
+		ret = iotcon_options_create(&resource->header_options);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("resource->header_options() Fail(%d)", ret);
+			return IOTCON_FUNC_STOP;
+		}
+	}
+
+	ret = iotcon_options_insert(resource->header_options, id, data);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_options_insert() Fail(%d)", ret);
+		return IOTCON_FUNC_STOP;
+	}
+
+	return IOTCON_FUNC_CONTINUE;
+}
+
+API int iotcon_remote_resource_clone(iotcon_remote_resource_h src, iotcon_remote_resource_h *dest)
+{
+	int ret;
+	iotcon_remote_resource_h resource = NULL;
+
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(src->ref_count <= 0, IOTCON_ERROR_INVALID_PARAMETER);
 
-	src->ref_count++;
+	resource = calloc(1, sizeof(struct icl_remote_resource));
+	if (NULL == resource) {
+		ERR("calloc() Fail(%d)", errno);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
 
-	*dest = src;
+	resource->uri_path = ic_utils_strdup(src->uri_path);
+	resource->host = ic_utils_strdup(src->host);
+	resource->device_id = ic_utils_strdup(src->device_id);
+	resource->is_secure = src->is_secure;
+	resource->is_observable = src->is_observable;
+
+	if (src->header_options) {
+		ret = iotcon_options_foreach(src->header_options,
+				_icl_remote_resource_header_foreach_cb, resource);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_options_foreach() Fail(%d)", ret);
+			iotcon_remote_resource_destroy(resource);
+			return ret;
+		}
+	}
+
+	if (src->types) {
+		ret = iotcon_resource_types_clone(src->types, &resource->types);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_resource_types_clone() Fail(%d)", ret);
+			iotcon_remote_resource_destroy(resource);
+			return ret;
+		}
+	}
+
+	resource->ifaces = src->ifaces;
+	resource->conn_type = src->conn_type;
+
+	*dest = resource;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -334,7 +390,6 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 		ERR("iotcon_remote_resource_create() Fail");
 		return NULL;
 	}
-	resource->ref_count = 1;
 
 	resource->device_id = strdup(device_id);
 	if (NULL == resource->device_id) {

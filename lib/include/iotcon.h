@@ -654,7 +654,7 @@ int iotcon_find_resource(const char *host_address, const char *resource_type,
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
  * @see iotcon_remote_resource_destroy()
- * @see iotcon_remote_resource_ref()
+ * @see iotcon_remote_resource_clone()
  */
 int iotcon_remote_resource_create(const char *host,
 		const char *uri_path,
@@ -675,17 +675,17 @@ int iotcon_remote_resource_create(const char *host,
  * @return void
  *
  * @see iotcon_remote_resource_create()
- * @see iotcon_remote_resource_ref()
+ * @see iotcon_remote_resource_clone()
  */
 void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource);
 
 /**
- * @brief Increments reference count of the source resource.
+ * @brief Makes a clone of a remote resource.
  *
  * @since_tizen 3.0
  *
  * @param[in] src The Source of resource
- * @param[out] dest The referenced resource handle
+ * @param[out] dest The cloned resource handle
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -694,7 +694,7 @@ void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource);
  * @see iotcon_remote_resource_create()
  * @see iotcon_remote_resource_destroy()
  */
-int iotcon_remote_resource_ref(iotcon_remote_resource_h src, iotcon_remote_resource_h *dest);
+int iotcon_remote_resource_clone(iotcon_remote_resource_h src, iotcon_remote_resource_h *dest);
 
 /**
  * @brief Specifies the type of function passed to iotcon_remote_resource_observer_start().

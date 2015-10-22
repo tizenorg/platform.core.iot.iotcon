@@ -21,7 +21,6 @@
 #include "icl-options.h"
 
 struct icl_remote_resource {
-	int ref_count;
 	char *uri_path;
 	char *host;
 	char *device_id;
@@ -34,5 +33,8 @@ struct icl_remote_resource {
 	int64_t observe_handle;
 	unsigned int observe_sub_id;
 };
+
+void icl_remote_resource_crud_stop(iotcon_remote_resource_h resource);
+
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__ */

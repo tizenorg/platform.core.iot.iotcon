@@ -37,8 +37,10 @@ static void _on_observe(iotcon_remote_resource_h resource,
 	static int i = 0;
 	i++;
 
-	if (2 == i)
+	if (2 == i) {
 		iotcon_remote_resource_observer_stop(resource);
+		iotcon_remote_resource_destroy(resource);
+	}
 }
 
 static void _on_delete(iotcon_remote_resource_h resource, iotcon_options_h header_options,
@@ -59,7 +61,7 @@ static void _on_delete(iotcon_remote_resource_h resource, iotcon_options_h heade
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("iotcon_remote_resource_observer_start() Fail(%d)", ret);
 
-	iotcon_remote_resource_destroy(door_resource);
+	iotcon_remote_resource_destroy(resource);
 }
 
 static void _on_post(iotcon_remote_resource_h resource, iotcon_representation_h recv_repr,
@@ -114,9 +116,9 @@ static void _on_post(iotcon_remote_resource_h resource, iotcon_representation_h 
 		return;
 	}
 
-	ret = iotcon_remote_resource_ref(resource, &door_resource);
+	ret = iotcon_remote_resource_clone(resource, &door_resource);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_remote_resource_ref() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_clone() Fail(%d)", ret);
 		iotcon_remote_resource_destroy(new_door_resource);
 		return;
 	}
@@ -129,7 +131,7 @@ static void _on_post(iotcon_remote_resource_h resource, iotcon_representation_h 
 		return;
 	}
 
-	iotcon_remote_resource_destroy(new_door_resource);
+	iotcon_remote_resource_destroy(resource);
 }
 
 static void _on_put(iotcon_remote_resource_h resource, iotcon_representation_h recv_repr,
@@ -281,6 +283,7 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 	int ret, resource_interfaces;
 	iotcon_presence_h presence_handle;
 	iotcon_resource_types_h resource_types;
+	iotcon_remote_resource_h resource_clone = NULL;
 
 	if (NULL == resource)
 		return;
@@ -401,8 +404,17 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 			return;
 		}
 
+		ret = iotcon_remote_resource_clone(resource, &resource_clone);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_remote_resource_clone() Fail(%d)", ret);
+			iotcon_query_destroy(query);
+			device_id_list = g_list_remove(device_id_list, door_resource_device_id);
+			free(door_resource_device_id);
+			return;
+		}
+
 		/* send GET Request */
-		ret = iotcon_remote_resource_get(resource, query, _on_get, NULL);
+		ret = iotcon_remote_resource_get(resource_clone, query, _on_get, NULL);
 		if (IOTCON_ERROR_NONE != ret)
 			ERR("iotcon_remote_resource_get() Fail(%d)", ret);
 
