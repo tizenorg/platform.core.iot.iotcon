@@ -116,9 +116,6 @@ static void _icl_request_handler(GDBusConnection *connection,
 	}
 	g_variant_iter_free(repr_iter);
 
-	/* TODO remove request.uri */
-	request.uri_path = "temp_uri_path";
-
 	/* for iotcon_resource_notify */
 	if (IOTCON_REQUEST_OBSERVE & request.types) {
 		int observer_id = request.observation_info.observer_id;

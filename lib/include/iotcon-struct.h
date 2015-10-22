@@ -927,28 +927,6 @@ int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
 typedef struct icl_resource_request* iotcon_request_h;
 
 /**
- * @brief Gets an URI path of the request
- *
- * @since_tizen 3.0
- * @remarks @a uri_path must not be released using free().
- *
- * @param[in] request The handle of the request
- * @param[out] uri_path The URI path of the request
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- *
- * @see iotcon_request_get_representation()
- * @see iotcon_request_get_types()
- * @see iotcon_request_get_options()
- * @see iotcon_request_get_query()
- * @see iotcon_request_get_observer_action()
- * @see iotcon_request_get_observer_id()
- */
-int iotcon_request_get_uri_path(iotcon_request_h request, char **uri_path);
-
-/**
  * @brief Gets an representation of the request
  *
  * @since_tizen 3.0
@@ -961,7 +939,6 @@ int iotcon_request_get_uri_path(iotcon_request_h request, char **uri_path);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_request_get_uri_path()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
@@ -983,7 +960,6 @@ int iotcon_request_get_representation(iotcon_request_h request,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_request_get_uri_path()
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
@@ -1005,7 +981,6 @@ int iotcon_request_get_types(iotcon_request_h request, int *types);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_request_get_uri_path()
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_query()
@@ -1027,7 +1002,6 @@ int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *optio
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_request_get_uri_path()
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
@@ -1049,7 +1023,6 @@ int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_request_get_uri_path()
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
@@ -1070,7 +1043,6 @@ int iotcon_request_get_observer_action(iotcon_request_h request, int *action);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_request_get_uri_path()
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
