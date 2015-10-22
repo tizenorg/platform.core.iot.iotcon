@@ -100,7 +100,7 @@ void icd_ioty_deinit(GThread *thread)
 
 
 OCResourceHandle icd_ioty_register_resource(const char *uri_path,
-		const char* const* res_types, int ifaces, uint8_t properties)
+		const char* const* res_types, int ifaces, int properties)
 {
 	FN_CALL;
 	int i;

@@ -60,7 +60,7 @@ GThread* icd_ioty_init(const char *addr, unsigned short port);
 void icd_ioty_deinit(GThread *thread);
 
 OCResourceHandle icd_ioty_register_resource(const char *uri_path,
-		const char* const* res_types, int ifaces, uint8_t properties);
+		const char* const* res_types, int ifaces, int properties);
 
 int icd_ioty_unregister_resource(OCResourceHandle handle);
 

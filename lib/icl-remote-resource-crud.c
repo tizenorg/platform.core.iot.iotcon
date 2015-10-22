@@ -478,7 +478,7 @@ static void _icl_observe_conn_cleanup(icl_on_observe_s *cb_container)
 
 
 API int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
-		int observe_type,
+		iotcon_observe_type_e observe_type,
 		iotcon_query_h query,
 		iotcon_remote_resource_observe_cb cb,
 		void *user_data)

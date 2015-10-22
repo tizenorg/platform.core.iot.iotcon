@@ -382,7 +382,7 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 		const gchar *uri_path,
 		const gchar* const *resource_types,
 		gint ifaces,
-		guchar properties,
+		gint properties,
 		guint signal_number)
 {
 	FN_CALL;

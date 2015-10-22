@@ -134,7 +134,7 @@ API int iotcon_response_set_header_options(iotcon_response_h resp,
 }
 
 
-API int iotcon_response_set_interface(iotcon_response_h resp, int iface)
+API int iotcon_response_set_interface(iotcon_response_h resp, iotcon_interface_e iface)
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 

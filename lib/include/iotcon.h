@@ -223,7 +223,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
 int iotcon_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int ifaces,
-		uint8_t properties,
+		int properties,
 		iotcon_request_handler_cb cb,
 		void *user_data,
 		iotcon_resource_h *resource_handle);
@@ -285,7 +285,7 @@ int iotcon_resource_destroy(iotcon_resource_h resource_handle);
  * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_resource_bind_interface(iotcon_resource_h resource, int iface);
+int iotcon_resource_bind_interface(iotcon_resource_h resource, iotcon_interface_e iface);
 
 /**
  * @brief Binds a type to the resource
@@ -782,7 +782,7 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
  * @see iotcon_resource_notify()
  */
 int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
-		int observe_type,
+		iotcon_observe_type_e observe_type,
 		iotcon_query_h query,
 		iotcon_remote_resource_observe_cb cb,
 		void *user_data);
@@ -848,7 +848,7 @@ int iotcon_response_send(iotcon_response_h resp);
  * @see iotcon_remote_resource_observer_stop()
  * @see iotcon_resource_notify()
  */
-int iotcon_notimsg_create(iotcon_representation_h repr, int iface,
+int iotcon_notimsg_create(iotcon_representation_h repr, iotcon_interface_e iface,
 		iotcon_notimsg_h *notimsg_handle);
 
 /**

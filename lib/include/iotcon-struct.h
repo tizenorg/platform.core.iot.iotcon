@@ -1181,7 +1181,7 @@ int iotcon_response_set_header_options(iotcon_response_h resp, iotcon_options_h 
  * @see iotcon_response_create()
  * @see iotcon_response_destroy()
  */
-int iotcon_response_set_interface(iotcon_response_h resp, int iface);
+int iotcon_response_set_interface(iotcon_response_h resp, iotcon_interface_e iface);
 
 /**
  * @brief The handle of device information.

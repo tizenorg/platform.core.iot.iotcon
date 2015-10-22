@@ -983,7 +983,7 @@ int iotcon_list_get_length(iotcon_list_h list, unsigned int *length);
  *
  * @see iotcon_list_foreach_int()
  */
-typedef int (*iotcon_list_int_cb)(int pos, const int value, void *user_data);
+typedef int (*iotcon_list_int_cb)(int pos, int value, void *user_data);
 
 /**
  * @brief Gets all integer values of the given list by invoking the callback function.
@@ -1023,7 +1023,7 @@ int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_cb cb, void *use
  *
  * @see iotcon_list_foreach_bool()
  */
-typedef int (*iotcon_list_bool_cb)(int pos, const bool value, void *user_data);
+typedef int (*iotcon_list_bool_cb)(int pos, bool value, void *user_data);
 
 /**
  * @brief Gets all boolean values of the given list by invoking the callback function.
@@ -1063,7 +1063,7 @@ int iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_cb cb, void *u
  *
  * @see iotcon_list_foreach_double()
  */
-typedef int (*iotcon_list_double_cb)(int pos, const double value, void *user_data);
+typedef int (*iotcon_list_double_cb)(int pos, double value, void *user_data);
 
 /**
  * @brief Gets all double values of the given list by invoking the callback function.

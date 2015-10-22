@@ -162,7 +162,7 @@ static void _icl_resource_conn_cleanup(iotcon_resource_h resource)
 API int iotcon_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int ifaces,
-		uint8_t properties,
+		int properties,
 		iotcon_request_handler_cb cb,
 		void *user_data,
 		iotcon_resource_h *resource_handle)
@@ -279,7 +279,8 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 }
 
 
-API int iotcon_resource_bind_interface(iotcon_resource_h resource, int iface)
+API int iotcon_resource_bind_interface(iotcon_resource_h resource,
+		iotcon_interface_e iface)
 {
 	FN_CALL;
 	int ret;
@@ -536,7 +537,7 @@ API int iotcon_resource_is_observable(iotcon_resource_h resource, bool *observab
 }
 
 
-API int iotcon_notimsg_create(iotcon_representation_h repr, int iface,
+API int iotcon_notimsg_create(iotcon_representation_h repr, iotcon_interface_e iface,
 		iotcon_notimsg_h *notimsg_handle)
 {
 	iotcon_notimsg_h msg;
