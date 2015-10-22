@@ -16,7 +16,6 @@
 	</define>
 	<assign>
 		<filesystem path="/usr/share/license/iotcon" label="_" />
-		<filesystem path="/usr/share/dbus-1/services/org.tizen.iotcon.dbus.service" label="_" />
 
 		<dbus name="org.tizen.iotcon.dbus" own="iotcon" bus="system">
 			<node name="/org/tizen/iotcon/dbus">
