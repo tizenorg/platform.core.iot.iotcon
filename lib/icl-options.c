@@ -103,7 +103,7 @@ API void iotcon_options_destroy(iotcon_options_h options)
 /* iotcon_options_h can have up to 2 options.
  * option id is always situated between 2048 and 3000.
  * Length of option data is less than or equal to 15. */
-API int iotcon_options_insert(iotcon_options_h options, unsigned short id,
+API int iotcon_options_add(iotcon_options_h options, unsigned short id,
 		const char *data)
 {
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
@@ -125,7 +125,7 @@ API int iotcon_options_insert(iotcon_options_h options, unsigned short id,
 }
 
 
-API int iotcon_options_delete(iotcon_options_h options, unsigned short id)
+API int iotcon_options_remove(iotcon_options_h options, unsigned short id)
 {
 	gboolean is_removed;
 

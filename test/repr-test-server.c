@@ -137,41 +137,41 @@ static void _room_request_handler_get(iotcon_request_h request,
 		return;
 	}
 
-	ret = iotcon_list_insert_int(temperature_list, 22, -1);
+	ret = iotcon_list_add_int(temperature_list, 22, -1);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_list_insert_int() Fail(%d)", ret);
+		ERR("iotcon_list_add_int() Fail(%d)", ret);
 		iotcon_state_destroy(room_state);
 		iotcon_representation_destroy(room_repr);
 		return;
 	}
 
-	ret = iotcon_list_insert_int(temperature_list, 23, -1);
+	ret = iotcon_list_add_int(temperature_list, 23, -1);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_list_insert_int() Fail(%d)", ret);
+		ERR("iotcon_list_add_int() Fail(%d)", ret);
 		iotcon_state_destroy(room_state);
 		iotcon_representation_destroy(room_repr);
 		return;
 	}
 
-	ret = iotcon_list_insert_int(temperature_list, 24, -1);
+	ret = iotcon_list_add_int(temperature_list, 24, -1);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_list_insert_int() Fail(%d)", ret);
+		ERR("iotcon_list_add_int() Fail(%d)", ret);
 		iotcon_state_destroy(room_state);
 		iotcon_representation_destroy(room_repr);
 		return;
 	}
 
-	ret = iotcon_list_insert_int(temperature_list, 25, -1);
+	ret = iotcon_list_add_int(temperature_list, 25, -1);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_list_insert_int() Fail(%d)", ret);
+		ERR("iotcon_list_add_int() Fail(%d)", ret);
 		iotcon_state_destroy(room_state);
 		iotcon_representation_destroy(room_repr);
 		return;
 	}
 
-	ret = iotcon_list_insert_int(temperature_list, 26, -1);
+	ret = iotcon_list_add_int(temperature_list, 26, -1);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_list_insert_int() Fail(%d)", ret);
+		ERR("iotcon_list_add_int() Fail(%d)", ret);
 		iotcon_state_destroy(room_state);
 		iotcon_representation_destroy(room_repr);
 		return;
@@ -504,9 +504,9 @@ int main(int argc, char **argv)
 		iotcon_close();
 		return -1;
 	}
-	ret = iotcon_resource_types_insert(room_rtypes, "core.room");
+	ret = iotcon_resource_types_add(room_rtypes, "core.room");
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_types_insert(%s) Fail(%d)", "core.room", ret);
+		ERR("iotcon_resource_types_add(%s) Fail(%d)", "core.room", ret);
 		iotcon_resource_types_destroy(room_rtypes);
 		iotcon_close();
 		return -1;
@@ -532,9 +532,9 @@ int main(int argc, char **argv)
 		iotcon_close();
 		return -1;
 	}
-	ret = iotcon_resource_types_insert(light_rtypes, "core.light");
+	ret = iotcon_resource_types_add(light_rtypes, "core.light");
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_types_insert(%s) Fail(%d)", "core.light", ret);
+		ERR("iotcon_resource_types_add(%s) Fail(%d)", "core.light", ret);
 		iotcon_resource_types_destroy(light_rtypes);
 		iotcon_resource_destroy(room_handle);
 		iotcon_close();

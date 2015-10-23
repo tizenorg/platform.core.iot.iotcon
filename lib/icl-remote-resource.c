@@ -231,9 +231,9 @@ static int _icl_remote_resource_header_foreach_cb(unsigned short id,
 		}
 	}
 
-	ret = iotcon_options_insert(resource->header_options, id, data);
+	ret = iotcon_options_add(resource->header_options, id, data);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_options_insert() Fail(%d)", ret);
+		ERR("iotcon_options_add() Fail(%d)", ret);
 		return IOTCON_FUNC_STOP;
 	}
 
@@ -405,7 +405,7 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 	}
 
 	while (g_variant_iter_loop(types_iter, "s", &res_type))
-		iotcon_resource_types_insert(res_types, res_type);
+		iotcon_resource_types_add(res_types, res_type);
 
 	ret = iotcon_remote_resource_create(host_addr, uri_path, !!is_observable, res_types, ifaces,
 			&resource);

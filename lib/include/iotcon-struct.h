@@ -83,6 +83,156 @@ typedef struct icl_notify_msg* iotcon_notimsg_h;
 typedef struct icl_presence* iotcon_presence_h;
 
 /**
+ * @brief The handle of resource types
+ * @details iotcon_resource_types_h is an opaque data structure to have list\n
+ * of resource types. A resource type is datatype of string.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_resource_types* iotcon_resource_types_h;
+
+
+/**
+ * @brief Creates a new resource types handle.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[out] ret_types A newly allocated list of resource types handle
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_resource_types_destroy()
+ * @see iotcon_resource_types_add()
+ * @see iotcon_resource_types_remove()
+ * @see iotcon_resource_types_clone()
+ */
+int iotcon_resource_types_create(iotcon_resource_types_h *ret_types);
+
+/**
+ * @brief Free a resource types handle.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] types The handle of the resource types
+ *
+ * @return void
+ *
+ * @see iotcon_resource_types_create()
+ * @see iotcon_resource_types_add()
+ * @see iotcon_resource_types_remove()
+ * @see iotcon_resource_types_clone()
+ */
+void iotcon_resource_types_destroy(iotcon_resource_types_h types);
+
+/**
+ * @brief Inserts a resource type into the list.
+ *
+ * @since_tizen 3.0
+ * @remarks The length of resource type should be less than or equal to 61. \n
+ * Duplicate strings are not allowed.
+ *
+ * @param[in] types The handle of the resource types
+ * @param[in] type The string data to insert into the resource types
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_resource_types_create()
+ * @see iotcon_resource_types_destroy()
+ * @see iotcon_resource_types_remove()
+ * @see iotcon_resource_types_clone()
+ */
+int iotcon_resource_types_add(iotcon_resource_types_h types, const char *type);
+
+/**
+ * @brief Delete a resource type form the list.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] types The handle of the resource types
+ * @param[in] type The string data to delete from the resource types
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA  No data available
+ *
+ * @see iotcon_resource_types_create()
+ * @see iotcon_resource_types_destroy()
+ * @see iotcon_resource_types_add()
+ * @see iotcon_resource_types_clone()
+ */
+int iotcon_resource_types_remove(iotcon_resource_types_h types, const char *type);
+
+/**
+ * @brief Specifies the type of function passed to iotcon_resource_types_foreach()
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] type The value of the resource types
+ * @param[in] user_data The user data to pass to the function
+ *
+ * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
+ * otherwise #IOTCON_FUNC_STOP to break out of the loop
+ * @retval #IOTCON_FUNC_STOP  stop to call next function
+ * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
+ *
+ * @pre iotcon_resource_types_foreach() will invoke this callback function.
+ *
+ * @see iotcon_resource_types_foreach()
+ */
+typedef int (*iotcon_resource_types_foreach_cb)(const char *type, void *user_data);
+
+/**
+ * @brief Gets all of the resource types of the list by invoking the callback function.
+ * @details iotcon_resource_types_foreach_cb() will be called for each type.\n
+ * If iotcon_resource_types_foreach_cb() returns #IOTCON_FUNC_STOP, iteration will be stop.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] types The handle of resource types
+ * @param[in] cb The callback function to get data
+ * @param[in] user_data The user data to pass to the function
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @post iotcon_resource_types_foreach() will be called for each type.
+ *
+ * @see iotcon_resource_types_foreach_cb()
+ */
+int iotcon_resource_types_foreach(iotcon_resource_types_h types,
+		iotcon_resource_types_foreach_cb cb, void *user_data);
+
+/**
+ * @brief Clones the resource types handle.
+ * @details Makes a deep copy of a source list of resource types.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] src The origin handle of the resource types
+ * @param[out] dest Clone of a source list of resource types
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_resource_types_create()
+ * @see iotcon_resource_types_destroy()
+ * @see iotcon_resource_types_add()
+ * @see iotcon_resource_types_remove()
+ */
+int iotcon_resource_types_clone(iotcon_resource_types_h src,
+		iotcon_resource_types_h *dest);
+
+
+
+/**
  * @brief The handle of options
  * @details iotcon_options_h is an opaque data structure to have attribute value map
  * which consists of a key and a value.\n
@@ -105,8 +255,8 @@ typedef struct icl_options* iotcon_options_h;
  * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
  *
  * @see iotcon_options_destroy()
- * @see iotcon_options_insert()
- * @see iotcon_options_delete()
+ * @see iotcon_options_add()
+ * @see iotcon_options_remove()
  * @see iotcon_options_lookup()
  */
 int iotcon_options_create(iotcon_options_h *options);
@@ -121,8 +271,8 @@ int iotcon_options_create(iotcon_options_h *options);
  * @return void
  *
  * @see iotcon_options_create()
- * @see iotcon_options_insert()
- * @see iotcon_options_delete()
+ * @see iotcon_options_add()
+ * @see iotcon_options_remove()
  * @see iotcon_options_lookup()
  */
 void iotcon_options_destroy(iotcon_options_h options);
@@ -146,10 +296,10 @@ void iotcon_options_destroy(iotcon_options_h options);
  *
  * @see iotcon_options_create()
  * @see iotcon_options_destroy()
- * @see iotcon_options_delete()
+ * @see iotcon_options_remove()
  * @see iotcon_options_lookup()
  */
-int iotcon_options_insert(iotcon_options_h options, unsigned short id,
+int iotcon_options_add(iotcon_options_h options, unsigned short id,
 		const char *data);
 
 /**
@@ -166,10 +316,10 @@ int iotcon_options_insert(iotcon_options_h options, unsigned short id,
  *
  * @see iotcon_options_create()
  * @see iotcon_options_destroy()
- * @see iotcon_options_insert()
+ * @see iotcon_options_add()
  * @see iotcon_options_lookup()
  */
-int iotcon_options_delete(iotcon_options_h options, unsigned short id);
+int iotcon_options_remove(iotcon_options_h options, unsigned short id);
 
 /**
  * @brief Looks up data at the given id from the options.
@@ -186,8 +336,8 @@ int iotcon_options_delete(iotcon_options_h options, unsigned short id);
  *
  * @see iotcon_options_create()
  * @see iotcon_options_destroy()
- * @see iotcon_options_insert()
- * @see iotcon_options_delete()
+ * @see iotcon_options_add()
+ * @see iotcon_options_remove()
  */
 int iotcon_options_lookup(iotcon_options_h options, unsigned short id, char **data);
 
@@ -260,8 +410,8 @@ typedef struct icl_query* iotcon_query_h;
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_query_destroy()
- * @see iotcon_query_insert()
- * @see iotcon_query_delete()
+ * @see iotcon_query_add()
+ * @see iotcon_query_remove()
  * @see iotcon_query_lookup()
  */
 int iotcon_query_create(iotcon_query_h *query);
@@ -276,11 +426,100 @@ int iotcon_query_create(iotcon_query_h *query);
  * @return void
  *
  * @see iotcon_query_create()
- * @see iotcon_query_insert()
- * @see iotcon_query_delete()
+ * @see iotcon_query_add()
+ * @see iotcon_query_remove()
  * @see iotcon_query_lookup()
  */
 void iotcon_query_destroy(iotcon_query_h query);
+
+/**
+ * @brief Get resource types from the query.
+ *
+ * @since_tizen 3.0
+ * @remarks @a types must not be released using iotcon_resource_types_destroy().
+ *
+ * @param[in] query The handle of the query
+ * @param[out] types Found resource types from query
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA  No data available
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ *
+ * @see iotcon_query_create()
+ * @see iotcon_query_destroy()
+ * @see iotcon_query_add()
+ * @see iotcon_query_remove()
+ * @see iotcon_query_set_resource_types()
+ */
+int iotcon_query_get_resource_tyeps(iotcon_query_h query, iotcon_resource_types_h *types);
+
+/**
+ * @brief Get resource types from the query.
+ * @details @a iface could be one of #iotcon_interface_e.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] query The handle of the query
+ * @param[out] iface Found interface from query
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA  No data available
+ *
+ * @see iotcon_query_create()
+ * @see iotcon_query_destroy()
+ * @see iotcon_query_add()
+ * @see iotcon_query_remove()
+ * @see iotcon_query_set_interface()
+ */
+int iotcon_query_get_interface(iotcon_query_h query, int *iface);
+
+/**
+ * @brief Sets the resource types into the query.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] query The handle of the query
+ * @param[in] value The resoure types to set into the query
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_query_create()
+ * @see iotcon_query_destroy()
+ * @see iotcon_query_add()
+ * @see iotcon_query_remove()
+ * @see iotcon_query_lookup()
+ * @see iotcon_query_get_resource_tyeps()
+ */
+int iotcon_query_set_resource_types(iotcon_query_h query, iotcon_resource_types_h types);
+
+/**
+ * @brief Sets the interface into the query.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] query The handle of the query
+ * @param[in] iface The interface to add into the query
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_query_create()
+ * @see iotcon_query_destroy()
+ * @see iotcon_query_add()
+ * @see iotcon_query_remove()
+ * @see iotcon_query_lookup()
+ * @see iotcon_query_get_interface()
+ */
+int iotcon_query_set_interface(iotcon_query_h query, iotcon_interface_e iface);
 
 /**
  * @brief Inserts a new key and correspoding value into the query.
@@ -299,10 +538,10 @@ void iotcon_query_destroy(iotcon_query_h query);
  *
  * @see iotcon_query_create()
  * @see iotcon_query_destroy()
- * @see iotcon_query_delete()
+ * @see iotcon_query_remove()
  * @see iotcon_query_lookup()
  */
-int iotcon_query_insert(iotcon_query_h query, const char *key, const char *value);
+int iotcon_query_add(iotcon_query_h query, const char *key, const char *value);
 
 /**
  * @brief Deletes the key and its associated value from the query.
@@ -318,10 +557,10 @@ int iotcon_query_insert(iotcon_query_h query, const char *key, const char *value
  *
  * @see iotcon_query_create()
  * @see iotcon_query_destroy()
- * @see iotcon_query_insert()
+ * @see iotcon_query_add()
  * @see iotcon_query_lookup()
  */
-int iotcon_query_delete(iotcon_query_h query, const char *key);
+int iotcon_query_remove(iotcon_query_h query, const char *key);
 
 /**
  * @brief Lookup data at the given key from the query.
@@ -338,8 +577,8 @@ int iotcon_query_delete(iotcon_query_h query, const char *key);
  *
  * @see iotcon_query_create()
  * @see iotcon_query_destroy()
- * @see iotcon_query_insert()
- * @see iotcon_query_delete()
+ * @see iotcon_query_add()
+ * @see iotcon_query_remove()
  */
 int iotcon_query_lookup(iotcon_query_h query, const char *key, char **data);
 
@@ -387,153 +626,6 @@ int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
 		void *user_data);
 
 /**
- * @brief The handle of resource types
- * @details iotcon_resource_types_h is an opaque data structure to have list\n
- * of resource types. A resource type is datatype of string.
- *
- * @since_tizen 3.0
- */
-typedef struct icl_resource_types* iotcon_resource_types_h;
-
-/**
- * @brief Creates a new resource types handle.
- *
- * @since_tizen 3.0
- *
- * @param[out] ret_types A newly allocated list of resource types handle
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- *
- * @see iotcon_resource_types_destroy()
- * @see iotcon_resource_types_insert()
- * @see iotcon_resource_types_delete()
- * @see iotcon_resource_types_clone()
- */
-int iotcon_resource_types_create(iotcon_resource_types_h *ret_types);
-
-/**
- * @brief Free a resource types handle.
- *
- * @since_tizen 3.0
- *
- * @param[in] types The handle of the resource types
- *
- * @return void
- *
- * @see iotcon_resource_types_create()
- * @see iotcon_resource_types_insert()
- * @see iotcon_resource_types_delete()
- * @see iotcon_resource_types_clone()
- */
-void iotcon_resource_types_destroy(iotcon_resource_types_h types);
-
-/**
- * @brief Inserts a resource type into the list.
- *
- * @since_tizen 3.0
- * @remarks The length of resource type should be less than or equal to 61. \n
- * Duplicate strings are not allowed.
- *
- * @param[in] types The handle of the resource types
- * @param[in] type The string data to insert into the resource types
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- *
- * @see iotcon_resource_types_create()
- * @see iotcon_resource_types_destroy()
- * @see iotcon_resource_types_delete()
- * @see iotcon_resource_types_clone()
- */
-int iotcon_resource_types_insert(iotcon_resource_types_h types, const char *type);
-
-/**
- * @brief Delete a resource type form the list.
- *
- * @since_tizen 3.0
- *
- * @param[in] types The handle of the resource types
- * @param[in] type The string data to delete from the resource types
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data available
- *
- * @see iotcon_resource_types_create()
- * @see iotcon_resource_types_destroy()
- * @see iotcon_resource_types_insert()
- * @see iotcon_resource_types_clone()
- */
-int iotcon_resource_types_delete(iotcon_resource_types_h types, const char *type);
-
-/**
- * @brief Specifies the type of function passed to iotcon_resource_types_foreach()
- *
- * @since_tizen 3.0
- *
- * @param[in] type The value of the resource types
- * @param[in] user_data The user data to pass to the function
- *
- * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
- * otherwise #IOTCON_FUNC_STOP to break out of the loop
- * @retval #IOTCON_FUNC_STOP  stop to call next function
- * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
- *
- * @pre iotcon_resource_types_foreach() will invoke this callback function.
- *
- * @see iotcon_resource_types_foreach()
- */
-typedef int (*iotcon_resource_types_foreach_cb)(const char *type, void *user_data);
-
-/**
- * @brief Gets all of the resource types of the list by invoking the callback function.
- * @details iotcon_resource_types_foreach_cb() will be called for each type.\n
- * If iotcon_resource_types_foreach_cb() returns #IOTCON_FUNC_STOP, iteration will be stop.
- *
- * @since_tizen 3.0
- *
- * @param[in] types The handle of resource types
- * @param[in] cb The callback function to get data
- * @param[in] user_data The user data to pass to the function
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- *
- * @post iotcon_resource_types_foreach() will be called for each type.
- *
- * @see iotcon_resource_types_foreach_cb()
- */
-int iotcon_resource_types_foreach(iotcon_resource_types_h types,
-		iotcon_resource_types_foreach_cb cb, void *user_data);
-
-/**
- * @brief Clones the resource types handle.
- * @details Makes a deep copy of a source list of resource types.
- *
- * @since_tizen 3.0
- *
- * @param[in] src The origin handle of the resource types
- * @param[out] dest Clone of a source list of resource types
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- *
- * @see iotcon_resource_types_create()
- * @see iotcon_resource_types_destroy()
- * @see iotcon_resource_types_insert()
- * @see iotcon_resource_types_delete()
- */
-int iotcon_resource_types_clone(iotcon_resource_types_h src,
-		iotcon_resource_types_h *dest);
-
-/**
  * @brief The handle of observers.
  * @details The list of observer ids.
  *
@@ -554,8 +646,8 @@ typedef struct icl_observers* iotcon_observers_h;
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
  * @see iotcon_observers_destroy()
- * @see iotcon_observers_insert()
- * @see iotcon_observers_delete()
+ * @see iotcon_observers_add()
+ * @see iotcon_observers_remove()
  */
 int iotcon_observers_create(iotcon_observers_h *ret_observers);
 
@@ -569,8 +661,8 @@ int iotcon_observers_create(iotcon_observers_h *ret_observers);
  * @return void
  *
  * @see iotcon_observers_create()
- * @see iotcon_observers_insert()
- * @see iotcon_observers_delete()
+ * @see iotcon_observers_add()
+ * @see iotcon_observers_remove()
  */
 void iotcon_observers_destroy(iotcon_observers_h observers);
 
@@ -590,9 +682,9 @@ void iotcon_observers_destroy(iotcon_observers_h observers);
  *
  * @see iotcon_observers_create()
  * @see iotcon_observers_destroy()
- * @see iotcon_observers_delete()
+ * @see iotcon_observers_remove()
  */
-int iotcon_observers_insert(iotcon_observers_h observers, int obs_id);
+int iotcon_observers_add(iotcon_observers_h observers, int obs_id);
 
 /**
  * @brief Remove id from the observers.
@@ -609,9 +701,9 @@ int iotcon_observers_insert(iotcon_observers_h observers, int obs_id);
  *
  * @see iotcon_observers_create()
  * @see iotcon_observers_destroy()
- * @see iotcon_observers_insert()
+ * @see iotcon_observers_add()
  */
-int iotcon_observers_delete(iotcon_observers_h observers, int obs_id);
+int iotcon_observers_remove(iotcon_observers_h observers, int obs_id);
 
 /**
  * @brief The handle of resource.

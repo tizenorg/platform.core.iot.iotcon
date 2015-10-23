@@ -891,8 +891,8 @@ void iotcon_notimsg_destroy(iotcon_notimsg_h msg);
  * @see iotcon_notimsg_destroy()
  * @see iotcon_observers_create()
  * @see iotcon_observers_destroy()
- * @see iotcon_observers_insert()
- * @see iotcon_observers_delete()
+ * @see iotcon_observers_add()
+ * @see iotcon_observers_remove()
  */
 int iotcon_resource_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
 		iotcon_observers_h observers);

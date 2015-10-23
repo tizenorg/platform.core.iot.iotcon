@@ -92,7 +92,7 @@ static bool _icl_resource_types_duplicate_check(iotcon_resource_types_h types,
 
 /* The length of resource type should be less than or equal to 61.
  * Duplicate strings are not allowed. */
-API int iotcon_resource_types_insert(iotcon_resource_types_h types, const char *type)
+API int iotcon_resource_types_add(iotcon_resource_types_h types, const char *type)
 {
 	char *resource_type;
 
@@ -124,7 +124,7 @@ API int iotcon_resource_types_insert(iotcon_resource_types_h types, const char *
 }
 
 
-API int iotcon_resource_types_delete(iotcon_resource_types_h types, const char *type)
+API int iotcon_resource_types_remove(iotcon_resource_types_h types, const char *type)
 {
 	GList *found_node;
 

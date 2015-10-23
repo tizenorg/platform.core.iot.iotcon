@@ -100,7 +100,7 @@ static void _icl_on_cru_cb(GVariant *result, icl_on_cru_s *cb_container)
 		}
 
 		while (g_variant_iter_loop(options, "(q&s)", &option_id, &option_data))
-			iotcon_options_insert(header_options, option_id, option_data);
+			iotcon_options_add(header_options, option_id, option_data);
 	}
 	g_variant_iter_free(options);
 
@@ -362,7 +362,7 @@ static void _icl_on_delete_cb(GObject *object, GAsyncResult *g_async_res,
 		}
 
 		while (g_variant_iter_loop(options, "(q&s)", &option_id, &option_data))
-			iotcon_options_insert(header_options, option_id, option_data);
+			iotcon_options_add(header_options, option_id, option_data);
 	}
 	g_variant_iter_free(options);
 
@@ -442,7 +442,7 @@ static void _icl_on_observe_cb(GDBusConnection *connection,
 		}
 
 		while (g_variant_iter_loop(options, "(q&s)", &option_id, &option_data))
-			iotcon_options_insert(header_options, option_id, option_data);
+			iotcon_options_add(header_options, option_id, option_data);
 	}
 	g_variant_iter_free(options);
 

@@ -146,7 +146,7 @@ API int iotcon_state_set_int(iotcon_state_h state, const char *key, int val)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_del(iotcon_state_h state, const char *key)
+API int iotcon_state_unset(iotcon_state_h state, const char *key)
 {
 	int ret;
 

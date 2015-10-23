@@ -183,9 +183,9 @@ static void _on_get_1st(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	ret = iotcon_query_insert(query_params, "if", "oic.if.b");
+	ret = iotcon_query_add(query_params, "if", "oic.if.b");
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_query_insert() Fail(%d)", ret);
+		ERR("iotcon_query_add() Fail(%d)", ret);
 		iotcon_query_destroy(query_params);
 		return;
 	}

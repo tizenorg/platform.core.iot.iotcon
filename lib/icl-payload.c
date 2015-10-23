@@ -270,7 +270,7 @@ static iotcon_list_h _icl_state_list_from_gvariant(GVariant *var)
 		}
 
 		while (g_variant_iter_loop(&iter, "b", &b))
-			iotcon_list_insert_bool(list, b, -1);
+			iotcon_list_add_bool(list, b, -1);
 	} else if (g_variant_type_equal(G_VARIANT_TYPE("ai"), type)) {
 		int i;
 		ret = iotcon_list_create(IOTCON_TYPE_INT, &list);
@@ -280,7 +280,7 @@ static iotcon_list_h _icl_state_list_from_gvariant(GVariant *var)
 		}
 
 		while (g_variant_iter_loop(&iter, "i", &i))
-			iotcon_list_insert_int(list, i, -1);
+			iotcon_list_add_int(list, i, -1);
 	} else if (g_variant_type_equal(G_VARIANT_TYPE("ad"), type)) {
 		double d;
 		ret = iotcon_list_create(IOTCON_TYPE_DOUBLE, &list);
@@ -290,7 +290,7 @@ static iotcon_list_h _icl_state_list_from_gvariant(GVariant *var)
 		}
 
 		while (g_variant_iter_loop(&iter, "d", &d))
-			iotcon_list_insert_double(list, d, -1);
+			iotcon_list_add_double(list, d, -1);
 	} else if (g_variant_type_equal(G_VARIANT_TYPE("as"), type)) {
 		char *s;
 		ret = iotcon_list_create(IOTCON_TYPE_STR, &list);
@@ -300,7 +300,7 @@ static iotcon_list_h _icl_state_list_from_gvariant(GVariant *var)
 		}
 
 		while (g_variant_iter_loop(&iter, "s", &s))
-			iotcon_list_insert_str(list, s, -1);
+			iotcon_list_add_str(list, s, -1);
 	} else if (g_variant_type_equal(G_VARIANT_TYPE("v"), type)) {
 		GVariant *value;
 		iotcon_list_h list_value;
@@ -309,12 +309,12 @@ static iotcon_list_h _icl_state_list_from_gvariant(GVariant *var)
 		while (g_variant_iter_loop(&iter, "v", &value)) {
 			if (g_variant_is_of_type(value, G_VARIANT_TYPE_ARRAY)) {
 				list_value = _icl_state_list_from_gvariant(value);
-				iotcon_list_insert_list(list, list_value, -1);
+				iotcon_list_add_list(list, list_value, -1);
 			} else if (g_variant_is_of_type(value, G_VARIANT_TYPE("a{sv}"))) {
 				GVariantIter *state_iter;
 				g_variant_get(value, "(&a{sv})", &state_iter);
 				_icl_state_from_gvariant(state_value, state_iter);
-				iotcon_list_insert_state(list, state_value, -1);
+				iotcon_list_add_state(list, state_value, -1);
 			}
 		}
 	}
@@ -367,7 +367,7 @@ iotcon_representation_h icl_representation_from_gvariant(GVariant *var)
 		}
 
 		while (g_variant_iter_loop(resource_types, "s", &resource_type))
-			iotcon_resource_types_insert(repr->res_types, resource_type);
+			iotcon_resource_types_add(repr->res_types, resource_type);
 	}
 	g_variant_iter_free(resource_types);
 

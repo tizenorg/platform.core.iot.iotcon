@@ -100,10 +100,10 @@ static iotcon_resource_h _create_door_resource(char *uri_path, char *type, int i
 		return NULL;
 	}
 
-	ret = iotcon_resource_types_insert(resource_types, type);
+	ret = iotcon_resource_types_add(resource_types, type);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(resource_types);
-		ERR("iotcon_resource_types_insert() Fail(%d)", ret);
+		ERR("iotcon_resource_types_add() Fail(%d)", ret);
 		return NULL;
 	}
 
@@ -481,14 +481,14 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 				ERR("iotcon_request_get_observer_id() Fail(%d)", ret);
 				return;
 			}
-			ret = iotcon_observers_insert(door->observers, observer_id);
+			ret = iotcon_observers_add(door->observers, observer_id);
 		} else if (IOTCON_OBSERVE_DEREGISTER == observer_action) {
 			ret = iotcon_request_get_observer_id(request, &observer_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("iotcon_request_get_observer_id() Fail(%d)", ret);
 				return;
 			}
-			ret = iotcon_observers_delete(door->observers, observer_id);
+			ret = iotcon_observers_remove(door->observers, observer_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("iotcon_observers_remove() Fail(%d)", ret);
 				return;

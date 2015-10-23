@@ -83,7 +83,7 @@ static void _icl_request_handler(GDBusConnection *connection,
 		}
 
 		while (g_variant_iter_loop(options, "(q&s)", &option_id, &option_data))
-			iotcon_options_insert(request.header_options, option_id, option_data);
+			iotcon_options_add(request.header_options, option_id, option_data);
 	}
 	g_variant_iter_free(options);
 
@@ -99,7 +99,7 @@ static void _icl_request_handler(GDBusConnection *connection,
 		}
 
 		while (g_variant_iter_loop(query, "(&s&s)", &key, &value))
-			iotcon_query_insert(request.query, key, value);
+			iotcon_query_add(request.query, key, value);
 	}
 	g_variant_iter_free(query);
 
@@ -122,9 +122,9 @@ static void _icl_request_handler(GDBusConnection *connection,
 		if (IOTCON_OBSERVE_REGISTER == request.observation_info.action) {
 			if (NULL == resource->observers)
 				iotcon_observers_create(&resource->observers);
-			iotcon_observers_insert(resource->observers, observer_id);
+			iotcon_observers_add(resource->observers, observer_id);
 		} else if (IOTCON_OBSERVE_DEREGISTER == request.observation_info.action) {
-			iotcon_observers_delete(resource->observers, observer_id);
+			iotcon_observers_remove(resource->observers, observer_id);
 		}
 	}
 

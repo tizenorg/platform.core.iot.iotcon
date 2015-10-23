@@ -397,9 +397,9 @@ static void _found_resource(iotcon_remote_resource_h resource, int result, void 
 			return;
 		}
 
-		ret = iotcon_query_insert(query, "query_key", "query_value");
+		ret = iotcon_query_add(query, "query_key", "query_value");
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_query_insert() Fail(%d)", ret);
+			ERR("iotcon_query_add() Fail(%d)", ret);
 			iotcon_query_destroy(query);
 			device_id_list = g_list_remove(device_id_list, door_resource_device_id);
 			free(door_resource_device_id);

@@ -491,7 +491,7 @@ int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
-int iotcon_state_del(iotcon_state_h state, const char *key);
+int iotcon_state_unset(iotcon_state_h state, const char *key);
 
 /**
  * @brief Gets the type of a value at the given key.
@@ -714,7 +714,7 @@ void iotcon_list_destroy(iotcon_list_h list);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_list_insert_int(iotcon_list_h list, int val, int pos);
+int iotcon_list_add_int(iotcon_list_h list, int val, int pos);
 
 /**
  * @brief Inserts a new element boolean value into the list at the given position.
@@ -733,7 +733,7 @@ int iotcon_list_insert_int(iotcon_list_h list, int val, int pos);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_list_insert_bool(iotcon_list_h list, bool val, int pos);
+int iotcon_list_add_bool(iotcon_list_h list, bool val, int pos);
 
 /**
  * @brief Inserts a new element double value into the list at the given position.
@@ -752,7 +752,7 @@ int iotcon_list_insert_bool(iotcon_list_h list, bool val, int pos);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_list_insert_double(iotcon_list_h list, double val, int pos);
+int iotcon_list_add_double(iotcon_list_h list, double val, int pos);
 
 /**
  * @brief Inserts a new element string value into the list at the given position.
@@ -771,7 +771,7 @@ int iotcon_list_insert_double(iotcon_list_h list, double val, int pos);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_list_insert_str(iotcon_list_h list, char *val, int pos);
+int iotcon_list_add_str(iotcon_list_h list, char *val, int pos);
 
 /**
  * @brief Inserts a new element list into the list at the given position.
@@ -790,7 +790,7 @@ int iotcon_list_insert_str(iotcon_list_h list, char *val, int pos);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_list_insert_list(iotcon_list_h list, iotcon_list_h val, int pos);
+int iotcon_list_add_list(iotcon_list_h list, iotcon_list_h val, int pos);
 
 /**
  * @brief Inserts a new element state value into the list at the given position.
@@ -809,7 +809,7 @@ int iotcon_list_insert_list(iotcon_list_h list, iotcon_list_h val, int pos);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_list_insert_state(iotcon_list_h list, iotcon_state_h val, int pos);
+int iotcon_list_add_state(iotcon_list_h list, iotcon_state_h val, int pos);
 
 /**
  * @brief Gets the integer value at the given position.
@@ -933,7 +933,7 @@ int iotcon_list_get_nth_state(iotcon_list_h list, int pos, iotcon_state_h *state
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
-int iotcon_list_del_nth(iotcon_list_h list, int pos);
+int iotcon_list_remove_nth(iotcon_list_h list, int pos);
 
 /**
  * @brief Gets the type of the list.

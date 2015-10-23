@@ -46,7 +46,7 @@ API void iotcon_observers_destroy(iotcon_observers_h observers)
 }
 
 
-API int iotcon_observers_insert(iotcon_observers_h observers, int obs_id)
+API int iotcon_observers_add(iotcon_observers_h observers, int obs_id)
 {
 	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -57,7 +57,7 @@ API int iotcon_observers_insert(iotcon_observers_h observers, int obs_id)
 }
 
 
-API int iotcon_observers_delete(iotcon_observers_h observers, int obs_id)
+API int iotcon_observers_remove(iotcon_observers_h observers, int obs_id)
 {
 	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
 

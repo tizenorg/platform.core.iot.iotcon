@@ -91,7 +91,7 @@ API int iotcon_list_create(iotcon_types_e type, iotcon_list_h *ret_list)
 }
 
 
-API int iotcon_list_insert_int(iotcon_list_h list, int val, int pos)
+API int iotcon_list_add_int(iotcon_list_h list, int val, int pos)
 {
 	iotcon_value_h value;
 
@@ -109,7 +109,7 @@ API int iotcon_list_insert_int(iotcon_list_h list, int val, int pos)
 }
 
 
-API int iotcon_list_insert_bool(iotcon_list_h list, bool val, int pos)
+API int iotcon_list_add_bool(iotcon_list_h list, bool val, int pos)
 {
 	iotcon_value_h value;
 
@@ -127,7 +127,7 @@ API int iotcon_list_insert_bool(iotcon_list_h list, bool val, int pos)
 }
 
 
-API int iotcon_list_insert_double(iotcon_list_h list, double val, int pos)
+API int iotcon_list_add_double(iotcon_list_h list, double val, int pos)
 {
 	iotcon_value_h value;
 
@@ -145,7 +145,7 @@ API int iotcon_list_insert_double(iotcon_list_h list, double val, int pos)
 }
 
 
-API int iotcon_list_insert_str(iotcon_list_h list, char *val, int pos)
+API int iotcon_list_add_str(iotcon_list_h list, char *val, int pos)
 {
 	iotcon_value_h value;
 
@@ -164,7 +164,7 @@ API int iotcon_list_insert_str(iotcon_list_h list, char *val, int pos)
 }
 
 
-API int iotcon_list_insert_list(iotcon_list_h list, iotcon_list_h val, int pos)
+API int iotcon_list_add_list(iotcon_list_h list, iotcon_list_h val, int pos)
 {
 	iotcon_value_h value;
 
@@ -185,7 +185,7 @@ API int iotcon_list_insert_list(iotcon_list_h list, iotcon_list_h val, int pos)
 }
 
 
-API int iotcon_list_insert_state(iotcon_list_h list, iotcon_state_h val, int pos)
+API int iotcon_list_add_state(iotcon_list_h list, iotcon_state_h val, int pos)
 {
 	iotcon_value_h value;
 
@@ -372,7 +372,7 @@ API int iotcon_list_get_nth_state(iotcon_list_h list, int pos, iotcon_state_h *s
 }
 
 
-static int _icl_list_del_nth_value(iotcon_list_h list, int pos)
+static int _icl_list_remove_nth_value(iotcon_list_h list, int pos)
 {
 	iotcon_value_h value;
 
@@ -401,13 +401,13 @@ static int _icl_list_del_nth_value(iotcon_list_h list, int pos)
 }
 
 
-API int iotcon_list_del_nth(iotcon_list_h list, int pos)
+API int iotcon_list_remove_nth(iotcon_list_h list, int pos)
 {
 	int ret;
 
-	ret = _icl_list_del_nth_value(list, pos);
+	ret = _icl_list_remove_nth_value(list, pos);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("_icl_list_del_nth_value() Fail(%d)", ret);
+		ERR("_icl_list_remove_nth_value() Fail(%d)", ret);
 
 	return ret;
 }

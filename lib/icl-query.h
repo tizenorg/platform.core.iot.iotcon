@@ -25,6 +25,8 @@
  */
 #define ICL_QUERY_LENGTH_MAX 64
 
+#define ICL_QUERY_KEY_RESOURCE_TYPE "rt"
+#define ICL_QUERY_KEY_INTERFACE "if"
 
 struct icl_query {
 	int len;

@@ -124,7 +124,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 		return;
 	}
 
-	ret = iotcon_resource_types_insert(resource_types, type);
+	ret = iotcon_resource_types_add(resource_types, type);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(resource_types);
 		return;
@@ -195,7 +195,7 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 		return;
 	}
 
-	iotcon_query_insert(query, "key", "value");
+	iotcon_query_add(query, "key", "value");
 
 	iotcon_remote_resource_get(resource, query, &_on_get, NULL);
 	iotcon_query_destroy(query);
@@ -254,7 +254,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
-			ret = iotcon_observers_insert(observers, observer_id);
+			ret = iotcon_observers_add(observers, observer_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
@@ -263,7 +263,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
-			ret = iotcon_observers_delete(observers, observer_id);
+			ret = iotcon_observers_remove(observers, observer_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
@@ -285,7 +285,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 		return;
 	}
 
-	ret = iotcon_resource_types_insert(resource_types, type);
+	ret = iotcon_resource_types_add(resource_types, type);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(resource_types);
 		return;
@@ -444,7 +444,7 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
 		return;
 	}
 
-	ret = iotcon_resource_types_insert(types, "core.light");
+	ret = iotcon_resource_types_add(types, "core.light");
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(types);
 		iotcon_representation_destroy(resp_repr);
@@ -507,7 +507,7 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
 		return;
 	}
 
-	ret = iotcon_list_insert_double(bright_step_list, 100.0, -1);
+	ret = iotcon_list_add_double(bright_step_list, 100.0, -1);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_list_destroy(bright_step_list);
 		iotcon_resource_types_destroy(types);
@@ -515,7 +515,7 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
 		return;
 	}
 
-	ret = iotcon_list_insert_double(bright_step_list, 200.0, -1);
+	ret = iotcon_list_add_double(bright_step_list, 200.0, -1);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_list_destroy(bright_step_list);
 		iotcon_resource_types_destroy(types);
@@ -523,7 +523,7 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
 		return;
 	}
 
-	ret = iotcon_list_insert_double(bright_step_list, 300.0, -1);
+	ret = iotcon_list_add_double(bright_step_list, 300.0, -1);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_list_destroy(bright_step_list);
 		iotcon_resource_types_destroy(types);
@@ -531,7 +531,7 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
 		return;
 	}
 
-	ret = iotcon_list_insert_double(bright_step_list, 400.0, -1);
+	ret = iotcon_list_add_double(bright_step_list, 400.0, -1);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_list_destroy(bright_step_list);
 		iotcon_resource_types_destroy(types);
@@ -539,7 +539,7 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
 		return;
 	}
 
-	ret = iotcon_list_insert_double(bright_step_list, 500.0, -1);
+	ret = iotcon_list_add_double(bright_step_list, 500.0, -1);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_list_destroy(bright_step_list);
 		iotcon_resource_types_destroy(types);
