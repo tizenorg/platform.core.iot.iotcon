@@ -86,8 +86,8 @@ API int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resourc
 		iotcon_remote_resource_state_changed_cb cb,
 		void *user_data)
 {
-	int ret;
 	char *host_address;
+	int ret, connectivity_type;
 	unsigned int get_timer_id;
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
@@ -127,17 +127,26 @@ API int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resourc
 	resource->monitoring_handle->get_timer_id = get_timer_id;
 
 	/* Device Presence */
-	ret = iotcon_remote_resource_get_host(resource, &host_address);
+	ret = iotcon_remote_resource_get_host_address(resource, &host_address);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_remote_resource_get_host() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_get_host_address() Fail(%d)", ret);
 		g_source_remove(resource->monitoring_handle->get_timer_id);
 		free(resource->monitoring_handle);
 		resource->monitoring_handle = NULL;
 		return ret;
 	}
 
-	ret = iotcon_subscribe_presence(host_address, NULL, _monitoring_presence_cb, resource,
-			&resource->monitoring_handle->presence);
+	ret = iotcon_remote_resource_get_connectivity_type(resource, &connectivity_type);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_remote_resource_get_connectivity_type() Fail(%d)", ret);
+		g_source_remove(resource->monitoring_handle->get_timer_id);
+		free(resource->monitoring_handle);
+		resource->monitoring_handle = NULL;
+		return ret;
+	}
+
+	ret = iotcon_subscribe_presence(host_address, connectivity_type, NULL,
+			_monitoring_presence_cb, resource, &resource->monitoring_handle->presence);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_subscribe_presence() Fail(%d)", ret);
 		g_source_remove(resource->monitoring_handle->get_timer_id);

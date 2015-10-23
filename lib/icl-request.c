@@ -30,6 +30,18 @@ API int iotcon_request_get_host_address(iotcon_request_h request,
 }
 
 
+API int iotcon_request_get_connectivity_type(iotcon_request_h request,
+		int *connectivity_type)
+{
+	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == connectivity_type, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*connectivity_type = request->connectivity_type;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
 /* The content of the request should not be freed by user. */
 API int iotcon_request_get_representation(iotcon_request_h request,
 		iotcon_representation_h *repr)

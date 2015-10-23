@@ -878,7 +878,8 @@ typedef struct icl_remote_resource* iotcon_remote_resource_h;
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_host_address()
+ * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
@@ -902,13 +903,38 @@ int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
+ * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_is_observable()
  * @see iotcon_remote_resource_set_options()
  */
-int iotcon_remote_resource_get_host(iotcon_remote_resource_h resource, char **host);
+int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resource,
+		char **host);
+
+/**
+ * @brief Gets connectivity type of the remote resource
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] request The handle of the remote resource
+ * @param[out] connectivity_type The connectivity type of the remote resource
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+
+ * @see iotcon_remote_resource_get_uri_path()
+ * @see iotcon_remote_resource_get_host_address()
+ * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_types()
+ * @see iotcon_remote_resource_get_interfaces()
+ * @see iotcon_remote_resource_is_observable()
+ * @see iotcon_remote_resource_set_options()
+ */
+int iotcon_remote_resource_get_connectivity_type(iotcon_remote_resource_h resource,
+		int *connectivity_type);
 
 /**
  * @brief Gets an device id of the remote resource
@@ -924,7 +950,8 @@ int iotcon_remote_resource_get_host(iotcon_remote_resource_h resource, char **ho
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
- * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_host_address()
+ * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_is_observable()
@@ -946,7 +973,8 @@ int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
- * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_host_address()
+ * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_is_observable()
@@ -968,7 +996,8 @@ int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
- * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_host_address()
+ * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_is_observable()
@@ -989,7 +1018,8 @@ int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource, int
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
- * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_host_address()
+ * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
@@ -1011,7 +1041,8 @@ int iotcon_remote_resource_is_observable(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
- * @see iotcon_remote_resource_get_host()
+ * @see iotcon_remote_resource_get_host_address()
+ * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
@@ -1042,6 +1073,7 @@ typedef struct icl_resource_request* iotcon_request_h;
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
+ * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
@@ -1052,6 +1084,28 @@ typedef struct icl_resource_request* iotcon_request_h;
 int iotcon_request_get_host_address(iotcon_request_h request,
 		char **host_address);
 
+/**
+ * @brief Gets connectivity type of the request
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] request The handle of the request
+ * @param[out] connectivity_type The connectivity type of the request
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_request_get_host_address()
+ * @see iotcon_request_get_representation()
+ * @see iotcon_request_get_types()
+ * @see iotcon_request_get_options()
+ * @see iotcon_request_get_query()
+ * @see iotcon_request_get_observer_action()
+ * @see iotcon_request_get_observer_id()
+ */
+int iotcon_request_get_connectivity_type(iotcon_request_h request,
+		int *connectivity_type);
 
 /**
  * @brief Gets an representation of the request
@@ -1067,6 +1121,7 @@ int iotcon_request_get_host_address(iotcon_request_h request,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
+ * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
@@ -1089,6 +1144,7 @@ int iotcon_request_get_representation(iotcon_request_h request,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
+ * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
@@ -1111,6 +1167,7 @@ int iotcon_request_get_types(iotcon_request_h request, int *types);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
+ * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_query()
@@ -1133,6 +1190,7 @@ int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *optio
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
+ * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
@@ -1155,6 +1213,7 @@ int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
+ * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
@@ -1176,6 +1235,7 @@ int iotcon_request_get_observer_action(iotcon_request_h request, int *action);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
+ * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()

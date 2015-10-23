@@ -76,8 +76,8 @@ int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers)
 
 int icd_ioty_send_response(GVariant *resp);
 
-int icd_ioty_find_resource(const char *host_address, const char *resource_type,
-		unsigned int signal_number, const char *bus_name);
+int icd_ioty_find_resource(const char *host_address, int conn_type,
+		const char *resource_type, unsigned int signal_number, const char *bus_name);
 
 void icd_ioty_complete(int type, GDBusMethodInvocation *invocation, GVariant *value);
 void icd_ioty_complete_error(int type, GDBusMethodInvocation *invocation, int ret_val);
@@ -113,17 +113,17 @@ int icd_ioty_register_platform_info(char *platform_id,
 		char *support_url,
 		char *system_time);
 
-int icd_ioty_get_info(int type, const char *host_address, unsigned int signal_number,
-		const char *bus_name);
+int icd_ioty_get_info(int type, const char *host_address, int conn_type,
+		unsigned int signal_number, const char *bus_name);
 
 int icd_ioty_set_tizen_info();
 
 gboolean icd_ioty_get_tizen_info(icDbus *object, GDBusMethodInvocation *invocation,
-		const gchar *host_address);
+		const gchar *host_address, int conn_type);
 
 int icd_ioty_tizen_info_get_property(char **device_name, char **tizen_device_id);
 
-OCDoHandle icd_ioty_subscribe_presence(const char *host_address,
+OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
 		const char *resource_type, unsigned int signal_number, const char *bus_name);
 
 int icd_ioty_unsubscribe_presence(OCDoHandle handle);

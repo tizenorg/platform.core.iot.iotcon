@@ -162,12 +162,14 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 		return;
 	}
 
-	g_variant_get(parameters, "(ia(qs)a(ss)iiavxx)",
+	g_variant_get(parameters, "(siia(qs)a(ss)iiavxx)",
+			NULL,	/* host address */
+			NULL,	/* connectivity type */
 			&request_types,
-			NULL,	// &options,
-			NULL,	// &query,
-			NULL,	// &action,
-			NULL,	// &observer_id,
+			NULL,	/* header options */
+			NULL,	/* query */
+			NULL,	/* observe action */
+			NULL,	/* observer_id */
 			&repr_iter,
 			&oic_request_h,
 			&oic_resource_h);

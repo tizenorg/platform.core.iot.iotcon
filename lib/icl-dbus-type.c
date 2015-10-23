@@ -133,7 +133,7 @@ GVariant* icl_dbus_remote_resource_to_gvariant(struct icl_remote_resource *resou
 	}
 
 	value = g_variant_new("(ssba(qs)i)", resource->uri_path, resource->host,
-			resource->is_secure, &options, resource->conn_type);
+			resource->is_secure, &options, resource->connectivity_type);
 
 	return value;
 }

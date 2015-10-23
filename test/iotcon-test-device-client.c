@@ -180,14 +180,16 @@ int main()
 		return -1;
 	}
 
-	ret = iotcon_get_device_info(IOTCON_MULTICAST_ADDRESS, _get_device_info, NULL);
+	ret = iotcon_get_device_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+			_get_device_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_get_device_info() Fail(%d)", ret);
 		iotcon_close();
 		return -1;
 	}
 
-	ret = iotcon_get_platform_info(IOTCON_MULTICAST_ADDRESS, _get_platform_info, NULL);
+	ret = iotcon_get_platform_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+			_get_platform_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_get_platform_info() Fail(%d)", ret);
 		iotcon_close();

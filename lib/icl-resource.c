@@ -54,8 +54,9 @@ static void _icl_request_handler(GDBusConnection *connection,
 	iotcon_resource_h resource = user_data;
 	iotcon_request_handler_cb cb = resource->cb;
 
-	g_variant_get(parameters, "(sia(qs)a(ss)iiavxx)",
+	g_variant_get(parameters, "(siia(qs)a(ss)iiavxx)",
 			&request.host_address,
+			&request.connectivity_type,
 			&request.types,
 			&options,
 			&query,

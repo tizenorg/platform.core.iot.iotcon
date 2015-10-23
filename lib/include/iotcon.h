@@ -427,6 +427,7 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info, int resu
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] host_address The host address of remote server
+ * @param[in] connectivity_type The connectivity type
  * @param[in] cb The callback function to invoke
  * @param[in] user_data The user data to pass to the function
  *
@@ -442,7 +443,9 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info, int resu
  * @see iotcon_device_info_cb()
  * @see iotcon_device_info_get_property()
  */
-int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
+int iotcon_get_device_info(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		iotcon_device_info_cb cb,
 		void *user_data);
 
 /**
@@ -473,6 +476,7 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info, in
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] host_address The host address of remote server
+ * @param[in] connectivity_type The connectivity type
  * @param[in] cb The callback function to invoke
  * @param[in] user_data The user data to pass to the function
  *
@@ -490,7 +494,9 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info, in
  * @see iotcon_platform_info_cb()
  * @see iotcon_platform_info_get_property()
  */
-int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_cb cb,
+int iotcon_get_platform_info(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		iotcon_platform_info_cb cb,
 		void *user_data);
 
 /**
@@ -521,6 +527,7 @@ typedef void (*iotcon_tizen_info_cb)(iotcon_tizen_info_h tizen_info,
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] host_address The host address of remote server
+ * @param[in] connectivity_type The connectivity type
  * @param[in] cb The callback function to invoke
  * @param[in] user_data The user data to pass to the function
  *
@@ -536,7 +543,9 @@ typedef void (*iotcon_tizen_info_cb)(iotcon_tizen_info_h tizen_info,
  * @see iotcon_tizen_info_cb()
  * @see iotcon_tizen_info_get_property()
  */
-int iotcon_get_tizen_info(const char *host_address, iotcon_tizen_info_cb cb,
+int iotcon_get_tizen_info(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		iotcon_tizen_info_cb cb,
 		void *user_data);
 
 /**
@@ -568,6 +577,7 @@ typedef void (*iotcon_presence_cb)(int result, unsigned int nonce,
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] host_address The address or addressable name of the server
+ * @param[in] connectivity_type The connectivity type
  * @param[in] resource_type A resource type that a client has interested in
  * @param[in] cb The callback function to invoke
  * @param[in] user_data The user data to pass to the function
@@ -588,8 +598,12 @@ typedef void (*iotcon_presence_cb)(int result, unsigned int nonce,
  * @see iotcon_unsubscribe_presence()
  * @see iotcon_presence_cb()
  */
-int iotcon_subscribe_presence(const char *host_address, const char *resource_type,
-		iotcon_presence_cb cb, void *user_data, iotcon_presence_h *presence_handle);
+int iotcon_subscribe_presence(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		const char *resource_type,
+		iotcon_presence_cb cb,
+		void *user_data,
+		iotcon_presence_h *presence_handle);
 
 /**
  * @brief Unsubscribes to a server's presence events.
@@ -643,6 +657,7 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource, int 
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] host_address The address or addressable name of server
+ * @param[in] connectivity_type The connectivity type
  * @param[in] resource_type The resource type specified as a filter for the resource
  * @param[in] cb The callback function to invoke
  * @param[in] user_data The user data to pass to the function
@@ -658,8 +673,11 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource, int 
  *
  * @see iotcon_found_resource_cb()
  */
-int iotcon_find_resource(const char *host_address, const char *resource_type,
-		iotcon_found_resource_cb cb, void *user_data);
+int iotcon_find_resource(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		const char *resource_type,
+		iotcon_found_resource_cb cb,
+		void *user_data);
 
 /**
  * @brief Creates a new resource handle.
@@ -672,6 +690,7 @@ int iotcon_find_resource(const char *host_address, const char *resource_type,
  * @since_tizen 3.0
  *
  * @param[in] host The host address of the resource
+ * @param[in] connectivity_type The connectivity type
  * @param[in] uri_path The URI path of the resource.
  * @param[in] is_observable Allow observation
  * @param[in] resource_types The resource type of the resource. For example, "core.light"
@@ -689,6 +708,7 @@ int iotcon_find_resource(const char *host_address, const char *resource_type,
  * @see iotcon_remote_resource_clone()
  */
 int iotcon_remote_resource_create(const char *host,
+		iotcon_connectivity_type_e connectivity_type,
 		const char *uri_path,
 		bool is_observable,
 		iotcon_resource_types_h resource_types,
@@ -726,7 +746,8 @@ void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource);
  * @see iotcon_remote_resource_create()
  * @see iotcon_remote_resource_destroy()
  */
-int iotcon_remote_resource_clone(iotcon_remote_resource_h src, iotcon_remote_resource_h *dest);
+int iotcon_remote_resource_clone(iotcon_remote_resource_h src,
+		iotcon_remote_resource_h *dest);
 
 /**
  * @brief Specifies the type of function passed to iotcon_remote_resource_observer_start().

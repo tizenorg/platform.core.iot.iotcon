@@ -43,6 +43,7 @@
 		</method>
 		<method name="findResource">
 			<arg type="s" name="host_address" direction="in"/>
+			<arg type="i" name="connectivity" direction="in"/>
 			<arg type="s" name="type" direction="in"/>
 			<arg type="u" name="signal_number" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
@@ -82,20 +83,24 @@
 		</method>
 		<method name="getDeviceInfo">
 			<arg type="s" name="host_address" direction="in"/>
+			<arg type="i" name="connectivity" direction="in"/>
 			<arg type="u" name="signal_number" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="getPlatformInfo">
 			<arg type="s" name="host_address" direction="in"/>
+			<arg type="i" name="connectivity" direction="in"/>
 			<arg type="u" name="signal_number" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="getTizenInfo">
 			<arg type="s" name="host_address" direction="in"/>
+			<arg type="i" name="connectivity" direction="in"/>
 			<arg type="(ssi)" name="ret" direction="out"/>
 		</method>
 		<method name="subscribePresence">
 			<arg type="s" name="host_address" direction="in"/>
+			<arg type="i" name="connectivity" direction="in"/>
 			<arg type="s" name="type" direction="in"/>
 			<arg type="u" name="signal_number" direction="in"/>
 			<arg type="x" name="presence_h" direction="out"/>

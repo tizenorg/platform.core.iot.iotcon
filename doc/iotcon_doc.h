@@ -175,7 +175,7 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 		return;
 	}
 
-	ret = iotcon_remote_resource_get_host(resource, &resource_host);
+	ret = iotcon_remote_resource_get_host_address(resource, &resource_host);
 	if (IOTCON_ERROR_NONE != ret) {
 		return;
 	}
@@ -205,7 +205,8 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 	int ret;
 	const char *type = "core.door";
 
-	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, type, &_found_resource, NULL);
+	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4, type,
+			&_found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		return;
 	}

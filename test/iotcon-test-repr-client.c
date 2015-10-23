@@ -164,6 +164,8 @@ static void _on_get_2nd(iotcon_remote_resource_h resource,
 		void *user_data)
 {
 	_on_get(recv_repr, response_result);
+
+	iotcon_remote_resource_destroy(resource);
 }
 
 static void _on_get_1st(iotcon_remote_resource_h resource,
@@ -215,7 +217,8 @@ static int _device_id_compare(const void *a, const void *b)
 	return strcmp(a, b);
 }
 
-static void _found_resource(iotcon_remote_resource_h resource, int result, void *user_data)
+static void _found_resource(iotcon_remote_resource_h resource, int result,
+		void *user_data)
 {
 	GList *node;
 	char *resource_host;
@@ -223,6 +226,7 @@ static void _found_resource(iotcon_remote_resource_h resource, int result, void 
 	char *resource_device_id;
 	int ret, resource_interfaces;
 	iotcon_resource_types_h resource_types;
+	iotcon_remote_resource_h cloned_resource;
 
 	RETM_IF(IOTCON_ERROR_NONE != result, "Invalid result(%d)", result);
 
@@ -262,9 +266,9 @@ static void _found_resource(iotcon_remote_resource_h resource, int result, void 
 	device_id_list = g_list_append(device_id_list, room_resource_device_id);
 
 	/* get the resource host address */
-	ret = iotcon_remote_resource_get_host(resource, &resource_host);
+	ret = iotcon_remote_resource_get_host_address(resource, &resource_host);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_remote_resource_get_host() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_get_host_address() Fail(%d)", ret);
 		device_id_list = g_list_remove(device_id_list, room_resource_device_id);
 		free(room_resource_device_id);
 		return;
@@ -306,8 +310,16 @@ static void _found_resource(iotcon_remote_resource_h resource, int result, void 
 	}
 
 	if (TEST_STR_EQUAL == strcmp(room_uri_path, resource_uri_path)) {
+		ret = iotcon_remote_resource_clone(resource, &cloned_resource);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_remote_resource_clone() Fail(%d)", ret);
+			device_id_list = g_list_remove(device_id_list, room_resource_device_id);
+			free(room_resource_device_id);
+			return;
+		}
+
 		/* send GET request */
-		ret = iotcon_remote_resource_get(resource, NULL, _on_get_1st, NULL);
+		ret = iotcon_remote_resource_get(cloned_resource, NULL, _on_get_1st, NULL);
 		if (IOTCON_ERROR_NONE != ret)
 			ERR("iotcon_remote_resource_get() Fail(%d)", ret);
 	}
@@ -332,8 +344,8 @@ int main(int argc, char **argv)
 	}
 
 	/* find room typed resources */
-	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, "core.room", &_found_resource,
-			NULL);
+	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+			"core.room", &_found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
 		iotcon_close();

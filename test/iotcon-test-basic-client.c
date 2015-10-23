@@ -67,9 +67,9 @@ static void _on_delete(iotcon_remote_resource_h resource, iotcon_options_h heade
 static void _on_post(iotcon_remote_resource_h resource, iotcon_representation_h recv_repr,
 		iotcon_options_h header_options, int response_result, void *user_data)
 {
-	int ret, ifaces = 0;
 	iotcon_state_h recv_state;
 	char *host, *created_uri_path;
+	int ret, connectivity_type, ifaces = 0;
 	iotcon_resource_types_h types = NULL;
 	iotcon_remote_resource_h new_door_resource, door_resource;
 
@@ -91,9 +91,15 @@ static void _on_post(iotcon_remote_resource_h resource, iotcon_representation_h 
 	}
 	DBG("New resource created : %s", created_uri_path);
 
-	ret = iotcon_remote_resource_get_host(resource, &host);
+	ret = iotcon_remote_resource_get_host_address(resource, &host);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_remote_resource_get_host() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_get_host_address() Fail(%d)", ret);
+		return;
+	}
+
+	ret = iotcon_remote_resource_get_connectivity_type(resource, &connectivity_type);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_remote_resource_get_connectivity_type() Fail(%d)", ret);
 		return;
 	}
 
@@ -109,8 +115,8 @@ static void _on_post(iotcon_remote_resource_h resource, iotcon_representation_h 
 		return;
 	}
 
-	ret = iotcon_remote_resource_create(host, created_uri_path, true, types, ifaces,
-			&new_door_resource);
+	ret = iotcon_remote_resource_create(host, connectivity_type, created_uri_path, true,
+			types, ifaces, &new_door_resource);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_remote_resource_create() Fail(%d)", ret);
 		return;
@@ -274,15 +280,16 @@ static void _get_tizen_info(iotcon_tizen_info_h info, int response_result,
 	INFO("- Tizen Device ID : %s", tizen_device_id);
 }
 
-static void _found_resource(iotcon_remote_resource_h resource, int result, void *user_data)
+static void _found_resource(iotcon_remote_resource_h resource, int result,
+		void *user_data)
 {
 	GList *node;
 	char *resource_host;
 	char *resource_uri_path;
 	char *resource_device_id;
-	int ret, resource_interfaces;
 	iotcon_presence_h presence_handle;
 	iotcon_resource_types_h resource_types;
+	int ret, resource_interfaces, connectivity_type;
 	iotcon_remote_resource_h resource_clone = NULL;
 
 	RETM_IF(IOTCON_ERROR_NONE != result, "Invalid result(%d)", result);
@@ -324,14 +331,22 @@ static void _found_resource(iotcon_remote_resource_h resource, int result, void 
 	device_id_list = g_list_append(device_id_list, door_resource_device_id);
 
 	/* get the resource host address */
-	ret = iotcon_remote_resource_get_host(resource, &resource_host);
+	ret = iotcon_remote_resource_get_host_address(resource, &resource_host);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_remote_resource_get_host() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_get_host_address() Fail(%d)", ret);
 		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
 		free(door_resource_device_id);
 		return;
 	}
 	DBG("[%s] resource host : %s", resource_uri_path, resource_host);
+
+	ret = iotcon_remote_resource_get_connectivity_type(resource, &connectivity_type);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_remote_resource_get_connectivity_type() Fail(%d)", ret);
+		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
+		free(door_resource_device_id);
+		return;
+	}
 
 	/* get the resource interfaces */
 	ret = iotcon_remote_resource_get_interfaces(resource, &resource_interfaces);
@@ -369,7 +384,7 @@ static void _found_resource(iotcon_remote_resource_h resource, int result, void 
 	}
 
 	/* get tizen info */
-	ret = iotcon_get_tizen_info(resource_host, _get_tizen_info, NULL);
+	ret = iotcon_get_tizen_info(resource_host, connectivity_type, _get_tizen_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_get_tizen_info() Fail(%d)", ret);
 		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
@@ -377,8 +392,8 @@ static void _found_resource(iotcon_remote_resource_h resource, int result, void 
 		return;
 	}
 
-	ret = iotcon_subscribe_presence(resource_host, "core.door", _presence_handler, NULL,
-			&presence_handle);
+	ret = iotcon_subscribe_presence(resource_host, connectivity_type, "core.door",
+			_presence_handler, NULL, &presence_handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_subscribe_presence() Fail(%d)", ret);
 		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
@@ -443,8 +458,8 @@ int main(int argc, char **argv)
 	}
 
 	/* find door typed resources */
-	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, "core.door", &_found_resource,
-			NULL);
+	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+			"core.door", &_found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
 		iotcon_close();

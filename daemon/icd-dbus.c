@@ -495,6 +495,7 @@ static gboolean _dbus_handle_unbind_resource(icDbus *object,
 static gboolean _dbus_handle_find_resource(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
+		gint connectivity,
 		const gchar *type,
 		guint signal_number)
 {
@@ -502,7 +503,7 @@ static gboolean _dbus_handle_find_resource(icDbus *object,
 	const gchar *sender;
 
 	sender = g_dbus_method_invocation_get_sender(invocation);
-	ret = icd_ioty_find_resource(host_address, type, signal_number, sender);
+	ret = icd_ioty_find_resource(host_address, connectivity, type, signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_find_resource() Fail(%d)", ret);
 
@@ -587,13 +588,15 @@ static gboolean _dbus_handle_send_response(icDbus *object,
 static gboolean _dbus_handle_get_device_info(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
+		gint connectivity,
 		guint signal_number)
 {
 	int ret;
 	const gchar *sender;
 
 	sender = g_dbus_method_invocation_get_sender(invocation);
-	ret = icd_ioty_get_info(ICD_DEVICE_INFO, host_address, signal_number, sender);
+	ret = icd_ioty_get_info(ICD_DEVICE_INFO, host_address, connectivity, signal_number,
+			sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_get_info(device info) Fail(%d)", ret);
 
@@ -605,13 +608,15 @@ static gboolean _dbus_handle_get_device_info(icDbus *object,
 static gboolean _dbus_handle_get_platform_info(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
+		gint connectivity,
 		guint signal_number)
 {
 	int ret;
 	const gchar *sender;
 
 	sender = g_dbus_method_invocation_get_sender(invocation);
-	ret = icd_ioty_get_info(ICD_PLATFORM_INFO, host_address, signal_number, sender);
+	ret = icd_ioty_get_info(ICD_PLATFORM_INFO, host_address, connectivity, signal_number,
+			sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_get_info(platform info) Fail(%d)", ret);
 
@@ -655,6 +660,7 @@ static gboolean _dbus_handle_stop_presence(icDbus *object,
 static gboolean _dbus_handle_subscribe_presence(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
+		gint connectivity,
 		const gchar *type,
 		guint signal_number)
 {
@@ -662,7 +668,8 @@ static gboolean _dbus_handle_subscribe_presence(icDbus *object,
 	const gchar *sender;
 
 	sender = g_dbus_method_invocation_get_sender(invocation);
-	presence_h = icd_ioty_subscribe_presence(host_address, type, signal_number, sender);
+	presence_h = icd_ioty_subscribe_presence(host_address, connectivity, type,
+			signal_number, sender);
 	if (NULL == presence_h)
 		ERR("icd_ioty_subscribe_presence() Fail");
 

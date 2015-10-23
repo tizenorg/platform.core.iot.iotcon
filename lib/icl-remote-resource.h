@@ -62,7 +62,7 @@ struct icl_remote_resource {
 	iotcon_options_h header_options;
 	iotcon_resource_types_h types;
 	int ifaces;
-	iotcon_connectivity_type_e conn_type;
+	iotcon_connectivity_type_e connectivity_type;
 	int64_t observe_handle;
 	unsigned int observe_sub_id;
 	icl_remote_resource_caching_h caching_handle;

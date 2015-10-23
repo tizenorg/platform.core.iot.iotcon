@@ -126,8 +126,12 @@ static void _icl_presence_conn_cleanup(icl_presence_s *presence)
 
 
 /* The length of resource_type should be less than or equal to 61. */
-API int iotcon_subscribe_presence(const char *host_address, const char *resource_type,
-		iotcon_presence_cb cb, void *user_data, iotcon_presence_h *presence_handle)
+API int iotcon_subscribe_presence(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		const char *resource_type,
+		iotcon_presence_cb cb,
+		void *user_data,
+		iotcon_presence_h *presence_handle)
 {
 	FN_CALL;
 	GError *error = NULL;
@@ -155,8 +159,14 @@ API int iotcon_subscribe_presence(const char *host_address, const char *resource
 
 	resource_type = ic_utils_dbus_encode_str(resource_type);
 
-	ic_dbus_call_subscribe_presence_sync(icl_dbus_get_object(), host_address,
-			resource_type, signal_number, &(presence_container->handle), NULL, &error);
+	ic_dbus_call_subscribe_presence_sync(icl_dbus_get_object(),
+			host_address,
+			connectivity_type,
+			resource_type,
+			signal_number,
+			&(presence_container->handle),
+			NULL,
+			&error);
 	if (error) {
 		ERR("ic_dbus_call_subscribe_presence_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);

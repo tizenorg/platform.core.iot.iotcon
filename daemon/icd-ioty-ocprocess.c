@@ -211,8 +211,8 @@ static inline GVariantBuilder* _ocprocess_parse_header_options(
 
 static int _worker_req_handler(void *context)
 {
-	int ret;
 	GVariant *value;
+	int ret, conn_type;
 	struct icd_req_context *ctx = context;
 	GVariantBuilder payload_builder;
 	char addr[PATH_MAX] = {0};
@@ -226,8 +226,12 @@ static int _worker_req_handler(void *context)
 	if (ctx->dev_addr->addr && *ctx->dev_addr->addr)
 		snprintf(addr, sizeof(addr), "%s:%d", ctx->dev_addr->addr, ctx->dev_addr->port);
 
-	value = g_variant_new("(sia(qs)a(ss)iiavxx)",
+	conn_type = icd_ioty_transport_flag_to_conn_type(ctx->dev_addr->adapter,
+			ctx->dev_addr->flags);
+
+	value = g_variant_new("(siia(qs)a(ss)iiavxx)",
 			addr,
+			conn_type,
 			ctx->types,
 			ctx->options,
 			ctx->query,

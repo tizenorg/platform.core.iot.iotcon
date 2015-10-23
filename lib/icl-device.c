@@ -135,7 +135,9 @@ static gboolean _icl_timeout_get_device_info(gpointer p)
 	return G_SOURCE_REMOVE;
 }
 
-API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb cb,
+API int iotcon_get_device_info(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		iotcon_device_info_cb cb,
 		void *user_data)
 {
 	GError *error = NULL;
@@ -151,7 +153,7 @@ API int iotcon_get_device_info(const char *host_address, iotcon_device_info_cb c
 	signal_number = icl_dbus_generate_signal_number();
 
 	ic_dbus_call_get_device_info_sync(icl_dbus_get_object(), host_address,
-			signal_number, &ret, NULL, &error);
+			connectivity_type, signal_number, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_get_device_info_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
@@ -298,7 +300,9 @@ static gboolean _icl_timeout_get_platform_info(gpointer p)
 	return G_SOURCE_REMOVE;
 }
 
-API int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_cb cb,
+API int iotcon_get_platform_info(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		iotcon_platform_info_cb cb,
 		void *user_data)
 {
 	GError *error = NULL;
@@ -314,7 +318,7 @@ API int iotcon_get_platform_info(const char *host_address, iotcon_platform_info_
 	signal_number = icl_dbus_generate_signal_number();
 
 	ic_dbus_call_get_platform_info_sync(icl_dbus_get_object(), host_address,
-			signal_number, &ret, NULL, &error);
+			connectivity_type, signal_number, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_get_platform_info_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
@@ -394,7 +398,9 @@ static void _icl_tizen_info_cb(GObject *object, GAsyncResult *g_async_res,
 }
 
 
-API int iotcon_get_tizen_info(const char *host_address, iotcon_tizen_info_cb cb,
+API int iotcon_get_tizen_info(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		iotcon_tizen_info_cb cb,
 		void *user_data)
 {
 	icl_tizen_info_s *cb_container;
@@ -412,8 +418,8 @@ API int iotcon_get_tizen_info(const char *host_address, iotcon_tizen_info_cb cb,
 	cb_container->cb = cb;
 	cb_container->user_data = user_data;
 
-	ic_dbus_call_get_tizen_info(icl_dbus_get_object(), host_address, NULL,
-			_icl_tizen_info_cb, cb_container);
+	ic_dbus_call_get_tizen_info(icl_dbus_get_object(), host_address, connectivity_type,
+			NULL, _icl_tizen_info_cb, cb_container);
 
 	return IOTCON_ERROR_NONE;
 }

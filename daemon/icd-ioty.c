@@ -385,8 +385,8 @@ static void _ioty_free_signal_context(void *data)
 }
 
 
-int icd_ioty_find_resource(const char *host_address, const char *resource_type,
-		unsigned int signum, const char *bus_name)
+int icd_ioty_find_resource(const char *host_address, int conn_type,
+		const char *resource_type, unsigned int signum, const char *bus_name)
 {
 	int len;
 	OCStackResult result;
@@ -394,7 +394,6 @@ int icd_ioty_find_resource(const char *host_address, const char *resource_type,
 	char uri[PATH_MAX] = {0};
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
-	iotcon_connectivity_type_e conn_type = IOTCON_CONNECTIVITY_IPV4;
 
 	if (IC_STR_EQUAL == strcmp(IOTCON_MULTICAST_ADDRESS, host_address)) {
 		len = snprintf(uri, sizeof(uri), "%s", OC_RSRVD_WELL_KNOWN_URI);
@@ -889,15 +888,14 @@ int icd_ioty_register_platform_info(char *platform_id,
 }
 
 
-int icd_ioty_get_info(int type, const char *host_address, unsigned int signal_number,
-		const char *bus_name)
+int icd_ioty_get_info(int type, const char *host_address, int conn_type,
+		unsigned int signal_number, const char *bus_name)
 {
 	OCStackResult result;
 	icd_sig_ctx_s *context;
 	OCCallbackData cbdata = {0};
 	char uri[PATH_MAX] = {0};
 	char *uri_path = NULL;
-	iotcon_connectivity_type_e conn_type = IOTCON_CONNECTIVITY_IPV4;
 	OCConnectivityType oic_conn_type;
 
 	if (ICD_DEVICE_INFO == type)
@@ -993,7 +991,7 @@ int icd_ioty_set_tizen_info()
 
 
 gboolean icd_ioty_get_tizen_info(icDbus *object, GDBusMethodInvocation *invocation,
-		const gchar *host_address)
+		const gchar *host_address, int conn_type)
 {
 	OCStackResult result;
 	OCDevAddr dev_addr = {0};
@@ -1001,7 +999,6 @@ gboolean icd_ioty_get_tizen_info(icDbus *object, GDBusMethodInvocation *invocati
 	OCConnectivityType oic_conn_type;
 	char host[PATH_MAX] = {0};
 	char *dev_host, *ptr = NULL;
-	int conn_type = IOTCON_CONNECTIVITY_IPV4;
 
 	snprintf(host, sizeof(host), "%s", host_address);
 
@@ -1056,15 +1053,16 @@ int icd_ioty_tizen_info_get_property(char **device_name, char **tizen_device_id)
 }
 
 
-OCDoHandle icd_ioty_subscribe_presence(const char *host_address,
+OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
 		const char *resource_type, unsigned int signal_number, const char *bus_name)
 {
 	int len;
 	OCDoHandle handle;
 	OCStackResult result;
+	icd_sig_ctx_s *context;
 	char uri[PATH_MAX] = {0};
 	OCCallbackData cbdata = {0};
-	icd_sig_ctx_s *context;
+	OCConnectivityType oic_conn_type;
 
 	len = snprintf(uri, sizeof(uri), "%s%s", host_address, OC_RSRVD_PRESENCE_URI);
 	if (len <= 0 || sizeof(uri) <= len) {
@@ -1087,7 +1085,12 @@ OCDoHandle icd_ioty_subscribe_presence(const char *host_address,
 	cbdata.cb = icd_ioty_ocprocess_presence_cb;
 	cbdata.cd = _ioty_free_signal_context;
 
+	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
+
 	/* In case of IPV4 or IPV6, connectivity type is CT_ADAPTER_IP in iotivity 0.9.2 */
+	if (CT_IP_USE_V4 == oic_conn_type && CT_IP_USE_V6 == oic_conn_type)
+		oic_conn_type = CT_ADAPTER_IP;
+
 	icd_ioty_csdk_lock();
 	result = OCDoResource(&handle, OC_REST_PRESENCE, uri, NULL, NULL, CT_ADAPTER_IP,
 			OC_LOW_QOS, &cbdata, NULL, 0);

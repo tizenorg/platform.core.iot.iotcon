@@ -137,9 +137,9 @@ static void _found_resource(iotcon_remote_resource_h resource, int result,
 	}
 
 	/* get the resource host address */
-	ret = iotcon_remote_resource_get_host(resource, &resource_host);
+	ret = iotcon_remote_resource_get_host_address(resource, &resource_host);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_remote_resource_get_host() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_get_host_address() Fail(%d)", ret);
 		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
 		free(door_resource_device_id);
 		return;
@@ -231,8 +231,8 @@ int main(int argc, char **argv)
 	}
 
 	/* find door typed resources */
-	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, "core.door", &_found_resource,
-			&resource);
+	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+			"core.door", &_found_resource, &resource);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
 		iotcon_close();
