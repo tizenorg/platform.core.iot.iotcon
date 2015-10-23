@@ -429,6 +429,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 	iotcon_query_h query;
 	iotcon_response_h response = NULL;
 	int ret, types, observer_id, observer_action;
+	char *host_address;
 
 	RET_IF(NULL == request);
 
@@ -468,12 +469,20 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 	iotcon_response_destroy(response);
 
+	ret = iotcon_request_get_host_address(request, &host_address);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_request_get_host_address() Fail(%d)", ret);
+		return;
+	}
+	INFO("host_address : %s", host_address);
+
 	if (IOTCON_REQUEST_OBSERVE & types) {
 		ret = iotcon_request_get_observer_action(request, &observer_action);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_request_get_observer_action() Fail(%d)", ret);
 			return;
 		}
+
 
 		if (IOTCON_OBSERVE_REGISTER == observer_action) {
 			ret = iotcon_request_get_observer_id(request, &observer_id);

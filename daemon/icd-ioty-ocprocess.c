@@ -53,6 +53,7 @@ struct icd_req_context {
 	GVariant *payload;
 	GVariantBuilder *options;
 	GVariantBuilder *query;
+	OCDevAddr *dev_addr;
 };
 
 
@@ -214,6 +215,7 @@ static int _worker_req_handler(void *context)
 	GVariant *value;
 	struct icd_req_context *ctx = context;
 	GVariantBuilder payload_builder;
+	char addr[PATH_MAX] = {0};
 
 	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -221,7 +223,11 @@ static int _worker_req_handler(void *context)
 	if (ctx->payload)
 		g_variant_builder_add(&payload_builder, "v", ctx->payload);
 
-	value = g_variant_new("(ia(qs)a(ss)iiavxx)",
+	if (ctx->dev_addr->addr && *ctx->dev_addr->addr)
+		snprintf(addr, sizeof(addr), "%s:%d", ctx->dev_addr->addr, ctx->dev_addr->port);
+
+	value = g_variant_new("(sia(qs)a(ss)iiavxx)",
+			addr,
 			ctx->types,
 			ctx->options,
 			ctx->query,
@@ -239,6 +245,7 @@ static int _worker_req_handler(void *context)
 	free(ctx->bus_name);
 	g_variant_builder_unref(ctx->options);
 	g_variant_builder_unref(ctx->query);
+	free(ctx->dev_addr);
 	free(ctx);
 
 	return ret;
@@ -255,6 +262,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 	char *token, *save_ptr1, *save_ptr2;
 	char *bus_name = NULL;
 	struct icd_req_context *req_ctx;
+	OCDevAddr *dev_addr;
 
 	RETV_IF(NULL == request, OC_EH_ERROR);
 
@@ -278,6 +286,15 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 	/* signal number & bus_name */
 	req_ctx->signum = signal_number;
 	req_ctx->bus_name = bus_name;
+
+	dev_addr = calloc(1, sizeof(OCDevAddr));
+	if (NULL == dev_addr) {
+		ERR("calloc() Fail(%d)", errno);
+		free(req_ctx);
+		return OC_EH_ERROR;
+	}
+	memcpy(dev_addr, &request->devAddr, sizeof(OCDevAddr));
+	req_ctx->dev_addr = dev_addr;
 
 	/* request type */
 	if (OC_REQUEST_FLAG & flag) {
@@ -340,6 +357,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 			g_variant_unref(req_ctx->payload);
 		g_variant_builder_unref(req_ctx->options);
 		g_variant_builder_unref(req_ctx->query);
+		free(req_ctx->dev_addr);
 		free(req_ctx);
 		return OC_EH_ERROR;
 	}

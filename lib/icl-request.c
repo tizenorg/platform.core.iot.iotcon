@@ -18,6 +18,18 @@
 #include "icl.h"
 #include "icl-request.h"
 
+API int iotcon_request_get_host_address(iotcon_request_h request,
+		char **host_address)
+{
+	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*host_address = request->host_address;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
 /* The content of the request should not be freed by user. */
 API int iotcon_request_get_representation(iotcon_request_h request,
 		iotcon_representation_h *repr)

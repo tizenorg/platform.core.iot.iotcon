@@ -26,6 +26,7 @@ struct icl_observe_info {
 };
 
 struct icl_resource_request {
+	char *host_address;
 	int types;
 	iotcon_options_h header_options;
 	iotcon_query_h query;
