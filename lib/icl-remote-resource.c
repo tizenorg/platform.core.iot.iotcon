@@ -160,7 +160,7 @@ API int iotcon_find_resource(const char *host_address,
 
 
 /* If you know the information of resource, then you can make a proxy of the resource. */
-API int iotcon_remote_resource_create(const char *host,
+API int iotcon_remote_resource_create(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		const char *uri_path,
 		bool is_observable,
@@ -171,7 +171,7 @@ API int iotcon_remote_resource_create(const char *host,
 	FN_CALL;
 	iotcon_remote_resource_h resource = NULL;
 
-	RETV_IF(NULL == host, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
@@ -182,7 +182,7 @@ API int iotcon_remote_resource_create(const char *host,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	resource->host = ic_utils_strdup(host);
+	resource->host_address = ic_utils_strdup(host_address);
 	resource->connectivity_type = connectivity_type;
 	resource->uri_path = ic_utils_strdup(uri_path);
 	resource->is_observable = is_observable;
@@ -210,7 +210,7 @@ API void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource)
 		iotcon_remote_resource_stop_monitoring(resource);
 
 	free(resource->uri_path);
-	free(resource->host);
+	free(resource->host_address);
 	free(resource->device_id);
 	iotcon_resource_types_destroy(resource->types);
 
@@ -261,7 +261,7 @@ API int iotcon_remote_resource_clone(iotcon_remote_resource_h src,
 	}
 
 	resource->uri_path = ic_utils_strdup(src->uri_path);
-	resource->host = ic_utils_strdup(src->host);
+	resource->host_address = ic_utils_strdup(src->host_address);
 	resource->connectivity_type = src->connectivity_type;
 	resource->device_id = ic_utils_strdup(src->device_id);
 	resource->is_secure = src->is_secure;
@@ -310,12 +310,12 @@ API int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource,
 
 /* The content of the resource should not be freed by user. */
 API int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resource,
-		char **host)
+		char **host_address)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == host, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*host = resource->host;
+	*host_address = resource->host_address;
 
 	return IOTCON_ERROR_NONE;
 }

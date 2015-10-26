@@ -72,7 +72,6 @@ int iotcon_start_presence(unsigned int time_to_live);
  */
 int iotcon_stop_presence(void);
 
-
 #ifdef __cplusplus
 }
 #endif

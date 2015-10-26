@@ -5,3 +5,12 @@ cscope.out
 .project
 common/ic-dbus.c
 common/ic-dbus.h
+Doxyfile
+docs_mobile
+doxygen_html_stylesheet.css
+footer.html
+html/
+latex/
+ref_config_mobile
+ref_layout.xml
+

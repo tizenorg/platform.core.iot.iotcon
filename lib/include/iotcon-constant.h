@@ -17,10 +17,201 @@
 #define __IOT_CONNECTIVITY_MANAGER_CONSTANT_H__
 
 /**
- * @addtogroup CAPI_IOT_CONNECTIVITY_MODULE
+ * @file iotcon-constant.h
+ */
+
+/**
+ * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
+ * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE Common
+ *
+ * @brief Iotcon Common API provides the set of definitions to use server and client API.
+ *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_MODULE_HEADER Header
+ *  \#include <iotcon.h>
+ *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_MODULE_OVERVIEW Overview
+ * This API set consists of data structures for @ref CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE,
+ * @ref CAPI_IOT_CONNECTIVITY_COMMON_QUERY_MODULE, @ref CAPI_IOT_CONNECTIVITY_COMMON_OPTIONS_MODULE,
+ * @ref CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE, @ref CAPI_IOT_CONNECTIVITY_COMMON_LIST_MODULE,
+ * @ref CAPI_IOT_CONNECTIVITY_COMMON_STATE_MODULE.
  *
  * @{
  */
+
+/**
+ * @brief The handle of resource.
+ * @details iotcon_resource_h is an opaque data structure to represent registered\n
+ * resource by server. A resource has host_address, uri_path, resource types, interfaces\n
+ * and internal handle. If observable attribute of resource is true, client can observe\n
+ * this resource. When client request by CRUD functions, handler will be invoked\n
+ * if registered. It could contain other resource as children.\n
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_resource* iotcon_resource_h;
+
+/**
+ * @brief The handle of lite resource.
+ * @details iotcon_lite_resource_h is an opaque data structure to represent registered\n
+ * resource by server. A resource has host_address, uri_path, resource types, and internal\n
+ * handle. If observable attribute of resource is true, client can observe\n
+ * this resource. When client request by GET / PUT / OBSERVE functions, handler will be\n
+ * invoked, internally. Then, it sends the response to client, automatically.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_lite_resource* iotcon_lite_resource_h;
+
+/**
+ * @brief The handle of notifications message.
+ * @details iotcon_notimsg_h is an opaque data structure to notify message to observers.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_notify_msg* iotcon_notimsg_h;
+
+/**
+* @brief The handle of response
+* @details iotcon_response_h is an opaque data structure to respond to client.\n
+* iotcon_response_h is a data type of server's response which consists of result,
+* header options, query, representation.
+*
+*
+* @since_tizen 3.0
+*/
+typedef struct icl_resource_response* iotcon_response_h;
+
+/**
+ * @brief The handle of observers.
+ * @details The list of observer ids.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_observers* iotcon_observers_h;
+
+/**
+* @brief The handle of request
+* @details iotcon_request_h is an opaque data structure to request to a particular resource.\n
+* iotcon_request_h is a data type of client's request which consists of header options,
+* query, representation.
+*
+* @since_tizen 3.0
+*/
+typedef struct icl_resource_request* iotcon_request_h;
+
+/**
+ * @brief The handle of remote resource
+ * @details When Client success to find out resource from remote server,
+ * server's resource information is reorganized as iotcon_remote_resource_h by Iotcon.
+ * Client can request CRUD to server by using this.\n
+ * iotcon_remote_resource_h is an opaque data structure to have host_address, uri_path,\n
+ * resource types, interfaces, options and device id.\n
+ * If observable attribute is true, remote resource is observable.\n
+ * When you observe remote resource, observe_handle will be set.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_remote_resource* iotcon_remote_resource_h;
+
+/**
+ * @brief The handle of presence.
+ * @details iotcon_presence_h is a handle of presence subscription.\n
+ * It is used to cancel presence.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_presence* iotcon_presence_h;
+
+/**
+ * @brief The handle of device information.
+ * @details iotcon_device_info_h is a handle of device information.\n
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_device_info* iotcon_device_info_h;
+
+/**
+ * @brief The handle of platform information.
+ * @details iotcon_platform_info_h is a handle of platform information.\n
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_platform_info* iotcon_platform_info_h;
+
+/**
+ * @brief The handle of tizen device information.
+ * @details iotcon_tizen_info_h is a handle of tizen device information.\n
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_tizen_info* iotcon_tizen_info_h;
+
+/**
+ * @brief The handle of resource types
+ * @details iotcon_resource_types_h is an opaque data structure to have list\n
+ * of resource types. A resource type is datatype of string.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_resource_types* iotcon_resource_types_h;
+
+/**
+ * @brief The handle of options
+ * @details iotcon_options_h is an opaque data structure to have attribute value map
+ * which consists of a key and a value.\n
+ * Datatype of key is integer and value is string.\n
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_options* iotcon_options_h;
+
+/**
+ * @brief The handle of query
+ * @details iotcon_query_h is an opaque data structure to have attribute value map
+ * which consists of key and value.\n
+ * Data ype of both key and value are string.\n
+ * iotcon_query_h also have length.\n
+ * The length is total length of all keys and values of map.\n
+ * The length should be less than or equal to 64.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_query* iotcon_query_h;
+
+/**
+ * @brief The handle of representation.
+ * @details iotcon_representation_h is an opaque data structure to have uri_path,\n
+ * list of resource types and interfaces.\n
+ * It could contain other representation as children.\n
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_representation_s* iotcon_representation_h;
+
+/**
+ * @brief The handle of list which is consist of iotcon_value_h type values.
+ * @details iotcon_list_h is an opaque data structure to have iotcon_value_h type values.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_list_s* iotcon_list_h;
+
+/**
+ * @brief The handle of state.
+ * @details iotcon_state_h is an opaque data structure to have attribute value map.\n
+ * Attribute value map consists of a key and a value.\n
+ * Datatype of the key is string and the value should be one of them\n
+ * #IOTCON_TYPE_INT\n
+ * #IOTCON_TYPE_BOOL\n
+ * #IOTCON_TYPE_DOUBLE\n
+ * #IOTCON_TYPE_STR\n
+ * #IOTCON_TYPE_NULL\n
+ * #IOTCON_TYPE_LIST\n
+ * #IOTCON_TYPE_STATE
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_state_s* iotcon_state_h;
 
 /**
  * @brief The IP Address for multicast.

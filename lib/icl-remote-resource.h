@@ -55,7 +55,7 @@ typedef struct icl_remote_resource_monitoring* icl_remote_resource_monitoring_h;
 
 struct icl_remote_resource {
 	char *uri_path;
-	char *host;
+	char *host_address;
 	char *device_id;
 	bool is_secure;
 	bool is_observable;

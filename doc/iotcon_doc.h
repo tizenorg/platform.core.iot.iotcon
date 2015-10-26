@@ -30,6 +30,8 @@
  * The Iotcon API provides to register resources, discover resources and access them via
  * RESTful API.\n\n
  *
+ * @addtogroup CAPI_IOT_CONNECTIVITY_SERVER_MODULE
+ * @{
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_RESOURCE Resource
  * A Resource is a component in a server that can be viewed and conrolled by another client.\n
  * There are different resource types, for example a temperature sensor, a light controller etc.\n\n
@@ -140,7 +142,10 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 	iotcon_resource_types_destroy(resource_types);
 }
  * @endcode
+ * @}
  *
+ * @addtogroup CAPI_IOT_CONNECTIVITY_CLIENT_MODULE
+ * @{
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_FINDING_RESOURCE Finding a resource.
  * This operation returns all resources of given type on the network service.\n
  * This operation is sent via multicast to all services.\n
@@ -212,7 +217,10 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 	}
 }
  * @endcode
+ * @}
  *
+ * @addtogroup CAPI_IOT_CONNECTIVITY_SERVER_MODULE
+ * @{
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_OBSERVING_RESOURCE Observing resource
  * This operation fetches and registers as an observer for the value of simple specific resource.\n
  * An observable resource can handle any number of observers.\n
@@ -349,218 +357,8 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
 		return;
 }
  * @endcode
+ * @}
  *
- * @subsection CAPI_IOT_CONNECTIVITY_MODULE_SERVER_CLIENT_OPERATIONS Server / client operations
- * Server operations should be called in server mode.\n
- * Client operations should be called in client mode.\n
- * Both mode can call both operations.
- * <div><table class="doxtable">
- *     <tr>
- *         <td><b>Server</b></td>
- *         <td><b>Client</b></td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_resource_create</td>
- *         <td>iotcon_get_device_info</td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_resource_destroy</td>
- *         <td>iotcon_subscribe_presence</td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_resource_bind_interface</td>
- *         <td>iotcon_unsubscribe_presence</td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_resource_bind_type</td>
- *         <td>iotcon_find_resource</td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_resource_bind_request_handler</td>
- *         <td>iotcon_remote_resource_observer_start</td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_resource_bind_child_resource</td>
- *         <td>iotcon_remote_resource_observer_stop</td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_resource_unbind_child_resource</td>
- *         <td>iotcon_remote_resource_get</td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_response_send</td>
- *         <td>iotcon_remote_resource_put</td>
- *     </tr>
- *     <tr>
- *         <td>iotcon_resource_notify</td>
- *         <td>iotcon_remote_resource_post</td>
- *     </tr>
- *     <tr>
- *         <td></td>
- *         <td>iotcon_remote_resource_delete</td>
- *     </tr>
- * </table></div>
- *
- */
-
-/**
- * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
- * @defgroup CAPI_IOT_CONNECTIVITY_REPRESENTATION_MODULE Iotcon Representation
- *
- * @section CAPI_IOT_CONNECTIVITY_REPRESENTATION_MODULE_HEADER Required Header
- * \#include <iotcon-resp_repr.h>
- *
- * @section CAPI_IOT_CONNECTIVITY_REPRESENTATION_MODULE_OVERVIEW Overview
- * The Iotcon Representation API provides data type of resp_repr handling.\n
- * A resp_repr is a payload of a request or a response.\n
- * It has uri_path, interface, list of resource types and its attributes.\n
- * Attributes have capabilties to store and retrieve integer, boolean, double, string, list, null,
- * resp_repr.\n
- * A list is a container that includes number of datas of same type.\n
- * It has capabilties to store and retrieve integer, boolean, double, string, list, null, resp_repr.
- *
- *@code
-#include <iotcon.h>
-...
-{
-	int ret;
-	iotcon_representation_h repr;
-	iotcon_resource_types_h types;
-	iotcon_list_h bright_step_list;
-
-	ret = iotcon_representation_create(&resp_repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		return;
-	}
-
-	ret = iotcon_representation_set_uri_path(resp_repr, "/a/light");
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_resource_types_create(&types);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_resource_types_add(types, "core.light");
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_representation_set_resource_types(resp_repr, types);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_representation_set_resource_interfaces(resp_repr, IOTCON_INTERFACE_LINK);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_state_set_str(resp_repr, "type", "lamp");
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_state_set_str(resp_repr, "where", "desk");
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_state_set_double(resp_repr, "default_bright", 200.0);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_state_set_str(resp_repr, "unit", "lux");
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_state_set_bool(resp_repr, "bright_step", true);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_list_create(IOTCON_TYPE_DOUBLE, &bright_step_list);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_list_add_double(bright_step_list, 100.0, -1);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_destroy(bright_step_list);
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_list_add_double(bright_step_list, 200.0, -1);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_destroy(bright_step_list);
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_list_add_double(bright_step_list, 300.0, -1);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_destroy(bright_step_list);
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_list_add_double(bright_step_list, 400.0, -1);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_destroy(bright_step_list);
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_list_add_double(bright_step_list, 500.0, -1);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_destroy(bright_step_list);
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	ret = iotcon_state_set_list(resp_repr, "bright_step_list", bright_step_list);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_list_destroy(bright_step_list);
-		iotcon_resource_types_destroy(types);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	iotcon_list_destroy(bright_step_list);
-	iotcon_resource_types_destroy(types);
-	iotcon_representation_destroy(resp_repr);
-}
- * @endcode
  */
 
 #endif /* __TIZEN_NETWORK_IOTCON_DOC_H__ */

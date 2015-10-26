@@ -23,9 +23,15 @@
 #endif
 
 /**
+ * @file iotcon-errors.h
+ */
+
+/**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
  * @brief Enumeration for Iotcon error code.
  * @since_tizen 3.0
+ *
+ * @{
  */
 typedef enum
 {
@@ -44,5 +50,9 @@ typedef enum
 	IOTCON_ERROR_DBUS = TIZEN_ERROR_IOTCON | 0x05, /**< D-Bus errors */
 	IOTCON_ERROR_SYSTEM = TIZEN_ERROR_IOTCON | 0x06, /**< System errors */
 }iotcon_error_e;
+
+/**
+ * @}
+ */
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_ERRORS_H__ */
