@@ -20,10 +20,176 @@
 
 #include "iotcon.h"
 #include "ic-dbus.h"
+#include "ic-utils.h"
 #include "icl.h"
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
+#include "icl-repr.h"
+#include "icl-repr-list.h"
+#include "icl-repr-value.h"
 #include "icl-remote-resource.h"
+
+static int _caching_compare_state(iotcon_state_h state1, iotcon_state_h state2);
+static int _caching_compare_value(iotcon_value_h val1, iotcon_value_h val2);
+static int _caching_compare_repr(iotcon_representation_h repr1,
+		iotcon_representation_h repr2);
+
+static int _caching_compare_glist(GList *list1, GList *list2, GCompareFunc func)
+{
+	GList *c;
+
+	if (NULL == list1 || NULL == list2)
+		return !!(list1 - list2);
+
+	if (g_list_length(list1) != g_list_length(list2))
+		return 1;
+
+	for (c = list1; c; c = c->next) {
+		if (NULL == g_list_find_custom(list2, c->data, func))
+			return 1;
+	}
+
+	return IC_EQUAL;
+}
+
+static gint _caching_find_value_custom(gconstpointer a, gconstpointer b)
+{
+	return _caching_compare_value((iotcon_value_h)a, (iotcon_value_h)b);
+}
+
+static int _caching_compare_list(iotcon_list_h list1, iotcon_list_h list2)
+{
+	if (NULL == list1 || NULL == list2)
+		return !!(list1 - list2);
+
+	if (list1->type != list2->type)
+		return 1;
+
+	return _caching_compare_glist(list1->list, list2->list, _caching_find_value_custom);
+}
+
+static int _caching_compare_value(iotcon_value_h val1, iotcon_value_h val2)
+{
+	if (NULL == val1 || NULL == val2)
+		return !!(val1 - val2);
+
+	if (val1->type != val2->type)
+		return 1;
+
+	switch (val1->type) {
+	case IOTCON_TYPE_INT:
+		return (((icl_basic_s *)val1)->val.i == ((icl_basic_s *)val2)->val.i)? 0: 1;
+	case IOTCON_TYPE_BOOL:
+		return (((icl_basic_s *)val1)->val.b == ((icl_basic_s *)val2)->val.b)? 0: 1;
+	case IOTCON_TYPE_DOUBLE:
+		return (((icl_basic_s *)val1)->val.d == ((icl_basic_s *)val2)->val.d)? 0: 1;
+	case IOTCON_TYPE_STR:
+		return g_strcmp0(((icl_basic_s *)val1)->val.s, ((icl_basic_s *)val2)->val.s);
+	case IOTCON_TYPE_NULL:
+		return IC_EQUAL;
+	case IOTCON_TYPE_LIST:
+		return _caching_compare_list(((icl_val_list_s *)val1)->list,
+				((icl_val_list_s *)val2)->list);
+	case IOTCON_TYPE_STATE:
+		return _caching_compare_state(((icl_val_state_s *)val1)->state,
+				((icl_val_state_s *)val2)->state);
+	case IOTCON_TYPE_NONE:
+	default:
+		ERR("Invalid type (%d)", val1->type);
+	}
+	return IC_EQUAL;
+}
+
+static int _caching_compare_state(iotcon_state_h state1, iotcon_state_h state2)
+{
+	int ret;
+	GHashTableIter iter;
+	gpointer key, value;
+
+	if (NULL == state1 || NULL == state2)
+		return !!(state1 - state2);
+
+	/* compare state */
+	if (g_hash_table_size(state1->hash_table) != g_hash_table_size(state2->hash_table))
+		return 1;
+
+	g_hash_table_iter_init(&iter, state1->hash_table);
+	while (g_hash_table_iter_next(&iter, &key, &value)) {
+		iotcon_value_h val1 = value;
+		iotcon_value_h val2 = g_hash_table_lookup(state2->hash_table, key);
+		ret = _caching_compare_value(val1, val2);
+		if (IC_EQUAL != ret)
+			return 1;
+	}
+	return IC_EQUAL;
+}
+
+static gint _caching_find_repr_custom(gconstpointer a, gconstpointer b)
+{
+	iotcon_representation_h repr1 = (iotcon_representation_h)a;
+	iotcon_representation_h repr2 = (iotcon_representation_h)b;
+	return _caching_compare_repr(repr1, repr2);
+}
+
+static gint _caching_find_resource_types_custom(gconstpointer a, gconstpointer b)
+{
+	return g_strcmp0(a, b);
+}
+
+static int _caching_compare_resource_types(iotcon_resource_types_h types1,
+		iotcon_resource_types_h types2)
+{
+	int ret;
+
+	if (NULL == types1 || NULL == types2)
+		return !!(types1 - types2);
+
+	ret = _caching_compare_glist(types1->type_list, types2->type_list,
+			_caching_find_resource_types_custom);
+	if (IC_EQUAL != ret)
+		return 1;
+
+	return IC_EQUAL;
+}
+
+/* return 0 on same */
+static int _caching_compare_repr(iotcon_representation_h repr1,
+		iotcon_representation_h repr2)
+{
+	int ret;
+
+	if (NULL == repr1 || NULL == repr2)
+		return !!(repr1 - repr2);
+
+	/* compare interface */
+	if (repr1->interfaces != repr2->interfaces)
+		return 1;
+
+	/* compare visibility */
+	if (repr1->visibility != repr2->visibility)
+		return 1;
+
+	/* compare uri_path */
+	if (IC_STR_EQUAL != g_strcmp0(repr1->uri_path, repr2->uri_path))
+		return 1;
+
+	ret = _caching_compare_resource_types(repr1->res_types, repr2->res_types);
+	if (IC_EQUAL != ret)
+		return 1;
+
+	/* compare state */
+	ret = _caching_compare_state(repr1->state, repr2->state);
+	if (IC_EQUAL != ret)
+		return 1;
+
+	/* compare children */
+	ret = _caching_compare_glist(repr1->children, repr2->children,
+			_caching_find_repr_custom);
+	if (IC_EQUAL != ret)
+		return 1;
+
+	return IC_EQUAL;
+}
 
 static void _caching_get_cb(iotcon_remote_resource_h resource,
 		iotcon_representation_h repr,
@@ -37,6 +203,12 @@ static void _caching_get_cb(iotcon_remote_resource_h resource,
 	RET_IF(NULL == resource);
 	RET_IF(NULL == resource->caching_handle);
 	RET_IF(IOTCON_RESPONSE_RESULT_OK != response_result);
+
+	ret = _caching_compare_repr(resource->caching_handle->repr, repr);
+	if (IC_EQUAL == ret) { /* same */
+		DBG("Not changed");
+		return;
+	}
 
 	ret = iotcon_representation_clone(repr, &cloned_repr);
 	if (IOTCON_ERROR_NONE != ret) {

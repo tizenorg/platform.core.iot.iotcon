@@ -20,6 +20,7 @@
 
 #include "iotcon-constant.h"
 
+#define IC_EQUAL 0
 #define IC_STR_EQUAL 0
 #define IC_STR_NULL "(NULL)"
 
