@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <glib.h>
 #include <system_info.h>
+#include <system_settings.h>
 
 #include <octypes.h>
 #include <ocstack.h>
@@ -38,13 +39,18 @@
 #define ICD_UUID_LENGTH 37
 
 static const char *ICD_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
+static const char *ICD_SYSTEM_INFO_PLATFORM_NAME = "http://tizen.org/system/platform.name";
+static const char *ICD_SYSTEM_INFO_PLATFORM_VERSION = "http://tizen.org/feature/platform.version";
+static const char *ICD_SYSTEM_INFO_MANUF_NAME = "http://tizen.org/system/manufacturer";
+static const char *ICD_SYSTEM_INFO_MODEL_NAME = "http://tizen.org/system/model_name";
+static const char *ICD_SYSTEM_INFO_BUILD_STRING = "http://tizen.org/system/build.string";
 
 typedef struct {
 	char *device_name;
 	char *tizen_device_id;
 } icd_tizen_info_s;
 
-static icd_tizen_info_s icd_tizen_info;
+static icd_tizen_info_s icd_tizen_info = {0};
 
 static GMutex icd_csdk_mutex;
 
@@ -823,71 +829,6 @@ int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options)
 	return IOTCON_ERROR_NONE;
 }
 
-
-int icd_ioty_register_device_info(char *device_name)
-{
-	OCStackResult result;
-	OCDeviceInfo device_info = {0};
-
-	RETV_IF(NULL == device_name, IOTCON_ERROR_INVALID_PARAMETER);
-
-	device_info.deviceName = device_name;
-
-	icd_ioty_csdk_lock();
-	result = OCSetDeviceInfo(device_info);
-	icd_ioty_csdk_unlock();
-
-	if (OC_STACK_OK != result) {
-		ERR("OCSetDeviceInfo() Fail(%d)", result);
-		return icd_ioty_convert_error(result);
-	}
-
-	icd_tizen_info.device_name = strdup(device_name);
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-int icd_ioty_register_platform_info(char *platform_id,
-		char *manufacturer_name,
-		char *manufacturer_url,
-		char *model_number,
-		char *date_of_manufacture,
-		char *platform_version,
-		char *os_version,
-		char *hw_version,
-		char *firmware_version,
-		char *support_url,
-		char *system_time)
-{
-	OCStackResult result;
-	OCPlatformInfo platform_info = {0};
-
-	platform_info.platformID = platform_id;
-	platform_info.manufacturerName = manufacturer_name;
-	platform_info.manufacturerUrl = manufacturer_url;
-	platform_info.modelNumber = model_number;
-	platform_info.dateOfManufacture = date_of_manufacture;
-	platform_info.platformVersion = platform_version;
-	platform_info.operatingSystemVersion = os_version;
-	platform_info.hardwareVersion = hw_version;
-	platform_info.firmwareVersion = firmware_version;
-	platform_info.supportUrl = support_url;
-	platform_info.systemTime = system_time;
-
-	icd_ioty_csdk_lock();
-	result = OCSetPlatformInfo(platform_info);
-	icd_ioty_csdk_unlock();
-
-	if (OC_STACK_OK != result) {
-		ERR("OCSetPlatformInfo() Fail(%d)", result);
-		return icd_ioty_convert_error(result);
-	}
-
-	return IOTCON_ERROR_NONE;
-}
-
-
 int icd_ioty_get_info(int type, const char *host_address, int conn_type,
 		unsigned int signal_number, const char *bus_name)
 {
@@ -955,6 +896,152 @@ static int _icd_ioty_get_tizen_id(char **tizen_device_id)
 	return IOTCON_ERROR_NONE;
 }
 
+static int _ioty_set_device_info()
+{
+	int ret;
+	char *device_name = NULL;
+	OCDeviceInfo device_info = {0};
+
+	ret = system_settings_get_value_string(SYSTEM_SETTINGS_KEY_DEVICE_NAME, &device_name);
+	if (SYSTEM_SETTINGS_ERROR_NONE != ret) {
+		ERR("system_settings_get_value_string() Fail(%d)", ret);
+		return IOTCON_ERROR_SYSTEM;
+	}
+
+	device_info.deviceName = device_name;
+
+	icd_ioty_csdk_lock();
+	ret = OCSetDeviceInfo(device_info);
+	icd_ioty_csdk_unlock();
+
+	if (OC_STACK_OK != ret) {
+		ERR("OCSetDeviceInfo() Fail(%d)", ret);
+		free(device_name);
+		return icd_ioty_convert_error(ret);
+	}
+
+	free(icd_tizen_info.device_name);
+	icd_tizen_info.device_name = device_name;
+
+	_ioty_print_device_info(device_info);
+
+	return IOTCON_ERROR_NONE;
+}
+
+static void _icd_ioty_on_device_name_changed_cb(system_settings_key_e key,
+		void *user_data)
+{
+	FN_CALL;
+	int ret;
+
+	ret = _ioty_set_device_info();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ioty_set_device_info() Fail(%d)", ret);
+		return;
+	}
+}
+
+int icd_ioty_set_device_info()
+{
+	int ret;
+
+	ret = system_settings_set_changed_cb(SYSTEM_SETTINGS_KEY_DEVICE_NAME,
+			_icd_ioty_on_device_name_changed_cb, NULL);
+	if (SYSTEM_SETTINGS_ERROR_NONE != ret) {
+		ERR("system_settings_set_changed_cb() Fail(%d)", ret);
+		return IOTCON_ERROR_SYSTEM;
+	}
+
+	ret = _ioty_set_device_info();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ioty_set_device_info() Fail(%d)", ret);
+		return ret;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+static void _ioty_free_platform_info(OCPlatformInfo platform_info)
+{
+	free(platform_info.manufacturerName);
+	free(platform_info.manufacturerUrl);
+	free(platform_info.modelNumber);
+	free(platform_info.dateOfManufacture);
+	free(platform_info.platformVersion);
+	free(platform_info.operatingSystemVersion);
+	free(platform_info.hardwareVersion);
+	free(platform_info.firmwareVersion);
+	free(platform_info.supportUrl);
+	free(platform_info.systemTime);
+}
+
+int icd_ioty_set_platform_info()
+{
+	int ret;
+	OCPlatformInfo platform_info = {0};
+
+	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_PLATFORM_NAME,
+			&platform_info.platformID);
+	if (SYSTEM_INFO_ERROR_NONE != ret) {
+		ERR("system_info_get_platform_string() Fail(%d)", ret);
+		_ioty_free_platform_info(platform_info);
+		return IOTCON_ERROR_SYSTEM;
+	}
+
+	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_MANUF_NAME,
+			&platform_info.manufacturerName);
+	if (SYSTEM_INFO_ERROR_NONE != ret) {
+		ERR("system_info_get_platform_string() Fail(%d)", ret);
+		_ioty_free_platform_info(platform_info);
+		return IOTCON_ERROR_SYSTEM;
+	}
+
+	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_MODEL_NAME,
+			&platform_info.modelNumber);
+	if (SYSTEM_INFO_ERROR_NONE != ret) {
+		ERR("system_info_get_platform_string() Fail(%d)", ret);
+		_ioty_free_platform_info(platform_info);
+		return IOTCON_ERROR_SYSTEM;
+	}
+
+	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_PLATFORM_VERSION,
+			&platform_info.platformVersion);
+	if (SYSTEM_INFO_ERROR_NONE != ret) {
+		ERR("system_info_get_platform_string() Fail(%d)", ret);
+		_ioty_free_platform_info(platform_info);
+		return IOTCON_ERROR_SYSTEM;
+	}
+
+	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_BUILD_STRING,
+			&platform_info.firmwareVersion);
+	if (SYSTEM_INFO_ERROR_NONE != ret) {
+		ERR("system_info_get_platform_string() Fail(%d)", ret);
+		_ioty_free_platform_info(platform_info);
+		return IOTCON_ERROR_SYSTEM;
+	}
+
+	/* platform_info.manufacturerUrl */
+	/* platform_info.dateOfManufacture */
+	/* platform_info.operatingSystemVersion */
+	/* platform_info.hardwareVersion */
+	/* platform_info.supportUrl */
+	/* platform_info.systemTime */
+
+	_ioty_print_platform_info(platform_info);
+
+	icd_ioty_csdk_lock();
+	ret = OCSetPlatformInfo(platform_info);
+	icd_ioty_csdk_unlock();
+
+	if (OC_STACK_OK != ret) {
+		ERR("OCSetPlatformInfo() Fail(%d)", ret);
+		_ioty_free_platform_info(platform_info);
+		return icd_ioty_convert_error(ret);
+	}
+	_ioty_free_platform_info(platform_info);
+
+	return IOTCON_ERROR_NONE;
+}
 
 int icd_ioty_set_tizen_info()
 {

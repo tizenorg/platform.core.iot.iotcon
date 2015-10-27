@@ -12,6 +12,7 @@
 			<smack request="device::app_logging" type="w" />
 			<smack request="device::sys_logging" type="w" />
 			<smack request="system::homedir" type="x" />
+			<smack request="tizen::vconf::setting::admin" type="rl" />
 		</request>
 	</define>
 	<assign>

@@ -99,23 +99,11 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVarian
 
 int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options);
 
-int icd_ioty_register_device_info(char *device_name);
-
-int icd_ioty_register_platform_info(char *platform_id,
-		char *manufacturer_name,
-		char *manufacturer_url,
-		char *model_number,
-		char *date_of_manufacture,
-		char *platform_version,
-		char *os_version,
-		char *hw_version,
-		char *firmware_version,
-		char *support_url,
-		char *system_time);
-
 int icd_ioty_get_info(int type, const char *host_address, int conn_type,
 		unsigned int signal_number, const char *bus_name);
 
+int icd_ioty_set_device_info();
+int icd_ioty_set_platform_info();
 int icd_ioty_set_tizen_info();
 
 gboolean icd_ioty_get_tizen_info(icDbus *object, GDBusMethodInvocation *invocation,
