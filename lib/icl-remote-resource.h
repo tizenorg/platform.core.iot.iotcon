@@ -80,7 +80,7 @@ int icl_remote_resource_observer_start(iotcon_remote_resource_h resource,
 		unsigned int *sub_id,
 		int64_t *observe_handle);
 
-int icl_remote_resource_observer_stop(iotcon_remote_resource_h resource,
+int icl_remote_resource_stop_observing(iotcon_remote_resource_h resource,
 		iotcon_options_h options, int64_t handle, unsigned int sub_id);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__ */

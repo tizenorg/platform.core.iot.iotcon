@@ -285,12 +285,12 @@ static int _caching_observer_stop(iotcon_remote_resource_h resource)
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	ret = icl_remote_resource_observer_stop(resource,
+	ret = icl_remote_resource_stop_observing(resource,
 			NULL,
 			resource->caching_handle->observe_handle,
 			resource->caching_handle->observe_sub_id);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icl_remote_resource_observer_stop() Fail(%d)", ret);
+		ERR("icl_remote_resource_stop_observing() Fail(%d)", ret);
 		return ret;
 	}
 

@@ -105,7 +105,7 @@ void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource);
 int iotcon_remote_resource_clone(iotcon_remote_resource_h src, iotcon_remote_resource_h *dest);
 
 /**
- * @brief Specifies the type of function passed to iotcon_remote_resource_observer_start().
+ * @brief Specifies the type of function passed to iotcon_remote_resource_start_observing().
  * @details Called when a client receive notifications from a server. The @a response_result could be one of #iotcon_response_result_e.
  *
  * @since_tizen 3.0
@@ -117,9 +117,9 @@ int iotcon_remote_resource_clone(iotcon_remote_resource_h src, iotcon_remote_res
  * @param[in] sequence_number The sequence of notifications from server.
  * @param[in] user_data The user data passed from the callback registration function
  *
- * @pre The callback must be registered using iotcon_remote_resource_observer_start()
+ * @pre The callback must be registered using iotcon_remote_resource_start_observing()
  *
- * @see iotcon_remote_resource_observer_start()
+ * @see iotcon_remote_resource_start_observing()
  */
 typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resource,
 		iotcon_representation_h repr,
@@ -158,7 +158,7 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
  * @see iotcon_notimsg_create()
  * @see iotcon_resource_notify()
  */
-int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
+int iotcon_remote_resource_start_observing(iotcon_remote_resource_h resource,
 		iotcon_observe_type_e observe_type,
 		iotcon_query_h query,
 		iotcon_remote_resource_observe_cb cb,
@@ -181,7 +181,7 @@ int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_remote_resource_observe_cb()
- * @see iotcon_remote_resource_observer_start()
+ * @see iotcon_remote_resource_start_observing()
  * @see iotcon_notimsg_create()
  * @see iotcon_resource_notify()
  */

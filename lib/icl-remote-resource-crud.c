@@ -528,7 +528,7 @@ int icl_remote_resource_observer_start(iotcon_remote_resource_h resource,
 }
 
 
-API int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
+API int iotcon_remote_resource_start_observing(iotcon_remote_resource_h resource,
 		iotcon_observe_type_e observe_type,
 		iotcon_query_h query,
 		iotcon_remote_resource_observe_cb cb,
@@ -574,7 +574,7 @@ API int iotcon_remote_resource_observer_start(iotcon_remote_resource_h resource,
 }
 
 
-int icl_remote_resource_observer_stop(iotcon_remote_resource_h resource,
+int icl_remote_resource_stop_observing(iotcon_remote_resource_h resource,
 		iotcon_options_h options, int64_t handle, unsigned int sub_id)
 {
 	int ret;
@@ -614,10 +614,10 @@ API int iotcon_remote_resource_observer_stop(iotcon_remote_resource_h resource)
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	ret = icl_remote_resource_observer_stop(resource, resource->header_options,
+	ret = icl_remote_resource_stop_observing(resource, resource->header_options,
 			resource->observe_handle, resource->observe_sub_id);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icl_remote_resource_observer_stop() Fail(%d)", ret);
+		ERR("icl_remote_resource_stop_observing() Fail(%d)", ret);
 		return ret;
 	}
 

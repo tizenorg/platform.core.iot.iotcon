@@ -351,7 +351,7 @@ static void _on_observe(iotcon_options_h header_options, iotcon_representation_h
 ...
 {
 	int ret;
-	ret = iotcon_remote_resource_observer_start(door_resource, IOTCON_OBSERVE_ALL, NULL,
+	ret = iotcon_remote_resource_start_observing(door_resource, IOTCON_OBSERVE_ALL, NULL,
 			&_on_observe, NULL);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
