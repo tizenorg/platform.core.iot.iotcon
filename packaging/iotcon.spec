@@ -59,7 +59,7 @@ Tizen IoT Connectivity Test Programs
 %prep
 %setup -q
 chmod g-w %_sourcedir/*
-%if %tizen_version_major < 3
+%if 0%{?tizen_version_major} < 3
 cp %{SOURCE1002} ./%{name}.manifest
 cp %{SOURCE1003} ./lib%{name}.manifest
 cp %{SOURCE1004} ./%{name}-test.manifest
