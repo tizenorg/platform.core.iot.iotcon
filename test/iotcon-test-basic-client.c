@@ -251,7 +251,7 @@ static int _device_id_compare(const void *a, const void *b)
 	return strcmp(a, b);
 }
 
-static void _get_tizen_info(iotcon_tizen_info_h info, int response_result,
+static void _request_tizen_info(iotcon_tizen_info_h info, int response_result,
 		void *user_data)
 {
 	int ret;
@@ -259,7 +259,7 @@ static void _get_tizen_info(iotcon_tizen_info_h info, int response_result,
 	char *tizen_device_id = NULL;
 
 	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result,
-			"_get_tizen_info Response error(%d)", response_result);
+			"_request_tizen_info Response error(%d)", response_result);
 
 	ret = iotcon_tizen_info_get_property(info, IOTCON_TIZEN_INFO_DEVICE_NAME,
 			&device_name);
@@ -383,10 +383,10 @@ static void _found_resource(iotcon_remote_resource_h resource, int result,
 		return;
 	}
 
-	/* get tizen info */
-	ret = iotcon_get_tizen_info(resource_host, connectivity_type, _get_tizen_info, NULL);
+	/* request tizen info */
+	ret = iotcon_request_tizen_info(resource_host, connectivity_type, _request_tizen_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_get_tizen_info() Fail(%d)", ret);
+		ERR("iotcon_request_tizen_info() Fail(%d)", ret);
 		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
 		free(door_resource_device_id);
 		return;

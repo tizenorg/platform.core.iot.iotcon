@@ -110,9 +110,9 @@ int iotcon_get_timeout(int *timeout_seconds);
  *
  * @pre iotcon_open() should be called to open a connection to the iotcon.
  *
- * @see iotcon_get_device_info()
- * @see iotcon_get_platform_info()
- * @see iotcon_get_tizen_info()
+ * @see iotcon_request_device_info()
+ * @see iotcon_request_platform_info()
+ * @see iotcon_request_tizen_info()
  * @see iotcon_find_resource()
  * @see iotcon_remote_resource_get()
  * @see iotcon_remote_resource_put()

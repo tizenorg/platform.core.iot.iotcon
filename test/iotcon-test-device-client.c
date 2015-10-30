@@ -18,7 +18,7 @@
 #include <iotcon.h>
 #include "test.h"
 
-static void _get_device_info(iotcon_device_info_h info, int result, void *user_data)
+static void _request_device_info(iotcon_device_info_h info, int result, void *user_data)
 {
 	int ret;
 	char *device_name = NULL;
@@ -60,7 +60,7 @@ static void _get_device_info(iotcon_device_info_h info, int result, void *user_d
 	INFO("data_model_version : %s", data_model_ver);
 }
 
-static void _get_platform_info(iotcon_platform_info_h info, int result, void *user_data)
+static void _request_platform_info(iotcon_platform_info_h info, int result, void *user_data)
 {
 	int ret;
 	char *platform_id = NULL;
@@ -180,18 +180,18 @@ int main()
 		return -1;
 	}
 
-	ret = iotcon_get_device_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
-			_get_device_info, NULL);
+	ret = iotcon_request_device_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+			_request_device_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_get_device_info() Fail(%d)", ret);
+		ERR("iotcon_request_device_info() Fail(%d)", ret);
 		iotcon_close();
 		return -1;
 	}
 
-	ret = iotcon_get_platform_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
-			_get_platform_info, NULL);
+	ret = iotcon_request_platform_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+			_request_platform_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_get_platform_info() Fail(%d)", ret);
+		ERR("iotcon_request_platform_info() Fail(%d)", ret);
 		iotcon_close();
 		return -1;
 	}

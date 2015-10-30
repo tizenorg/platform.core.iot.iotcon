@@ -135,7 +135,7 @@ static gboolean _icl_timeout_get_device_info(gpointer p)
 	return G_SOURCE_REMOVE;
 }
 
-API int iotcon_get_device_info(const char *host_address,
+API int iotcon_request_device_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_device_info_cb cb,
 		void *user_data)
@@ -300,7 +300,7 @@ static gboolean _icl_timeout_get_platform_info(gpointer p)
 	return G_SOURCE_REMOVE;
 }
 
-API int iotcon_get_platform_info(const char *host_address,
+API int iotcon_request_platform_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_platform_info_cb cb,
 		void *user_data)
@@ -398,7 +398,7 @@ static void _icl_tizen_info_cb(GObject *object, GAsyncResult *g_async_res,
 }
 
 
-API int iotcon_get_tizen_info(const char *host_address,
+API int iotcon_request_tizen_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_tizen_info_cb cb,
 		void *user_data)

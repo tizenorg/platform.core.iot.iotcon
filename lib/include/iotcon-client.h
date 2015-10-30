@@ -170,7 +170,7 @@ int iotcon_find_resource(const char *host_address,
 		void *user_data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_get_device_info().
+ * @brief Specifies the type of function passed to iotcon_request_device_info().
  *
  * @since_tizen 3.0
  *
@@ -178,9 +178,9 @@ int iotcon_find_resource(const char *host_address,
  * @param[in] result The result code (0 on success, other wise a negative error value)
  * @param[in] user_data The user data to pass to the function
  *
- * @pre iotcon_get_device_info() will invoke this callback function.
+ * @pre iotcon_request_device_info() will invoke this callback function.
  *
- * @see iotcon_get_device_info()
+ * @see iotcon_request_device_info()
  * @see iotcon_device_info_get_property()
  */
 typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info, int result,
@@ -213,7 +213,7 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info, int resu
  * @see iotcon_device_info_cb()
  * @see iotcon_device_info_get_property()
  */
-int iotcon_get_device_info(const char *host_address,
+int iotcon_request_device_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_device_info_cb cb,
 		void *user_data);
@@ -232,13 +232,13 @@ int iotcon_get_device_info(const char *host_address,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_device_info_cb()
- * @see iotcon_get_device_info()
+ * @see iotcon_request_device_info()
  */
 int iotcon_device_info_get_property(iotcon_device_info_h device_info,
 		iotcon_device_info_e property, char **value);
 
 /**
- * @brief Specifies the type of function passed to iotcon_get_platform_info().
+ * @brief Specifies the type of function passed to iotcon_request_platform_info().
  *
  * @since_tizen 3.0
  *
@@ -246,9 +246,9 @@ int iotcon_device_info_get_property(iotcon_device_info_h device_info,
  * @param[in] result The result code (0 on success, other wise a negative error value)
  * @param[in] user_data The user data to pass to the function
  *
- * @pre iotcon_get_platform_info() will invoke this callback function.
+ * @pre iotcon_request_platform_info() will invoke this callback function.
  *
- * @see iotcon_get_platform_info()
+ * @see iotcon_request_platform_info()
  * @see iotcon_platform_info_get_property()
  */
 typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info, int result,
@@ -283,7 +283,7 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info, in
  * @see iotcon_platform_info_cb()
  * @see iotcon_platform_info_get_property()
  */
-int iotcon_get_platform_info(const char *host_address,
+int iotcon_request_platform_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_platform_info_cb cb,
 		void *user_data);
@@ -302,13 +302,13 @@ int iotcon_get_platform_info(const char *host_address,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_platform_info_cb()
- * @see iotcon_get_platform_info()
+ * @see iotcon_request_platform_info()
  */
 int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
 		iotcon_platform_info_e property, char **value);
 
 /**
- * @brief Specifies the type of function passed to iotcon_get_tizen_info().
+ * @brief Specifies the type of function passed to iotcon_request_tizen_info().
  *
  * @since_tizen 3.0
  *
@@ -316,9 +316,9 @@ int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
  * @param[in] response_result The response result code (Lesser than 0 on fail, otherwise a response result value)
  * @param[in] user_data The user data to pass to the function
  *
- * @pre iotcon_get_tizen_info() will invoke this callback function.
+ * @pre iotcon_request_tizen_info() will invoke this callback function.
  *
- * @see iotcon_get_tizen_info()
+ * @see iotcon_request_tizen_info()
  * @see iotcon_tizen_info_get_property()
  */
 typedef void (*iotcon_tizen_info_cb)(iotcon_tizen_info_h tizen_info,
@@ -351,7 +351,7 @@ typedef void (*iotcon_tizen_info_cb)(iotcon_tizen_info_h tizen_info,
  * @see iotcon_tizen_info_cb()
  * @see iotcon_tizen_info_get_property()
  */
-int iotcon_get_tizen_info(const char *host_address,
+int iotcon_request_tizen_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_tizen_info_cb cb,
 		void *user_data);
@@ -370,7 +370,7 @@ int iotcon_get_tizen_info(const char *host_address,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_tizen_info_cb()
- * @see iotcon_get_tizen_info()
+ * @see iotcon_request_tizen_info()
  */
 int iotcon_tizen_info_get_property(iotcon_tizen_info_h tizen_info,
 				iotcon_tizen_info_e property, char **value);
