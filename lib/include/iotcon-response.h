@@ -84,6 +84,7 @@ int iotcon_response_set_new_uri_path(iotcon_response_h resp, char *new_uri_path)
 
 /**
  * @brief Sets result into the response
+ * @details The @a result could be one of #iotcon_response_result_e.
  *
  * @since_tizen 3.0
  *
@@ -98,7 +99,7 @@ int iotcon_response_set_new_uri_path(iotcon_response_h resp, char *new_uri_path)
  * @see iotcon_response_create()
  * @see iotcon_response_destroy()
  */
-int iotcon_response_set_result(iotcon_response_h resp, int result);
+int iotcon_response_set_result(iotcon_response_h resp, iotcon_response_result_e result);
 
 /**
  * @brief Sets representation into the response

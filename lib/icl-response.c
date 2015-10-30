@@ -90,7 +90,8 @@ API int iotcon_response_set_new_uri_path(iotcon_response_h resp, char *new_uri_p
 }
 
 
-API int iotcon_response_set_result(iotcon_response_h resp, int result)
+API int iotcon_response_set_result(iotcon_response_h resp,
+		iotcon_response_result_e result)
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 
