@@ -173,10 +173,10 @@ int main()
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* iotcon open */
-	ret = iotcon_open();
+	/* connect iotcon */
+	ret = iotcon_connect();
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_open() Fail(%d)", ret);
+		ERR("iotcon_connect() Fail(%d)", ret);
 		return -1;
 	}
 
@@ -184,7 +184,7 @@ int main()
 			_request_device_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_device_info() Fail(%d)", ret);
-		iotcon_close();
+		iotcon_disconnect();
 		return -1;
 	}
 
@@ -192,7 +192,7 @@ int main()
 			_request_platform_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_platform_info() Fail(%d)", ret);
-		iotcon_close();
+		iotcon_disconnect();
 		return -1;
 	}
 
@@ -200,8 +200,8 @@ int main()
 
 	g_main_loop_unref(loop);
 
-	/* iotcon close */
-	iotcon_close();
+	/* disconnect iotcon */
+	iotcon_disconnect();
 
 	return 0;
 }

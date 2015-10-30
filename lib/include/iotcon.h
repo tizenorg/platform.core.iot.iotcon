@@ -40,24 +40,24 @@ extern "C" {
  */
 
 /**
- * @brief Opens Iotcon.
+ * @brief Connects to the iotcon service.
  * @details Call this function to start Iotcon.
  *
  * @since_tizen 3.0
  *
- * @remarks You must free all resources of the Iotcon by calling iotcon_close()
+ * @remarks You must free all resources of the Iotcon by calling iotcon_disconnect()
  * if Iotcon API is no longer needed.
  *
  * @return  0 on success, otherwise a negative error value.
  * @retval  #IOTCON_ERROR_NONE Successful
  * @retval  #IOTCON_ERROR_DBUS Dbus error
  *
- * @see iotcon_close()
+ * @see iotcon_disconnect()
  */
-int iotcon_open(void);
+int iotcon_connect(void);
 
 /**
- * @brief Closes Iotcon.
+ * @brief Disconnects from the iotcon service.
  * @details Frees the resources allocated to Iotcon.
  *
  * @since_tizen 3.0
@@ -66,9 +66,9 @@ int iotcon_open(void);
  *
  * @return void
  *
- * @see iotcon_open()
+ * @see iotcon_connect()
  */
-void iotcon_close(void);
+void iotcon_disconnect(void);
 
 /**
  * @brief Gets timeout of asynchronous APIs.
@@ -81,7 +81,7 @@ void iotcon_close(void);
  * @retval #IOTCON_ERROR_NONE Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @pre iotcon_open() should be called to open a connection to the iotcon.
+ * @pre iotcon_connect() should be called to connect a connection to the iotcon.
  *
  * @see iotcon_get_device_info()
  * @see iotcon_get_platform_info()
@@ -108,7 +108,7 @@ int iotcon_get_timeout(int *timeout_seconds);
  * @retval  #IOTCON_ERROR_NONE Successful
  * @retval  #IOTCON_ERROR_DBUS Dbus error
  *
- * @pre iotcon_open() should be called to open a connection to the iotcon.
+ * @pre iotcon_connect() should be called to connect a connection to the iotcon.
  *
  * @see iotcon_request_device_info()
  * @see iotcon_request_platform_info()

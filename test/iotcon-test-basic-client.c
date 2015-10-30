@@ -450,10 +450,10 @@ int main(int argc, char **argv)
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* iotcon open */
-	ret = iotcon_open();
+	/* connect iotcon */
+	ret = iotcon_connect();
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_open() Fail(%d)", ret);
+		ERR("iotcon_connect() Fail(%d)", ret);
 		return -1;
 	}
 
@@ -462,7 +462,7 @@ int main(int argc, char **argv)
 			"core.door", &_found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
-		iotcon_close();
+		iotcon_disconnect();
 		return -1;
 	}
 
@@ -471,8 +471,8 @@ int main(int argc, char **argv)
 
 	g_list_free_full(device_id_list, free);
 
-	/* iotcon close */
-	iotcon_close();
+	/* disconnect iotcon */
+	iotcon_disconnect();
 
 	return 0;
 }

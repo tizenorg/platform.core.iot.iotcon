@@ -490,10 +490,10 @@ int main(int argc, char **argv)
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* iotcon open */
-	ret = iotcon_open();
+	/* connect iotcon */
+	ret = iotcon_connect();
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_open() Fail(%d)", ret);
+		ERR("iotcon_connect() Fail(%d)", ret);
 		return -1;
 	}
 
@@ -501,14 +501,14 @@ int main(int argc, char **argv)
 	ret = iotcon_resource_types_create(&room_rtypes);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_types_create() Fail(%d)", ret);
-		iotcon_close();
+		iotcon_disconnect();
 		return -1;
 	}
 	ret = iotcon_resource_types_add(room_rtypes, "core.room");
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_types_add(%s) Fail(%d)", "core.room", ret);
 		iotcon_resource_types_destroy(room_rtypes);
-		iotcon_close();
+		iotcon_disconnect();
 		return -1;
 	}
 
@@ -519,7 +519,7 @@ int main(int argc, char **argv)
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_create() Fail(%d)", ret);
 		iotcon_resource_types_destroy(room_rtypes);
-		iotcon_close();
+		iotcon_disconnect();
 		return -1;
 	}
 	iotcon_resource_types_destroy(room_rtypes);
@@ -529,7 +529,7 @@ int main(int argc, char **argv)
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_types_create() Fail(%d)", ret);
 		iotcon_resource_destroy(room_handle);
-		iotcon_close();
+		iotcon_disconnect();
 		return -1;
 	}
 	ret = iotcon_resource_types_add(light_rtypes, "core.light");
@@ -537,7 +537,7 @@ int main(int argc, char **argv)
 		ERR("iotcon_resource_types_add(%s) Fail(%d)", "core.light", ret);
 		iotcon_resource_types_destroy(light_rtypes);
 		iotcon_resource_destroy(room_handle);
-		iotcon_close();
+		iotcon_disconnect();
 		return -1;
 	}
 
@@ -549,7 +549,7 @@ int main(int argc, char **argv)
 		ERR("iotcon_resource_create() Fail");
 		iotcon_resource_types_destroy(light_rtypes);
 		iotcon_resource_destroy(room_handle);
-		iotcon_close();
+		iotcon_disconnect();
 		return -1;
 	}
 	iotcon_resource_types_destroy(light_rtypes);
@@ -559,7 +559,7 @@ int main(int argc, char **argv)
 		ERR("iotcon_resource_bind_child_resource() Fail");
 		iotcon_resource_destroy(light_handle);
 		iotcon_resource_destroy(room_handle);
-		iotcon_close();
+		iotcon_disconnect();
 		return -1;
 	}
 
@@ -569,8 +569,8 @@ int main(int argc, char **argv)
 	iotcon_resource_destroy(light_handle);
 	iotcon_resource_destroy(room_handle);
 
-	/* iotcon close */
-	iotcon_close();
+	/* disconnect iotcon */
+	iotcon_disconnect();
 
 	return 0;
 }
