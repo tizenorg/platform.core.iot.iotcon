@@ -245,7 +245,11 @@ int icl_dbus_set_timeout(int timeout_seconds)
 
 int icl_dbus_get_timeout()
 {
-	gint timeout = g_dbus_proxy_get_default_timeout(G_DBUS_PROXY(icl_dbus_object));
+	gint timeout;
+
+	RETV_IF(NULL == icl_dbus_object, ICL_DBUS_TIMEOUT_DEFAULT);
+
+	timeout = g_dbus_proxy_get_default_timeout(G_DBUS_PROXY(icl_dbus_object));
 	if (timeout <= 0) {
 		ERR("Invalid timeout (%d)", timeout);
 		return ICL_DBUS_TIMEOUT_DEFAULT;

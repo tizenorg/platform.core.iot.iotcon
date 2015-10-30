@@ -71,6 +71,31 @@ int iotcon_open(void);
 void iotcon_close(void);
 
 /**
+ * @brief Gets timeout of asynchronous APIs.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[out] timeout_seconds Seconds for timeout
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @pre iotcon_open() should be called to open a connection to the iotcon.
+ *
+ * @see iotcon_get_device_info()
+ * @see iotcon_get_platform_info()
+ * @see iotcon_get_tizen_info()
+ * @see iotcon_find_resource()
+ * @see iotcon_remote_resource_get()
+ * @see iotcon_remote_resource_put()
+ * @see iotcon_remote_resource_post()
+ * @see iotcon_remote_resource_delete()
+ */
+int iotcon_get_timeout(int *timeout_seconds);
+
+
+/**
  * @brief Set timeout of asynchronous APIs.
  * @details Default timeout is 10 seconds.
  * Maximum timeout is 60 seconds.
