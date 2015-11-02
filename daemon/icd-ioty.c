@@ -251,10 +251,9 @@ int icd_ioty_unbind_resource(OCResourceHandle parent, OCResourceHandle child)
 	return IOTCON_ERROR_NONE;
 }
 
-
 int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers)
 {
-	int i, error_code, obs_length, msg_length;
+	int i, obs_length, msg_length;
 	GVariant *repr_gvar;
 	GVariantIter obs_iter, msg_iter;
 	OCStackResult ret;
@@ -272,7 +271,7 @@ int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers)
 	g_variant_iter_init(&msg_iter, msg);
 	msg_length = g_variant_iter_n_children(&msg_iter);
 	if (msg_length) {
-		g_variant_iter_loop(&msg_iter, "(iv)", &error_code, &repr_gvar);
+		g_variant_iter_loop(&msg_iter, "v", &repr_gvar);
 		/* TODO : How to use error_code. */
 		payload = icd_payload_representation_from_gvariant(repr_gvar);
 	}
@@ -330,11 +329,10 @@ int icd_ioty_send_response(GVariant *resp)
 	GVariantIter *options;
 	OCStackResult ret;
 	OCEntityHandlerResponse response = {0};
-	int result, error_code, options_size;
+	int result, options_size;
 	int64_t request_handle, resource_handle;
 
-	g_variant_get(resp, "(ia(qs)ivxx)",
-			&error_code,
+	g_variant_get(resp, "(a(qs)ivxx)",
 			&options,
 			&result,
 			&repr_gvar,

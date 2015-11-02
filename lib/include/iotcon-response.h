@@ -155,7 +155,7 @@ int iotcon_response_set_result(iotcon_response_h resp, iotcon_response_result_e 
  * @see iotcon_response_destroy()
  */
 int iotcon_response_set_representation(iotcon_response_h resp,
-		iotcon_representation_h repr);
+		iotcon_interface_e iface, iotcon_representation_h repr);
 
 /**
  * @brief Sets header options into the response
@@ -174,24 +174,6 @@ int iotcon_response_set_representation(iotcon_response_h resp,
  * @see iotcon_response_destroy()
  */
 int iotcon_response_set_header_options(iotcon_response_h resp, iotcon_options_h options);
-
-/**
- * @brief Sets resource interface into the response
- *
- * @since_tizen 3.0
- *
- * @param[in] resp The handle of the response
- * @param[in] iface The resource interface
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
- *
- * @see iotcon_response_create()
- * @see iotcon_response_destroy()
- */
-int iotcon_response_set_interface(iotcon_response_h resp, iotcon_interface_e iface);
 
 /**
  * @brief Send response for incoming request.

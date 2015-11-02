@@ -530,61 +530,27 @@ API int iotcon_resource_get_properties(iotcon_resource_h resource, int *properti
 	return IOTCON_ERROR_NONE;
 }
 
-
-API int iotcon_notimsg_create(iotcon_representation_h repr, iotcon_interface_e iface,
-		iotcon_notimsg_h *notimsg_handle)
-{
-	iotcon_notimsg_h msg;
-
-	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == notimsg_handle, IOTCON_ERROR_INVALID_PARAMETER);
-
-	msg = calloc(1, sizeof(struct icl_notify_msg));
-	if (NULL == msg) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
-
-	msg->repr = repr;
-	icl_representation_inc_ref_count(msg->repr);
-	msg->iface = iface;
-	msg->error_code = 200;
-
-	*notimsg_handle = msg;
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-API void iotcon_notimsg_destroy(iotcon_notimsg_h msg)
-{
-	RET_IF(NULL == msg);
-
-	iotcon_representation_destroy(msg->repr);
-	free(msg);
-}
-
-API int iotcon_resource_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
-		iotcon_observers_h observers)
+API int iotcon_resource_notify(iotcon_resource_h resource,
+		iotcon_representation_h repr, iotcon_observers_h observers)
 {
 	int ret;
 	GError *error = NULL;
-	GVariant *noti_msg;
 	GVariant *obs;
+	GVariant *repr_gvar;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (0 == resource->sub_id) {
 		ERR("Invalid Resource handle");
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	/* TODO: Get default message if msg parameter is NULL */
-	noti_msg = icl_dbus_notimsg_to_gvariant(msg);
-	if (NULL == noti_msg) {
-		ERR("icl_dbus_notimsg_to_gvariant() Fail");
-		return IOTCON_ERROR_REPRESENTATION;
+	repr_gvar = icl_dbus_representation_to_gvariant(repr);
+	if (NULL == repr_gvar) {
+		ERR("icl_representation_to_gvariant() Fail");
+		return IOTCON_ERROR_SYSTEM;
 	}
 
 	if (observers)
@@ -592,14 +558,14 @@ API int iotcon_resource_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
 	else
 		obs = icl_dbus_observers_to_gvariant(resource->observers);
 
-	ic_dbus_call_notify_sync(icl_dbus_get_object(), resource->handle, noti_msg, obs, &ret,
+	ic_dbus_call_notify_sync(icl_dbus_get_object(), resource->handle, repr_gvar, obs, &ret,
 			NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_notify_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
 		g_variant_unref(obs);
-		g_variant_unref(noti_msg);
+		g_variant_unref(repr_gvar);
 		return ret;
 	}
 

@@ -35,7 +35,6 @@
 #define ICL_URI_PATH_LENGTH_MAX 36
 
 struct icl_notify_msg {
-	int error_code;
 	iotcon_interface_e iface;
 	iotcon_representation_h repr;
 };

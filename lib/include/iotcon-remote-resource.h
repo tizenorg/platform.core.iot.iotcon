@@ -159,7 +159,6 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
  *
  * @see iotcon_remote_resource_response_cb()
  * @see iotcon_remote_resource_observer_stop()
- * @see iotcon_notimsg_create()
  * @see iotcon_resource_notify()
  */
 int iotcon_remote_resource_start_observing(iotcon_remote_resource_h resource,
@@ -186,7 +185,6 @@ int iotcon_remote_resource_start_observing(iotcon_remote_resource_h resource,
  *
  * @see iotcon_remote_resource_response_cb()
  * @see iotcon_remote_resource_start_observing()
- * @see iotcon_notimsg_create()
  * @see iotcon_resource_notify()
  */
 int iotcon_remote_resource_observer_stop(iotcon_remote_resource_h resource);

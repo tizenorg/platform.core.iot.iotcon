@@ -18,7 +18,6 @@
 
 #include <iotcon-resource.h>
 #include <iotcon-lite-resource.h>
-#include <iotcon-notimsg.h>
 #include <iotcon-response.h>
 #include <iotcon-observers.h>
 #include <iotcon-request.h>

@@ -25,15 +25,9 @@ static int _send_response(iotcon_response_h response, iotcon_representation_h re
 {
 	int ret;
 
-	ret = iotcon_response_set_representation(response, repr);
+	ret = iotcon_response_set_representation(response, iface, repr);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_response_set_representation() Fail(%d)", ret);
-		return -1;
-	}
-
-	ret = iotcon_response_set_interface(response, iface);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_response_set_interface() Fail(%d)", ret);
 		return -1;
 	}
 

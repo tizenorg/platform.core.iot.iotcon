@@ -63,14 +63,6 @@ typedef struct icl_resource* iotcon_resource_h;
 typedef struct icl_lite_resource* iotcon_lite_resource_h;
 
 /**
- * @brief The handle of notifications message.
- * @details iotcon_notimsg_h is an opaque data structure to notify message to observers.
- *
- * @since_tizen 3.0
- */
-typedef struct icl_notify_msg* iotcon_notimsg_h;
-
-/**
 * @brief The handle of response
 * @details iotcon_response_h is an opaque data structure to respond to client.\n
 * iotcon_response_h is a data type of server's response which consists of result,

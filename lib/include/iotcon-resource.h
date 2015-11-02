@@ -291,7 +291,7 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
- * @param[in] msg The handle of the notifications message
+ * @param[in] repr The handle of the representation
  * @param[in] observers The handle of the observers.
  *
  * @return 0 on success, otherwise a negative error value.
@@ -305,14 +305,12 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  * @see iotcon_remote_resource_response_cb()
  * @see iotcon_remote_resource_start_observing()
  * @see iotcon_remote_resource_observer_stop()
- * @see iotcon_notimsg_create()
- * @see iotcon_notimsg_destroy()
  * @see iotcon_observers_create()
  * @see iotcon_observers_destroy()
  * @see iotcon_observers_add()
  * @see iotcon_observers_remove()
  */
-int iotcon_resource_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
+int iotcon_resource_notify(iotcon_resource_h resource, iotcon_representation_h repr,
 		iotcon_observers_h observers);
 
 /**

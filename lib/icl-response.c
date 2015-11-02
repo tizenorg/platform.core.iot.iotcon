@@ -47,7 +47,6 @@ API int iotcon_response_create(iotcon_request_h request,
 
 	resp->oic_request_h = request->oic_request_h;
 	resp->oic_resource_h = request->oic_resource_h;
-	resp->error_code = 200;
 
 	*response = resp;
 
@@ -114,12 +113,13 @@ API int iotcon_response_set_result(iotcon_response_h resp,
 
 
 API int iotcon_response_set_representation(iotcon_response_h resp,
-		iotcon_representation_h repr)
+		iotcon_interface_e iface, iotcon_representation_h repr)
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	resp->repr = repr;
+	resp->iface = iface;
 	icl_representation_inc_ref_count(resp->repr);
 
 	return IOTCON_ERROR_NONE;
@@ -141,17 +141,6 @@ API int iotcon_response_set_header_options(iotcon_response_h resp,
 
 	return IOTCON_ERROR_NONE;
 }
-
-
-API int iotcon_response_set_interface(iotcon_response_h resp, iotcon_interface_e iface)
-{
-	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
-
-	resp->iface = iface;
-
-	return IOTCON_ERROR_NONE;
-}
-
 
 static bool _icl_response_representation_child_cb(iotcon_representation_h child,
 		void *user_data)

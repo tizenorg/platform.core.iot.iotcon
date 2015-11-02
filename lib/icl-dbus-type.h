@@ -22,7 +22,7 @@
 #include "icl-resource-types.h"
 
 const char** icl_dbus_resource_types_to_array(iotcon_resource_types_h types);
-GVariant* icl_dbus_notimsg_to_gvariant(struct icl_notify_msg *msg);
+GVariant* icl_dbus_representation_to_gvariant(struct icl_representation_s *repr);
 GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response);
 GVariant* icl_dbus_remote_resource_to_gvariant(struct icl_remote_resource *resource);
 GVariant* icl_dbus_device_info_to_gvariant(struct icl_device_info *device_info);

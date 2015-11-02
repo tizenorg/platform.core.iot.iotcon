@@ -313,27 +313,18 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 {
 	int ret;
 	iotcon_representation_h repr;
-	iotcon_notimsg_h msg;
 
 	ret = iotcon_representation_create(&resp_repr);
 	if (IOTCON_ERROR_NONE != ret) {
 		return;
 	}
 
-	ret = iotcon_notimsg_create(resp_repr, IOTCON_INTERFACE_DEFAULT, &msg);
+	ret = iotcon_resource_notify(door_handle, resp_repr, observers);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_resource_notify(door_handle, msg, observers);
-	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_notimsg_destroy(msg);
-		iotcon_representation_destroy(resp_repr);
-		return;
-	}
-
-	iotcon_notimsg_destroy(msg);
 	iotcon_representation_destroy(resp_repr);
 }
  * @endcode

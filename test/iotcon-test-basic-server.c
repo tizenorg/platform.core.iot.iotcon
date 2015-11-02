@@ -132,7 +132,7 @@ static int _send_response(iotcon_response_h response, iotcon_representation_h re
 		return -1;
 	}
 
-	ret = iotcon_response_set_representation(response, repr);
+	ret = iotcon_response_set_representation(response, IOTCON_INTERFACE_DEFAULT, repr);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_response_set_representation() Fail(%d)", ret);
 		return -1;
@@ -283,7 +283,6 @@ static gboolean _notifier(gpointer user_data)
 {
 	int ret;
 	static int i = 0;
-	iotcon_notimsg_h msg;
 	door_resource_s *door;
 	iotcon_representation_h repr;
 
@@ -299,22 +298,13 @@ static gboolean _notifier(gpointer user_data)
 		return G_SOURCE_REMOVE;
 	}
 
-	ret = iotcon_notimsg_create(repr, IOTCON_INTERFACE_DEFAULT, &msg);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_notimsg_create() Fail(%d)", ret);
-		iotcon_representation_destroy(repr);
-		return G_SOURCE_REMOVE;
-	}
-
-	ret = iotcon_resource_notify(door->handle, msg, door->observers);
+	ret = iotcon_resource_notify(door->handle, repr, door->observers);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_notify() Fail(%d)", ret);
-		iotcon_notimsg_destroy(msg);
 		iotcon_representation_destroy(repr);
 		return G_SOURCE_REMOVE;
 	}
 
-	iotcon_notimsg_destroy(msg);
 	iotcon_representation_destroy(repr);
 
 	return G_SOURCE_CONTINUE;
