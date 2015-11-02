@@ -302,7 +302,7 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  * @retval #IOTCON_ERROR_SYSTEM  System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @see iotcon_remote_resource_observe_cb()
+ * @see iotcon_remote_resource_response_cb()
  * @see iotcon_remote_resource_start_observing()
  * @see iotcon_remote_resource_observer_stop()
  * @see iotcon_notimsg_create()

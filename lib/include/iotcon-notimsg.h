@@ -49,7 +49,7 @@
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
- * @see iotcon_remote_resource_observe_cb()
+ * @see iotcon_remote_resource_response_cb()
  * @see iotcon_remote_resource_start_observing()
  * @see iotcon_remote_resource_observer_stop()
  * @see iotcon_resource_notify()

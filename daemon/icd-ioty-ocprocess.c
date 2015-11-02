@@ -546,7 +546,6 @@ static int _ocprocess_worker(_ocprocess_cb cb, int type, OCPayload *payload, int
 	return ret;
 }
 
-
 static int _ocprocess_parse_oic_result(OCStackResult result)
 {
 	int res;

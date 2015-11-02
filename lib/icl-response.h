@@ -28,11 +28,11 @@ typedef enum {
 
 
 struct icl_resource_response {
-	char *new_uri_path;
 	int error_code;
+	int seq_number;
 	iotcon_options_h header_options;
 	iotcon_interface_e iface;
-	iotcon_response_result_e result;
+	int result;
 	iotcon_representation_h repr;
 	int64_t oic_request_h;
 	int64_t oic_resource_h;

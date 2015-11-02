@@ -154,8 +154,8 @@ static void _request_handler(iotcon_request_h request, void *user_data)
  * Example :
  * @code
 #include <iotcon.h>
-static void _on_get(iotcon_options_h header_options, iotcon_representation_h recv_repr,
-		int response_result, void *user_data)
+static void _on_get(iotcon_remote_resource_h resource, iotcon_error_e err,
+		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data)
 {
 	// handle get from response
 }
@@ -344,8 +344,8 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 ...
 static iotcon_remote_resource_h door_resource;
 ...
-static void _on_observe(iotcon_options_h header_options, iotcon_representation_h recv_repr,
-		int response_result, int sequence_number, void *user_data)
+static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
+		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data)
 {
 }
 ...

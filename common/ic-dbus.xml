@@ -38,7 +38,7 @@
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="sendResponse">
-			<arg type="(sia(qs)ivxx)" name="response" direction="in"/>
+			<arg type="(ia(qs)ivxx)" name="response" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="findResource">

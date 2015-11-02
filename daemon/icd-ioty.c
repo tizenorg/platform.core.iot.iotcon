@@ -326,7 +326,6 @@ static int _ioty_get_header_options(GVariantIter *src, int src_size,
 
 int icd_ioty_send_response(GVariant *resp)
 {
-	char *new_uri_path;
 	GVariant *repr_gvar;
 	GVariantIter *options;
 	OCStackResult ret;
@@ -334,8 +333,7 @@ int icd_ioty_send_response(GVariant *resp)
 	int result, error_code, options_size;
 	int64_t request_handle, resource_handle;
 
-	g_variant_get(resp, "(&sia(qs)ivxx)",
-			&new_uri_path,
+	g_variant_get(resp, "(ia(qs)ivxx)",
 			&error_code,
 			&options,
 			&result,
@@ -346,9 +344,6 @@ int icd_ioty_send_response(GVariant *resp)
 	response.requestHandle = ICD_INT64_TO_POINTER(request_handle);
 	response.resourceHandle = ICD_INT64_TO_POINTER(resource_handle);
 	response.ehResult = (OCEntityHandlerResult)result;
-
-	if (OC_EH_RESOURCE_CREATED == response.ehResult)
-		snprintf(response.resourceUri, sizeof(response.resourceUri), "%s", new_uri_path);
 
 	options_size = g_variant_iter_n_children(options);
 	response.numSendVendorSpecificHeaderOptions = options_size;
@@ -505,6 +500,8 @@ void icd_ioty_complete(int type, GDBusMethodInvocation *invocation, GVariant *va
 	case ICD_TIZEN_INFO:
 		ic_dbus_complete_get_tizen_info(icd_dbus_get_object(), invocation, value);
 		break;
+	default:
+		INFO("Invalid type(%d)", type);
 	}
 }
 

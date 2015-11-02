@@ -100,8 +100,7 @@ GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 		return NULL;
 	}
 
-	value = g_variant_new("(sia(qs)ivxx)",
-			ic_utils_dbus_encode_str(response->new_uri_path),
+	value = g_variant_new("(ia(qs)ivxx)",
 			response->error_code,
 			&options,
 			response->result,

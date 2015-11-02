@@ -61,34 +61,42 @@ API void iotcon_response_destroy(iotcon_response_h resp)
 
 	if (resp->repr)
 		iotcon_representation_destroy(resp->repr);
-	if (resp->new_uri_path)
-		free(resp->new_uri_path);
 	if (resp->header_options)
 		iotcon_options_destroy(resp->header_options);
 	free(resp);
 }
 
-
-API int iotcon_response_set_new_uri_path(iotcon_response_h resp, char *new_uri_path)
+API int iotcon_response_get_options(iotcon_response_h resp,
+		iotcon_options_h *options)
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resp->header_options, IOTCON_ERROR_NO_DATA);
 
-	if (resp->new_uri_path)
-		free(resp->new_uri_path);
-
-	if (new_uri_path) {
-		resp->new_uri_path = strdup(new_uri_path);
-		if (NULL == resp->new_uri_path) {
-			ERR("strdup() Fail(%d)", errno);
-			return IOTCON_ERROR_OUT_OF_MEMORY;
-		}
-	} else {
-		resp->new_uri_path = NULL;
-	}
+	*options = resp->header_options;
 
 	return IOTCON_ERROR_NONE;
 }
 
+API int iotcon_response_get_representation(iotcon_response_h resp,
+		iotcon_representation_h *repr)
+{
+	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resp->repr, IOTCON_ERROR_NO_DATA);
+
+	*repr = resp->repr;
+
+	return IOTCON_ERROR_NONE;
+
+}
+
+API int iotcon_response_get_result(iotcon_response_h resp, int *result)
+{
+	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*result = resp->result;
+
+	return IOTCON_ERROR_NONE;
+}
 
 API int iotcon_response_set_result(iotcon_response_h resp,
 		iotcon_response_result_e result)

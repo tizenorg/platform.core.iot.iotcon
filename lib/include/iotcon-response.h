@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_SERVER_RESPONSE_H__
-#define __IOT_CONNECTIVITY_MANAGER_SERVER_RESPONSE_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_COMMON_RESPONSE_H__
+#define __IOT_CONNECTIVITY_MANAGER_COMMON_RESPONSE_H__
 
 #include <iotcon-constant.h>
 
@@ -23,8 +23,8 @@
  */
 
 /**
- * @ingroup CAPI_IOT_CONNECTIVITY_SERVER_MODULE
- * @defgroup CAPI_IOT_CONNECTIVITY_SERVER_RESPONSE_MODULE Response
+ * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE
+ * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_RESPONSE_MODULE Response
  *
  * @brief Iotcon Response provides API to manage response.
  *
@@ -64,23 +64,60 @@ int iotcon_response_create(iotcon_request_h request, iotcon_response_h *response
  */
 void iotcon_response_destroy(iotcon_response_h resp);
 
+
 /**
- * @brief Sets new uri path into the response
+ * @brief Gets header options of the response
  *
  * @since_tizen 3.0
  *
  * @param[in] resp The handle of the response
- * @param[in] new_uri_path New uri path to set
+ * @param[out] options The handle of the header options
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_NO_DATA  No data
  *
- * @see iotcon_response_create()
- * @see iotcon_response_destroy()
+ * @see iotcon_response_get_representation()
+ * @see iotcon_response_get_result()
  */
-int iotcon_response_set_new_uri_path(iotcon_response_h resp, char *new_uri_path);
+int iotcon_response_get_options(iotcon_response_h resp, iotcon_options_h *options);
+
+/**
+ * @brief Gets representation of the response
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] resp The handle of the response
+ * @param[out] repr The handle of the representation
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA  No data
+ *
+ * @see iotcon_response_get_options()
+ * @see iotcon_response_get_result()
+ */
+int iotcon_response_get_representation(iotcon_response_h resp, iotcon_representation_h *repr);
+
+/**
+ * @brief Gets result of the response
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] resp The handle of the response
+ * @param[out] result The result of the response
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_response_get_options()
+ * @see iotcon_response_get_representation()
+ */
+int iotcon_response_get_result(iotcon_response_h resp, int *result);
+
 
 /**
  * @brief Sets result into the response
@@ -178,4 +215,4 @@ int iotcon_response_send(iotcon_response_h resp);
  * @}
  */
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_SERVER_RESPONSE_H__ */
+#endif /* __IOT_CONNECTIVITY_MANAGER_COMMON_RESPONSE_H__ */

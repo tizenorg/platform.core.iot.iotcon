@@ -25,12 +25,8 @@ static GList *device_id_list;
 
 static const char* const door_uri_path = "/a/door";
 
-static void _on_observe(iotcon_remote_resource_h resource,
-		iotcon_representation_h recv_repr,
-		iotcon_options_h header_options,
-		int response_result,
-		int sequence_number,
-		void *user_data)
+static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
+		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data)
 {
 	INFO("_on_observe");
 
@@ -43,15 +39,25 @@ static void _on_observe(iotcon_remote_resource_h resource,
 	}
 }
 
-static void _on_delete(iotcon_remote_resource_h resource, iotcon_options_h header_options,
-		int response_result, void *user_data)
+static void _on_delete(iotcon_remote_resource_h resource, iotcon_error_e err,
+	iotcon_request_type_e request_type, iotcon_response_h response, void *user_data)
 {
-	int ret;
+	int ret, response_result;
 	iotcon_remote_resource_h door_resource = user_data;
 
-	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result
-			&& IOTCON_RESPONSE_RESULT_RESOURCE_DELETED != response_result,
-			"_on_delete Response error(%d)", response_result);
+	RETM_IF(IOTCON_ERROR_NONE != err, "_on_delete error(%d)", err);
+
+	ret = iotcon_response_get_result(response, &response_result);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_result() Fail(%d)", ret);
+		return;
+	}
+
+	if (IOTCON_RESPONSE_RESULT_OK != response_result
+			&& IOTCON_RESPONSE_RESULT_RESOURCE_DELETED != response_result) {
+		ERR("_on_delete Response error(%d)", response_result);
+		return;
+	}
 	INFO("DELETE request was successful");
 
 	/* delete callback operations */
@@ -64,19 +70,36 @@ static void _on_delete(iotcon_remote_resource_h resource, iotcon_options_h heade
 	iotcon_remote_resource_destroy(resource);
 }
 
-static void _on_post(iotcon_remote_resource_h resource, iotcon_representation_h recv_repr,
-		iotcon_options_h header_options, int response_result, void *user_data)
+static void _on_post(iotcon_remote_resource_h resource, iotcon_error_e err,
+		iotcon_request_type_e type, iotcon_response_h response, void *user_data)
 {
 	iotcon_state_h recv_state;
 	char *host, *created_uri_path;
-	int ret, connectivity_type, ifaces = 0;
+	int ret, connectivity_type, response_result, ifaces = 0;
 	iotcon_resource_types_h types = NULL;
 	iotcon_remote_resource_h new_door_resource, door_resource;
+	iotcon_representation_h recv_repr = NULL;
 
-	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result
-			&& IOTCON_RESPONSE_RESULT_RESOURCE_CREATED != response_result,
-			"_on_post Response error(%d)", response_result);
+	RETM_IF(IOTCON_ERROR_NONE != err, "_on_post error(%d)", err);
+
+	ret = iotcon_response_get_result(response, &response_result);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_result() Fail(%d)", ret);
+		return;
+	}
+
+	if (IOTCON_RESPONSE_RESULT_OK != response_result
+			&& IOTCON_RESPONSE_RESULT_RESOURCE_CREATED != response_result) {
+		ERR("_on_post Response error(%d)", response_result);
+		return;
+	}
 	INFO("POST request was successful");
+
+	ret = iotcon_response_get_representation(response, &recv_repr);
+		if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_representation() Fail(%d)", ret);
+		return;
+	}
 
 	ret = iotcon_representation_get_state(recv_repr, &recv_state);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -140,14 +163,25 @@ static void _on_post(iotcon_remote_resource_h resource, iotcon_representation_h 
 	iotcon_remote_resource_destroy(resource);
 }
 
-static void _on_put(iotcon_remote_resource_h resource, iotcon_representation_h recv_repr,
-		iotcon_options_h header_options, int response_result, void *user_data)
+static void _on_put(iotcon_remote_resource_h resource, iotcon_error_e err,
+		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data)
 {
 	int ret;
+	int response_result;
 	iotcon_representation_h send_repr;
 
-	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result, "_on_put Response error(%d)",
-			response_result);
+	RETM_IF(IOTCON_ERROR_NONE != err, "_on_put error(%d)", err);
+
+	ret = iotcon_response_get_result(response, &response_result);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_result() Fail(%d)", ret);
+		return;
+	}
+
+	if (IOTCON_RESPONSE_RESULT_OK != response_result) {
+		ERR("_on_put Response error(%d)", response_result);
+		return;
+	}
 	INFO("PUT request was successful");
 
 	ret = iotcon_representation_create(&send_repr);
@@ -164,18 +198,44 @@ static void _on_put(iotcon_remote_resource_h resource, iotcon_representation_h r
 	iotcon_representation_destroy(send_repr);
 }
 
-static void _on_get(iotcon_remote_resource_h resource, iotcon_representation_h recv_repr,
-		iotcon_options_h header_options, int response_result, void *user_data)
+static void _on_get(iotcon_remote_resource_h resource,
+		iotcon_error_e err,
+		iotcon_request_type_e request_type,
+		iotcon_response_h response,
+		void *user_data)
 {
 	int ret;
+	int response_result;
 	bool opened = true;
 	iotcon_representation_h send_repr;
+	iotcon_representation_h recv_repr;
 	iotcon_state_h send_state;
 	iotcon_state_h recv_state = NULL;
 
-	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result, "_on_get Response error(%d)",
-			response_result);
+	RETM_IF(IOTCON_ERROR_NONE != err, "_on_get error(%d)", err);
 	INFO("GET request was successful");
+
+	ret = iotcon_response_get_result(response, &response_result);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_result() Fail(%d)", ret);
+		return;
+	}
+
+	if (IOTCON_RESPONSE_RESULT_OK != response_result) {
+		ERR("_on_get Response error(%d)", response_result);
+		return;
+	}
+
+	/* get the resource host address */
+	char *resource_host = NULL;
+	iotcon_remote_resource_get_host_address(resource, &resource_host);
+	INFO("resource host : %s", resource_host);
+
+	ret = iotcon_response_get_representation(response, &recv_repr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_representation() Fail(%d)", ret);
+		return;
+	}
 
 	ret = iotcon_representation_get_state(recv_repr, &recv_state);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -429,6 +489,12 @@ static void _found_resource(iotcon_remote_resource_h resource, int result,
 			free(door_resource_device_id);
 			return;
 		}
+
+
+		/* get the resource host address */
+		iotcon_remote_resource_get_host_address(resource_clone, &resource_host);
+		INFO("[%s] resource host : %s", resource_uri_path, resource_host);
+
 
 		/* send GET Request */
 		ret = iotcon_remote_resource_get(resource_clone, query, _on_get, NULL);

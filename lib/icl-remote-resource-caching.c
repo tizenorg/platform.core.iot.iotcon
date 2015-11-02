@@ -192,17 +192,31 @@ static int _caching_compare_repr(iotcon_representation_h repr1,
 }
 
 static void _caching_get_cb(iotcon_remote_resource_h resource,
-		iotcon_representation_h repr,
-		iotcon_options_h options,
-		int response_result,
+		iotcon_error_e err,
+		iotcon_request_type_e request_type,
+		iotcon_response_h resp,
 		void *user_data)
 {
 	int ret;
+	int result;
+	iotcon_representation_h repr = NULL;
 	iotcon_representation_h cloned_repr;
 
 	RET_IF(NULL == resource);
 	RET_IF(NULL == resource->caching_handle);
-	RET_IF(IOTCON_RESPONSE_RESULT_OK != response_result);
+	RETM_IF(IOTCON_ERROR_NONE != err, "_caching_get Fail(%d)", err);
+
+	ret = iotcon_response_get_result(resp, &result);
+	if (IOTCON_ERROR_NONE != ret || IOTCON_RESPONSE_RESULT_OK != result) {
+		ERR("Invalid result (%d)", result);
+		return;
+	}
+
+	ret = iotcon_response_get_representation(resp, &repr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_representation() Fail(%d)", ret);
+		return;
+	}
 
 	ret = _caching_compare_repr(resource->caching_handle->repr, repr);
 	if (IC_EQUAL == ret) { /* same */

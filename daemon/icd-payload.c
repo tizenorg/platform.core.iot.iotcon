@@ -633,7 +633,6 @@ OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var)
 		cur->next = icd_payload_representation_from_gvariant(child);
 		cur = cur->next;
 	}
-
 	return repr;
 }
 

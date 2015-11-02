@@ -158,24 +158,57 @@ static void _on_get(iotcon_representation_h recv_repr, int response_result)
 }
 
 static void _on_get_2nd(iotcon_remote_resource_h resource,
-		iotcon_representation_h recv_repr,
-		iotcon_options_h header_options,
-		int response_result,
+		iotcon_error_e err,
+		iotcon_request_type_e request_type,
+		iotcon_response_h response,
 		void *user_data)
 {
-	_on_get(recv_repr, response_result);
+	int ret;
+	int response_result;
+	iotcon_representation_h recv_repr = NULL;
 
+	RETM_IF(IOTCON_ERROR_NONE != err, "Invalid err(%d)", err);
+
+	ret = iotcon_response_get_result(response, &response_result);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_result() Fail(%d)", ret);
+		return;
+	}
+
+	ret = iotcon_response_get_representation(response, &recv_repr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_representation() Fail(%d)", ret);
+		return;
+	}
+
+	_on_get(recv_repr, response_result);
 	iotcon_remote_resource_destroy(resource);
 }
 
 static void _on_get_1st(iotcon_remote_resource_h resource,
-		iotcon_representation_h recv_repr,
-		iotcon_options_h header_options,
-		int response_result,
+		iotcon_error_e err,
+		iotcon_request_type_e request_type,
+		iotcon_response_h response,
 		void *user_data)
 {
 	int ret;
+	int response_result;
 	iotcon_query_h query_params;
+	iotcon_representation_h recv_repr = NULL;
+
+	RETM_IF(IOTCON_ERROR_NONE != err, "Invalid err(%d)", err);
+
+	ret = iotcon_response_get_result(response, &response_result);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_result() Fail(%d)", ret);
+		return;
+	}
+
+	ret = iotcon_response_get_representation(response, &recv_repr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_representation() Fail(%d)", ret);
+		return;
+	}
 
 	_on_get(recv_repr, response_result);
 

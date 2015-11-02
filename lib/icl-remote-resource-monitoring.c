@@ -22,15 +22,24 @@
 #include "icl-remote-resource.h"
 
 static void _monitoring_get_cb(iotcon_remote_resource_h resource,
-		iotcon_representation_h repr,
-		iotcon_options_h options,
-		int response_result,
+		iotcon_error_e err,
+		iotcon_request_type_e request_type,
+		iotcon_response_h response,
 		void *user_data)
 {
+	int ret;
+	int response_result;
 	iotcon_remote_resource_state_e resource_state;
 
 	RET_IF(NULL == resource);
 	RET_IF(NULL == resource->monitoring_handle);
+	RETM_IF(IOTCON_ERROR_NONE != err, "_monitoring_get Fail(%d)", err);
+
+	ret = iotcon_response_get_result(response, &response_result);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_get_result() Fail(%d)", ret);
+		return;
+	}
 
 	if (IOTCON_RESPONSE_RESULT_OK <= response_result)
 		resource_state = IOTCON_REMOTE_RESOURCE_STATE_ALIVE;
