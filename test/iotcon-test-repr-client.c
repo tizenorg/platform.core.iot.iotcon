@@ -24,9 +24,9 @@ static GList *device_id_list;
 
 static const char* const room_uri_path = "/a/room";
 
-static int _get_int_list_cb(int pos, const int value, void *user_data)
+static bool _get_int_list_cb(int pos, const int value, void *user_data)
 {
-	DBG("%d°C", value);
+	DBG("%d", value);
 
 	return IOTCON_FUNC_CONTINUE;
 }
@@ -236,7 +236,7 @@ static void _on_get_1st(iotcon_remote_resource_h resource,
 	iotcon_query_destroy(query_params);
 }
 
-static int _get_res_type_fn(const char *string, void *user_data)
+static bool _get_res_type_fn(const char *string, void *user_data)
 {
 	char *resource_uri_path = user_data;
 

@@ -16,6 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_STRUCT_RESOURCE_TYPES_H__
 #define __IOT_CONNECTIVITY_MANAGER_STRUCT_RESOURCE_TYPES_H__
 
+#include <stdbool.h>
 #include <iotcon-constant.h>
 
 /**
@@ -123,21 +124,20 @@ int iotcon_resource_types_remove(iotcon_resource_types_h types, const char *type
  * @param[in] type The value of the resource types
  * @param[in] user_data The user data to pass to the function
  *
- * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
- * otherwise #IOTCON_FUNC_STOP to break out of the loop
- * @retval #IOTCON_FUNC_STOP  stop to call next function
- * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
  *
  * @pre iotcon_resource_types_foreach() will invoke this callback function.
  *
  * @see iotcon_resource_types_foreach()
  */
-typedef int (*iotcon_resource_types_foreach_cb)(const char *type, void *user_data);
+typedef bool (*iotcon_resource_types_foreach_cb)(const char *type, void *user_data);
 
 /**
  * @brief Gets all of the resource types of the list by invoking the callback function.
  * @details iotcon_resource_types_foreach_cb() will be called for each type.\n
- * If iotcon_resource_types_foreach_cb() returns #IOTCON_FUNC_STOP, iteration will be stop.
+ * If iotcon_resource_types_foreach_cb() returns false, iteration will be stop.
  *
  * @since_tizen 3.0
  *

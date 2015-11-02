@@ -405,7 +405,7 @@ static void _request_handler_delete(iotcon_resource_h resource,
 	iotcon_representation_destroy(resp_repr);
 }
 
-static int _query_cb(const char *key, const char *value, void *user_data)
+static bool _query_cb(const char *key, const char *value, void *user_data)
 {
 	INFO("key : %s, value : %s", key, value);
 

@@ -351,16 +351,15 @@ int iotcon_state_get_type(iotcon_state_h state, const char *key, int *type);
  * @param[in] key The key
  * @param[in] user_data The user data to pass to the function
  *
- * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
- * otherwise #IOTCON_FUNC_STOP to break out of the loop
- * @retval #IOTCON_FUNC_CONTINUE  Continue to iterate next key
- * @retval #IOTCON_FUNC_STOP  Stop to iterate key
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
  *
  * @pre iotcon_state_foreach() will invoke this callback function.
  *
  * @see iotcon_state_foreach()
  */
-typedef int (*iotcon_state_cb)(iotcon_state_h state, const char *key, void *user_data);
+typedef bool (*iotcon_state_cb)(iotcon_state_h state, const char *key, void *user_data);
 
 /**
  * @brief Calls a function for each element of state.

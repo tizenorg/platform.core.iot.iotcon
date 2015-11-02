@@ -248,7 +248,7 @@ API int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
 
 	g_hash_table_iter_init(&iter, query->hash);
 	while (g_hash_table_iter_next(&iter, &key, &value)) {
-		if (false == cb(key, value, user_data))
+		if (IOTCON_FUNC_STOP == cb(key, value, user_data))
 			break;
 	}
 

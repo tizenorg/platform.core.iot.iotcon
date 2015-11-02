@@ -16,6 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_STRUCT_QUERY_H__
 #define __IOT_CONNECTIVITY_MANAGER_STRUCT_QUERY_H__
 
+#include <stdbool.h>
 #include <iotcon-constant.h>
 
 /**
@@ -234,22 +235,21 @@ int iotcon_query_lookup(iotcon_query_h query, const char *key, char **data);
  * @param[in] value The value of the query
  * @param[in] user_data The user data to pass to the function
  *
- * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
- * otherwise #IOTCON_FUNC_STOP to break out of the loop
- * @retval #IOTCON_FUNC_STOP  stop to call next function
- * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
  *
  * @pre iotcon_query_foreach() will invoke this callback function.
  *
  * @see iotcon_query_foreach()
  */
-typedef int (*iotcon_query_foreach_cb)(const char *key, const char *value,
+typedef bool (*iotcon_query_foreach_cb)(const char *key, const char *value,
 		void *user_data);
 
 /**
  * @brief Gets all datas of the query by invoking the callback function.
  * @details iotcon_query_foreach_cb() will be called for each query.\n
- * If iotcon_query_foreach_cb() returns #IOTCON_FUNC_STOP, iteration will be stop.
+ * If iotcon_query_foreach_cb() returns false, iteration will be stop.
  *
  * @since_tizen 3.0
  *

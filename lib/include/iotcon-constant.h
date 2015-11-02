@@ -16,6 +16,8 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_CONSTANT_H__
 #define __IOT_CONNECTIVITY_MANAGER_CONSTANT_H__
 
+#include <tizen_type.h>
+
 /**
  * @file iotcon-constant.h
  */
@@ -215,14 +217,14 @@ typedef struct icl_state_s* iotcon_state_h;
  *
  * @since_tizen 3.0
  */
-#define IOTCON_FUNC_STOP 0
+#define IOTCON_FUNC_STOP false
 
 /**
  * @brief Use this value as the return value to continue foreach function.
  *
  * @since_tizen 3.0
  */
-#define IOTCON_FUNC_CONTINUE 1
+#define IOTCON_FUNC_CONTINUE true
 
 /**
  * @brief Enumeration for action of observation.

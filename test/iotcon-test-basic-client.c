@@ -288,7 +288,7 @@ static void _on_get(iotcon_remote_resource_h resource,
 	iotcon_representation_destroy(send_repr);
 }
 
-static int _get_res_type_cb(const char *string, void *user_data)
+static bool _get_res_type_cb(const char *string, void *user_data)
 {
 	char *resource_uri_path = user_data;
 

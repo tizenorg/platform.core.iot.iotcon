@@ -418,9 +418,9 @@ int iotcon_representation_remove_child(iotcon_representation_h parent,
  * @param[in] child The child representation handle
  * @param[in] user_data The user data to pass to the function
  *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_FUNC_CONTINUE  Continue to iterate next child representation
- * @retval #IOTCON_FUNC_STOP  Stop to iterate children representation
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
  *
  * @pre iotcon_representation_foreach_children() will invoke this callback function.
  *

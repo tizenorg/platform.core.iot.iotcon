@@ -349,16 +349,15 @@ int iotcon_list_get_length(iotcon_list_h list, unsigned int *length);
  * @param[in] value The integer value
  * @param[in] user_data The user data to pass to the function
  *
- * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
- * otherwise #IOTCON_FUNC_STOP to break out of the loop
- * @retval #IOTCON_FUNC_STOP  stop to call next function
- * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
  *
  * @pre iotcon_list_foreach_int() will invoke this callback function.
  *
  * @see iotcon_list_foreach_int()
  */
-typedef int (*iotcon_list_int_cb)(int pos, int value, void *user_data);
+typedef bool (*iotcon_list_int_cb)(int pos, int value, void *user_data);
 
 /**
  * @brief Gets all integer values of the given list by invoking the callback function.
@@ -389,16 +388,15 @@ int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_cb cb, void *use
  * @param[in] value The boolean value
  * @param[in] user_data The user data to pass to the function
  *
- * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
- * otherwise #IOTCON_FUNC_STOP to break out of the loop
- * @retval #IOTCON_FUNC_STOP  stop to call next function
- * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
  *
  * @pre iotcon_list_foreach_bool() will invoke this callback function.
  *
  * @see iotcon_list_foreach_bool()
  */
-typedef int (*iotcon_list_bool_cb)(int pos, bool value, void *user_data);
+typedef bool (*iotcon_list_bool_cb)(int pos, bool value, void *user_data);
 
 /**
  * @brief Gets all boolean values of the given list by invoking the callback function.
@@ -429,16 +427,15 @@ int iotcon_list_foreach_bool(iotcon_list_h list, iotcon_list_bool_cb cb, void *u
  * @param[in] value The double value
  * @param[in] user_data The user data to pass to the function
  *
- * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
- * otherwise #IOTCON_FUNC_STOP to break out of the loop
- * @retval #IOTCON_FUNC_STOP  stop to call next function
- * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
  *
  * @pre iotcon_list_foreach_double() will invoke this callback function.
  *
  * @see iotcon_list_foreach_double()
  */
-typedef int (*iotcon_list_double_cb)(int pos, double value, void *user_data);
+typedef bool (*iotcon_list_double_cb)(int pos, double value, void *user_data);
 
 /**
  * @brief Gets all double values of the given list by invoking the callback function.
@@ -470,16 +467,15 @@ int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_cb cb,
  * @param[in] value The string value
  * @param[in] user_data The user data to pass to the function
  *
- * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
- * otherwise #IOTCON_FUNC_STOP to break out of the loop
- * @retval #IOTCON_FUNC_STOP  stop to call next function
- * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
  *
  * @pre iotcon_list_foreach_str() will invoke this callback function.
  *
  * @see iotcon_list_foreach_str()
  */
-typedef int (*iotcon_list_str_cb)(int pos, const char *value, void *user_data);
+typedef bool (*iotcon_list_str_cb)(int pos, const char *value, void *user_data);
 
 /**
  * @brief Gets all string values of the given list by invoking the callback function.
@@ -510,16 +506,15 @@ int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_cb cb, void *use
  * @param[in] value The list value
  * @param[in] user_data The user data to pass to the function
  *
- * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
- * otherwise #IOTCON_FUNC_STOP to break out of the loop
- * @retval #IOTCON_FUNC_STOP  stop to call next function
- * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
  *
  * @pre iotcon_list_foreach_list() will invoke this callback function.
  *
  * @see iotcon_list_foreach_list()
  */
-typedef int (*iotcon_list_list_cb)(int pos, iotcon_list_h value, void *user_data);
+typedef bool (*iotcon_list_list_cb)(int pos, iotcon_list_h value, void *user_data);
 
 /**
  * @brief Gets all sub lists of the given list by invoking the callback function.
@@ -550,16 +545,15 @@ int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_cb cb, void *u
  * @param[in] value The state value
  * @param[in] user_data The user data to pass to the function
  *
- * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
- * otherwise #IOTCON_FUNC_STOP to break out of the loop
- * @retval #IOTCON_FUNC_STOP  stop to call next function
- * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
  *
  * @pre iotcon_list_foreach_state() will invoke this callback function.
  *
  * @see iotcon_list_foreach_state()
  */
-typedef int (*iotcon_list_state_cb)(int pos, iotcon_state_h value, void *user_data);
+typedef bool (*iotcon_list_state_cb)(int pos, iotcon_state_h value, void *user_data);
 
 /**
  * @brief Gets all state of the given list by invoking the callback function.

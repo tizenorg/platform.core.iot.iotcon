@@ -172,7 +172,7 @@ API int iotcon_options_foreach(iotcon_options_h options, iotcon_options_foreach_
 
 	g_hash_table_iter_init(&iter, options->hash);
 	while (g_hash_table_iter_next(&iter, &key, &value)) {
-		if (false == cb(GPOINTER_TO_UINT(key), value, user_data))
+		if (IOTCON_FUNC_STOP == cb(GPOINTER_TO_UINT(key), value, user_data))
 			break;
 	}
 

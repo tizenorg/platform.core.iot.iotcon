@@ -23,7 +23,7 @@
 static char *door_resource_device_id;
 static GList *device_id_list;
 
-static int _get_res_type_cb(const char *string, void *user_data)
+static bool _get_res_type_cb(const char *string, void *user_data)
 {
 	char *resource_uri_path = user_data;
 

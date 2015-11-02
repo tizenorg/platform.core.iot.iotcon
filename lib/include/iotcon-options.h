@@ -16,6 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_STRUCT_OPTIONS_H__
 #define __IOT_CONNECTIVITY_MANAGER_STRUCT_OPTIONS_H__
 
+#include <stdbool.h>
 #include <iotcon-constant.h>
 
 /**
@@ -147,22 +148,21 @@ int iotcon_options_lookup(iotcon_options_h options, unsigned short id, char **da
  * @param[in] data The data of the option
  * @param[in] user_data The user data to pass to the function
  *
- * @return #IOTCON_FUNC_CONTINUE to continue with the next function of the loop,
- * otherwise #IOTCON_FUNC_STOP to break out of the loop
- * @retval #IOTCON_FUNC_STOP  stop to call next function
- * @retval #IOTCON_FUNC_CONTINUE  continue to call next function
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
  *
  * @pre iotcon_options_foreach() will invoke this callback function.
  *
  * @see iotcon_options_foreach()
  */
-typedef int (*iotcon_options_foreach_cb)(unsigned short id, const char *data,
+typedef bool (*iotcon_options_foreach_cb)(unsigned short id, const char *data,
 		void *user_data);
 
 /**
  * @brief Gets all datas of the options by invoking the callback function.
  * @details iotcon_options_foreach_cb() will be called for each option.\n
- * If iotcon_options_foreach_cb() returns #IOTCON_FUNC_STOP, iteration will be stop.
+ * If iotcon_options_foreach_cb() returns false, iteration will be stop.
  *
  * @since_tizen 3.0
  *

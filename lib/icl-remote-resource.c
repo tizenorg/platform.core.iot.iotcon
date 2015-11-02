@@ -221,7 +221,7 @@ API void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource)
 	free(resource);
 }
 
-static int _icl_remote_resource_header_foreach_cb(unsigned short id,
+static bool _icl_remote_resource_header_foreach_cb(unsigned short id,
 		const char *data, void *user_data)
 {
 	int ret;
