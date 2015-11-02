@@ -923,8 +923,6 @@ static int _ioty_set_device_info()
 	free(icd_tizen_info.device_name);
 	icd_tizen_info.device_name = device_name;
 
-	_ioty_print_device_info(device_info);
-
 	return IOTCON_ERROR_NONE;
 }
 
@@ -1026,8 +1024,6 @@ int icd_ioty_set_platform_info()
 	/* platform_info.hardwareVersion */
 	/* platform_info.supportUrl */
 	/* platform_info.systemTime */
-
-	_ioty_print_platform_info(platform_info);
 
 	icd_ioty_csdk_lock();
 	ret = OCSetPlatformInfo(platform_info);
