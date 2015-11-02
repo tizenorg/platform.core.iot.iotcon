@@ -331,7 +331,7 @@ int iotcon_resource_notify(iotcon_resource_h resource, iotcon_notimsg_h msg,
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
- * @see iotcon_resource_is_observable()
+ * @see iotcon_resource_get_properties()
  */
 int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *number);
 
@@ -352,7 +352,7 @@ int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *numb
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
- * @see iotcon_resource_is_observable()
+ * @see iotcon_resource_get_properties()
  */
 int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 		iotcon_resource_h *child);
@@ -373,7 +373,7 @@ int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
- * @see iotcon_resource_is_observable()
+ * @see iotcon_resource_get_properties()
  */
 int iotcon_resource_get_uri_path(iotcon_resource_h resource, char **uri_path);
 
@@ -393,7 +393,7 @@ int iotcon_resource_get_uri_path(iotcon_resource_h resource, char **uri_path);
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_interfaces()
- * @see iotcon_resource_is_observable()
+ * @see iotcon_resource_get_properties()
  */
 int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_h *types);
 
@@ -413,7 +413,7 @@ int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
- * @see iotcon_resource_is_observable()
+ * @see iotcon_resource_get_properties()
  */
 int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces);
 
@@ -423,7 +423,7 @@ int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces);
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of the resource
- * @param[out] observable The value of observable
+ * @param[out] properties The properties of resource
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -435,7 +435,7 @@ int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces);
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
  */
-int iotcon_resource_is_observable(iotcon_resource_h resource, bool *observable);
+int iotcon_resource_get_properties(iotcon_resource_h resource, int *properties);
 
 /**
  * @}

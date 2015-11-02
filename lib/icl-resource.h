@@ -42,7 +42,7 @@ struct icl_notify_msg {
 
 struct icl_resource {
 	char *uri_path;
-	bool is_observable;
+	int properties;
 	iotcon_resource_types_h types;
 	int ifaces;
 	iotcon_request_handler_cb cb;

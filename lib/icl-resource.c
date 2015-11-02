@@ -214,7 +214,7 @@ API int iotcon_resource_create(const char *uri_path,
 	resource->types = icl_resource_types_ref(res_types);
 	resource->uri_path = ic_utils_strdup(uri_path);
 	resource->ifaces = ifaces;
-	resource->is_observable = properties & IOTCON_OBSERVABLE;
+	resource->properties = properties;
 
 	snprintf(sig_name, sizeof(sig_name), "%s_%u", IC_DBUS_SIGNAL_REQUEST_HANDLER,
 			signal_number);
@@ -520,12 +520,12 @@ API int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces)
 }
 
 
-API int iotcon_resource_is_observable(iotcon_resource_h resource, bool *observable)
+API int iotcon_resource_get_properties(iotcon_resource_h resource, int *properties)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == observable, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == properties, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*observable = resource->is_observable;
+	*properties = resource->properties;
 
 	return IOTCON_ERROR_NONE;
 }

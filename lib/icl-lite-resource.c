@@ -38,7 +38,7 @@ struct icl_lite_resource {
 	iotcon_state_h state;
 	int64_t handle;
 	unsigned int sub_id;
-	bool is_observable;
+	int properties;
 };
 
 
@@ -113,7 +113,7 @@ static int _icl_lite_resource_notify(iotcon_lite_resource_h lite_resource)
 	struct icl_resource resource = {0};
 
 	RETV_IF(NULL == lite_resource, IOTCON_ERROR_INVALID_PARAMETER);
-	if (false == lite_resource->is_observable)
+	if (false == (IOTCON_OBSERVABLE & lite_resource->properties))
 		return IOTCON_ERROR_NONE;
 
 	resource.handle = lite_resource->handle;
@@ -322,7 +322,7 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		return IOTCON_ERROR_IOTIVITY;
 	}
 
-	resource->is_observable = properties & IOTCON_OBSERVABLE;
+	resource->properties = properties;
 	resource->uri_path = ic_utils_strdup(uri_path);
 
 	ret = icl_state_clone(state, &(resource->state));
