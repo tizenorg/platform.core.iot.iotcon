@@ -30,8 +30,8 @@
 #define ICD_IOTY_COAPS "coaps://"
 
 /* TODO Define Tizen Information Resource(uri, resource type) */
-#define ICD_IOTY_TIZEN_INFO_URI "/org/tizen/iot/devInfo"
-#define ICD_IOTY_TIZEN_INFO_TYPE "org.tizen.iot.devInfo"
+#define ICD_IOTY_TIZEN_INFO_URI "/org/tizen/iot/d"
+#define ICD_IOTY_TIZEN_INFO_TYPE "org.tizen.iot.d"
 
 #define ICD_IOTY_TIZEN_INFO_DEVICE_NAME "device_name"
 #define ICD_IOTY_TIZEN_INFO_TIZEN_DEVICE_ID "tizen_device_id"

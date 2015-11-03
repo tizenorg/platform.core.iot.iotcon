@@ -73,7 +73,9 @@ void iotcon_resource_types_destroy(iotcon_resource_types_h types);
  * @brief Inserts a resource type into the list.
  *
  * @since_tizen 3.0
- * @remarks The length of resource type should be less than or equal to 61. \n
+ * @remarks The length of @a type should be less than or equal to 61.\n
+ * The @a type must start with a lowercase alphabetic character, followed by a sequence
+ * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.\n
  * Duplicate strings are not allowed.
  *
  * @param[in] types The handle of the resource types

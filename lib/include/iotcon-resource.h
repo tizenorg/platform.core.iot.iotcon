@@ -177,6 +177,10 @@ int iotcon_resource_bind_interface(iotcon_resource_h resource, iotcon_interface_
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
  *
+ * @remarks The length of @a resource_type should be less than or equal to 61.\n
+ * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
+ * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.\n
+ *
  * @param[in] resource_handle The handle of the resource
  * @param[in] resource_type The type to be bound to the resource
  *

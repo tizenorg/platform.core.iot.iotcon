@@ -66,6 +66,10 @@ typedef void (*iotcon_presence_cb)(int result, unsigned int nonce,
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
  *
+ * @remarks The length of @a resource_type should be less than or equal to 61.\n
+ * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
+ * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.\n
+ *
  * @param[in] host_address The address or addressable name of the server
  * @param[in] connectivity_type The connectivity type
  * @param[in] resource_type A resource type that a client has interested in
@@ -145,6 +149,10 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource, int 
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks The length of @a resource_type should be less than or equal to 61.\n
+ * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
+ * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.\n
  *
  * @param[in] host_address The address or addressable name of server
  * @param[in] connectivity_type The connectivity type
