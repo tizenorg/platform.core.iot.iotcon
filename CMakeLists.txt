@@ -10,12 +10,6 @@ SET(CLIENT ${PROJECT_NAME})
 SET(DAEMON "${PROJECT_NAME}-daemon")
 SET(DBUS_INTERFACE "org.tizen.${PROJECT_NAME}.dbus")
 
-SET(OCLIB "oc")
-SET(OCLOGGER "oc_logger")
-SET(OCLOGGER_CORE "oc_logger_core")
-SET(CA "connectivity_abstraction")
-SET(OCTBSTACK "octbstack")
-
 IF(NEW_SECURE)
 CONFIGURE_FILE(${PROJECT_NAME}.conf.in ${PROJECT_NAME}.conf @ONLY)
 INSTALL(FILES ${PROJECT_NAME}.conf DESTINATION ${SYSCONF_INSTALL_DIR}/dbus-1/system.d/)

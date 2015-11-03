@@ -13,12 +13,12 @@ Source1004: %{name}-test-old.manifest
 Source2001: %{name}.conf.in
 BuildRequires:  cmake
 BuildRequires:  boost-devel
-BuildRequires:  iotivity-devel
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(capi-base-common)
 BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(capi-system-system-settings)
+BuildRequires:  pkgconfig(iotivity)
 %if "%{tizen}" == "2.3"
 BuildRequires:  python-xml
 %endif

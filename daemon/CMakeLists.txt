@@ -7,7 +7,15 @@ SET(DAEMON_SRCS ${DAEMON_SRCS} ${CMAKE_SOURCE_DIR}/common/ic-dbus.c)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/common/ic-dbus.c
 	PROPERTIES GENERATED TRUE)
 
-pkg_check_modules(daemon_pkgs REQUIRED gio-2.0 dlog gio-unix-2.0 capi-system-info capi-system-system-settings)
+pkg_check_modules(daemon_pkgs REQUIRED gio-2.0 dlog gio-unix-2.0 capi-system-info
+	capi-system-system-settings iotivity)
+
+FOREACH(flag ${daemon_pkgs_CFLAGS_OTHER})
+	IF(${flag} MATCHES "\\-D+")
+		ADD_DEFINITIONS(${flag})
+	ENDIF(${flag} MATCHES "\\-D+")
+ENDFOREACH(flag)
+
 INCLUDE_DIRECTORIES(${daemon_pkgs_INCLUDE_DIRS})
 LINK_DIRECTORIES(${daemon_pkgs_LIBRARY_DIRS})
 
@@ -18,13 +26,6 @@ ADD_DEFINITIONS("-DIOTCON_DBUS_INTERFACE=\"${DBUS_INTERFACE}\"")
 ADD_EXECUTABLE(${DAEMON} ${DAEMON_SRCS})
 ADD_DEPENDENCIES(${DAEMON} GENERATED_DBUS_CODE)
 
-TARGET_LINK_LIBRARIES(${DAEMON}
-	${daemon_pkgs_LIBRARIES}
-	${OCLIB}
-	${OCLOGGER}
-	${OCLOGGER_CORE}
-	${CA}
-	${OCTBSTACK}
-)
+TARGET_LINK_LIBRARIES(${DAEMON} ${daemon_pkgs_LIBRARIES})
 
 INSTALL(TARGETS ${DAEMON} DESTINATION ${BIN_INSTALL_DIR})
