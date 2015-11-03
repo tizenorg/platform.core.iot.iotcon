@@ -531,7 +531,7 @@ int icl_remote_resource_stop_observing(iotcon_remote_resource_h resource,
 }
 
 
-API int iotcon_remote_resource_observer_stop(iotcon_remote_resource_h resource)
+API int iotcon_remote_resource_stop_observing(iotcon_remote_resource_h resource)
 {
 	int ret;
 

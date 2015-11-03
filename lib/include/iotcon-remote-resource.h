@@ -37,13 +37,19 @@
 
 /**
  * @brief Creates a new resource handle.
- * @details Creates a resource proxy object so that get/put/observe functionality can be used
- * without discovering the object in advance.\n
+ * @details Creates a resource proxy object so that iotcon_remote_resource_get(),
+ * iotcon_remote_resource_put(), iotcon_remote_resource_post(),
+ * iotcon_remote_resource_delete(), iotcon_remote_resource_start_observing(),
+ * iotcon_remote_resource_start_caching() and iotcon_remote_resource_start_monitoring()
+ * API can be used without discovering the object in advance.\n
  * To use this API, you should provide all of the details required to correctly contact and
  * observe the object.\n
  * If not, you should discover the resource object manually.
  *
  * @since_tizen 3.0
+ *
+ * @remarks You must destroy @a remote_resource by calling iotcon_remote_resource_destroy()
+ * if @a remote_resource is no longer needed.
  *
  * @param[in] host_address The host address of the resource
  * @param[in] connectivity_type The connectivity type
@@ -51,7 +57,7 @@
  * @param[in] is_observable Allow observation
  * @param[in] resource_types The resource type of the resource. For example, "core.light"
  * @param[in] resource_ifaces The resource interfaces (whether it is collection etc)
- * @param[out] client_handle Generated resource handle
+ * @param[out] remote_resource Generated resource handle
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -69,10 +75,10 @@ int iotcon_remote_resource_create(const char *host_address,
 		bool is_observable,
 		iotcon_resource_types_h resource_types,
 		int resource_ifaces,
-		iotcon_remote_resource_h *client_handle);
+		iotcon_remote_resource_h *remote_resource);
 
 /**
- * @brief Releases a resource handle.
+ * @brief Destroys a resource handle.
  * @details Decrements reference count of the source resource.\n
  * If the reference count drops to 0, releases a resource handle.
  *
@@ -88,9 +94,12 @@ int iotcon_remote_resource_create(const char *host_address,
 void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource);
 
 /**
- * @brief Makes a clone of a remote resource.
+ * @brief Clones a clone of a remote resource.
  *
  * @since_tizen 3.0
+ *
+ * @remarks You must destroy @a dest by calling iotcon_remote_resource_destroy()
+ * if @a dest is no longer needed.
  *
  * @param[in] src The Source of resource
  * @param[out] dest The cloned resource handle
@@ -133,7 +142,7 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
 		void *user_data);
 
 /**
- * @brief Sets observation on the resource
+ * @brief Starts observing on the resource
  * @details When server sends notification message, iotcon_remote_resource_response_cb() will be called.
  * The @a observe_type could be one of #iotcon_observe_type_e.
  *
@@ -158,7 +167,7 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
  * @post When the @a resource receive notification message, iotcon_remote_resource_response_cb() will be called.
  *
  * @see iotcon_remote_resource_response_cb()
- * @see iotcon_remote_resource_observer_stop()
+ * @see iotcon_remote_resource_stop_observing()
  * @see iotcon_resource_notify()
  */
 int iotcon_remote_resource_start_observing(iotcon_remote_resource_h resource,
@@ -168,7 +177,7 @@ int iotcon_remote_resource_start_observing(iotcon_remote_resource_h resource,
 		void *user_data);
 
 /**
- * @brief Cancels the observation on the resource
+ * @brief Stops observing on the resource
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -187,7 +196,7 @@ int iotcon_remote_resource_start_observing(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_start_observing()
  * @see iotcon_resource_notify()
  */
-int iotcon_remote_resource_observer_stop(iotcon_remote_resource_h resource);
+int iotcon_remote_resource_stop_observing(iotcon_remote_resource_h resource);
 
 /**
  * @brief Gets the attributes of a resource.
@@ -214,12 +223,13 @@ int iotcon_remote_resource_observer_stop(iotcon_remote_resource_h resource);
  * @see iotcon_remote_resource_response_cb()
  * @see iotcon_remote_resource_put()
  * @see iotcon_remote_resource_post()
+ * @see iotcon_set_timeout()
  */
 int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h query,
 		iotcon_remote_resource_response_cb cb, void *user_data);
 
 /**
- * @brief Sets the representation of a resource (via PUT)
+ * @brief Puts the representation of a resource
  * @details When server sends response on put request, iotcon_remote_resource_response_cb() will be called.
  *
  * @since_tizen 3.0
@@ -244,6 +254,7 @@ int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h
  * @see iotcon_remote_resource_response_cb()
  * @see iotcon_remote_resource_get()
  * @see iotcon_remote_resource_post()
+ * @see iotcon_set_timeout()
  */
 int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
 		iotcon_representation_h repr,
@@ -277,6 +288,7 @@ int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_response_cb()
  * @see iotcon_remote_resource_get()
  * @see iotcon_remote_resource_put()
+ * @see iotcon_set_timeout()
  */
 int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
 		iotcon_representation_h repr,
@@ -306,6 +318,7 @@ int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
  * @post When the client receive delete response, iotcon_remote_resource_response_cb() will be called.
  *
  * @see iotcon_remote_resource_response_cb()
+ * @see iotcon_set_timeout()
  */
 int iotcon_remote_resource_delete(iotcon_remote_resource_h resource,
 		iotcon_remote_resource_response_cb cb, void *user_data);
@@ -330,8 +343,8 @@ typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
 		void *user_data);
 
 /**
- * @brief Start caching of a remote resource.
- * @details Use this function to start caching the resource's attribute data (state).\n
+ * @brief Starts caching of a remote resource.
+ * @details Use this function to start caching the resource's attribute.\n
  * Default caching time interval is 10 seconds.
  * Internally, it operates GET method, periodically, and it observes the remote resource.
  *
@@ -363,8 +376,8 @@ int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
 		void *user_data);
 
 /**
- * @brief Stop caching of a remote resource.
- * @details Use this function to stop caching the resource's attribute data (state).\n
+ * @brief Stops caching of a remote resource.
+ * @details Use this function to stop caching the resource's attribute.\n
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -402,7 +415,7 @@ typedef void (*iotcon_remote_resource_state_changed_cb)(iotcon_remote_resource_h
 		iotcon_remote_resource_state_e state, void *user_data);
 
 /**
- * @brief Start monitoring of a remote resource.
+ * @brief Starts monitoring of a remote resource.
  * @details When remote resource's state are changed, registered callbacks will be called\n
  * in turn. Default monitoring time interval is 10 seconds.
  * Internally, it operates GET method, periodically, and it subscribes the devices's presence.
@@ -432,7 +445,7 @@ int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resource,
 		void *user_data);
 
 /**
- * @brief Stop monitoring.
+ * @brief Stops monitoring of a remote resource.
  * @details Use this function to stop monitoring the remote resource.
  *
  * @since_tizen 3.0
@@ -457,6 +470,7 @@ int iotcon_remote_resource_stop_monitoring(iotcon_remote_resource_h resource);
  * @brief Gets an URI path of the remote resource
  *
  * @since_tizen 3.0
+ *
  * @remarks @a uri_path must not be released using free().
  *
  * @param[in] resource The handle of the remote resource
@@ -505,6 +519,7 @@ int iotcon_remote_resource_get_connectivity_type(iotcon_remote_resource_h resour
  * @brief Gets an host address of the remote resource
  *
  * @since_tizen 3.0
+ *
  * @remarks @a host_address must not be released using free().
  *
  * @param[in] resource The handle of the remote resource
@@ -529,6 +544,7 @@ int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resource,
  * @brief Gets an device id of the remote resource
  *
  * @since_tizen 3.0
+ *
  * @remarks @a device_id must not be released using free().
  *
  * @param[in] resource The handle of the remote resource
@@ -553,6 +569,8 @@ int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
  * @brief Gets resource types of the remote resource
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a types must not be released using iotcon_resource_types_destroy().
  *
  * @param[in] resource The handle of the remote resource
  * @param[out] types The resource types of the remote resource
@@ -641,9 +659,11 @@ int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
 		iotcon_options_h options);
 
 /**
- * @brief Get cached representation from the remote resource
+ * @brief Gets cached representation from the remote resource
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a representation must not be released using iotcon_representation_destroy().
  *
  * @param[in] resource The handle of the remote resource
  * @param[out] representation The handle of the representation

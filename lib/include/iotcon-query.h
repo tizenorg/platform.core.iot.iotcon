@@ -39,6 +39,9 @@
  *
  * @since_tizen 3.0
  *
+ * @remarks You must destroy @a query by calling iotcon_query_destroy()
+ * if @a query is no longer needed.
+ *
  * @param[out] query A newly allocated query handle
  *
  * @return 0 on success, otherwise a negative error value.
@@ -54,7 +57,7 @@
 int iotcon_query_create(iotcon_query_h *query);
 
 /**
- * @brief Free a query handle.
+ * @brief Destroys a query handle.
  *
  * @since_tizen 3.0
  *
@@ -70,9 +73,10 @@ int iotcon_query_create(iotcon_query_h *query);
 void iotcon_query_destroy(iotcon_query_h query);
 
 /**
- * @brief Get resource types from the query.
+ * @brief Gets resource types from the query.
  *
  * @since_tizen 3.0
+ *
  * @remarks @a types must not be released using iotcon_resource_types_destroy().
  *
  * @param[in] query The handle of the query
@@ -93,7 +97,7 @@ void iotcon_query_destroy(iotcon_query_h query);
 int iotcon_query_get_resource_tyeps(iotcon_query_h query, iotcon_resource_types_h *types);
 
 /**
- * @brief Get resource types from the query.
+ * @brief Gets resource types from the query.
  * @details @a iface could be one of #iotcon_interface_e.
  *
  * @since_tizen 3.0
@@ -159,7 +163,7 @@ int iotcon_query_set_resource_types(iotcon_query_h query, iotcon_resource_types_
 int iotcon_query_set_interface(iotcon_query_h query, iotcon_interface_e iface);
 
 /**
- * @brief Inserts a new key and correspoding value into the query.
+ * @brief Adds a new key and correspoding value into the query.
  *
  * @since_tizen 3.0
  * @remarks The full length of query should be less than or equal to 64.
@@ -181,7 +185,7 @@ int iotcon_query_set_interface(iotcon_query_h query, iotcon_interface_e iface);
 int iotcon_query_add(iotcon_query_h query, const char *key, const char *value);
 
 /**
- * @brief Deletes the key and its associated value from the query.
+ * @brief Removes the key and its associated value from the query.
  *
  * @since_tizen 3.0
  *
@@ -200,9 +204,11 @@ int iotcon_query_add(iotcon_query_h query, const char *key, const char *value);
 int iotcon_query_remove(iotcon_query_h query, const char *key);
 
 /**
- * @brief Lookup data at the given key from the query.
+ * @brief Looks up data at the given key from the query.
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a data must not be released using free().
  *
  * @param[in] query The handle of the query
  * @param[in] key The key of the query to lookup

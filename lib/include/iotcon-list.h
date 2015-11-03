@@ -40,6 +40,9 @@
  *
  * @since_tizen 3.0
  *
+ * @remarks You must destroy @a list by calling iotcon_list_destroy()
+ * if @a list is no longer needed.
+ *
  * @param[in] type The type of list
  * @param[out] list A newly allocated list handle
  *
@@ -52,7 +55,7 @@
 int iotcon_list_create(iotcon_types_e type, iotcon_list_h *list);
 
 /**
- * @brief Frees a list handle.
+ * @brief Destroys a list handle.
  * @details Releases a @a list and its internal data.
  *
  * @since_tizen 3.0
@@ -64,7 +67,7 @@ int iotcon_list_create(iotcon_types_e type, iotcon_list_h *list);
 void iotcon_list_destroy(iotcon_list_h list);
 
 /**
- * @brief Inserts a new element integer value into the list at the given position.
+ * @brief Adds a new element integer value into the list at the given position.
  * @details If @a pos is negative, or is larger than the number of elements in the list,
  * the new value is added on to the end of the list.
  *
@@ -83,7 +86,7 @@ void iotcon_list_destroy(iotcon_list_h list);
 int iotcon_list_add_int(iotcon_list_h list, int val, int pos);
 
 /**
- * @brief Inserts a new element boolean value into the list at the given position.
+ * @brief Adds a new element boolean value into the list at the given position.
  * @details If @a pos is negative, or is larger than the number of elements in the list,
  * the new value is added on to the end of the list.
  *
@@ -102,7 +105,7 @@ int iotcon_list_add_int(iotcon_list_h list, int val, int pos);
 int iotcon_list_add_bool(iotcon_list_h list, bool val, int pos);
 
 /**
- * @brief Inserts a new element double value into the list at the given position.
+ * @brief Adds a new element double value into the list at the given position.
  * @details If @a pos is negative, or is larger than the number of elements in the list,
  * the new value is added on to the end of the list.
  *
@@ -121,7 +124,7 @@ int iotcon_list_add_bool(iotcon_list_h list, bool val, int pos);
 int iotcon_list_add_double(iotcon_list_h list, double val, int pos);
 
 /**
- * @brief Inserts a new element string value into the list at the given position.
+ * @brief Adds a new element string value into the list at the given position.
  * @details If @a pos is negative, or is larger than the number of elements in the list,
  * the new value is added on to the end of the list.
  *
@@ -140,7 +143,7 @@ int iotcon_list_add_double(iotcon_list_h list, double val, int pos);
 int iotcon_list_add_str(iotcon_list_h list, char *val, int pos);
 
 /**
- * @brief Inserts a new element list into the list at the given position.
+ * @brief Adds a new element list into the list at the given position.
  * @details If @a pos is negative, or is larger than the number of elements in the list,
  * the new value is added on to the end of the list.
  *
@@ -159,7 +162,7 @@ int iotcon_list_add_str(iotcon_list_h list, char *val, int pos);
 int iotcon_list_add_list(iotcon_list_h list, iotcon_list_h val, int pos);
 
 /**
- * @brief Inserts a new element state value into the list at the given position.
+ * @brief Adds a new element state value into the list at the given position.
  * @details If @a pos is negative, or is larger than the number of elements in the list,
  * the new value is added on to the end of the list.
  *
@@ -237,6 +240,8 @@ int iotcon_list_get_nth_double(iotcon_list_h list, int pos, double *val);
  *
  * @since_tizen 3.0
  *
+ * @remarks @a val must not be released using free().
+ *
  * @param[in] list The list handle
  * @param[in] pos The position
  * @param[out] val The string value to get
@@ -254,6 +259,8 @@ int iotcon_list_get_nth_str(iotcon_list_h list, int pos, char **val);
  * @details Iterates over the list until it reaches the @a pos-1 position.
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a dest must not be released using iotcon_list_destroy().
  *
  * @param[in] src The list handle
  * @param[in] pos The position
@@ -273,6 +280,8 @@ int iotcon_list_get_nth_list(iotcon_list_h src, int pos, iotcon_list_h *dest);
  *
  * @since_tizen 3.0
  *
+ * @remarks @a state must not be released using iotcon_state_destroy().
+ *
  * @param[in] list The list handle
  * @param[in] pos The position
  * @param[out] state The state value to get
@@ -286,7 +295,7 @@ int iotcon_list_get_nth_list(iotcon_list_h src, int pos, iotcon_list_h *dest);
 int iotcon_list_get_nth_state(iotcon_list_h list, int pos, iotcon_state_h *state);
 
 /**
- * @brief Deletes the value at the given position.
+ * @brief Removes the value at the given position.
  * @details Iterates over the list until it reaches the @a pos-1 position.
  *
  * @since_tizen 3.0

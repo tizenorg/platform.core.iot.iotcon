@@ -28,7 +28,7 @@
  *
  * @brief Iotcon Response provides API to manage response.
  *
- * @section CAPI_IOT_CONNECTIVITY_SERVER_RESPONSE_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_RESPONSE_MODULE_HEADER Header
  *  \#include <iotcon.h>
  *
  * @{
@@ -38,6 +38,9 @@
  * @brief Creates a response handle.
  *
  * @since_tizen 3.0
+ *
+ * @remarks You must destroy @a response by calling iotcon_response_destroy()
+ * if @a response is no longer needed.
  *
  * @param[in] request The handle of received request handle
  * @param[out] response Generated response handle
@@ -53,7 +56,7 @@
 int iotcon_response_create(iotcon_request_h request, iotcon_response_h *response);
 
 /**
- * @brief Free a response handle.
+ * @brief Destroys a response handle.
  *
  * @since_tizen 3.0
  *
@@ -69,6 +72,8 @@ void iotcon_response_destroy(iotcon_response_h resp);
  * @brief Gets header options of the response
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a options must not be released using iotcon_options_destroy().
  *
  * @param[in] resp The handle of the response
  * @param[out] options The handle of the header options
@@ -87,6 +92,8 @@ int iotcon_response_get_options(iotcon_response_h resp, iotcon_options_h *option
  * @brief Gets representation of the response
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a repr must not be released using iotcon_representation_destroy().
  *
  * @param[in] resp The handle of the response
  * @param[out] repr The handle of the representation
@@ -144,6 +151,7 @@ int iotcon_response_set_result(iotcon_response_h resp, iotcon_response_result_e 
  * @since_tizen 3.0
  *
  * @param[in] resp The handle of the response
+ * @param[in] iface The interface of the representation
  * @param[in] repr The representation of the response
  *
  * @return 0 on success, otherwise a negative error value.

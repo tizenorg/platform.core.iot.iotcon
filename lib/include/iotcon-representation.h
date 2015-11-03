@@ -190,6 +190,9 @@
  *
  * @since_tizen 3.0
  *
+ * @remarks You must destroy @a repr by calling iotcon_representation_destroy()
+ * if @a repr is no longer needed.
+ *
  * @param[out] repr A newly allocated representation handle
  *
  * @return 0 on success, otherwise a negative error value.
@@ -202,7 +205,7 @@
 int iotcon_representation_create(iotcon_representation_h *repr);
 
 /**
- * @brief Frees a representation.
+ * @brief Destroys a representation.
  * @details Releases a @a representation and its internal data.
  *
  * @since_tizen 3.0
@@ -220,6 +223,9 @@ void iotcon_representation_destroy(iotcon_representation_h repr);
  * @details Makes a deep copy of a source representation.
  *
  * @since_tizen 3.0
+ *
+ * @remarks You must destroy @a dest by calling iotcon_representation_destroy()
+ * if @a dest is no longer needed.
  *
  * @param[in] src Source of representation to be copied
  * @param[out] dest Clone of a source representation
@@ -254,6 +260,8 @@ int iotcon_representation_set_uri_path(iotcon_representation_h repr,
  *
  * @since_tizen 3.0
  *
+ * @remarks @a uri_path must not be released using free().
+ *
  * @param[in] repr The representation handle
  * @param[out] uri_path The URI path to get
  *
@@ -283,6 +291,8 @@ int iotcon_representation_set_resource_types(iotcon_representation_h repr,
  * @brief Gets list of resource type from the representation.
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a types must not be released using iotcon_resource_types_destroy().
  *
  * @param[in] repr The representation handle
  * @param[out] types The list of resource types to get
@@ -420,7 +430,7 @@ int iotcon_representation_remove_child(iotcon_representation_h parent,
 typedef bool (*iotcon_children_cb)(iotcon_representation_h child, void *user_data);
 
 /**
- * @brief Call a function for each children representation of parent.
+ * @brief Calls a function for each children representation of parent.
  * @details iotcon_children_cb() will be called for each child.
  *
  * @since_tizen 3.0
@@ -460,6 +470,8 @@ int iotcon_representation_get_children_count(iotcon_representation_h parent,
  * @details Iterates over the parent until it reaches the @a pos-1 position.
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a child must not be released using iotcon_representation_destroy().
  *
  * @param[in] parent The parent representation handle
  * @param[in] pos The position of the child representation

@@ -53,6 +53,8 @@ extern "C" {
  * @retval  #IOTCON_ERROR_DBUS Dbus error
  *
  * @see iotcon_disconnect()
+ * @see iotcon_add_connection_changed_cb()
+ * @see iotcon_remove_connection_changed_cb()
  */
 int iotcon_connect(void);
 
@@ -67,11 +69,16 @@ int iotcon_connect(void);
  * @return void
  *
  * @see iotcon_connect()
+ * @see iotcon_add_connection_changed_cb()
+ * @see iotcon_remove_connection_changed_cb()
  */
 void iotcon_disconnect(void);
 
 /**
- * @brief Gets timeout of asynchronous APIs.
+ * @brief Gets the timeout seconds of iotcon_get_device_info(),
+ * iotcon_get_platform_info(), iotcon_get_tizen_info(), iotcon_find_resource(),
+ * iotcon_remote_resource_get(), iotcon_remote_resource_put(),
+ * iotcon_remote_resource_post() and iotcon_remote_resource_delete().
  *
  * @since_tizen 3.0
  *
@@ -79,45 +86,34 @@ void iotcon_disconnect(void);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
  *
  * @pre iotcon_connect() should be called to connect a connection to the iotcon.
  *
- * @see iotcon_get_device_info()
- * @see iotcon_get_platform_info()
- * @see iotcon_get_tizen_info()
- * @see iotcon_find_resource()
- * @see iotcon_remote_resource_get()
- * @see iotcon_remote_resource_put()
- * @see iotcon_remote_resource_post()
- * @see iotcon_remote_resource_delete()
+ * @see iotcon_set_timeout()
  */
 int iotcon_get_timeout(int *timeout_seconds);
 
-
 /**
- * @brief Set timeout of asynchronous APIs.
- * @details Default timeout is 10 seconds.
- * Maximum timeout is 60 seconds.
+ * @brief Sets the timeout seconds of iotcon_get_device_info(),
+ * iotcon_get_platform_info(), iotcon_get_tizen_info(), iotcon_find_resource(),
+ * iotcon_remote_resource_get(), iotcon_remote_resource_put(),
+ * iotcon_remote_resource_post() and iotcon_remote_resource_delete().
+ * @details Default timeout interval is 10 seconds.
+ * Maximum timeout interval is 60 seconds.
  *
  * @since_tizen 3.0
  *
  * @param[in] timeout_seconds Seconds for timeout
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #IOTCON_ERROR_NONE Successful
- * @retval  #IOTCON_ERROR_DBUS Dbus error
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
+ * @retval #IOTCON_ERROR_DBUS Dbus error
  *
  * @pre iotcon_connect() should be called to connect a connection to the iotcon.
  *
- * @see iotcon_request_device_info()
- * @see iotcon_request_platform_info()
- * @see iotcon_request_tizen_info()
- * @see iotcon_find_resource()
- * @see iotcon_remote_resource_get()
- * @see iotcon_remote_resource_put()
- * @see iotcon_remote_resource_post()
- * @see iotcon_remote_resource_delete()
+ * @see iotcon_get_timeout()
  */
 int iotcon_set_timeout(int timeout_seconds);
 
@@ -133,6 +129,8 @@ int iotcon_set_timeout(int timeout_seconds);
  * @pre The callback must be registered using iotcon_add_connection_changed_cb()\n
  * The callback must be unregistered using iotcon_remove_connection_changed_cb()\n
  *
+ * @see iotcon_connect()
+ * @see iotcon_disconnect()
  * @see iotcon_add_connection_changed_cb()
  * @see iotcon_remove_connection_changed_cb()
  */
@@ -140,7 +138,9 @@ typedef void (*iotcon_connection_changed_cb)(bool is_connected, void *user_data)
 
 /**
  * @brief Adds a callback to Iotcon
- * @details When Iotcon connection status is changed, registered callbacks will be called in turn.
+ * @details When Iotcon connection status is changed with unexpected reason, registered
+ * callbacks will be called in turn. The handles are validate no more after broken connection.
+ * The handles must creates again when connection recovered.
  *
  * @since_tizen 3.0
  *
@@ -154,6 +154,10 @@ typedef void (*iotcon_connection_changed_cb)(bool is_connected, void *user_data)
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  *
+ * @pre iotcon_connect() should be called to connect a connection to the iotcon.
+ *
+ * @see iotcon_connect()
+ * @see iotcon_disconnect()
  * @see iotcon_remove_connection_changed_cb()
  * @see iotcon_connection_changed_cb()
  */
@@ -172,6 +176,10 @@ int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *user
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
+ * @pre iotcon_connect() should be called to connect a connection to the iotcon.
+ *
+ * @see iotcon_connect()
+ * @see iotcon_disconnect()
  * @see iotcon_add_connection_changed_cb()
  * @see iotcon_connection_changed_cb()
  */

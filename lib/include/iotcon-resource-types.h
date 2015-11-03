@@ -39,7 +39,10 @@
  *
  * @since_tizen 3.0
  *
- * @param[out] ret_types A newly allocated list of resource types handle
+ * @remarks You must destroy @a types by calling iotcon_resource_types_destroy()
+ * if @a types is no longer needed.
+ *
+ * @param[out] types A newly allocated list of resource types handle
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -51,10 +54,10 @@
  * @see iotcon_resource_types_remove()
  * @see iotcon_resource_types_clone()
  */
-int iotcon_resource_types_create(iotcon_resource_types_h *ret_types);
+int iotcon_resource_types_create(iotcon_resource_types_h *types);
 
 /**
- * @brief Free a resource types handle.
+ * @brief Destroys a resource types handle.
  *
  * @since_tizen 3.0
  *
@@ -158,6 +161,9 @@ int iotcon_resource_types_foreach(iotcon_resource_types_h types,
  * @details Makes a deep copy of a source list of resource types.
  *
  * @since_tizen 3.0
+ *
+ * @remarks You must @a destroy dest by calling iotcon_resource_types_destroy()
+ * if @a dest is no longer needed.
  *
  * @param[in] src The origin handle of the resource types
  * @param[out] dest Clone of a source list of resource types

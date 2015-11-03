@@ -40,6 +40,9 @@
  *
  * @since_tizen 3.0
  *
+ * @remarks You must destroy @a state by calling iotcon_state_destroy()
+ * if @a state is no longer needed.
+ *
  * @param[out] state A newly allocated state handle
  *
  * @return 0 on success, otherwise a negative error value.
@@ -52,7 +55,7 @@
 int iotcon_state_create(iotcon_state_h *state);
 
 /**
- * @brief Frees a state.
+ * @brief Destroys a state.
  * @details Releases a @a state and its internal data.
  *
  * @since_tizen 3.0
@@ -239,6 +242,8 @@ int iotcon_state_get_double(iotcon_state_h state, const char *key, double *val);
  *
  * @since_tizen 3.0
  *
+ * @remarks @a val must not be released using free().
+ *
  * @param[in] state The state handle
  * @param[in] key The key
  * @param[out] val The string value
@@ -256,6 +261,8 @@ int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val);
  *
  * @since_tizen 3.0
  *
+ * @remarks @a list must not be released using iotcon_list_destroy().
+ *
  * @param[in] state The state handle
  * @param[in] key The key
  * @param[out] list The list value
@@ -272,6 +279,8 @@ int iotcon_state_get_list(iotcon_state_h state, const char *key, iotcon_list_h *
  * @brief Gets the state value from the given key.
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a state must not be released using iotcon_state_destroy().
  *
  * @param[in] src The state handle
  * @param[in] key The key
@@ -301,7 +310,7 @@ int iotcon_state_get_state(iotcon_state_h src, const char *key, iotcon_state_h *
 int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null);
 
 /**
- * @brief Deletes the key and its associated value from the state.
+ * @brief Unsets the key and its associated value from the state.
  *
  * @since_tizen 3.0
  *
@@ -354,7 +363,7 @@ int iotcon_state_get_type(iotcon_state_h state, const char *key, int *type);
 typedef int (*iotcon_state_cb)(iotcon_state_h state, const char *key, void *user_data);
 
 /**
- * @brief Call a function for each element of state.
+ * @brief Calls a function for each element of state.
  * @details iotcon_state_cb() will be called for each child.
  *
  * @since_tizen 3.0

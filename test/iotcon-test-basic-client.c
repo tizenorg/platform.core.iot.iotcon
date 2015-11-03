@@ -34,7 +34,7 @@ static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
 	i++;
 
 	if (2 == i) {
-		iotcon_remote_resource_observer_stop(resource);
+		iotcon_remote_resource_stop_observing(resource);
 		iotcon_remote_resource_destroy(resource);
 	}
 }
@@ -311,15 +311,15 @@ static int _device_id_compare(const void *a, const void *b)
 	return strcmp(a, b);
 }
 
-static void _request_tizen_info(iotcon_tizen_info_h info, int response_result,
+static void _request_tizen_info(iotcon_tizen_info_h info, iotcon_error_e result,
 		void *user_data)
 {
 	int ret;
 	char *device_name = NULL;
 	char *tizen_device_id = NULL;
 
-	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result,
-			"_request_tizen_info Response error(%d)", response_result);
+	RETM_IF(IOTCON_ERROR_NONE != result,
+			"_request_tizen_info Response error(%d)", result);
 
 	ret = iotcon_tizen_info_get_property(info, IOTCON_TIZEN_INFO_DEVICE_NAME,
 			&device_name);
@@ -340,7 +340,7 @@ static void _request_tizen_info(iotcon_tizen_info_h info, int response_result,
 	INFO("- Tizen Device ID : %s", tizen_device_id);
 }
 
-static void _found_resource(iotcon_remote_resource_h resource, int result,
+static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e result,
 		void *user_data)
 {
 	GList *node;
@@ -444,9 +444,9 @@ static void _found_resource(iotcon_remote_resource_h resource, int result,
 	}
 
 	/* request tizen info */
-	ret = iotcon_request_tizen_info(resource_host, connectivity_type, _request_tizen_info, NULL);
+	ret = iotcon_get_tizen_info(resource_host, connectivity_type, _request_tizen_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_request_tizen_info() Fail(%d)", ret);
+		ERR("iotcon_get_tizen_info() Fail(%d)", ret);
 		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
 		free(door_resource_device_id);
 		return;

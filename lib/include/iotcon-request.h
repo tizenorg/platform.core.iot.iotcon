@@ -39,6 +39,8 @@
  *
  * @since_tizen 3.0
  *
+ * @remarks @a host_address must not be released using free().
+ *
  * @param[in] request The handle of the request
  * @param[out] host_address The host address of the request
  *
@@ -79,12 +81,13 @@ int iotcon_request_get_host_address(iotcon_request_h request,
  */
 int iotcon_request_get_connectivity_type(iotcon_request_h request,
 		int *connectivity_type);
-		
+
 /**
  * @brief Gets an representation of the request
  *
  * @since_tizen 3.0
- * @remarks @a repr must not be released using free().
+ *
+ * @remarks @a repr must not be released using iotcon_representation_destroy().
  *
  * @param[in] request The handle of the request
  * @param[out] repr The representation of the request
@@ -105,7 +108,7 @@ int iotcon_request_get_representation(iotcon_request_h request,
 		iotcon_representation_h *repr);
 
 /**
- * @brief Get types of the request
+ * @brief Gets types of the request
  *
  * @since_tizen 3.0
  *
@@ -127,10 +130,11 @@ int iotcon_request_get_representation(iotcon_request_h request,
 int iotcon_request_get_types(iotcon_request_h request, int *types);
 
 /**
- * @brief Get options of the request
+ * @brief Gets options of the request
  *
  * @since_tizen 3.0
- * @remarks @a options must not be released using free().
+ *
+ * @remarks @a options must not be released using iotcon_options_destroy().
  *
  * @param[in] request The handle of the request
  * @param[out] options The options of the request
@@ -150,10 +154,11 @@ int iotcon_request_get_types(iotcon_request_h request, int *types);
 int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *options);
 
 /**
- * @brief Get query of the request
+ * @brief Gets query of the request
  *
  * @since_tizen 3.0
- * @remarks @a query must not be released using free().
+ *
+ * @remarks @a query must not be released using iotcon_query_destroy().
  *
  * @param[in] request The handle of the request
  * @param[out] query The query of the request
@@ -173,7 +178,7 @@ int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *optio
 int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
 
 /**
- * @brief Get observation action of the request
+ * @brief Gets observation action of the request
  *
  * @since_tizen 3.0
  * @details The @a action could be one of #iotcon_observe_action_e.
@@ -196,7 +201,7 @@ int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
 int iotcon_request_get_observer_action(iotcon_request_h request, int *action);
 
 /**
- * @brief Get observation id of the request
+ * @brief Gets observation id of the request
  *
  * @since_tizen 3.0
  *

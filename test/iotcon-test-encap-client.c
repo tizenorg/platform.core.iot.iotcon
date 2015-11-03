@@ -87,7 +87,7 @@ static void _representation_changed_cb(iotcon_remote_resource_h resource,
 	}
 }
 
-static void _found_resource(iotcon_remote_resource_h resource, int result,
+static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e result,
 		void *user_data)
 {
 	GList *node;

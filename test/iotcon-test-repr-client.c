@@ -250,7 +250,7 @@ static int _device_id_compare(const void *a, const void *b)
 	return strcmp(a, b);
 }
 
-static void _found_resource(iotcon_remote_resource_h resource, int result,
+static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e result,
 		void *user_data)
 {
 	GList *node;

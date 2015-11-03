@@ -30,8 +30,6 @@
  * The Iotcon API provides to register resources, discover resources and access them via
  * RESTful API.\n\n
  *
- * @addtogroup CAPI_IOT_CONNECTIVITY_SERVER_MODULE
- * @{
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_RESOURCE Resource
  * A Resource is a component in a server that can be viewed and conrolled by another client.\n
  * There are different resource types, for example a temperature sensor, a light controller etc.\n\n
@@ -142,10 +140,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 	iotcon_resource_types_destroy(resource_types);
 }
  * @endcode
- * @}
  *
- * @addtogroup CAPI_IOT_CONNECTIVITY_CLIENT_MODULE
- * @{
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_FINDING_RESOURCE Finding a resource.
  * This operation returns all resources of given type on the network service.\n
  * This operation is sent via multicast to all services.\n
@@ -217,10 +212,7 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 	}
 }
  * @endcode
- * @}
  *
- * @addtogroup CAPI_IOT_CONNECTIVITY_SERVER_MODULE
- * @{
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_OBSERVING_RESOURCE Observing resource
  * This operation fetches and registers as an observer for the value of simple specific resource.\n
  * An observable resource can handle any number of observers.\n
@@ -348,7 +340,6 @@ static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
 		return;
 }
  * @endcode
- * @}
  *
  */
 

@@ -52,7 +52,7 @@ extern "C" {
 int iotcon_start_presence(unsigned int time_to_live);
 
 /**
- * @brief Stop presence of a server.
+ * @brief Stops presence of a server.
  * @details Use this function to stop sending server's announcements to clients.
  * Server can call this function when terminating, entering to offline or out of network.
  *

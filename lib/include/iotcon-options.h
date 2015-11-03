@@ -39,6 +39,9 @@
  *
  * @since_tizen 3.0
  *
+ * @remarks You must destroy @a options by calling iotcon_options_destroy()
+ * if @a options is no longer needed.
+ *
  * @param[out] options A newly allocated option handle
  *
  * @return 0 on success, otherwise a negative error value.
@@ -54,7 +57,7 @@
 int iotcon_options_create(iotcon_options_h *options);
 
 /**
- * @brief Free an option handle.
+ * @brief Destroys an option handle.
  *
  * @since_tizen 3.0
  *
@@ -70,7 +73,7 @@ int iotcon_options_create(iotcon_options_h *options);
 void iotcon_options_destroy(iotcon_options_h options);
 
 /**
- * @brief Inserts a new id and a correspoding data into the options.
+ * @brief Adds a new id and a correspoding data into the options.
  *
  * @since_tizen 3.0
  * @remarks iotcon_options_h can have up to 2 options. \n
@@ -95,7 +98,7 @@ int iotcon_options_add(iotcon_options_h options, unsigned short id,
 		const char *data);
 
 /**
- * @brief Deletes the id and its associated data from the options.
+ * @brief Removes the id and its associated data from the options.
  *
  * @since_tizen 3.0
  *
@@ -117,6 +120,8 @@ int iotcon_options_remove(iotcon_options_h options, unsigned short id);
  * @brief Looks up data at the given id from the options.
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a data must not be released using free().
  *
  * @param[in] options The handle of the options
  * @param[in] id The id of the option to lookup

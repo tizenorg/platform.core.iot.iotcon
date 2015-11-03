@@ -30,10 +30,10 @@ OCConnectivityType icd_ioty_conn_type_to_oic_conn_type(int conn_type)
 	case IOTCON_CONNECTIVITY_IPV6:
 		oic_conn_type = CT_IP_USE_V6;
 		break;
-	case IOTCON_CONNECTIVITY_EDR:
+	case IOTCON_CONNECTIVITY_BT_EDR:
 		oic_conn_type = CT_ADAPTER_RFCOMM_BTEDR;
 		break;
-	case IOTCON_CONNECTIVITY_LE:
+	case IOTCON_CONNECTIVITY_BT_LE:
 		oic_conn_type = CT_ADAPTER_GATT_BTLE;
 		break;
 	case IOTCON_CONNECTIVITY_ALL:
@@ -59,10 +59,10 @@ int icd_ioty_transport_flag_to_conn_type(OCTransportAdapter adapter,
 			conn_type = IOTCON_CONNECTIVITY_IPV6;
 		break;
 	case OC_ADAPTER_RFCOMM_BTEDR:
-		conn_type = IOTCON_CONNECTIVITY_EDR;
+		conn_type = IOTCON_CONNECTIVITY_BT_EDR;
 		break;
 	case OC_ADAPTER_GATT_BTLE:
-		conn_type = IOTCON_CONNECTIVITY_LE;
+		conn_type = IOTCON_CONNECTIVITY_BT_LE;
 		break;
 	default:
 		ERR("Invalid Adpater");
@@ -84,11 +84,11 @@ int icd_ioty_conn_type_to_oic_transport_type(int conn_type, OCTransportAdapter *
 		*adapter = OC_ADAPTER_IP;
 		*flag = OC_IP_USE_V6;
 		break;
-	case IOTCON_CONNECTIVITY_EDR:
+	case IOTCON_CONNECTIVITY_BT_EDR:
 		*adapter = OC_ADAPTER_RFCOMM_BTEDR;
 		*flag = OC_DEFAULT_FLAGS;
 		break;
-	case IOTCON_CONNECTIVITY_LE:
+	case IOTCON_CONNECTIVITY_BT_LE:
 		*adapter = OC_ADAPTER_GATT_BTLE;
 		*flag = OC_DEFAULT_FLAGS;
 		break;

@@ -55,7 +55,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
 		iotcon_request_h request, void *user_data);
 
 /**
- * @brief Create a resource handle and registers the resource in server
+ * @brief Creates a resource handle and registers the resource in server
  * @details Registers a resource specified by @a uri_path, @a res_types, @a ifaces which have
  * @a properties in Iotcon server.\n
  * When client find the registered resource, iotcon_request_handler_cb() will be called automatically.\n
@@ -74,8 +74,8 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks @a uri_path length must be less than or equal 36.\n
- * You must unregister resource by calling iotcon_resource_destroy()
- * if resource is no longer needed.
+ * You must destroy @a resource by calling iotcon_resource_destroy()
+ * if @a resource is no longer needed.
  *
  * @param[in] uri_path The URI path of the resource.
  * @param[in] res_types The list of type of the resource.
@@ -112,7 +112,7 @@ int iotcon_resource_create(const char *uri_path,
 		iotcon_resource_h *resource_handle);
 
 /**
- * @brief Destroy the resource and releases its data.
+ * @brief Destroys the resource and releases its data.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -143,12 +143,12 @@ int iotcon_resource_destroy(iotcon_resource_h resource_handle);
 /**
  * @brief Binds an interface to the resource
  *
- * @details The @a action could be one of #iotcon_interface_e.
+ * @details The @a iface could be one of #iotcon_interface_e.
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
  *
- * @remarks Set only one interface to @a iface. If not, @a iface will be ignored.
+ * @remarks Sets only one interface to @a iface. If not, @a iface will be ignored.
  *
  * @param[in] resource The handle of the resource
  * @param[in] iface The interface to be bound to the resource
@@ -308,7 +308,7 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  *
  * @see iotcon_remote_resource_response_cb()
  * @see iotcon_remote_resource_start_observing()
- * @see iotcon_remote_resource_observer_stop()
+ * @see iotcon_remote_resource_stop_observing()
  * @see iotcon_observers_create()
  * @see iotcon_observers_destroy()
  * @see iotcon_observers_add()
@@ -342,6 +342,8 @@ int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *numb
  *
  * @since_tizen 3.0
  *
+ * @remarks @a child must not be released using iotcon_resource_destroy().
+ *
  * @param[in] parent The handle of the parent resource
  * @param[in] index The index of the child resource
  * @param[out] child The child resource at the index
@@ -364,6 +366,8 @@ int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
  *
  * @since_tizen 3.0
  *
+ * @remarks @a uri_path must not be released using free().
+ *
  * @param[in] resource The handle of the resource
  * @param[out] uri_path The URI path of the resource
  *
@@ -380,9 +384,11 @@ int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 int iotcon_resource_get_uri_path(iotcon_resource_h resource, char **uri_path);
 
 /**
- * @brief Get the list of types in the resource
+ * @brief Gets the list of types in the resource
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a types must not be released using iotcon_resource_types_destroy().
  *
  * @param[in] resource The handle of the resource
  * @param[out] types The types of the resource
@@ -400,7 +406,7 @@ int iotcon_resource_get_uri_path(iotcon_resource_h resource, char **uri_path);
 int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_h *types);
 
 /**
- * @brief Get the interfaces of the resource
+ * @brief Gets the interfaces of the resource
  *
  * @since_tizen 3.0
  *

@@ -39,7 +39,10 @@
  *
  * @since_tizen 3.0
  *
- * @param[out] ret_observers A newly allocated list of observers handle
+ * @remarks You must destroy @a observers by calling iotcon_observers_destroy()
+ * if @a observers is no longer needed.
+ *
+ * @param[out] observers A newly allocated list of observers handle
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -50,10 +53,10 @@
  * @see iotcon_observers_add()
  * @see iotcon_observers_remove()
  */
-int iotcon_observers_create(iotcon_observers_h *ret_observers);
+int iotcon_observers_create(iotcon_observers_h *observers);
 
 /**
- * @brief Free a observers handle.
+ * @brief Destroys a observers handle.
  *
  * @since_tizen 3.0
  *
@@ -87,7 +90,7 @@ void iotcon_observers_destroy(iotcon_observers_h observers);
 int iotcon_observers_add(iotcon_observers_h observers, int obs_id);
 
 /**
- * @brief Remove id from the observers.
+ * @brief Removes id from the observers.
  *
  * @since_tizen 3.0
  *

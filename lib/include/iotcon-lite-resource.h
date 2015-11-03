@@ -26,8 +26,13 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_SERVER_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_SERVER_LITE_RESOURCE_MODULE Lite Resource
  *
- * @brief Iotcon Lite Resource provides API to encapsulate resources.\n
- * This API provides that the users manages resources, simply.
+ * @brief Iotcon Lite Resource provides API to encapsulate resources.
+ *
+ * @section CAPI_IOT_CONNECTIVITY_SERVER_LITE_RESOURCE_MODULE_OVERVIEW Overview
+ * This API provides that the users manages resources without request handler.
+ * When client request by CRUD functions, internal default request handler will be invoked.
+ * The default request handler will create response and send to client automatically.
+ * When updated state by iotcon_lite_update_state(), changes will notify to observers.
  *
  * @section CAPI_IOT_CONNECTIVITY_SERVER_LITE_RESOURCE_MODULE_HEADER Header
  *  \#include <iotcon.h>
@@ -36,7 +41,7 @@
  */
 
 /**
- * @brief Create a lite resource handle and registers the resource in server
+ * @brief Creates a lite resource handle and registers the resource in server
  * @details Registers a resource specified by @a uri_path, @a res_types, @a state which have
  * @a properties in Iotcon server.\n
  * When client requests some operations, it send a response to client, automatically.\n
@@ -46,8 +51,8 @@
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks @a uri_path length must be less than or equal 36.\n
- * You must unregister resource by calling iotcon_resource_destroy()
- * if resource is no longer needed.
+ * You must destroy @a resource_handle by calling iotcon_lite_resource_destroy()
+ * if @a remote_handle is no longer needed.
  *
  * @param[in] uri_path The URI path of the resource.
  * @param[in] res_types The list of type of the resource.
@@ -74,7 +79,7 @@ int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_lite_resource_h *resource_handle);
 
 /**
- * @brief Destroy the resource and releases its data.
+ * @brief Destroys the resource and releases its data.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -97,7 +102,7 @@ int iotcon_lite_resource_create(const char *uri_path,
 int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource);
 
 /**
- * @brief Update state into the lite resource handle
+ * @brief Updates state into the lite resource handle
  *
  * @since_tizen 3.0
  *
@@ -115,9 +120,11 @@ int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 		iotcon_state_h state);
 
 /**
- * @brief Get state from the lite resource handle
+ * @brief Gets state from the lite resource handle
  *
  * @since_tizen 3.0
+ *
+ * @remarks @a state must not be released using iotcon_state_destroy().
  *
  * @param[in] resource The handle of the lite resource
  * @param[out] state The state handle of the lite resource
