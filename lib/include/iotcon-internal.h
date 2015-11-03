@@ -46,8 +46,8 @@ extern "C" {
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_stop_presence()
- * @see iotcon_subscribe_presence()
- * @see iotcon_unsubscribe_presence()
+ * @see iotcon_add_presence_cb()
+ * @see iotcon_remove_presence_cb()
  */
 int iotcon_start_presence(unsigned int time_to_live);
 
@@ -67,8 +67,8 @@ int iotcon_start_presence(unsigned int time_to_live);
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_start_presence()
- * @see iotcon_subscribe_presence()
- * @see iotcon_unsubscribe_presence()
+ * @see iotcon_add_presence_cb()
+ * @see iotcon_remove_presence_cb()
  */
 int iotcon_stop_presence(void);
 

@@ -105,6 +105,8 @@ struct icd_presence_context {
 	int result;
 	unsigned int nonce;
 	OCDevAddr *dev_addr;
+	iotcon_presence_trigger_e trigger;
+	char *resource_type;
 };
 
 
@@ -800,17 +802,19 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle han
 
 static int _worker_presence_cb(void *context)
 {
-	FN_CALL;
-	int ret;
 	GVariant *value;
+	int ret, conn_type;
 	char addr[PATH_MAX] = {0};
 	struct icd_presence_context *ctx = context;
 
 	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
 
 	snprintf(addr, sizeof(addr), "%s:%d", ctx->dev_addr->addr, ctx->dev_addr->port);
+	conn_type = icd_ioty_transport_flag_to_conn_type(ctx->dev_addr->adapter,
+			ctx->dev_addr->flags);
 
-	value = g_variant_new("(ius)", ctx->result, ctx->nonce, addr);
+	value = g_variant_new("(iusiis)", ctx->result, ctx->nonce, addr, conn_type,
+			ctx->trigger, ic_utils_dbus_encode_str(ctx->resource_type));
 
 	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_PRESENCE, ctx->signum,
 			value);
@@ -818,6 +822,7 @@ static int _worker_presence_cb(void *context)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 
 	/* ctx was allocated from icd_ioty_ocprocess_presence_cb() */
+	free(ctx->resource_type);
 	free(ctx->bus_name);
 	free(ctx->dev_addr);
 	free(ctx);
@@ -833,11 +838,36 @@ static void _presence_cb_response_error(const char *dest, unsigned int signum,
 	int ret;
 	GVariant *value;
 
-	value = g_variant_new("(ius)", ret_val, 0, IC_STR_NULL);
+	value = g_variant_new("(iusiis)", ret_val, 0, IC_STR_NULL, IOTCON_CONNECTIVITY_ALL,
+			IOTCON_PRESENCE_TRIGGER_RESOURCE_CREATED, IC_STR_NULL);
 
 	ret = _ocprocess_response_signal(dest, IC_DBUS_SIGNAL_PRESENCE, signum, value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
+}
+
+
+static int _presence_trigger_to_ioty_trigger(OCPresenceTrigger src,
+		iotcon_presence_trigger_e *dest)
+{
+	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
+
+	switch (src) {
+	case OC_PRESENCE_TRIGGER_CREATE:
+		*dest = IOTCON_PRESENCE_TRIGGER_RESOURCE_CREATED;
+		break;
+	case OC_PRESENCE_TRIGGER_CHANGE:
+		*dest = IOTCON_PRESENCE_TRIGGER_RESOURCE_UPDATED;
+		break;
+	case OC_PRESENCE_TRIGGER_DELETE:
+		*dest = IOTCON_PRESENCE_TRIGGER_RESOURCE_DESTROYED;
+		break;
+	default:
+		ERR("Invalid trigger(%d)", src);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	return IOTCON_ERROR_NONE;
 }
 
 
@@ -847,6 +877,7 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 	FN_CALL;
 	int ret;
 	OCDevAddr *dev_addr;
+	OCPresencePayload *payload;
 	icd_sig_ctx_s *sig_context = ctx;
 	struct icd_presence_context *presence_ctx;
 
@@ -871,9 +902,18 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 	}
 	memcpy(dev_addr, &resp->devAddr, sizeof(OCDevAddr));
 
+	payload = (OCPresencePayload*)resp->payload;
+
 	switch (resp->result) {
 	case OC_STACK_OK:
 		presence_ctx->result = IOTCON_PRESENCE_OK;
+		ret = _presence_trigger_to_ioty_trigger(payload->trigger, &presence_ctx->trigger);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_presence_trigger_to_ioty_trigger() Fail(%d)", ret);
+			_presence_cb_response_error(sig_context->bus_name, sig_context->signum, ret);
+			free(presence_ctx);
+			return OC_STACK_KEEP_TRANSACTION;
+		}
 		break;
 	case OC_STACK_PRESENCE_STOPPED:
 		presence_ctx->result = IOTCON_PRESENCE_STOPPED;
@@ -892,10 +932,14 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 	presence_ctx->nonce = resp->sequenceNumber;
 	presence_ctx->dev_addr = dev_addr;
 
+	if (payload->resourceType)
+		presence_ctx->resource_type = strdup(payload->resourceType);
+
 	ret = _ocprocess_worker_start(_worker_presence_cb, presence_ctx);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_ocprocess_worker_start() Fail(%d)", ret);
 		_presence_cb_response_error(sig_context->bus_name, sig_context->signum, ret);
+		free(presence_ctx->resource_type);
 		free(presence_ctx->bus_name);
 		free(presence_ctx->dev_addr);
 		free(presence_ctx);

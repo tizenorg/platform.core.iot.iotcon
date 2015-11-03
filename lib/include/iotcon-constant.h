@@ -120,6 +120,15 @@ typedef struct icl_remote_resource* iotcon_remote_resource_h;
 typedef struct icl_presence* iotcon_presence_h;
 
 /**
+ * @brief The handle of presence response.
+ * @details @a iotcon_presence_response_h is a handle of presence response subscription.\n
+ * It is used to get the information of presence response from server.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_presence_response* iotcon_presence_response_h;
+
+/**
  * @brief The handle of device information.
  * @details @a iotcon_device_info_h is a handle of device information.
  *
@@ -336,8 +345,18 @@ typedef enum {
 	IOTCON_PRESENCE_OK = 0, /**< Indicates for successful action of presence */
 	IOTCON_PRESENCE_STOPPED, /**< Indicates for stopped action of presence */
 	IOTCON_PRESENCE_TIMEOUT, /**< Indicates for no response of presence for some time */
-	IOTCON_PRESENCE_ERROR /**< Indicates for some errors of presence */
 } iotcon_presence_result_e;
+
+/**
+ * @brief Enumeration for operation of presence response.
+ *
+ * @since_tizen 3.0
+ */
+typedef enum  {
+    IOTCON_PRESENCE_TRIGGER_RESOURCE_CREATED, /**< Indicates for resource creation operation of server */
+    IOTCON_PRESENCE_TRIGGER_RESOURCE_UPDATED, /**< Indicates for resource update operation of server */
+    IOTCON_PRESENCE_TRIGGER_RESOURCE_DESTROYED, /**< Indicates for resource destruction operation of server */
+} iotcon_presence_trigger_e;
 
 /**
  * @brief Enumeration for types of representation that is able to have.

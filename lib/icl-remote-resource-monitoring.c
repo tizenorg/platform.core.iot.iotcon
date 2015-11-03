@@ -33,7 +33,7 @@ static void _monitoring_get_cb(iotcon_remote_resource_h resource,
 
 	RET_IF(NULL == resource);
 	RET_IF(NULL == resource->monitoring_handle);
-	RETM_IF(IOTCON_ERROR_NONE != err, "_monitoring_get Fail(%d)", err);
+	RETM_IF(IOTCON_ERROR_NONE != err, "_monitoring_get() Fail(%d)", err);
 
 	ret = iotcon_response_get_result(response, &response_result);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -72,14 +72,15 @@ static gboolean _monitoring_get_timer(gpointer user_data)
 }
 
 
-static void _monitoring_presence_cb(int result, unsigned int nonce,
-		const char *host_address, void *user_data)
+static void _monitoring_presence_cb(iotcon_presence_h presence, iotcon_error_e err,
+		iotcon_presence_response_h response, void *user_data)
 {
 	unsigned int get_timer_id;
 	iotcon_remote_resource_h resource = user_data;
 
 	RET_IF(NULL == resource);
 	RET_IF(NULL == resource->monitoring_handle);
+	RETM_IF(IOTCON_ERROR_NONE != err, "_monitoring_presence() Fail(%d)", err);
 
 	g_source_remove(resource->monitoring_handle->get_timer_id);
 
@@ -154,10 +155,10 @@ API int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resourc
 		return ret;
 	}
 
-	ret = iotcon_subscribe_presence(host_address, connectivity_type, NULL,
+	ret = iotcon_add_presence_cb(host_address, connectivity_type, NULL,
 			_monitoring_presence_cb, resource, &resource->monitoring_handle->presence);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_subscribe_presence() Fail(%d)", ret);
+		ERR("iotcon_add_presence_cb() Fail(%d)", ret);
 		g_source_remove(resource->monitoring_handle->get_timer_id);
 		free(resource->monitoring_handle);
 		resource->monitoring_handle = NULL;
@@ -182,9 +183,9 @@ API int iotcon_remote_resource_stop_monitoring(iotcon_remote_resource_h resource
 	INFO("Stop Monitoring");
 
 	/* Device Presence */
-	ret = iotcon_unsubscribe_presence(resource->monitoring_handle->presence);
+	ret = iotcon_remove_presence_cb(resource->monitoring_handle->presence);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_unsubscribe_presence() Fail(%d)", ret);
+		ERR("iotcon_remove_presence_cb() Fail(%d)", ret);
 		return ret;
 	}
 

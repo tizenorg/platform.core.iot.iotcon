@@ -297,13 +297,53 @@ static bool _get_res_type_cb(const char *string, void *user_data)
 	return IOTCON_FUNC_CONTINUE;
 }
 
-static void _presence_handler(int result, unsigned int nonce,
-		const char *host_address, void *user_data)
+static void _presence_handler(iotcon_presence_h presence, iotcon_error_e err,
+		iotcon_presence_response_h response, void *user_data)
 {
+	char *host_address;
+	char *resource_type;
+	int ret, connectivity_type, result, trigger;
+
+	RETM_IF(IOTCON_ERROR_NONE != err, "_presence_handler error(%d)", err);
+
+	ret = iotcon_presence_response_get_result(response, &result);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_presence_response_get_result() Fail(%d)", ret);
+		return;
+	}
+
+	if (IOTCON_PRESENCE_OK == result) {
+		ret = iotcon_presence_response_get_trigger(response, &trigger);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_presence_response_get_trigger() Fail(%d)", ret);
+			return;
+		}
+	}
+
+	ret = iotcon_presence_response_get_host_address(response, &host_address);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_presence_response_get_host_address() Fail(%d)", ret);
+		return;
+	}
+
+	ret = iotcon_presence_response_get_connectivity_type(response, &connectivity_type);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_presence_response_get_connectivity_type() Fail(%d)", ret);
+		return;
+	}
+
+	ret = iotcon_presence_response_get_resource_type(response, &resource_type);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_presence_response_get_resource_type() Fail(%d)", ret);
+		return;
+	}
+
 	INFO("_presence_handler");
 	INFO("result : %d", result);
-	INFO("nonce : %d", nonce);
+	if (IOTCON_PRESENCE_OK == result)
+		INFO("trigger : %d", trigger);
 	INFO("host_address : %s", host_address);
+	INFO("resource_type : %s", resource_type);
 }
 
 static int _device_id_compare(const void *a, const void *b)
@@ -452,10 +492,10 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		return;
 	}
 
-	ret = iotcon_subscribe_presence(resource_host, connectivity_type, "core.door",
+	ret = iotcon_add_presence_cb(resource_host, connectivity_type, "core.door",
 			_presence_handler, NULL, &presence_handle);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_subscribe_presence() Fail(%d)", ret);
+		ERR("iotcon_add_presence_cb() Fail(%d)", ret);
 		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
 		free(door_resource_device_id);
 		return;
@@ -489,7 +529,6 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 			free(door_resource_device_id);
 			return;
 		}
-
 
 		/* get the resource host address */
 		iotcon_remote_resource_get_host_address(resource_clone, &resource_host);

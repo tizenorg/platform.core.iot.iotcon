@@ -204,7 +204,7 @@ static void _caching_get_cb(iotcon_remote_resource_h resource,
 
 	RET_IF(NULL == resource);
 	RET_IF(NULL == resource->caching_handle);
-	RETM_IF(IOTCON_ERROR_NONE != err, "_caching_get Fail(%d)", err);
+	RETM_IF(IOTCON_ERROR_NONE != err, "_caching_get() Fail(%d)", err);
 
 	ret = iotcon_response_get_result(resp, &result);
 	if (IOTCON_ERROR_NONE != ret || IOTCON_RESPONSE_RESULT_OK != result) {

@@ -1165,12 +1165,8 @@ OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
 
 	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
 
-	/* In case of IPV4 or IPV6, connectivity type is CT_ADAPTER_IP in iotivity 0.9.2 */
-	if (CT_IP_USE_V4 == oic_conn_type && CT_IP_USE_V6 == oic_conn_type)
-		oic_conn_type = CT_ADAPTER_IP;
-
 	icd_ioty_csdk_lock();
-	result = OCDoResource(&handle, OC_REST_PRESENCE, uri, NULL, NULL, CT_ADAPTER_IP,
+	result = OCDoResource(&handle, OC_REST_PRESENCE, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);
 	icd_ioty_csdk_unlock();
 

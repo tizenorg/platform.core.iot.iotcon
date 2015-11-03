@@ -30,11 +30,24 @@
 #define ICL_PRESENCE_TTL_SECONDS_MAX (60 * 60 * 24) /* 60 sec/min * 60 min/hr * 24 hr/day */
 
 typedef struct icl_presence {
+	char *host_address;
+	iotcon_connectivity_type_e connectivity_type;
+	char *resource_type;
 	iotcon_presence_cb cb;
 	void *user_data;
-	unsigned int id;
+	unsigned int sub_id;
 	int64_t handle;
 } icl_presence_s;
+
+
+typedef struct icl_presence_response {
+	char *host_address;
+	iotcon_connectivity_type_e connectivity_type;
+	char *resource_type;
+	iotcon_presence_result_e result;
+	iotcon_presence_trigger_e trigger;
+} icl_presence_response_s;
+
 
 API int iotcon_start_presence(unsigned int time_to_live)
 {
@@ -97,36 +110,49 @@ static void _icl_presence_cb(GDBusConnection *connection,
 		gpointer user_data)
 {
 	FN_CALL;
-	int res;
 	unsigned int nonce;
-	char *host_address;
-	icl_presence_s *presence_container = user_data;
-	iotcon_presence_cb cb = presence_container->cb;
+	char *host_address, *resource_type;
+	int res, connectivity_type, trigger;
+	icl_presence_s *presence = user_data;
+	iotcon_presence_cb cb = presence->cb;
+	icl_presence_response_s response = {0};
 
-	g_variant_get(parameters, "(iu&s)", &res, &nonce, &host_address);
+	g_variant_get(parameters, "(iu&sii&s)", &res, &nonce, &host_address,
+			&connectivity_type, &trigger, &resource_type);
 
-	res = icl_dbus_convert_daemon_error(res);
+	if (res < IOTCON_ERROR_NONE && cb)
+		cb(presence, icl_dbus_convert_daemon_error(res), NULL, presence->user_data);
+
+	DBG("presence nonce : %d", nonce);
+
+	response.host_address = host_address;
+	response.connectivity_type = connectivity_type;
+	response.resource_type = ic_utils_dbus_decode_str(resource_type);
+	response.result = res;
+	response.trigger = trigger;
 
 	if (cb)
-		cb(res, nonce, host_address, presence_container->user_data);
+		cb(presence, IOTCON_ERROR_NONE, &response, presence->user_data);
 }
 
 
 static void _icl_presence_conn_cleanup(icl_presence_s *presence)
 {
-	presence->id = 0;
+	presence->sub_id = 0;
 
 	if (presence->handle) {
 		presence->handle = 0;
 		return;
 	}
 
+	free(presence->resource_type);
+	free(presence->host_address);
 	free(presence);
 }
 
 
 /* The length of resource_type should be less than or equal to 61. */
-API int iotcon_subscribe_presence(const char *host_address,
+API int iotcon_add_presence_cb(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		const char *resource_type,
 		iotcon_presence_cb cb,
@@ -138,7 +164,7 @@ API int iotcon_subscribe_presence(const char *host_address,
 	unsigned int sub_id;
 	int signal_number, ret;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
-	icl_presence_s *presence_container;
+	icl_presence_s *presence;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
@@ -151,8 +177,8 @@ API int iotcon_subscribe_presence(const char *host_address,
 
 	signal_number = icl_dbus_generate_signal_number();
 
-	presence_container = calloc(1, sizeof(icl_presence_s));
-	if (NULL == presence_container) {
+	presence = calloc(1, sizeof(icl_presence_s));
+	if (NULL == presence) {
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
@@ -164,46 +190,53 @@ API int iotcon_subscribe_presence(const char *host_address,
 			connectivity_type,
 			resource_type,
 			signal_number,
-			&(presence_container->handle),
+			&(presence->handle),
 			NULL,
 			&error);
 	if (error) {
 		ERR("ic_dbus_call_subscribe_presence_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		free(presence_container);
+		free(presence);
 		return ret;
 	}
 
-	if (0 == presence_container->handle) {
+	if (0 == presence->handle) {
 		ERR("iotcon-daemon Fail");
-		free(presence_container);
+		free(presence);
 		return IOTCON_ERROR_IOTIVITY;
 	}
 
 	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_PRESENCE,
 			signal_number);
 
-	presence_container->cb = cb;
-	presence_container->user_data = user_data;
+	presence->cb = cb;
+	presence->user_data = user_data;
 
-	sub_id = icl_dbus_subscribe_signal(signal_name, presence_container,
+	presence->host_address = ic_utils_strdup(host_address);
+	presence->connectivity_type = connectivity_type;
+	if (resource_type)
+		presence->resource_type = strdup(resource_type);
+
+	sub_id = icl_dbus_subscribe_signal(signal_name, presence,
 			_icl_presence_conn_cleanup, _icl_presence_cb);
 	if (0 == sub_id) {
 		ERR("icl_dbus_subscribe_signal() Fail");
-		free(presence_container);
+		free(presence->resource_type);
+		free(presence->host_address);
+		free(presence);
 		return IOTCON_ERROR_DBUS;
 	}
 
-	presence_container->id = sub_id;
+	presence->sub_id = sub_id;
 
-	*presence_handle = presence_container;
+	*presence_handle = presence;
 
 	return IOTCON_ERROR_NONE;
 }
 
 
-API int iotcon_unsubscribe_presence(iotcon_presence_h presence)
+API int iotcon_remove_presence_cb(iotcon_presence_h presence)
 {
 	FN_CALL;
 	int ret;
@@ -211,8 +244,10 @@ API int iotcon_unsubscribe_presence(iotcon_presence_h presence)
 
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (0 == presence->id) { /* disconnected iotcon dbus */
+	if (0 == presence->sub_id) { /* disconnected iotcon dbus */
 		WARN("Invalid Presence handle");
+		free(presence->resource_type);
+		free(presence->host_address);
 		free(presence);
 		return IOTCON_ERROR_NONE;
 	}
@@ -237,7 +272,107 @@ API int iotcon_unsubscribe_presence(iotcon_presence_h presence)
 	}
 	presence->handle = 0;
 
-	icl_dbus_unsubscribe_signal(presence->id);
+	icl_dbus_unsubscribe_signal(presence->sub_id);
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_presence_get_host_address(iotcon_presence_h presence, char **host_address)
+{
+	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*host_address = presence->host_address;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_presence_get_connectivity_type(iotcon_presence_h presence,
+		int *connectivity_type)
+{
+	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == connectivity_type, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*connectivity_type = presence->connectivity_type;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_presence_get_resource_type(iotcon_presence_h presence,
+		char **resource_type)
+{
+	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*resource_type = presence->resource_type;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_presence_response_get_host_address(iotcon_presence_response_h response,
+		char **host_address)
+{
+	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*host_address = response->host_address;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_presence_response_get_connectivity_type(
+		iotcon_presence_response_h response, int *connectivity_type)
+{
+	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == connectivity_type, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*connectivity_type = response->connectivity_type;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_presence_response_get_resource_type(iotcon_presence_response_h response,
+		char **resource_type)
+{
+	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*resource_type = response->resource_type;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_presence_response_get_result(iotcon_presence_response_h response,
+		int *result)
+{
+	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == result, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*result = response->result;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_presence_response_get_trigger(iotcon_presence_response_h response,
+		int *trigger)
+{
+	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == trigger, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (IOTCON_PRESENCE_OK != response->result) {
+		ERR("trigger is valid if IOTCON_PRESENCE_OK");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	*trigger = response->trigger;
 
 	return IOTCON_ERROR_NONE;
 }

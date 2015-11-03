@@ -39,25 +39,25 @@
  */
 
 /**
- * @brief Specifies the type of function passed to iotcon_subscribe_presence().
+ * @brief Specifies the type of function passed to iotcon_add_presence_cb().
  * @details Called when client receive presence events from the server.
  *
  * @since_tizen 3.0
  *
- * @param[in] result The result code of server's presence
- * @param[in] nonce Current nonce of server's presence
- * @param[in] host_address The address or addressable name of server
+ * @param[in] presence The presence handle
+ * @param[in] err The error code(0 on success, otherwise a negative error value)
+ * @param[in] response The presence response handle
  * @param[in] user_data The user data to pass to the function
  *
- * @pre The callback must be registered using iotcon_subscribe_presence()
+ * @pre The callback must be registered using iotcon_add_presence_cb()
  *
- * @see iotcon_subscribe_presence()
+ * @see iotcon_add_presence_cb()
  */
-typedef void (*iotcon_presence_cb)(int result, unsigned int nonce,
-		const char *host_address, void *user_data);
+typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e err,
+		iotcon_presence_response_h response, void *user_data);
 
 /**
- * @brief Subscribes to a server to receive presence events.
+ * @brief Adds callback to a server to receive presence events.
  * @details Request to receive presence to an interested server's resource with @a resource_type.\n
  * If succeed to subscribe, iotcon_presence_cb() will be invoked when the server sends presence\n
  * A server sends presence events when adds/removes/alters a resource or start/stop presence.
@@ -91,10 +91,10 @@ typedef void (*iotcon_presence_cb)(int result, unsigned int nonce,
  *
  * @see iotcon_start_presence()
  * @see iotcon_stop_presence()
- * @see iotcon_unsubscribe_presence()
+ * @see iotcon_remove_presence_cb()
  * @see iotcon_presence_cb()
  */
-int iotcon_subscribe_presence(const char *host_address,
+int iotcon_add_presence_cb(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		const char *resource_type,
 		iotcon_presence_cb cb,
@@ -102,9 +102,9 @@ int iotcon_subscribe_presence(const char *host_address,
 		iotcon_presence_h *presence_handle);
 
 /**
- * @brief Unsubscribes to a server's presence events.
+ * @brief Removes callback to a server's presence events.
  * @details Request not to receive server's presence any more.
- *
+ /*
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
@@ -120,10 +120,174 @@ int iotcon_subscribe_presence(const char *host_address,
  *
  * @see iotcon_start_presence()
  * @see iotcon_stop_presence()
- * @see iotcon_subscribe_presence()
+ * @see iotcon_add_presence_cb()
  * @see iotcon_presence_cb()
  */
-int iotcon_unsubscribe_presence(iotcon_presence_h presence_handle);
+int iotcon_remove_presence_cb(iotcon_presence_h presence_handle);
+
+/**
+ * @brief Gets host address from the presence handle
+ *
+ * @since_tizen 3.0
+ *
+ * @remarks @a host_address must not be released using free().
+ *
+ * @param[in] presence The handle of the presence
+ * @param[out] host_address The host address of the presence
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_presence_get_connectivity_type()
+ * @see iotcon_presence_get_resource_type()
+ */
+int iotcon_presence_get_host_address(iotcon_presence_h presence, char **host_address);
+
+/**
+ * @brief Gets connectivity type from the presence handle
+ * @details The @a connectivity_type could be one of #iotcon_connectivity_type_e.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] presence The handle of the presence
+ * @param[out] connectivity_type The connectivity type of the presence
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_presence_get_host_address()
+ * @see iotcon_presence_get_resource_type()
+ */
+int iotcon_presence_get_connectivity_type(iotcon_presence_h presence,
+		int *connectivity_type);
+
+/**
+ * @brief Gets resource type from the presence handle
+ *
+ * @since_tizen 3.0
+ *
+ * @remarks @a resource_type must not be released using free().
+ *
+ * @param[in] presence The handle of the presence
+ * @param[out] resource_type The resource type of the presence
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_presence_get_host_address()
+ * @see iotcon_presence_get_connectivity_type()
+ */
+int iotcon_presence_get_resource_type(iotcon_presence_h presence,
+		char **resource_type);
+
+/**
+ * @brief Gets result from the presence response handle
+ *
+ * @details The @a result could be one of #iotcon_presence_result_e.
+ * @since_tizen 3.0
+ *
+ * @param[in] response The handle of the presence response
+ * @param[out] result The result code
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_presence_response_get_trigger()
+ * @see iotcon_presence_response_get_host_address()
+ * @see iotcon_presence_response_get_connectivity_type()
+ * @see iotcon_presence_response_get_resource_type()
+ */
+int iotcon_presence_response_get_result(iotcon_presence_response_h response, int *result);
+
+/**
+ * @brief Gets trigger from the presence response handle
+ *
+ * @details The @a trigger could be one of #iotcon_presence_trigger_e.
+ * @since_tizen 3.0
+ *
+ * @param[in] response The handle of the presence response
+ * @param[out] trigger The presence trigger value. It is set only if @a result is IOTCON_PRESENCE_OK.
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_presence_response_get_result()
+ * @see iotcon_presence_response_get_host_address()
+ * @see iotcon_presence_response_get_connectivity_type()
+ * @see iotcon_presence_response_get_resource_type()
+ */
+int iotcon_presence_response_get_trigger(iotcon_presence_response_h response,
+		int *trigger);
+
+/**
+ * @brief Gets host address from the presence response handle
+ *
+ * @since_tizen 3.0
+ *
+ * @remarks @a host_address must not be released using free().
+ *
+ * @param[in] response The handle of the presence response
+ * @param[out] host_address The host address of the presence response
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_presence_response_get_result()
+ * @see iotcon_presence_response_get_trigger()
+ * @see iotcon_presence_response_get_connectivity_type()
+ * @see iotcon_presence_response_get_resource_type()
+ */
+int iotcon_presence_response_get_host_address(iotcon_presence_response_h response,
+		char **host_address);
+
+/**
+ * @brief Gets connectivity type from the presence response handle
+ *
+ * @details The @a connectivity_type could be one of #iotcon_connectivity_type_e.
+ * @since_tizen 3.0
+ *
+ * @param[in] response The handle of the presence response
+ * @param[out] connectivity_type The connectivity type of the presence response
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_presence_response_get_result()
+ * @see iotcon_presence_response_get_trigger()
+ * @see iotcon_presence_response_get_host_address()
+ * @see iotcon_presence_response_get_resource_type()
+ */
+int iotcon_presence_response_get_connectivity_type(iotcon_presence_response_h response,
+		int *connectivity_type);
+
+/**
+ * @brief Gets resource type from the presence response handle
+ *
+ * @since_tizen 3.0
+ *
+ * @remarks @a resource_type must not be released using free().
+ *
+ * @param[in] response The handle of the presence response
+ * @param[out] resource_type The resource type of the presence response
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_presence_response_get_result()
+ * @see iotcon_presence_response_get_trigger()
+ * @see iotcon_presence_response_get_host_address()
+ * @see iotcon_presence_response_get_connectivity_type()
+ */
+int iotcon_presence_response_get_resource_type(iotcon_presence_response_h response,
+		char **resource_type);
 
 /**
  * @brief Specifies the type of function passed to iotcon_find_resource().
