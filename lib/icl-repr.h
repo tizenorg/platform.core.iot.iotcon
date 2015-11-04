@@ -16,8 +16,8 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__
 
-#include <stdbool.h>
 #include <glib.h>
+#include <tizen_type.h>
 
 #include "iotcon-struct.h"
 #include "icl-repr-value.h"

@@ -20,7 +20,7 @@
 extern "C" {
 #endif
 
-#include <stdbool.h>
+#include <tizen_type.h>
 
 #include <iotcon-constant.h>
 #include <iotcon-errors.h>

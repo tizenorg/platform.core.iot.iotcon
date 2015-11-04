@@ -17,9 +17,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h> /* for uint8_t etc */
-#include <stdbool.h>
 #include <errno.h>
 #include <glib.h>
+#include <tizen_type.h>
 #include <system_info.h>
 #include <system_settings.h>
 

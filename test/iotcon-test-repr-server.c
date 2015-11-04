@@ -15,8 +15,8 @@
  */
 
 #include <stdlib.h>
-#include <stdbool.h>
 #include <glib.h>
+#include <tizen_type.h>
 #include <iotcon.h>
 #include "test.h"
 

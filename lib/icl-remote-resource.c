@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <glib.h>
+#include <tizen_type.h>
 
 #include "iotcon.h"
 #include "ic-utils.h"

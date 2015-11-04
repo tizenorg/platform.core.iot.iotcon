@@ -15,8 +15,8 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <gio/gio.h>
+#include <tizen_type.h>
 
 #include "iotcon.h"
 #include "ic-common.h"

@@ -16,11 +16,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
 #include <glib.h>
+#include <tizen_type.h>
 
 #include "iotcon-struct.h"
 #include "iotcon-representation.h"
