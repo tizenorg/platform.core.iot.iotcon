@@ -199,7 +199,7 @@ int iotcon_remote_resource_start_observing(iotcon_remote_resource_h resource,
 int iotcon_remote_resource_stop_observing(iotcon_remote_resource_h resource);
 
 /**
- * @brief Gets the attributes of a resource.
+ * @brief Gets the attributes of a resource, asynchronously.
  * @details When server sends response on get request, iotcon_remote_resource_response_cb() will be called.
  *
  * @since_tizen 3.0
@@ -229,7 +229,7 @@ int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h
 		iotcon_remote_resource_response_cb cb, void *user_data);
 
 /**
- * @brief Puts the representation of a resource
+ * @brief Puts the representation of a resource, asynchronously.
  * @details When server sends response on put request, iotcon_remote_resource_response_cb() will be called.
  *
  * @since_tizen 3.0
@@ -263,7 +263,7 @@ int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
 		void *user_data);
 
 /**
- * @brief Posts on a resource
+ * @brief Posts on a resource, asynchronously.
  * @details When server sends response on post request, iotcon_remote_resource_response_cb() will be called.
  *
  * @since_tizen 3.0
@@ -297,7 +297,7 @@ int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
 		void *user_data);
 
 /**
- * @brief Deletes a resource.
+ * @brief Deletes a resource, asynchronously.
  * @details When server sends response on delete request, iotcon_remote_resource_response_cb() will be called.
  *
  * @since_tizen 3.0

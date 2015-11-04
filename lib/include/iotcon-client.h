@@ -144,7 +144,7 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
 		iotcon_error_e result, void *user_data);
 
 /**
- * @brief Finds resources.
+ * @brief Finds resources, asynchronously.
  * @details Request to find a resource of @a host_address server with @a resource_type.\n
  * @a host_address could be #IOTCON_MULTICAST_ADDRESS for IPv4 multicast.\n
  * If succeed to find the resource, iotcon_found_resource_cb() will be invoked with
@@ -202,7 +202,7 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
 		iotcon_error_e result, void *user_data);
 
 /**
- * @brief Gets the device information of remote server.
+ * @brief Gets the device information of remote server, asynchronously.
  * @details Request device information to server and pass the information by calling
  * iotcon_device_info_cb().\n
  * @a host_address could be #IOTCON_MULTICAST_ADDRESS for IPv4 multicast.\n
@@ -277,7 +277,7 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
 		iotcon_error_e result, void *user_data);
 
 /**
- * @brief Gets the platform information of remote server.
+ * @brief Gets the platform information of remote server, asynchronously.
  * @details Request platform information to server and pass the information by calling
  * iotcon_platform_info_cb().\n
  * @a host_address could be #IOTCON_MULTICAST_ADDRESS for IPv4 multicast.\n
@@ -354,7 +354,7 @@ typedef void (*iotcon_tizen_info_cb)(iotcon_tizen_info_h tizen_info,
 		iotcon_error_e result, void *user_data);
 
 /**
- * @brief Gets the tizen device information of remote server.
+ * @brief Gets the tizen device information of remote server, asynchronously.
  * @details Request tizen device information to server and pass the information by calling
  * iotcon_tizen_info_cb().\n
  * If succeed to getting tizen information, iotcon_tizen_info_cb() will be invoked with
