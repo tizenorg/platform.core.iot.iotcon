@@ -27,7 +27,7 @@
 #include "icl-options.h"
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
-#include "icl-repr.h"
+#include "icl-representation.h"
 #include "icl-response.h"
 #include "icl-remote-resource.h"
 #include "icl-payload.h"

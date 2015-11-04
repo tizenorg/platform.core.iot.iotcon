@@ -20,7 +20,7 @@
 #include <tizen_type.h>
 
 #include "iotcon-struct.h"
-#include "icl-repr-value.h"
+#include "icl-value.h"
 
 struct icl_representation_s {
 	char *uri_path;

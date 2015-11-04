@@ -21,9 +21,9 @@
 #include "iotcon-representation.h"
 #include "ic-utils.h"
 #include "icl.h"
-#include "icl-repr.h"
-#include "icl-repr-list.h"
-#include "icl-repr-value.h"
+#include "icl-representation.h"
+#include "icl-list.h"
+#include "icl-value.h"
 
 static iotcon_value_h _icl_value_create(int type)
 {

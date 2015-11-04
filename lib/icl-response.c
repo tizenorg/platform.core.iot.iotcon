@@ -23,7 +23,7 @@
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
 #include "icl-resource.h"
-#include "icl-repr.h"
+#include "icl-representation.h"
 #include "icl-options.h"
 #include "icl-request.h"
 #include "icl-response.h"

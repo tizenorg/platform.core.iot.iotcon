@@ -28,7 +28,7 @@
 #include "icl-request.h"
 #include "icl-response.h"
 #include "icl-remote-resource.h"
-#include "icl-repr.h"
+#include "icl-representation.h"
 #include "icl-device.h"
 #include "icl-payload.h"
 #include "icl-observation.h"

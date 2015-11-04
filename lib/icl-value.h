@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_VALUE_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_VALUE_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_VALUE_H__
+#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_VALUE_H__
 
 #include <glib.h>
 #include <tizen_type.h>
@@ -84,4 +84,4 @@ void icl_value_destroy(gpointer data);
 
 iotcon_value_h icl_value_clone(iotcon_value_h src);
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_VALUE_H__ */
+#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_VALUE_H__ */

@@ -13,20 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_STATE_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_STATE_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_LIST_H__
+#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_LIST_H__
+
+#include <glib.h>
 
 #include "iotcon-struct.h"
-#include "iotcon-constant.h"
-#include "icl-repr-value.h"
+#include "icl-value.h"
 
-void icl_state_inc_ref_count(iotcon_state_h val);
-int icl_state_dec_ref_count(iotcon_state_h val);
+struct icl_list_s {
+	int type;
+	int ref_count;
+	GList *list;
+};
 
-int icl_state_del_value(iotcon_state_h state, const char *key);
+int icl_list_remove(iotcon_list_h list, iotcon_value_h val);
+int icl_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
 
-int icl_state_set_value(iotcon_state_h state, const char *key, iotcon_value_h value);
+iotcon_list_h icl_list_clone(iotcon_list_h list);
 
-int icl_state_clone(iotcon_state_h src, iotcon_state_h *dest);
+void icl_list_inc_ref_count(iotcon_list_h val);
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_STATE_H__ */
+#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_LIST_H__ */

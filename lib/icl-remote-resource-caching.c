@@ -24,9 +24,9 @@
 #include "icl.h"
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
-#include "icl-repr.h"
-#include "icl-repr-list.h"
-#include "icl-repr-value.h"
+#include "icl-representation.h"
+#include "icl-list.h"
+#include "icl-value.h"
 #include "icl-remote-resource.h"
 
 static int _caching_compare_state(iotcon_state_h state1, iotcon_state_h state2);

@@ -21,10 +21,10 @@
 #include "iotcon-representation.h"
 #include "ic-utils.h"
 #include "icl.h"
-#include "icl-repr-list.h"
-#include "icl-repr-value.h"
-#include "icl-repr.h"
-#include "icl-repr-state.h"
+#include "icl-list.h"
+#include "icl-value.h"
+#include "icl-representation.h"
+#include "icl-state.h"
 
 void icl_state_inc_ref_count(iotcon_state_h val)
 {

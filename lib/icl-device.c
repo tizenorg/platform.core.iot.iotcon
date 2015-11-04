@@ -22,7 +22,7 @@
 #include "iotcon.h"
 #include "ic-utils.h"
 #include "icl.h"
-#include "icl-repr.h"
+#include "icl-representation.h"
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
 #include "icl-device.h"

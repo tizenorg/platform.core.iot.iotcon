@@ -29,10 +29,10 @@
 #include "icl-resource.h"
 #include "icl-resource-types.h"
 #include "icl-response.h"
-#include "icl-repr-list.h"
-#include "icl-repr-value.h"
-#include "icl-repr-state.h"
-#include "icl-repr.h"
+#include "icl-list.h"
+#include "icl-value.h"
+#include "icl-state.h"
+#include "icl-representation.h"
 
 void icl_representation_inc_ref_count(iotcon_representation_h val)
 {
