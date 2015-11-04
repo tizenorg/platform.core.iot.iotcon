@@ -54,7 +54,8 @@ API void iotcon_query_destroy(iotcon_query_h query)
 }
 
 
-API int iotcon_query_get_resource_tyeps(iotcon_query_h query, iotcon_resource_types_h *types)
+API int iotcon_query_get_resource_types(iotcon_query_h query,
+		iotcon_resource_types_h *types)
 {
 	int ret;
 	char *resource_type = NULL;
