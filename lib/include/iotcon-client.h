@@ -104,7 +104,7 @@ int iotcon_add_presence_cb(const char *host_address,
 /**
  * @brief Removes callback to a server's presence events.
  * @details Request not to receive server's presence any more.
- /*
+ *
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet

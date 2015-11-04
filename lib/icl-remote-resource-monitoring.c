@@ -75,12 +75,30 @@ static gboolean _monitoring_get_timer(gpointer user_data)
 static void _monitoring_presence_cb(iotcon_presence_h presence, iotcon_error_e err,
 		iotcon_presence_response_h response, void *user_data)
 {
+	int ret, result, trigger;
 	unsigned int get_timer_id;
 	iotcon_remote_resource_h resource = user_data;
 
 	RET_IF(NULL == resource);
 	RET_IF(NULL == resource->monitoring_handle);
 	RETM_IF(IOTCON_ERROR_NONE != err, "_monitoring_presence() Fail(%d)", err);
+
+	ret = iotcon_presence_response_get_result(response, &result);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_presence_response_get_result() Fail(%d)", ret);
+		return;
+	}
+
+	if (IOTCON_PRESENCE_OK == result) {
+		ret = iotcon_presence_response_get_trigger(response, &trigger);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_presence_response_get_trigger() Fail(%d)", ret);
+			return;
+		}
+
+		if (IOTCON_PRESENCE_TRIGGER_RESOURCE_DESTROYED != trigger)
+			return;
+	}
 
 	g_source_remove(resource->monitoring_handle->get_timer_id);
 
