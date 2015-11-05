@@ -324,15 +324,15 @@ static GVariant* _icd_payload_platform_to_gvariant(OCPlatformPayload *repr)
 			repr->uri,
 			repr->info.platformID,
 			repr->info.manufacturerName,
-			repr->info.manufacturerUrl,
-			repr->info.modelNumber,
-			repr->info.dateOfManufacture,
-			repr->info.platformVersion,
-			repr->info.operatingSystemVersion,
-			repr->info.hardwareVersion,
-			repr->info.firmwareVersion,
-			repr->info.supportUrl,
-			repr->info.systemTime);
+			ic_utils_dbus_encode_str(repr->info.manufacturerUrl),
+			ic_utils_dbus_encode_str(repr->info.modelNumber),
+			ic_utils_dbus_encode_str(repr->info.dateOfManufacture),
+			ic_utils_dbus_encode_str(repr->info.platformVersion),
+			ic_utils_dbus_encode_str(repr->info.operatingSystemVersion),
+			ic_utils_dbus_encode_str(repr->info.hardwareVersion),
+			ic_utils_dbus_encode_str(repr->info.firmwareVersion),
+			ic_utils_dbus_encode_str(repr->info.supportUrl),
+			ic_utils_dbus_encode_str(repr->info.systemTime));
 
 	return value;
 }

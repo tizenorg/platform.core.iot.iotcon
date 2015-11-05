@@ -271,6 +271,16 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 			&info.support_url,
 			&info.system_time);
 
+	info.manuf_url = ic_utils_dbus_decode_str(info.manuf_url);
+	info.model_number = ic_utils_dbus_decode_str(info.model_number);
+	info.date_of_manuf = ic_utils_dbus_decode_str(info.date_of_manuf);
+	info.platform_ver = ic_utils_dbus_decode_str(info.platform_ver);
+	info.os_ver = ic_utils_dbus_decode_str(info.os_ver);
+	info.hardware_ver = ic_utils_dbus_decode_str(info.hardware_ver);
+	info.firmware_ver = ic_utils_dbus_decode_str(info.firmware_ver);
+	info.support_url = ic_utils_dbus_decode_str(info.support_url);
+	info.system_time = ic_utils_dbus_decode_str(info.system_time);
+
 	/* From iotivity, we can get uri_path. But, the value is always "/oic/p". */
 
 	if (cb)
