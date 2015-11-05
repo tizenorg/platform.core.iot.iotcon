@@ -210,11 +210,29 @@ static inline GVariantBuilder* _ocprocess_parse_header_options(
 	return options;
 }
 
+static int _ioty_oic_action_to_ioty_action(int oic_action)
+{
+	int action;
+
+	switch (oic_action) {
+	case OC_OBSERVE_REGISTER:
+		action = IOTCON_OBSERVE_REGISTER;
+		break;
+	case OC_OBSERVE_DEREGISTER:
+		action = IOTCON_OBSERVE_DEREGISTER;
+		break;
+	case OC_OBSERVE_NO_OPTION:
+	default:
+		ERR("Invalid action (%d)", oic_action);
+		action = IOTCON_OBSERVE_NO_OPTION;
+	}
+	return action;
+}
 
 static int _worker_req_handler(void *context)
 {
 	GVariant *value;
-	int ret, conn_type;
+	int ret, conn_type, action;
 	struct icd_req_context *ctx = context;
 	GVariantBuilder payload_builder;
 	char addr[PATH_MAX] = {0};
@@ -231,13 +249,15 @@ static int _worker_req_handler(void *context)
 	conn_type = icd_ioty_transport_flag_to_conn_type(ctx->dev_addr->adapter,
 			ctx->dev_addr->flags);
 
+	action = _ioty_oic_action_to_ioty_action(ctx->observe_action);
+
 	value = g_variant_new("(siia(qs)a(ss)iiavxx)",
 			addr,
 			conn_type,
 			ctx->types,
 			ctx->options,
 			ctx->query,
-			ctx->observe_action,
+			action,
 			ctx->observer_id,
 			&payload_builder,
 			ICD_POINTER_TO_INT64(ctx->request_h),

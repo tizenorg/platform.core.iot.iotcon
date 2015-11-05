@@ -293,6 +293,7 @@ typedef enum {
 	IOTCON_ACTIVE = (1 << 2), /**< Indicates resource initialized and activated */
 	IOTCON_SLOW = (1 << 3), /**< Indicates resource which takes some delay to respond */
 	IOTCON_SECURE = (1 << 4), /**< Indicates secure resource */
+	IOTCON_EXPLICIT_DISCOVERABLE = (1 << 5), /**< When this bit is set, the resource is allowed to be discovered only if discovery request contains an explicit querystring. */
 } iotcon_resource_property_e;
 
 /**

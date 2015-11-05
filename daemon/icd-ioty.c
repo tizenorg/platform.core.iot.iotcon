@@ -104,6 +104,33 @@ void icd_ioty_deinit(GThread *thread)
 		ERR("OCStop() Fail(%d)", result);
 }
 
+static int _ioty_properties_to_oic_properties(int properties)
+{
+	int prop = OC_RES_PROP_NONE;
+
+	if (IOTCON_DISCOVERABLE & properties)
+		prop |= OC_DISCOVERABLE;
+
+	if (IOTCON_OBSERVABLE & properties)
+		prop |= OC_OBSERVABLE;
+
+	if (IOTCON_ACTIVE & properties)
+		prop |= OC_ACTIVE;
+
+	if (IOTCON_SLOW & properties)
+		prop |= OC_SLOW;
+
+	if (IOTCON_SECURE & properties)
+		prop |= OC_SECURE;
+
+	if (IOTCON_EXPLICIT_DISCOVERABLE & properties)
+		prop |= OC_EXPLICIT_DISCOVERABLE;
+
+	/* TODO: Secure option is not supported yet. */
+	properties = (properties & OC_SECURE)? (properties ^ OC_SECURE):properties;
+
+	return prop;
+}
 
 OCResourceHandle icd_ioty_register_resource(const char *uri_path,
 		const char* const* res_types, int ifaces, int properties)
@@ -131,8 +158,7 @@ OCResourceHandle icd_ioty_register_resource(const char *uri_path,
 		return NULL;
 	}
 
-	/* Secure option is not supported yet. */
-	properties = (properties & OC_SECURE)? (properties ^ OC_SECURE):properties;
+	properties = _ioty_properties_to_oic_properties(properties);
 
 	icd_ioty_csdk_lock();
 	ret = OCCreateResource(&handle, res_types[0], res_iface, uri_path,
@@ -1057,7 +1083,7 @@ int icd_ioty_set_tizen_info()
 			ICD_IOTY_TIZEN_INFO_URI,
 			icd_ioty_ocprocess_tizen_info_handler,
 			NULL,
-			OC_RES_PROP_NONE);
+			OC_EXPLICIT_DISCOVERABLE);
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCCreateResource() Fail(%d)", ret);
