@@ -23,7 +23,8 @@
 static char *door_resource_device_id;
 static GList *device_id_list;
 
-static const char* const door_uri_path = "/a/door";
+#define DOOR_RESOURCE_URI_PREFIX "/door"
+#define DOOR_RESOURCE_TYPE "org.tizen.door"
 
 static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
 		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data)
@@ -417,7 +418,8 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 
 	node = g_list_find_custom(device_id_list, resource_device_id, _device_id_compare);
 
-	if (node && TEST_STR_EQUAL == strcmp(door_uri_path, resource_uri_path)) {
+	if (node && TEST_STR_EQUAL == strncmp(DOOR_RESOURCE_URI_PREFIX, resource_uri_path,
+			strlen(DOOR_RESOURCE_URI_PREFIX))) {
 		DBG("uri_path \"%s\" already found. skip !", resource_uri_path);
 		return;
 	}
@@ -492,7 +494,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		return;
 	}
 
-	ret = iotcon_add_presence_cb(resource_host, connectivity_type, "core.door",
+	ret = iotcon_add_presence_cb(resource_host, connectivity_type, DOOR_RESOURCE_TYPE,
 			_presence_handler, NULL, &presence_handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_add_presence_cb() Fail(%d)", ret);
@@ -501,7 +503,8 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		return;
 	}
 
-	if (TEST_STR_EQUAL == strcmp(door_uri_path, resource_uri_path)) {
+	if (TEST_STR_EQUAL == strncmp(DOOR_RESOURCE_URI_PREFIX, resource_uri_path,
+			strlen(DOOR_RESOURCE_URI_PREFIX))) {
 		iotcon_query_h query;
 
 		ret = iotcon_query_create(&query);
@@ -564,7 +567,7 @@ int main(int argc, char **argv)
 
 	/* find door typed resources */
 	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
-			"core.door", &_found_resource, NULL);
+			DOOR_RESOURCE_TYPE, &_found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
 		iotcon_disconnect();

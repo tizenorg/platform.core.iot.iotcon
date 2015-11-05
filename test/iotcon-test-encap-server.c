@@ -22,6 +22,9 @@
 #include <iotcon-internal.h>
 #include "test.h"
 
+#define DOOR_RESOURCE_URI "/door/1"
+#define DOOR_RESOURCE_TYPE "org.tizen.door"
+
 /* Door Resource */
 typedef struct _door_resource_s {
 	bool state;
@@ -35,15 +38,15 @@ static int _set_door_resource(door_resource_s *door)
 {
 	door->state = false;
 
-	door->uri_path = strdup("/a/door");
+	door->uri_path = strdup(DOOR_RESOURCE_URI);
 	if (NULL == door->uri_path) {
-		ERR("strdup(/a/door) Fail");
+		ERR("strdup(%s) Fail", DOOR_RESOURCE_URI);
 		return -1;
 	}
 
-	door->type = strdup("core.door");
+	door->type = strdup(DOOR_RESOURCE_TYPE);
 	if (NULL == door->type) {
-		ERR("strdup(core.door) Fail");
+		ERR("strdup(%s) Fail", DOOR_RESOURCE_TYPE);
 		free(door->uri_path);
 		return -1;
 	}

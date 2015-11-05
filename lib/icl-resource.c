@@ -542,7 +542,6 @@ API int iotcon_resource_notify(iotcon_resource_h resource,
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (0 == resource->sub_id) {
 		ERR("Invalid Resource handle");

@@ -36,6 +36,10 @@ typedef struct _door_resource_s {
 
 static bool resource_created;
 
+#define DOOR_RESOURCE_URI "/door/1"
+#define DOOR_RESOURCE_URI2 "/door/2"
+#define DOOR_RESOURCE_TYPE "org.tizen.door"
+
 static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
 		void *user_data);
 
@@ -45,15 +49,15 @@ static int _set_door_resource(door_resource_s *door)
 
 	door->state = false;
 
-	door->uri_path = strdup("/a/door");
+	door->uri_path = strdup(DOOR_RESOURCE_URI);
 	if (NULL == door->uri_path) {
-		ERR("strdup(/a/door) Fail");
+		ERR("strdup(%s) Fail", DOOR_RESOURCE_URI);
 		return -1;
 	}
 
-	door->type = strdup("core.door");
+	door->type = strdup(DOOR_RESOURCE_TYPE);
 	if (NULL == door->type) {
-		ERR("strdup(core.door) Fail");
+		ERR("strdup(%s) Fail", DOOR_RESOURCE_TYPE);
 		free(door->uri_path);
 		return -1;
 	}
@@ -323,7 +327,7 @@ static void _request_handler_post(door_resource_s *door, iotcon_response_h respo
 		return;
 	}
 
-	new_door_handle = _create_door_resource("/a/door1", door->type,
+	new_door_handle = _create_door_resource(DOOR_RESOURCE_URI2, door->type,
 			IOTCON_INTERFACE_DEFAULT, (IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE), NULL);
 	if (NULL == new_door_handle) {
 		ERR("_create_door_resource() Fail");
@@ -345,7 +349,7 @@ static void _request_handler_post(door_resource_s *door, iotcon_response_h respo
 		return;
 	}
 
-	ret = iotcon_state_set_str(resp_state, "createduripath", "/a/door1");
+	ret = iotcon_state_set_str(resp_state, "createduripath", DOOR_RESOURCE_URI2);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_state_set_str() Fail(%d)", ret);
 		iotcon_state_destroy(resp_state);

@@ -22,7 +22,10 @@
 static char *room_resource_device_id;
 static GList *device_id_list;
 
-static const char* const room_uri_path = "/a/room";
+#define ROOM_RESOURCE_TYPE "org.tizen.room"
+#define ROOM_RESOURCE_URI_PREFIX "/room"
+#define LIGHT_RESOURCE_URI_PREFIX "/light"
+#define SWITCH_RESOURCE_URI_PREFIX "/switch"
 
 static bool _get_int_list_cb(int pos, const int value, void *user_data)
 {
@@ -124,7 +127,8 @@ static void _on_get(iotcon_representation_h recv_repr, int response_result)
 			continue;
 		}
 
-		if (TEST_STR_EQUAL == strcmp("/a/light", uri_path)) {
+		if (TEST_STR_EQUAL == strncmp(LIGHT_RESOURCE_URI_PREFIX, uri_path,
+				strlen(LIGHT_RESOURCE_URI_PREFIX))) {
 			ret = iotcon_state_get_keys_count(child_state, &key_count);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("iotcon_state_get_keys_count() Fail(%d)", ret);
@@ -139,7 +143,8 @@ static void _on_get(iotcon_representation_h recv_repr, int response_result)
 				}
 				DBG("brightness : %d", int_val);
 			}
-		} else if (TEST_STR_EQUAL == strcmp("/a/switch", uri_path)) {
+		} else if (TEST_STR_EQUAL == strncmp(SWITCH_RESOURCE_URI_PREFIX, uri_path,
+				strlen(SWITCH_RESOURCE_URI_PREFIX))) {
 			ret = iotcon_state_get_keys_count(child_state, &key_count);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("iotcon_state_get_keys_count() Fail(%d)", ret);
@@ -285,7 +290,8 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 
 	node = g_list_find_custom(device_id_list, resource_device_id, _device_id_compare);
 
-	if (node && TEST_STR_EQUAL == strcmp(room_uri_path, resource_uri_path)) {
+	if (node && TEST_STR_EQUAL == strncmp(ROOM_RESOURCE_URI_PREFIX, resource_uri_path,
+			strlen(ROOM_RESOURCE_URI_PREFIX))) {
 		DBG("uri_path \"%s\" already found. skip !", resource_uri_path);
 		return;
 	}
@@ -342,7 +348,8 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		return;
 	}
 
-	if (TEST_STR_EQUAL == strcmp(room_uri_path, resource_uri_path)) {
+	if (TEST_STR_EQUAL == strncmp(ROOM_RESOURCE_URI_PREFIX, resource_uri_path,
+			strlen(ROOM_RESOURCE_URI_PREFIX))) {
 		ret = iotcon_remote_resource_clone(resource, &cloned_resource);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_remote_resource_clone() Fail(%d)", ret);
@@ -378,7 +385,7 @@ int main(int argc, char **argv)
 
 	/* find room typed resources */
 	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
-			"core.room", &_found_resource, NULL);
+			ROOM_RESOURCE_TYPE, &_found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
 		iotcon_disconnect();

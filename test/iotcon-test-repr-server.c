@@ -20,6 +20,14 @@
 #include <iotcon.h>
 #include "test.h"
 
+#define LIGHT_RESOURCE_URI "/light/1"
+#define LIGHT_RESOURCE_TYPE "org.tizen.light"
+
+#define ROOM_RESOURCE_URI "/room/1"
+#define ROOM_RESOURCE_TYPE "org.tizen.room"
+
+#define SWITCH_RESOURCE_URI "/switch/1"
+
 static int _send_response(iotcon_response_h response, iotcon_representation_h repr,
 		iotcon_interface_e iface)
 {
@@ -98,7 +106,7 @@ static void _room_request_handler_get(iotcon_request_h request,
 		return;
 	}
 
-	ret = iotcon_representation_set_uri_path(room_repr, "/a/room");
+	ret = iotcon_representation_set_uri_path(room_repr, ROOM_RESOURCE_URI);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_set_uri_path() Fail(%d)", ret);
 		iotcon_state_destroy(room_state);
@@ -200,7 +208,7 @@ static void _room_request_handler_get(iotcon_request_h request,
 		return;
 	}
 
-	ret = iotcon_representation_set_uri_path(light_repr, "/a/light");
+	ret = iotcon_representation_set_uri_path(light_repr, LIGHT_RESOURCE_URI);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_set_uri_path() Fail(%d)", ret);
 		iotcon_representation_destroy(light_repr);
@@ -257,7 +265,7 @@ static void _room_request_handler_get(iotcon_request_h request,
 		return;
 	}
 
-	ret = iotcon_representation_set_uri_path(switch_repr, "/a/switch");
+	ret = iotcon_representation_set_uri_path(switch_repr, SWITCH_RESOURCE_URI);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_set_uri_path() Fail(%d)", ret);
 		iotcon_representation_destroy(switch_repr);
@@ -498,15 +506,15 @@ int main(int argc, char **argv)
 		iotcon_disconnect();
 		return -1;
 	}
-	ret = iotcon_resource_types_add(room_rtypes, "core.room");
+	ret = iotcon_resource_types_add(room_rtypes, ROOM_RESOURCE_TYPE);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_types_add(%s) Fail(%d)", "core.room", ret);
+		ERR("iotcon_resource_types_add(%s) Fail(%d)", ROOM_RESOURCE_TYPE, ret);
 		iotcon_resource_types_destroy(room_rtypes);
 		iotcon_disconnect();
 		return -1;
 	}
 
-	ret = iotcon_resource_create("/a/room", room_rtypes,
+	ret = iotcon_resource_create(ROOM_RESOURCE_URI, room_rtypes,
 			(IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_BATCH),
 			(IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE), _room_request_handler,
 			NULL, &room_handle);
@@ -526,16 +534,16 @@ int main(int argc, char **argv)
 		iotcon_disconnect();
 		return -1;
 	}
-	ret = iotcon_resource_types_add(light_rtypes, "core.light");
+	ret = iotcon_resource_types_add(light_rtypes, LIGHT_RESOURCE_TYPE);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_types_add(%s) Fail(%d)", "core.light", ret);
+		ERR("iotcon_resource_types_add(%s) Fail(%d)", LIGHT_RESOURCE_TYPE, ret);
 		iotcon_resource_types_destroy(light_rtypes);
 		iotcon_resource_destroy(room_handle);
 		iotcon_disconnect();
 		return -1;
 	}
 
-	ret = iotcon_resource_create("/a/light", light_rtypes,
+	ret = iotcon_resource_create(LIGHT_RESOURCE_URI, light_rtypes,
 			(IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_BATCH),
 			(IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE), _light_request_handler,
 			NULL, &light_handle);

@@ -23,6 +23,8 @@
 static char *door_resource_device_id;
 static GList *device_id_list;
 
+#define DOOR_RESOURCE_TYPE "org.tizen.door"
+
 static bool _get_res_type_cb(const char *string, void *user_data)
 {
 	char *resource_uri_path = user_data;
@@ -232,7 +234,7 @@ int main(int argc, char **argv)
 
 	/* find door typed resources */
 	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
-			"core.door", &_found_resource, &resource);
+			DOOR_RESOURCE_TYPE, &_found_resource, &resource);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
 		iotcon_disconnect();
