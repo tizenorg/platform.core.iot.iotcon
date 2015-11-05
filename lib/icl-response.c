@@ -116,11 +116,13 @@ API int iotcon_response_set_representation(iotcon_response_h resp,
 		iotcon_interface_e iface, iotcon_representation_h repr)
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	resp->repr = repr;
+	if (resp->repr)
+		iotcon_representation_destroy(resp->repr);
 	resp->iface = iface;
-	icl_representation_inc_ref_count(resp->repr);
+	resp->repr = repr;
+	if (repr)
+		icl_representation_inc_ref_count(resp->repr);
 
 	return IOTCON_ERROR_NONE;
 }
