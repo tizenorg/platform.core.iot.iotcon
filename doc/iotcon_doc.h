@@ -149,7 +149,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
  * Example :
  * @code
 #include <iotcon.h>
-static void _on_get(iotcon_remote_resource_h resource, iotcon_error_e err,
+static void _on_response_get(iotcon_remote_resource_h resource, iotcon_error_e err,
 		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data)
 {
 	// handle get from response
@@ -197,7 +197,7 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 
 	iotcon_query_add(query, "key", "value");
 
-	iotcon_remote_resource_get(resource, query, &_on_get, NULL);
+	iotcon_remote_resource_get(resource, query, _on_response_get, NULL);
 	iotcon_query_destroy(query);
 }
 ...
@@ -206,7 +206,7 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 	const char *type = "org.tizen.door";
 
 	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4, type,
-			&_found_resource, NULL);
+			_found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		return;
 	}
@@ -327,7 +327,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 ...
 static iotcon_remote_resource_h door_resource;
 ...
-static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
+static void _on_resopnse_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
 		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data)
 {
 }
@@ -335,7 +335,7 @@ static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
 {
 	int ret;
 	ret = iotcon_remote_resource_start_observing(door_resource, IOTCON_OBSERVE_ALL, NULL,
-			&_on_observe, NULL);
+			_on_resopnse_observe, NULL);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 }

@@ -34,7 +34,7 @@ static bool _get_int_list_cb(int pos, const int value, void *user_data)
 	return IOTCON_FUNC_CONTINUE;
 }
 
-static void _on_get(iotcon_representation_h recv_repr, int response_result)
+static void _print_repr(iotcon_representation_h recv_repr)
 {
 	int i, ret, int_val;
 	bool is_null, bool_val;
@@ -44,8 +44,6 @@ static void _on_get(iotcon_representation_h recv_repr, int response_result)
 	iotcon_state_h recv_state, child_state;
 	unsigned int key_count, children_count;
 
-	RETM_IF(IOTCON_RESPONSE_RESULT_OK != response_result, "_on_get Response error(%d)",
-			response_result);
 	INFO("GET request was successful");
 
 	DBG("[ parent representation ]");
@@ -186,11 +184,15 @@ static void _on_get_2nd(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	_on_get(recv_repr, response_result);
+	if (IOTCON_RESPONSE_RESULT_OK == response_result)
+		_print_repr(recv_repr);
+	else
+		ERR("Invalid result(%d)", response_result);
+
 	iotcon_remote_resource_destroy(resource);
 }
 
-static void _on_get_1st(iotcon_remote_resource_h resource,
+static void _on_response_1st(iotcon_remote_resource_h resource,
 		iotcon_error_e err,
 		iotcon_request_type_e request_type,
 		iotcon_response_h response,
@@ -215,7 +217,10 @@ static void _on_get_1st(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	_on_get(recv_repr, response_result);
+	if (IOTCON_RESPONSE_RESULT_OK == response_result)
+		_print_repr(recv_repr);
+	else
+		ERR("Invalid result(%d)", response_result);
 
 	ret = iotcon_query_create(&query_params);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -359,7 +364,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		}
 
 		/* send GET request */
-		ret = iotcon_remote_resource_get(cloned_resource, NULL, _on_get_1st, NULL);
+		ret = iotcon_remote_resource_get(cloned_resource, NULL, _on_response_1st, NULL);
 		if (IOTCON_ERROR_NONE != ret)
 			ERR("iotcon_remote_resource_get() Fail(%d)", ret);
 	}
@@ -385,7 +390,7 @@ int main(int argc, char **argv)
 
 	/* find room typed resources */
 	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
-			ROOM_RESOURCE_TYPE, &_found_resource, NULL);
+			ROOM_RESOURCE_TYPE, _found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
 		iotcon_disconnect();
