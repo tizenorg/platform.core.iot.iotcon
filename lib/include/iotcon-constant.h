@@ -243,6 +243,7 @@ typedef struct icl_state_s* iotcon_state_h;
 typedef enum {
 	IOTCON_OBSERVE_REGISTER = 0, /**< Indicates action of registering observation*/
 	IOTCON_OBSERVE_DEREGISTER = 1, /**< Indicates action of unregistering observation */
+	IOTCON_OBSERVE_NO_OPTION = 2 /**< Indicates no option */
 } iotcon_observe_action_e;
 
 /**
