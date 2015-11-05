@@ -102,10 +102,8 @@ static void _icl_device_info_cb(GDBusConnection *connection,
 	icl_device_info_s *cb_container = user_data;
 	iotcon_device_info_cb cb = cb_container->cb;
 
-	if (cb_container->timeout_id) {
-		g_source_remove(cb_container->timeout_id);
+	if (cb_container->timeout_id)
 		cb_container->timeout_id = 0;
-	}
 
 	g_variant_get(parameters, "(&s&s&s&s&s)", &uri_path, &info.device_name,
 			&info.spec_ver, &info.device_id, &info.data_model_ver);
@@ -127,7 +125,7 @@ static gboolean _icl_timeout_get_device_info(gpointer p)
 		return G_SOURCE_REMOVE;
 	}
 
-	if (cb_container->cb)
+	if (cb_container->timeout_id && cb_container->cb)
 		cb_container->cb(&info, IOTCON_ERROR_TIMEOUT, cb_container->user_data);
 
 	icl_dbus_unsubscribe_signal(cb_container->id);
@@ -256,10 +254,8 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 	icl_platform_info_s *cb_container = user_data;
 	iotcon_platform_info_cb cb = cb_container->cb;
 
-	if (cb_container->timeout_id) {
-		g_source_remove(cb_container->timeout_id);
+	if (cb_container->timeout_id)
 		cb_container->timeout_id = 0;
-	}
 
 	g_variant_get(parameters, "(&s&s&s&s&s&s&s&s&s&s&s&s)",
 			&uri_path,
@@ -292,7 +288,7 @@ static gboolean _icl_timeout_get_platform_info(gpointer p)
 		return G_SOURCE_REMOVE;
 	}
 
-	if (cb_container->cb)
+	if (cb_container->timeout_id && cb_container->cb)
 		cb_container->cb(&info, IOTCON_ERROR_TIMEOUT, cb_container->user_data);
 
 	icl_dbus_unsubscribe_signal(cb_container->id);

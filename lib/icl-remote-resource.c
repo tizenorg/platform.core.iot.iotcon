@@ -56,10 +56,8 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 	icl_found_resource_s *cb_container = user_data;
 	iotcon_found_resource_cb cb = cb_container->cb;
 
-	if (cb_container->timeout_id) {
-		g_source_remove(cb_container->timeout_id);
+	if (cb_container->timeout_id)
 		cb_container->timeout_id = 0;
-	}
 
 	g_variant_get(parameters, "(vi)", &payload, &connectivity_type);
 
@@ -84,7 +82,7 @@ static gboolean _icl_timeout_find_resource(gpointer p)
 		return G_SOURCE_REMOVE;
 	}
 
-	if (cb_container->cb)
+	if (cb_container->timeout_id && cb_container->cb)
 		cb_container->cb(NULL, IOTCON_ERROR_TIMEOUT, cb_container->user_data);
 
 	icl_dbus_unsubscribe_signal(cb_container->id);
