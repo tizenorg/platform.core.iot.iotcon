@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdint.h>
 #include <stdlib.h>
 #include <gio/gio.h>
 
@@ -39,7 +40,7 @@ typedef struct _icd_dbus_client_s {
 
 typedef struct _icd_resource_handle {
 	OCResourceHandle handle;
-	unsigned int signal_number;
+	int64_t signal_number;
 } icd_resource_handle_s;
 
 
@@ -88,7 +89,7 @@ static void _icd_dbus_resource_handle_free(OCResourceHandle handle)
 }
 
 int icd_dbus_client_list_get_info(OCResourceHandle handle,
-		unsigned int *signal_number, gchar **bus_name)
+		int64_t *signal_number, gchar **bus_name)
 {
 	FN_CALL;
 	icd_dbus_client_s *client;
@@ -152,12 +153,14 @@ int icd_dbus_emit_signal(const char *dest, const char *signal_name, GVariant *va
 	if (FALSE == ret) {
 		ERR("g_dbus_connection_emit_signal() Fail(%s)", error->message);
 		g_error_free(error);
+		g_variant_unref(value);
 		return IOTCON_ERROR_DBUS;
 	}
 
 	if (FALSE == g_dbus_connection_flush_sync(conn, NULL, &error)) {
 		ERR("g_dbus_connection_flush_sync() Fail(%s)", error->message);
 		g_error_free(error);
+		g_variant_unref(value);
 		return IOTCON_ERROR_DBUS;
 	}
 
@@ -287,7 +290,7 @@ static int _icd_dbus_subscribe_name_owner_changed(GDBusConnection *conn)
 }
 
 static int _icd_dbus_resource_list_append_handle(const gchar *bus_name,
-		OCResourceHandle handle, unsigned int signal_number)
+		OCResourceHandle handle, int64_t signal_number)
 {
 	FN_CALL;
 	GList *cur_client, *cur_hd;
@@ -383,7 +386,7 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 		const gchar* const *resource_types,
 		gint ifaces,
 		gint properties,
-		guint signal_number)
+		gint64 signal_number)
 {
 	FN_CALL;
 	int ret;
@@ -498,7 +501,7 @@ static gboolean _dbus_handle_find_resource(icDbus *object,
 		const gchar *host_address,
 		gint connectivity,
 		const gchar *type,
-		guint signal_number)
+		gint64 signal_number)
 {
 	int ret;
 	const gchar *sender;
@@ -519,7 +522,7 @@ static gboolean _dbus_handle_observer_start(icDbus *object,
 		GVariant *resource,
 		gint observe_policy,
 		GVariant *query,
-		guint signal_number)
+		gint64 signal_number)
 {
 	OCDoHandle observe_h;
 	const gchar *sender;
@@ -590,7 +593,7 @@ static gboolean _dbus_handle_get_device_info(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
 		gint connectivity,
-		guint signal_number)
+		gint64 signal_number)
 {
 	int ret;
 	const gchar *sender;
@@ -610,7 +613,7 @@ static gboolean _dbus_handle_get_platform_info(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
 		gint connectivity,
-		guint signal_number)
+		gint64 signal_number)
 {
 	int ret;
 	const gchar *sender;
@@ -662,15 +665,11 @@ static gboolean _dbus_handle_subscribe_presence(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
 		gint connectivity,
-		const gchar *type,
-		guint signal_number)
+		const gchar *type)
 {
 	OCDoHandle presence_h;
-	const gchar *sender;
 
-	sender = g_dbus_method_invocation_get_sender(invocation);
-	presence_h = icd_ioty_subscribe_presence(host_address, connectivity, type,
-			signal_number, sender);
+	presence_h = icd_ioty_subscribe_presence(host_address, connectivity, type);
 	if (NULL == presence_h)
 		ERR("icd_ioty_subscribe_presence() Fail");
 
@@ -683,11 +682,12 @@ static gboolean _dbus_handle_subscribe_presence(icDbus *object,
 
 static gboolean _dbus_handle_unsubscribe_presence(icDbus *object,
 		GDBusMethodInvocation *invocation,
-		gint64 presence_h)
+		gint64 presence_h,
+		const gchar *host_address)
 {
 	int ret;
 
-	ret = icd_ioty_unsubscribe_presence(ICD_INT64_TO_POINTER(presence_h));
+	ret = icd_ioty_unsubscribe_presence(ICD_INT64_TO_POINTER(presence_h), host_address);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_unsubscribe_presence() Fail(%d)", ret);
 

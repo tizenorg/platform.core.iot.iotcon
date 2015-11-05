@@ -274,10 +274,11 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_lite_resource_h *resource_handle)
 {
 	int ret, iface;
+	unsigned int sub_id;
 	const gchar **types;
 	GError *error = NULL;
 	iotcon_lite_resource_h resource;
-	unsigned int sub_id, signal_number;
+	int64_t signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH];
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -332,7 +333,7 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		return ret;
 	}
 
-	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_REQUEST_HANDLER,
+	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_REQUEST_HANDLER,
 			signal_number);
 
 	sub_id = icl_dbus_subscribe_signal(signal_name, resource,

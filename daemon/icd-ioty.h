@@ -29,6 +29,8 @@
 #define ICD_IOTY_COAP "coap://"
 #define ICD_IOTY_COAPS "coaps://"
 
+#define ICD_MULTICAST_ADDRESS "224.0.1.187:5683"
+
 /* TODO Define Tizen Information Resource(uri, resource type) */
 #define ICD_IOTY_TIZEN_INFO_URI "/org/tizen/iot/d"
 #define ICD_IOTY_TIZEN_INFO_TYPE "org.tizen.iot.d"
@@ -37,9 +39,14 @@
 #define ICD_IOTY_TIZEN_INFO_TIZEN_DEVICE_ID "tizen_device_id"
 
 typedef struct {
-	unsigned int signal_number;
+	int64_t signal_number;
 	char *bus_name;
 } icd_sig_ctx_s;
+
+typedef struct {
+	OCDoHandle handle;
+	int client_count;
+} icd_presence_handle_info;
 
 enum {
 	ICD_CRUD_GET,
@@ -77,7 +84,7 @@ int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers)
 int icd_ioty_send_response(GVariant *resp);
 
 int icd_ioty_find_resource(const char *host_address, int conn_type,
-		const char *resource_type, unsigned int signal_number, const char *bus_name);
+		const char *resource_type, int64_t signal_number, const char *bus_name);
 
 void icd_ioty_complete(int type, GDBusMethodInvocation *invocation, GVariant *value);
 void icd_ioty_complete_error(int type, GDBusMethodInvocation *invocation, int ret_val);
@@ -95,12 +102,12 @@ gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource);
 
 OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type,
-		GVariant *query, unsigned int signal_number, const char *bus_name);
+		GVariant *query, int64_t signal_number, const char *bus_name);
 
 int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options);
 
 int icd_ioty_get_info(int type, const char *host_address, int conn_type,
-		unsigned int signal_number, const char *bus_name);
+		int64_t signal_number, const char *bus_name);
 
 int icd_ioty_set_device_info();
 int icd_ioty_set_platform_info();
@@ -111,10 +118,12 @@ gboolean icd_ioty_get_tizen_info(icDbus *object, GDBusMethodInvocation *invocati
 
 int icd_ioty_tizen_info_get_property(char **device_name, char **tizen_device_id);
 
-OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
-		const char *resource_type, unsigned int signal_number, const char *bus_name);
+OCDoHandle icd_ioty_presence_table_get_handle(const char *host_address);
 
-int icd_ioty_unsubscribe_presence(OCDoHandle handle);
+OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
+		const char *resource_type);
+
+int icd_ioty_unsubscribe_presence(OCDoHandle handle, const char *host_address);
 
 int icd_ioty_start_presence(unsigned int time_to_live);
 

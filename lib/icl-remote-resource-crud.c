@@ -464,7 +464,7 @@ int icl_remote_resource_observer_start(iotcon_remote_resource_h resource,
 {
 	int ret;
 	GError *error = NULL;
-	unsigned int signal_number;
+	int64_t signal_number;
 	GVariant *arg_query, *arg_remote_resource;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
@@ -491,7 +491,7 @@ int icl_remote_resource_observer_start(iotcon_remote_resource_h resource,
 		return IOTCON_ERROR_IOTIVITY;
 	}
 
-	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_OBSERVE,
+	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_OBSERVE,
 			signal_number);
 
 	*sub_id = icl_dbus_subscribe_signal(signal_name, cb_container, cb_free, sig_handler);

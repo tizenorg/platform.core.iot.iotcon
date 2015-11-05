@@ -16,6 +16,8 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_DBUS_H__
 #define __IOT_CONNECTIVITY_MANAGER_DBUS_H__
 
+#include <stdint.h>
+
 #include "ic-dbus.h"
 
 #define ICL_DBUS_TIMEOUT_DEFAULT 30 /* 30 sec */
@@ -23,7 +25,7 @@
 
 
 icDbus* icl_dbus_get_object();
-unsigned int icl_dbus_generate_signal_number();
+int64_t icl_dbus_generate_signal_number();
 
 unsigned int icl_dbus_subscribe_signal(char *signal_name, void *cb_container,
 		void *cb_free, GDBusSignalCallback sig_handler);

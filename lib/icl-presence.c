@@ -120,14 +120,20 @@ static void _icl_presence_cb(GDBusConnection *connection,
 	g_variant_get(parameters, "(iu&sii&s)", &res, &nonce, &host_address,
 			&connectivity_type, &trigger, &resource_type);
 
+	response.resource_type = ic_utils_dbus_decode_str(resource_type);
+
+	if (response.resource_type && presence->resource_type) {
+		if (IC_STR_EQUAL != strcmp(response.resource_type, presence->resource_type))
+			return;
+	}
+
 	if (res < IOTCON_ERROR_NONE && cb)
 		cb(presence, icl_dbus_convert_daemon_error(res), NULL, presence->user_data);
 
-	DBG("presence nonce : %d", nonce);
+	DBG("presence nonce : %u", nonce);
 
 	response.host_address = host_address;
 	response.connectivity_type = connectivity_type;
-	response.resource_type = ic_utils_dbus_decode_str(resource_type);
 	response.result = res;
 	response.trigger = trigger;
 
@@ -161,9 +167,9 @@ API int iotcon_add_presence_cb(const char *host_address,
 {
 	FN_CALL;
 	int ret;
+	unsigned int sub_id;
 	GError *error = NULL;
 	icl_presence_s *presence;
-	unsigned int sub_id, signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
@@ -181,21 +187,16 @@ API int iotcon_add_presence_cb(const char *host_address,
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	signal_number = icl_dbus_generate_signal_number();
-
 	presence = calloc(1, sizeof(icl_presence_s));
 	if (NULL == presence) {
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	resource_type = ic_utils_dbus_encode_str(resource_type);
-
 	ic_dbus_call_subscribe_presence_sync(icl_dbus_get_object(),
 			ic_utils_dbus_encode_str(host_address),
 			connectivity_type,
-			resource_type,
-			signal_number,
+			ic_utils_dbus_encode_str(resource_type),
 			&(presence->handle),
 			NULL,
 			&error);
@@ -213,8 +214,8 @@ API int iotcon_add_presence_cb(const char *host_address,
 		return IOTCON_ERROR_IOTIVITY;
 	}
 
-	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_PRESENCE,
-			signal_number);
+	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_PRESENCE,
+			presence->handle);
 
 	presence->cb = cb;
 	presence->user_data = user_data;
@@ -265,7 +266,7 @@ API int iotcon_remove_presence_cb(iotcon_presence_h presence)
 	}
 
 	ic_dbus_call_unsubscribe_presence_sync(icl_dbus_get_object(), presence->handle,
-			&ret, NULL, &error);
+			presence->host_address, &ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_unsubscribe_presence_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);

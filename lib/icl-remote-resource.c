@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -99,9 +100,10 @@ API int iotcon_find_resource(const char *host_address,
 		void *user_data)
 {
 	int ret;
+	unsigned int sub_id;
 	GError *error = NULL;
+	int64_t signal_number;
 	icl_found_resource_s *cb_container;
-	unsigned int sub_id, signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -133,7 +135,7 @@ API int iotcon_find_resource(const char *host_address,
 		return icl_dbus_convert_daemon_error(ret);
 	}
 
-	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_FOUND_RESOURCE,
+	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_FOUND_RESOURCE,
 			signal_number);
 
 	cb_container = calloc(1, sizeof(icl_found_resource_s));

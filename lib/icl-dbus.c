@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <gio/gio.h>
 #include <tizen_type.h>
@@ -42,9 +43,9 @@ icDbus* icl_dbus_get_object()
 }
 
 
-unsigned int icl_dbus_generate_signal_number()
+int64_t icl_dbus_generate_signal_number()
 {
-	static unsigned int i = 0;
+	static int64_t i = 0;
 
 	return i++;
 }

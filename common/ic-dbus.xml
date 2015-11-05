@@ -5,7 +5,7 @@
 			<arg type="as" name="resource_types" direction="in"/>
 			<arg type="i" name="ifaces" direction="in"/>
 			<arg type="i" name="properties" direction="in"/>
-			<arg type="u" name="signal_number" direction="in"/>
+			<arg type="x" name="signal_number" direction="in"/>
 			<arg type="x" name="resource" direction="out"/>
 		</method>
 		<method name="unregisterResource">
@@ -45,7 +45,7 @@
 			<arg type="s" name="host_address" direction="in"/>
 			<arg type="i" name="connectivity" direction="in"/>
 			<arg type="s" name="type" direction="in"/>
-			<arg type="u" name="signal_number" direction="in"/>
+			<arg type="x" name="signal_number" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="get">
@@ -73,7 +73,7 @@
 			<arg type="(ssba(qs)i)" name="remote_resource" direction="in"/>
 			<arg type="i" name="observe_type" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
-			<arg type="u" name="signal_number" direction="in"/>
+			<arg type="x" name="signal_number" direction="in"/>
 			<arg type="x" name="observe_h" direction="out"/>
 		</method>
 		<method name="observerStop">
@@ -84,13 +84,13 @@
 		<method name="getDeviceInfo">
 			<arg type="s" name="host_address" direction="in"/>
 			<arg type="i" name="connectivity" direction="in"/>
-			<arg type="u" name="signal_number" direction="in"/>
+			<arg type="x" name="signal_number" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="getPlatformInfo">
 			<arg type="s" name="host_address" direction="in"/>
 			<arg type="i" name="connectivity" direction="in"/>
-			<arg type="u" name="signal_number" direction="in"/>
+			<arg type="x" name="signal_number" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="getTizenInfo">
@@ -102,11 +102,11 @@
 			<arg type="s" name="host_address" direction="in"/>
 			<arg type="i" name="connectivity" direction="in"/>
 			<arg type="s" name="type" direction="in"/>
-			<arg type="u" name="signal_number" direction="in"/>
 			<arg type="x" name="presence_h" direction="out"/>
 		</method>
 		<method name="unsubscribePresence">
 			<arg type="x" name="presence_h" direction="in"/>
+			<arg type="s" name="host_address" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="startPresence">

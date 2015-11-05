@@ -35,7 +35,6 @@
 #include "icd-ioty-type.h"
 #include "icd-ioty-ocprocess.h"
 
-#define ICD_MULTICAST_ADDRESS "224.0.1.187:5683"
 #define ICD_UUID_LENGTH 37
 
 static const char *ICD_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
@@ -51,6 +50,8 @@ typedef struct {
 } icd_tizen_info_s;
 
 static icd_tizen_info_s icd_tizen_info = {0};
+
+static GHashTable *icd_ioty_presence_table;
 
 static GMutex icd_csdk_mutex;
 
@@ -411,7 +412,7 @@ static void _ioty_free_signal_context(void *data)
 
 
 int icd_ioty_find_resource(const char *host_address, int conn_type,
-		const char *resource_type, unsigned int signal_number, const char *bus_name)
+		const char *resource_type, int64_t signal_number, const char *bus_name)
 {
 	int len;
 	OCStackResult result;
@@ -707,7 +708,7 @@ gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
 
 
 OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_policy,
-		GVariant *query, unsigned int signal_number, const char *bus_name)
+		GVariant *query, int64_t signal_number, const char *bus_name)
 {
 	bool is_secure;
 	OCMethod method;
@@ -829,7 +830,7 @@ int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options)
 }
 
 int icd_ioty_get_info(int type, const char *host_address, int conn_type,
-		unsigned int signal_number, const char *bus_name)
+		int64_t signal_number, const char *bus_name)
 {
 	OCStackResult result;
 	icd_sig_ctx_s *context;
@@ -1120,40 +1121,114 @@ int icd_ioty_tizen_info_get_property(char **device_name, char **tizen_device_id)
 }
 
 
-OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
-		const char *resource_type, unsigned int signal_number, const char *bus_name)
+static void _icd_ioty_presence_table_create()
 {
-	int len;
-	OCDoHandle handle;
-	OCStackResult result;
-	icd_sig_ctx_s *context;
-	char uri[PATH_MAX] = {0};
-	OCCallbackData cbdata = {0};
-	OCConnectivityType oic_conn_type;
+	if (icd_ioty_presence_table)
+		return;
 
-	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, host_address) || '\0' == host_address[0]) {
-		len = snprintf(uri, sizeof(uri), "%s%s", ICD_MULTICAST_ADDRESS,
-				OC_RSRVD_PRESENCE_URI);
-	} else {
-		len = snprintf(uri, sizeof(uri), "%s%s", host_address, OC_RSRVD_PRESENCE_URI);
-	}
-	if (len <= 0 || sizeof(uri) <= len) {
-		ERR("snprintf() Fail(%d)", len);
-		return NULL;
-	}
+	icd_ioty_presence_table = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+}
 
-	if (IC_STR_EQUAL != strcmp(IC_STR_NULL, resource_type))
-		snprintf(uri + len, sizeof(uri) - len, "?rt=%s", resource_type);
 
-	context = calloc(1, sizeof(icd_sig_ctx_s));
-	if (NULL == context) {
+static icd_presence_handle_info* _icd_ioty_presence_table_add(const char *host_address)
+{
+	icd_presence_handle_info *handle_info;
+
+	handle_info = calloc(1, sizeof(icd_presence_handle_info));
+	if (NULL == handle_info) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;
 	}
-	context->bus_name = ic_utils_strdup(bus_name);
-	context->signal_number = signal_number;
 
-	cbdata.context = context;
+	handle_info->client_count = 1;
+
+	g_hash_table_insert(icd_ioty_presence_table, ic_utils_strdup(host_address),
+			handle_info);
+
+	return handle_info;
+}
+
+
+static void _icd_ioty_presence_table_destroy()
+{
+	g_hash_table_destroy(icd_ioty_presence_table);
+	icd_ioty_presence_table = NULL;
+}
+
+
+static void _icd_ioty_presence_table_remove(const char *host_address)
+{
+	icd_presence_handle_info *handle_info;
+
+	handle_info = g_hash_table_lookup(icd_ioty_presence_table, host_address);
+	if (NULL == handle_info)
+		return;
+
+	handle_info->client_count--;
+	if (0 < handle_info->client_count)
+		return;
+
+	g_hash_table_remove(icd_ioty_presence_table, host_address);
+
+	if (0 == g_hash_table_size(icd_ioty_presence_table))
+		_icd_ioty_presence_table_destroy();
+
+	return;
+}
+
+
+static icd_presence_handle_info* _icd_ioty_presence_table_get_handle_info(
+		const char *host_address)
+{
+	return g_hash_table_lookup(icd_ioty_presence_table, host_address);
+}
+
+
+OCDoHandle icd_ioty_presence_table_get_handle(const char *host_address)
+{
+	icd_presence_handle_info *handle_info;
+
+	handle_info = g_hash_table_lookup(icd_ioty_presence_table, host_address);
+	if (NULL == handle_info)
+		return NULL;
+
+	return handle_info->handle;
+}
+
+
+OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
+		const char *resource_type)
+{
+	OCDoHandle handle;
+	const char *address;
+	OCStackResult result;
+	char uri[PATH_MAX] = {0};
+	OCCallbackData cbdata = {0};
+	OCConnectivityType oic_conn_type;
+	icd_presence_handle_info *handle_info;
+
+	_icd_ioty_presence_table_create();
+
+	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, host_address) || '\0' == host_address[0])
+		address = ICD_MULTICAST_ADDRESS;
+	else
+		address = host_address;
+
+	handle_info = _icd_ioty_presence_table_get_handle_info(address);
+	if (handle_info) {
+		DBG("Already subscribe presence(%s)", address);
+		handle_info->client_count++;
+		return handle_info->handle;
+	}
+
+	handle_info = _icd_ioty_presence_table_add(address);
+	if (NULL == handle_info) {
+		ERR("_icd_ioty_presence_table_add() Fail");
+		return NULL;
+	}
+
+	snprintf(uri, sizeof(uri), "%s%s", address, OC_RSRVD_PRESENCE_URI);
+
 	cbdata.cb = icd_ioty_ocprocess_presence_cb;
 	cbdata.cd = _ioty_free_signal_context;
 
@@ -1166,15 +1241,17 @@ OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
 
 	if (OC_STACK_OK != result) {
 		ERR("OCDoResource() Fail(%d)", result);
-		free(context->bus_name);
-		free(context);
+		_icd_ioty_presence_table_remove(address);
 		return NULL;
 	}
+
+	handle_info->handle = handle;
+
 	return handle;
 }
 
 
-int icd_ioty_unsubscribe_presence(OCDoHandle handle)
+int icd_ioty_unsubscribe_presence(OCDoHandle handle, const char *host_address)
 {
 	OCStackResult ret;
 
@@ -1185,6 +1262,8 @@ int icd_ioty_unsubscribe_presence(OCDoHandle handle)
 		ERR("OCCancel() Fail(%d)", ret);
 		return icd_ioty_convert_error(ret);
 	}
+
+	_icd_ioty_presence_table_remove(host_address);
 
 	return IOTCON_ERROR_NONE;
 }

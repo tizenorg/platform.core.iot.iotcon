@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h> /* for usleep() */
 #include <glib.h>
@@ -43,7 +44,7 @@ struct icd_ioty_worker
 
 
 struct icd_req_context {
-	unsigned int signal_number;
+	int64_t signal_number;
 	char *bus_name;
 	int request_type;
 	int observe_id;
@@ -58,7 +59,7 @@ struct icd_req_context {
 
 
 struct icd_find_context {
-	unsigned int signal_number;
+	int64_t signal_number;
 	char *bus_name;
 	int conn_type;
 	GVariant **payload;
@@ -75,7 +76,7 @@ struct icd_crud_context {
 
 
 struct icd_info_context {
-	unsigned int signal_number;
+	int64_t signal_number;
 	int info_type;
 	char *bus_name;
 	GVariant *payload;
@@ -90,7 +91,7 @@ struct icd_tizen_info_context {
 
 
 struct icd_observe_context {
-	unsigned int signal_number;
+	int64_t signal_number;
 	int res;
 	int seqnum;
 	char *bus_name;
@@ -100,8 +101,7 @@ struct icd_observe_context {
 
 
 struct icd_presence_context {
-	unsigned int signal_number;
-	char *bus_name;
+	OCDoHandle handle;
 	int result;
 	unsigned int nonce;
 	OCDevAddr *dev_addr;
@@ -174,12 +174,12 @@ static int _ocprocess_worker_start(_ocprocess_cb cb, void *ctx)
 
 
 static int _ocprocess_response_signal(const char *dest, const char *signal_prefix,
-		unsigned int signal_number, GVariant *value)
+		int64_t signal_number, GVariant *value)
 {
 	int ret;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
-	ret = snprintf(signal_name, sizeof(signal_name), "%s_%u", signal_prefix, signal_number);
+	ret = snprintf(signal_name, sizeof(signal_name), "%s_%llx", signal_prefix, signal_number);
 	if (ret <= 0 || sizeof(signal_name) <= ret) {
 		ERR("snprintf() Fail(%d)", ret);
 		return IOTCON_ERROR_IO_ERROR;
@@ -296,7 +296,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 {
 	FN_CALL;
 	int ret;
-	unsigned int signal_number;
+	int64_t signal_number;
 	char *query_str, *query_key, *query_value;
 	char *token, *save_ptr1, *save_ptr2;
 	char *bus_name = NULL;
@@ -757,7 +757,7 @@ static int _worker_observe_cb(void *context)
 
 
 static void _observe_cb_response_error(const char *dest,
-		unsigned int signal_number, int ret_val)
+		int64_t signal_number, int ret_val)
 {
 	int ret;
 	GVariant *value;
@@ -832,9 +832,11 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx,
 
 static int _worker_presence_cb(void *context)
 {
-	GVariant *value;
-	int ret, conn_type;
+	int conn_type;
+	OCDoHandle handle;
 	char *host_address;
+	GVariant *value, *value2;
+	int ret = IOTCON_ERROR_NONE;
 	struct icd_presence_context *ctx = context;
 
 	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
@@ -843,7 +845,6 @@ static int _worker_presence_cb(void *context)
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icd_ioty_get_host_address() Fail(%d)", ret);
 		free(ctx->resource_type);
-		free(ctx->bus_name);
 		free(ctx->dev_addr);
 		free(ctx);
 		return ret;
@@ -851,17 +852,27 @@ static int _worker_presence_cb(void *context)
 
 	value = g_variant_new("(iusiis)", ctx->result, ctx->nonce, host_address, conn_type,
 			ctx->trigger, ic_utils_dbus_encode_str(ctx->resource_type));
+	value2 = g_variant_ref(value);
 
 	free(host_address);
 
-	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_PRESENCE,
-			ctx->signal_number, value);
+	ret = _ocprocess_response_signal(NULL, IC_DBUS_SIGNAL_PRESENCE,
+			ICD_POINTER_TO_INT64(ctx->handle), value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 
+	handle = icd_ioty_presence_table_get_handle(ICD_MULTICAST_ADDRESS);
+	if (handle && (handle != ctx->handle)) {
+		ret = _ocprocess_response_signal(NULL, IC_DBUS_SIGNAL_PRESENCE,
+				ICD_POINTER_TO_INT64(handle), value2);
+		if (IOTCON_ERROR_NONE != ret)
+			ERR("_ocprocess_response_signal() Fail(%d)", ret);
+	} else {
+		g_variant_unref(value2);
+	}
+
 	/* ctx was allocated from icd_ioty_ocprocess_presence_cb() */
 	free(ctx->resource_type);
-	free(ctx->bus_name);
 	free(ctx->dev_addr);
 	free(ctx);
 
@@ -869,19 +880,31 @@ static int _worker_presence_cb(void *context)
 }
 
 
-static void _presence_cb_response_error(const char *dest, unsigned int signal_number,
-		int ret_val)
+static void _presence_cb_response_error(OCDoHandle handle, int ret_val)
 {
 	FN_CALL;
 	int ret;
-	GVariant *value;
+	OCDoHandle handle2;
+	GVariant *value, *value2;
 
 	value = g_variant_new("(iusiis)", ret_val, 0, IC_STR_NULL, IOTCON_CONNECTIVITY_ALL,
 			IOTCON_PRESENCE_TRIGGER_RESOURCE_CREATED, IC_STR_NULL);
+	value2 = g_variant_ref(value);
 
-	ret = _ocprocess_response_signal(dest, IC_DBUS_SIGNAL_PRESENCE, signal_number, value);
+	ret = _ocprocess_response_signal(NULL, IC_DBUS_SIGNAL_PRESENCE,
+			ICD_POINTER_TO_INT64(handle), value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
+
+	handle2 = icd_ioty_presence_table_get_handle(ICD_MULTICAST_ADDRESS);
+	if (handle2 && (handle2 != handle)) {
+		ret = _ocprocess_response_signal(NULL, IC_DBUS_SIGNAL_PRESENCE,
+				ICD_POINTER_TO_INT64(handle), value2);
+		if (IOTCON_ERROR_NONE != ret)
+			ERR("_ocprocess_response_signal() Fail(%d)", ret);
+	} else {
+		g_variant_unref(value2);
+	}
 }
 
 
@@ -916,25 +939,21 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 	int ret;
 	OCDevAddr *dev_addr;
 	OCPresencePayload *payload;
-	icd_sig_ctx_s *sig_context = ctx;
 	struct icd_presence_context *presence_ctx;
 
-	RETV_IF(NULL == ctx, OC_STACK_KEEP_TRANSACTION);
 	RETV_IF(NULL == resp, OC_STACK_KEEP_TRANSACTION);
 
 	presence_ctx = calloc(1, sizeof(struct icd_presence_context));
 	if (NULL == presence_ctx) {
 		ERR("calloc() Fail(%d)", errno);
-		_presence_cb_response_error(sig_context->bus_name, sig_context->signal_number,
-				IOTCON_ERROR_OUT_OF_MEMORY);
+		_presence_cb_response_error(handle, IOTCON_ERROR_OUT_OF_MEMORY);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
 
 	dev_addr = calloc(1, sizeof(OCDevAddr));
 	if (NULL == dev_addr) {
 		ERR("calloc() Fail(%d)", errno);
-		_presence_cb_response_error(sig_context->bus_name, sig_context->signal_number,
-				IOTCON_ERROR_OUT_OF_MEMORY);
+		_presence_cb_response_error(handle, IOTCON_ERROR_OUT_OF_MEMORY);
 		free(presence_ctx);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
@@ -948,8 +967,7 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 		ret = _presence_trigger_to_ioty_trigger(payload->trigger, &presence_ctx->trigger);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_presence_trigger_to_ioty_trigger() Fail(%d)", ret);
-			_presence_cb_response_error(sig_context->bus_name, sig_context->signal_number,
-					ret);
+			_presence_cb_response_error(handle, ret);
 			free(presence_ctx);
 			return OC_STACK_KEEP_TRANSACTION;
 		}
@@ -966,8 +984,7 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 		presence_ctx->result = IOTCON_ERROR_IOTIVITY;
 	}
 
-	presence_ctx->signal_number = sig_context->signal_number;
-	presence_ctx->bus_name = ic_utils_strdup(sig_context->bus_name);
+	presence_ctx->handle = handle;
 	presence_ctx->nonce = resp->sequenceNumber;
 	presence_ctx->dev_addr = dev_addr;
 
@@ -977,15 +994,13 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 	ret = _ocprocess_worker_start(_worker_presence_cb, presence_ctx);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_ocprocess_worker_start() Fail(%d)", ret);
-		_presence_cb_response_error(sig_context->bus_name, sig_context->signal_number, ret);
+		_presence_cb_response_error(handle, ret);
 		free(presence_ctx->resource_type);
-		free(presence_ctx->bus_name);
 		free(presence_ctx->dev_addr);
 		free(presence_ctx);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
 
-	/* DO NOT FREE sig_context. It MUST be freed in the ocstack */
 	/* DO NOT FREE presence_ctx. It MUST be freed in the _worker_presence_cb func */
 
 	return OC_STACK_KEEP_TRANSACTION;
