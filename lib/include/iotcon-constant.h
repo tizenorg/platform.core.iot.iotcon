@@ -243,7 +243,6 @@ typedef struct icl_state_s* iotcon_state_h;
 typedef enum {
 	IOTCON_OBSERVE_REGISTER = 0, /**< Indicates action of registering observation*/
 	IOTCON_OBSERVE_DEREGISTER = 1, /**< Indicates action of unregistering observation */
-	IOTCON_OBSERVE_NO_OPTION = 2 /**< Indicates no option */
 } iotcon_observe_action_e;
 
 /**
@@ -295,19 +294,6 @@ typedef enum {
 	IOTCON_SLOW = (1 << 3), /**< Indicates resource which takes some delay to respond */
 	IOTCON_SECURE = (1 << 4), /**< Indicates secure resource */
 } iotcon_resource_property_e;
-
-/**
- * @brief Enumeration for property which can be held in a response.
- *
- * @since_tizen 3.0
- */
-typedef enum {
-	IOTCON_RESPONSE_NEW_URI_PATH = 1, /**< Indicates uri_path which can be held in a response */
-	IOTCON_RESPONSE_RESULT = 2, /**< Indicates result which can be held in a response */
-	IOTCON_RESPONSE_REPRESENTATION = 3, /**< Indicates representation which can be held in a response */
-	IOTCON_RESPONSE_HEADER_OPTIONS = 4, /**< Indicates header options which can be held in a response */
-	IOTCON_RESPONSE_INTERFACE = 5, /**< Indicates interface which can be held in a response */
-} iotcon_response_property_e;
 
 /**
  * @brief Enumeration for type of request.
