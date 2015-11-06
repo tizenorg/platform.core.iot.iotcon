@@ -43,7 +43,7 @@ struct icd_ioty_worker
 
 
 struct icd_req_context {
-	unsigned int signum;
+	unsigned int signal_number;
 	char *bus_name;
 	int types;
 	int observer_id;
@@ -58,7 +58,7 @@ struct icd_req_context {
 
 
 struct icd_find_context {
-	unsigned int signum;
+	unsigned int signal_number;
 	char *bus_name;
 	int conn_type;
 	GVariant **payload;
@@ -75,7 +75,7 @@ struct icd_crud_context {
 
 
 struct icd_info_context {
-	unsigned int signum;
+	unsigned int signal_number;
 	int info_type;
 	char *bus_name;
 	GVariant *payload;
@@ -90,7 +90,7 @@ struct icd_tizen_info_context {
 
 
 struct icd_observe_context {
-	unsigned int signum;
+	unsigned int signal_number;
 	int res;
 	int seqnum;
 	char *bus_name;
@@ -100,7 +100,7 @@ struct icd_observe_context {
 
 
 struct icd_presence_context {
-	unsigned int signum;
+	unsigned int signal_number;
 	char *bus_name;
 	int result;
 	unsigned int nonce;
@@ -173,19 +173,19 @@ static int _ocprocess_worker_start(_ocprocess_cb cb, void *ctx)
 }
 
 
-static int _ocprocess_response_signal(const char *dest, const char *signal,
-		unsigned int signum, GVariant *value)
+static int _ocprocess_response_signal(const char *dest, const char *signal_prefix,
+		unsigned int signal_number, GVariant *value)
 {
 	int ret;
-	char sig_name[IC_DBUS_SIGNAL_LENGTH] = {0};
+	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
-	ret = snprintf(sig_name, sizeof(sig_name), "%s_%u", signal, signum);
-	if (ret <= 0 || sizeof(sig_name) <= ret) {
+	ret = snprintf(signal_name, sizeof(signal_name), "%s_%u", signal_prefix, signal_number);
+	if (ret <= 0 || sizeof(signal_name) <= ret) {
 		ERR("snprintf() Fail(%d)", ret);
 		return IOTCON_ERROR_IO_ERROR;
 	}
 
-	ret = icd_dbus_emit_signal(dest, sig_name, value);
+	ret = icd_dbus_emit_signal(dest, signal_name, value);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icd_dbus_emit_signal() Fail(%d)", ret);
 		return ret;
@@ -264,7 +264,7 @@ static int _worker_req_handler(void *context)
 			ICD_POINTER_TO_INT64(ctx->resource_h));
 
 	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_REQUEST_HANDLER,
-			ctx->signum, value);
+			ctx->signal_number, value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 
@@ -310,7 +310,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 	}
 
 	/* signal number & bus_name */
-	req_ctx->signum = signal_number;
+	req_ctx->signal_number = signal_number;
 	req_ctx->bus_name = bus_name;
 
 	dev_addr = calloc(1, sizeof(OCDevAddr));
@@ -431,7 +431,7 @@ static int _worker_find_cb(void *context)
 		 * To reduce the number of emit_signal, let's send signal only one time for one device.
 		 * for ex, client list. */
 		ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_FOUND_RESOURCE,
-				ctx->signum, value);
+				ctx->signal_number, value);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_ocprocess_response_signal() Fail(%d)", ret);
 			g_variant_unref(value);
@@ -468,7 +468,7 @@ OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 		return OC_STACK_KEEP_TRANSACTION;
 	}
 
-	find_ctx->signum = sig_context->signum;
+	find_ctx->signal_number = sig_context->signal_number;
 	find_ctx->bus_name = ic_utils_strdup(sig_context->bus_name);
 	find_ctx->payload = icd_payload_res_to_gvariant(resp->payload, &resp->devAddr);
 	find_ctx->conn_type = icd_ioty_transport_flag_to_conn_type(resp->devAddr.adapter,
@@ -514,17 +514,18 @@ static int _worker_crud_cb(void *context)
 static int _worker_info_cb(void *context)
 {
 	int ret;
-	const char *sig_name = NULL;
+	const char *signal_prefix = NULL;
 	struct icd_info_context *ctx = context;
 
 	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (ICD_DEVICE_INFO == ctx->info_type)
-		sig_name = IC_DBUS_SIGNAL_DEVICE;
+		signal_prefix = IC_DBUS_SIGNAL_DEVICE;
 	else if (ICD_PLATFORM_INFO == ctx->info_type)
-		sig_name = IC_DBUS_SIGNAL_PLATFORM;
+		signal_prefix = IC_DBUS_SIGNAL_PLATFORM;
 
-	ret = _ocprocess_response_signal(ctx->bus_name, sig_name, ctx->signum, ctx->payload);
+	ret = _ocprocess_response_signal(ctx->bus_name, signal_prefix, ctx->signal_number,
+			ctx->payload);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 
@@ -733,8 +734,8 @@ static int _worker_observe_cb(void *context)
 	value = g_variant_new("(a(qs)vii)", ctx->options, ctx->payload, ctx->res,
 			ctx->seqnum);
 
-	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_OBSERVE, ctx->signum,
-			value);
+	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_OBSERVE,
+			ctx->signal_number, value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 
@@ -747,7 +748,8 @@ static int _worker_observe_cb(void *context)
 }
 
 
-static void _observe_cb_response_error(const char *dest, unsigned int signum, int ret_val)
+static void _observe_cb_response_error(const char *dest,
+		unsigned int signal_number, int ret_val)
 {
 	int ret;
 	GVariant *value;
@@ -759,14 +761,14 @@ static void _observe_cb_response_error(const char *dest, unsigned int signum, in
 
 	value = g_variant_new("(a(qs)vii)", &options, payload, ret_val, 0);
 
-	ret = _ocprocess_response_signal(dest, IC_DBUS_SIGNAL_OBSERVE, signum, value);
+	ret = _ocprocess_response_signal(dest, IC_DBUS_SIGNAL_OBSERVE, signal_number, value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 }
 
 
-OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle handle,
-		OCClientResponse *resp)
+OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx,
+		OCDoHandle handle, OCClientResponse *resp)
 {
 	int ret, res;
 	GVariantBuilder *options;
@@ -777,7 +779,7 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle han
 
 	if (NULL == resp->payload) {
 		ERR("payload is empty");
-		_observe_cb_response_error(sig_context->bus_name, sig_context->signum,
+		_observe_cb_response_error(sig_context->bus_name, sig_context->signal_number,
 				IOTCON_ERROR_IOTIVITY);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
@@ -785,7 +787,7 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle han
 	observe_ctx = calloc(1, sizeof(struct icd_observe_context));
 	if (NULL == observe_ctx) {
 		ERR("calloc() Fail(%d)", errno);
-		_observe_cb_response_error(sig_context->bus_name, sig_context->signum,
+		_observe_cb_response_error(sig_context->bus_name, sig_context->signal_number,
 				IOTCON_ERROR_OUT_OF_MEMORY);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
@@ -796,7 +798,7 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle han
 			resp->numRcvdVendorSpecificHeaderOptions);
 
 	observe_ctx->payload = icd_payload_to_gvariant(resp->payload);
-	observe_ctx->signum = sig_context->signum;
+	observe_ctx->signal_number = sig_context->signal_number;
 	observe_ctx->res = res;
 	observe_ctx->bus_name = ic_utils_strdup(sig_context->bus_name);
 	observe_ctx->options = options;
@@ -804,7 +806,7 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx, OCDoHandle han
 	ret = _ocprocess_worker_start(_worker_observe_cb, observe_ctx);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_ocprocess_worker_start() Fail(%d)", ret);
-		_observe_cb_response_error(sig_context->bus_name, sig_context->signum, ret);
+		_observe_cb_response_error(sig_context->bus_name, sig_context->signal_number, ret);
 		free(observe_ctx->bus_name);
 		if (observe_ctx->payload)
 			g_variant_unref(observe_ctx->payload);
@@ -836,8 +838,8 @@ static int _worker_presence_cb(void *context)
 	value = g_variant_new("(iusiis)", ctx->result, ctx->nonce, addr, conn_type,
 			ctx->trigger, ic_utils_dbus_encode_str(ctx->resource_type));
 
-	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_PRESENCE, ctx->signum,
-			value);
+	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_PRESENCE,
+			ctx->signal_number, value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 
@@ -851,7 +853,7 @@ static int _worker_presence_cb(void *context)
 }
 
 
-static void _presence_cb_response_error(const char *dest, unsigned int signum,
+static void _presence_cb_response_error(const char *dest, unsigned int signal_number,
 		int ret_val)
 {
 	FN_CALL;
@@ -861,7 +863,7 @@ static void _presence_cb_response_error(const char *dest, unsigned int signum,
 	value = g_variant_new("(iusiis)", ret_val, 0, IC_STR_NULL, IOTCON_CONNECTIVITY_ALL,
 			IOTCON_PRESENCE_TRIGGER_RESOURCE_CREATED, IC_STR_NULL);
 
-	ret = _ocprocess_response_signal(dest, IC_DBUS_SIGNAL_PRESENCE, signum, value);
+	ret = _ocprocess_response_signal(dest, IC_DBUS_SIGNAL_PRESENCE, signal_number, value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 }
@@ -907,7 +909,7 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 	presence_ctx = calloc(1, sizeof(struct icd_presence_context));
 	if (NULL == presence_ctx) {
 		ERR("calloc() Fail(%d)", errno);
-		_presence_cb_response_error(sig_context->bus_name, sig_context->signum,
+		_presence_cb_response_error(sig_context->bus_name, sig_context->signal_number,
 				IOTCON_ERROR_OUT_OF_MEMORY);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
@@ -915,7 +917,7 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 	dev_addr = calloc(1, sizeof(OCDevAddr));
 	if (NULL == dev_addr) {
 		ERR("calloc() Fail(%d)", errno);
-		_presence_cb_response_error(sig_context->bus_name, sig_context->signum,
+		_presence_cb_response_error(sig_context->bus_name, sig_context->signal_number,
 				IOTCON_ERROR_OUT_OF_MEMORY);
 		free(presence_ctx);
 		return OC_STACK_KEEP_TRANSACTION;
@@ -930,7 +932,8 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 		ret = _presence_trigger_to_ioty_trigger(payload->trigger, &presence_ctx->trigger);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_presence_trigger_to_ioty_trigger() Fail(%d)", ret);
-			_presence_cb_response_error(sig_context->bus_name, sig_context->signum, ret);
+			_presence_cb_response_error(sig_context->bus_name, sig_context->signal_number,
+					ret);
 			free(presence_ctx);
 			return OC_STACK_KEEP_TRANSACTION;
 		}
@@ -947,7 +950,7 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 		presence_ctx->result = IOTCON_ERROR_IOTIVITY;
 	}
 
-	presence_ctx->signum = sig_context->signum;
+	presence_ctx->signal_number = sig_context->signal_number;
 	presence_ctx->bus_name = ic_utils_strdup(sig_context->bus_name);
 	presence_ctx->nonce = resp->sequenceNumber;
 	presence_ctx->dev_addr = dev_addr;
@@ -958,7 +961,7 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 	ret = _ocprocess_worker_start(_worker_presence_cb, presence_ctx);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_ocprocess_worker_start() Fail(%d)", ret);
-		_presence_cb_response_error(sig_context->bus_name, sig_context->signum, ret);
+		_presence_cb_response_error(sig_context->bus_name, sig_context->signal_number, ret);
 		free(presence_ctx->resource_type);
 		free(presence_ctx->bus_name);
 		free(presence_ctx->dev_addr);
@@ -1000,7 +1003,7 @@ OCStackApplicationResult icd_ioty_ocprocess_info_cb(void *ctx, OCDoHandle handle
 
 	info_ctx->info_type = info_type;
 	info_ctx->payload = icd_payload_to_gvariant(resp->payload);
-	info_ctx->signum = sig_context->signum;
+	info_ctx->signal_number = sig_context->signal_number;
 	info_ctx->bus_name = ic_utils_strdup(sig_context->bus_name);
 
 	ret = _ocprocess_worker_start(_worker_info_cb, info_ctx);

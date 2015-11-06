@@ -160,11 +160,11 @@ API int iotcon_add_presence_cb(const char *host_address,
 		iotcon_presence_h *presence_handle)
 {
 	FN_CALL;
+	int ret;
 	GError *error = NULL;
-	unsigned int sub_id;
-	int signal_number, ret;
-	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	icl_presence_s *presence;
+	unsigned int sub_id, signal_number;
+	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);

@@ -24,8 +24,10 @@
 #define ICD_POINTER_TO_INT64(p) ((int64_t)(intptr_t)(p))
 
 icDbus* icd_dbus_get_object();
-int icd_dbus_client_list_get_info(void *handle, unsigned int *sig_num, gchar **bus_name);
-int icd_dbus_emit_signal(const char *dest, const char *sig_name, GVariant *value);
+int icd_dbus_client_list_get_info(void *handle, unsigned int *signal_number,
+		gchar **bus_name);
+int icd_dbus_emit_signal(const char *dest, const char *signal_name,
+		GVariant *value);
 unsigned int icd_dbus_init();
 void icd_dbus_deinit(unsigned int id);
 

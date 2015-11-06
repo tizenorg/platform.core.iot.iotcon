@@ -50,8 +50,8 @@ unsigned int icl_dbus_generate_signal_number()
 }
 
 
-unsigned int icl_dbus_subscribe_signal(char *sig_name, void *cb_container, void *cb_free,
-		GDBusSignalCallback sig_handler)
+unsigned int icl_dbus_subscribe_signal(char *signal_name, void *cb_container,
+		void *cb_free, GDBusSignalCallback sig_handler)
 {
 	unsigned int id;
 	GDBusConnection *conn = g_dbus_proxy_get_connection(G_DBUS_PROXY(icl_dbus_object));
@@ -59,7 +59,7 @@ unsigned int icl_dbus_subscribe_signal(char *sig_name, void *cb_container, void 
 	id = g_dbus_connection_signal_subscribe(conn,
 			NULL,
 			IOTCON_DBUS_INTERFACE,
-			sig_name,
+			signal_name,
 			IOTCON_DBUS_OBJPATH,
 			NULL,
 			G_DBUS_SIGNAL_FLAGS_NONE,

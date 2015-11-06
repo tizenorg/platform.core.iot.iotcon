@@ -25,11 +25,12 @@
 icDbus* icl_dbus_get_object();
 unsigned int icl_dbus_generate_signal_number();
 
-unsigned int icl_dbus_subscribe_signal(char *sig_name, void *cb_container, void *cb_free,
-		GDBusSignalCallback sig_handler);
+unsigned int icl_dbus_subscribe_signal(char *signal_name, void *cb_container,
+		void *cb_free, GDBusSignalCallback sig_handler);
 void icl_dbus_unsubscribe_signal(unsigned int id);
 
-int icl_dbus_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *user_data);
+int icl_dbus_add_connection_changed_cb(iotcon_connection_changed_cb cb,
+		void *user_data);
 int icl_dbus_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
 		void *user_data);
 

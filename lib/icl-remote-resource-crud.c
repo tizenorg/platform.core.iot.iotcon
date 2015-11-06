@@ -414,8 +414,9 @@ int icl_remote_resource_observer_start(iotcon_remote_resource_h resource,
 		unsigned int *sub_id,
 		int64_t *observe_handle)
 {
+	int ret;
 	GError *error = NULL;
-	int ret, signal_number;
+	unsigned int signal_number;
 	GVariant *arg_query, *arg_remote_resource;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 

@@ -138,11 +138,11 @@ API int iotcon_get_device_info(const char *host_address,
 		iotcon_device_info_cb cb,
 		void *user_data)
 {
+	int ret;
 	GError *error = NULL;
-	unsigned int sub_id;
-	int ret, signal_number;
-	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	icl_device_info_s *cb_container;
+	unsigned int sub_id, signal_number;
+	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
@@ -311,11 +311,11 @@ API int iotcon_get_platform_info(const char *host_address,
 		iotcon_platform_info_cb cb,
 		void *user_data)
 {
+	int ret;
 	GError *error = NULL;
-	unsigned int sub_id;
-	int ret, signal_number;
-	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 	icl_platform_info_s *cb_container;
+	unsigned int sub_id, signal_number;
+	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);

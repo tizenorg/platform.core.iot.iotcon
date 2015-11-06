@@ -37,7 +37,7 @@
 #define ICD_IOTY_TIZEN_INFO_TIZEN_DEVICE_ID "tizen_device_id"
 
 typedef struct {
-	unsigned int signum;
+	unsigned int signal_number;
 	char *bus_name;
 } icd_sig_ctx_s;
 
@@ -94,8 +94,8 @@ gboolean icd_ioty_post(icDbus *object, GDBusMethodInvocation *invocation,
 gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
 		GVariant *resource);
 
-OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVariant *query,
-		unsigned int signal_number, const char *bus_name);
+OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type,
+		GVariant *query, unsigned int signal_number, const char *bus_name);
 
 int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options);
 

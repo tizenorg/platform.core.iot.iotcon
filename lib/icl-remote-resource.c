@@ -99,10 +99,10 @@ API int iotcon_find_resource(const char *host_address,
 		iotcon_found_resource_cb cb,
 		void *user_data)
 {
-	unsigned int sub_id;
+	int ret;
 	GError *error = NULL;
-	int ret, signal_number;
 	icl_found_resource_s *cb_container;
+	unsigned int sub_id, signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);

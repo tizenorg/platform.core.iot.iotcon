@@ -274,12 +274,12 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_state_h state,
 		iotcon_lite_resource_h *resource_handle)
 {
-	unsigned int sub_id;
+	int ret, iface;
 	const gchar **types;
 	GError *error = NULL;
-	int ret, iface, signal_number;
 	iotcon_lite_resource_h resource;
-	char sig_name[IC_DBUS_SIGNAL_LENGTH];
+	unsigned int sub_id, signal_number;
+	char signal_name[IC_DBUS_SIGNAL_LENGTH];
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
@@ -333,10 +333,10 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		return ret;
 	}
 
-	snprintf(sig_name, sizeof(sig_name), "%s_%u", IC_DBUS_SIGNAL_REQUEST_HANDLER,
+	snprintf(signal_name, sizeof(signal_name), "%s_%u", IC_DBUS_SIGNAL_REQUEST_HANDLER,
 			signal_number);
 
-	sub_id = icl_dbus_subscribe_signal(sig_name, resource,
+	sub_id = icl_dbus_subscribe_signal(signal_name, resource,
 			_icl_lite_resource_conn_cleanup, _icl_lite_resource_request_handler);
 	if (0 == sub_id) {
 		ERR("icl_dbus_subscribe_signal() Fail");

@@ -39,7 +39,7 @@ typedef struct _icd_dbus_client_s {
 
 typedef struct _icd_resource_handle {
 	OCResourceHandle handle;
-	unsigned int number;
+	unsigned int signal_number;
 } icd_resource_handle_s;
 
 
@@ -71,7 +71,7 @@ static void _icd_dbus_resource_handle_free(OCResourceHandle handle)
 
 			if (rsrc_handle->handle == handle) {
 				DBG("resource handle(%u, %u) removed from handle list", handle,
-						rsrc_handle->number);
+						rsrc_handle->signal_number);
 				client->hdlist = g_list_delete_link(client->hdlist, cur_hd);
 				free(rsrc_handle);
 				g_mutex_unlock(&icd_dbus_client_list_mutex);
@@ -87,15 +87,15 @@ static void _icd_dbus_resource_handle_free(OCResourceHandle handle)
 	return;
 }
 
-int icd_dbus_client_list_get_info(OCResourceHandle handle, unsigned int *sig_num,
-		gchar **bus_name)
+int icd_dbus_client_list_get_info(OCResourceHandle handle,
+		unsigned int *signal_number, gchar **bus_name)
 {
 	FN_CALL;
 	icd_dbus_client_s *client;
 	GList *cur_client, *cur_hd;
 	icd_resource_handle_s *rsrc_handle;
 
-	RETV_IF(NULL == sig_num, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == signal_number, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == bus_name, IOTCON_ERROR_INVALID_PARAMETER);
 
 	g_mutex_lock(&icd_dbus_client_list_mutex);
@@ -114,8 +114,8 @@ int icd_dbus_client_list_get_info(OCResourceHandle handle, unsigned int *sig_num
 
 			if (rsrc_handle->handle == handle) {
 				DBG("signal_number(%u) for resource handle(%u) found",
-						rsrc_handle->number, handle);
-				*sig_num = rsrc_handle->number;
+						rsrc_handle->signal_number, handle);
+				*signal_number = rsrc_handle->signal_number;
 				*bus_name = ic_utils_strdup(client->bus_name);
 				g_mutex_unlock(&icd_dbus_client_list_mutex);
 				return IOTCON_ERROR_NONE;
@@ -172,7 +172,7 @@ static void _icd_dbus_cleanup_handle(OCResourceHandle data)
 	RET_IF(NULL == rsrc_handle);
 	RET_IF(NULL == rsrc_handle->handle);
 
-	DBG("handle(%u, %u) deregistering", rsrc_handle->handle, rsrc_handle->number);
+	DBG("handle(%u, %u) deregistering", rsrc_handle->handle, rsrc_handle->signal_number);
 
 	ret = icd_ioty_unregister_resource(rsrc_handle->handle);
 	if (IOTCON_ERROR_NONE != ret)
@@ -325,7 +325,7 @@ static int _icd_dbus_resource_list_append_handle(const gchar *bus_name,
 
 			if (rsrc_handle->handle == handle) {
 				ERR("resource handle(%u, %u) already exist", rsrc_handle->handle,
-						rsrc_handle->number);
+						rsrc_handle->signal_number);
 				g_mutex_unlock(&icd_dbus_client_list_mutex);
 				return IOTCON_ERROR_ALREADY;
 			}
@@ -364,7 +364,7 @@ static int _icd_dbus_resource_list_append_handle(const gchar *bus_name,
 	}
 
 	rsrc_handle->handle = handle;
-	rsrc_handle->number = signal_number;
+	rsrc_handle->signal_number = signal_number;
 
 	DBG("handle(%u) added in the client(%s, %u)", handle, bus_name, signal_number);
 
@@ -466,7 +466,8 @@ static gboolean _dbus_handle_bind_resource(icDbus *object,
 {
 	int ret;
 
-	ret = icd_ioty_bind_resource(ICD_INT64_TO_POINTER(parent), ICD_INT64_TO_POINTER(child));
+	ret = icd_ioty_bind_resource(ICD_INT64_TO_POINTER(parent),
+			ICD_INT64_TO_POINTER(child));
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_bind_resource() Fail(%d)", ret);
 

@@ -411,7 +411,7 @@ static void _ioty_free_signal_context(void *data)
 
 
 int icd_ioty_find_resource(const char *host_address, int conn_type,
-		const char *resource_type, unsigned int signum, const char *bus_name)
+		const char *resource_type, unsigned int signal_number, const char *bus_name)
 {
 	int len;
 	OCStackResult result;
@@ -441,7 +441,7 @@ int icd_ioty_find_resource(const char *host_address, int conn_type,
 	}
 
 	context->bus_name = ic_utils_strdup(bus_name);
-	context->signum = signum;
+	context->signal_number = signal_number;
 
 	cbdata.context = context;
 	cbdata.cb = icd_ioty_ocprocess_find_cb;
@@ -569,8 +569,12 @@ void icd_ioty_complete_error(int type, GDBusMethodInvocation *invocation, int re
 }
 
 
-static gboolean _icd_ioty_crud(int type, icDbus *object, GDBusMethodInvocation *invocation,
-		GVariant *resource, GVariant *query, GVariant *repr)
+static gboolean _icd_ioty_crud(int type,
+		icDbus *object,
+		GDBusMethodInvocation *invocation,
+		GVariant *resource,
+		GVariant *query,
+		GVariant *repr)
 {
 	bool is_secure;
 	OCMethod rest_type;
@@ -715,8 +719,8 @@ gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
 }
 
 
-OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVariant *query,
-		unsigned int signal_number, const char *bus_name)
+OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type,
+		GVariant *query, unsigned int signal_number, const char *bus_name)
 {
 	bool is_secure;
 	OCMethod method;
@@ -755,7 +759,7 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type, GVarian
 		return NULL;
 	}
 	context->bus_name = ic_utils_strdup(bus_name);
-	context->signum = signal_number;
+	context->signal_number = signal_number;
 
 	cbdata.context = context;
 	cbdata.cb = icd_ioty_ocprocess_observe_cb;
@@ -878,7 +882,7 @@ int icd_ioty_get_info(int type, const char *host_address, int conn_type,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 	context->bus_name = ic_utils_strdup(bus_name);
-	context->signum = signal_number;
+	context->signal_number = signal_number;
 
 	cbdata.context = context;
 	cbdata.cb = icd_ioty_ocprocess_info_cb;
@@ -1183,7 +1187,7 @@ OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
 		return NULL;
 	}
 	context->bus_name = ic_utils_strdup(bus_name);
-	context->signum = signal_number;
+	context->signal_number = signal_number;
 
 	cbdata.context = context;
 	cbdata.cb = icd_ioty_ocprocess_presence_cb;
