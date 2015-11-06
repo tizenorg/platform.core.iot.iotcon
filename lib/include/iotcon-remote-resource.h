@@ -115,10 +115,11 @@ int iotcon_remote_resource_clone(iotcon_remote_resource_h src, iotcon_remote_res
 
 
 /**
- * @brief Specifies the type of function passed to iotcon_remote_resource_start_observing(),
+ * @brief Specifies the type of response function.
+ * @details The function passed to iotcon_remote_resource_start_observing(),
  * iotcon_remote_resource_get(), iotcon_remote_resource_put(), iotcon_remote_resource_post(),
  * iotcon_remote_resource_delete().
- * @details The @a err could be one of #iotcon_error_e.
+ * The @a err could be one of #iotcon_error_e.
  * The @a request_type could be one of #iotcon_request_type_e.
  *
  * @since_tizen 3.0

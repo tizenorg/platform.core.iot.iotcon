@@ -55,7 +55,7 @@ API int iotcon_set_timeout(int timeout_seconds)
 	int ret;
 
 	if (ICL_DBUS_TIMEOUT_MAX < timeout_seconds || timeout_seconds <= 0) {
-		ERR("Invalid seconds (%d)", timeout_seconds);
+		ERR("timeout_seconds(%d) must be in range from 1 to 60", timeout_seconds);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 

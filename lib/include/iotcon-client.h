@@ -41,6 +41,7 @@
 /**
  * @brief Specifies the type of function passed to iotcon_add_presence_cb().
  * @details Called when client receive presence events from the server.
+ * The @a response handle contains about presence information.
  *
  * @since_tizen 3.0
  *
@@ -52,6 +53,12 @@
  * @pre The callback must be registered using iotcon_add_presence_cb()
  *
  * @see iotcon_add_presence_cb()
+ * @see iotcon_remove_presence_cb()
+ * @see iotcon_presence_response_get_connectivity_type()
+ * @see iotcon_presence_response_get_host_address()
+ * @see iotcon_presence_response_get_resource_type()
+ * @see iotcon_presence_response_get_result()
+ * @see iotcon_presence_response_get_trigger()
  */
 typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e err,
 		iotcon_presence_response_h response, void *user_data);
@@ -59,7 +66,7 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
 /**
  * @brief Adds callback to a server to receive presence events.
  * @details Request to receive presence to an interested server's resource with @a resource_type.\n
- * If succeed to subscribe, iotcon_presence_cb() will be invoked when the server sends presence\n
+ * If succeed to subscribe, iotcon_presence_cb() will be invoked when the server sends presence.\n
  * A server sends presence events when adds/removes/alters a resource or start/stop presence.
  *
  * @since_tizen 3.0
@@ -207,10 +214,11 @@ int iotcon_presence_response_get_result(iotcon_presence_response_h response, int
  * @brief Gets trigger from the presence response handle
  *
  * @details The @a trigger could be one of #iotcon_presence_trigger_e.
+ * It is set only if a response result is IOTCON_PRESENCE_OK.
  * @since_tizen 3.0
  *
  * @param[in] response The handle of the presence response
- * @param[out] trigger The presence trigger value. It is set only if @a result is IOTCON_PRESENCE_OK.
+ * @param[out] trigger The presence trigger value.
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful

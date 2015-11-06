@@ -75,7 +75,8 @@ int iotcon_connect(void);
 void iotcon_disconnect(void);
 
 /**
- * @brief Gets the timeout seconds of iotcon_get_device_info(),
+ * @brief Gets the timeout seconds of asynchronous API.
+ * @details This API get the timeout of iotcon_get_device_info(),
  * iotcon_get_platform_info(), iotcon_get_tizen_info(), iotcon_find_resource(),
  * iotcon_remote_resource_get(), iotcon_remote_resource_put(),
  * iotcon_remote_resource_post() and iotcon_remote_resource_delete().
@@ -95,16 +96,16 @@ void iotcon_disconnect(void);
 int iotcon_get_timeout(int *timeout_seconds);
 
 /**
- * @brief Sets the timeout seconds of iotcon_get_device_info(),
+ * @brief Sets the timeout seconds of asynchrous APIs.
+ * @details This API set the timeout of iotcon_get_device_info(),
  * iotcon_get_platform_info(), iotcon_get_tizen_info(), iotcon_find_resource(),
  * iotcon_remote_resource_get(), iotcon_remote_resource_put(),
- * iotcon_remote_resource_post() and iotcon_remote_resource_delete().
- * @details Default timeout interval is 10 seconds.
- * Maximum timeout interval is 60 seconds.
+ * iotcon_remote_resource_post() and iotcon_remote_resource_delete().\n
+ * Default timeout interval value is 30.
  *
  * @since_tizen 3.0
  *
- * @param[in] timeout_seconds Seconds for timeout
+ * @param[in] timeout_seconds Seconds for timeout (must be in range from 1 to 60)
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE Successful

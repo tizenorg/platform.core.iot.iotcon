@@ -18,7 +18,7 @@
 
 #include "ic-dbus.h"
 
-#define ICL_DBUS_TIMEOUT_DEFAULT 10 /* 10 sec */
+#define ICL_DBUS_TIMEOUT_DEFAULT 30 /* 30 sec */
 #define ICL_DBUS_TIMEOUT_MAX 60 /* 60 sec */
 
 
