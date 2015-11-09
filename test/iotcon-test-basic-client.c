@@ -46,7 +46,8 @@ static void _on_resopnse_observe(iotcon_remote_resource_h resource, iotcon_respo
 static void _on_response_delete(iotcon_remote_resource_h resource, iotcon_response_h response,
 		void *user_data)
 {
-	int ret, response_result;
+	int ret;
+	iotcon_response_result_e response_result;
 	iotcon_remote_resource_h door_resource = user_data;
 
 	ret = iotcon_response_get_result(response, &response_result);
@@ -77,7 +78,9 @@ static void _on_resopnse_post(iotcon_remote_resource_h resource, iotcon_response
 {
 	iotcon_state_h recv_state;
 	char *host, *created_uri_path;
-	int ret, connectivity_type, response_result, ifaces = 0;
+	int ret, ifaces = 0;
+	iotcon_connectivity_type_e connectivity_type;
+	iotcon_response_result_e response_result;
 	iotcon_resource_types_h types = NULL;
 	iotcon_remote_resource_h new_door_resource, door_resource;
 	iotcon_representation_h recv_repr = NULL;
@@ -167,7 +170,7 @@ static void _on_response_put(iotcon_remote_resource_h resource, iotcon_response_
 		void *user_data)
 {
 	int ret;
-	int response_result;
+	iotcon_response_result_e response_result;
 	iotcon_representation_h send_repr;
 
 	ret = iotcon_response_get_result(response, &response_result);
@@ -200,8 +203,8 @@ static void _on_response_get(iotcon_remote_resource_h resource,
 		iotcon_response_h response, void *user_data)
 {
 	int ret;
-	int response_result;
 	bool opened = true;
+	iotcon_response_result_e response_result;
 	iotcon_representation_h send_repr;
 	iotcon_representation_h recv_repr;
 	iotcon_state_h send_state;
@@ -294,7 +297,10 @@ static void _presence_handler(iotcon_presence_h presence, iotcon_error_e err,
 {
 	char *host_address;
 	char *resource_type;
-	int ret, connectivity_type, result, trigger;
+	int ret;
+	iotcon_presence_result_e result;
+	iotcon_presence_trigger_e trigger;
+	iotcon_connectivity_type_e connectivity_type;
 
 	RETM_IF(IOTCON_ERROR_NONE != err, "_presence_handler error(%d)", err);
 
@@ -409,7 +415,8 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 	char *resource_device_id;
 	iotcon_presence_h presence_handle;
 	iotcon_resource_types_h resource_types;
-	int ret, resource_interfaces, connectivity_type;
+	int ret, resource_interfaces;
+	iotcon_connectivity_type_e connectivity_type;
 	iotcon_remote_resource_h resource_clone = NULL;
 
 	RETM_IF(IOTCON_ERROR_NONE != result, "Invalid result(%d)", result);

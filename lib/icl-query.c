@@ -88,7 +88,7 @@ API int iotcon_query_get_resource_types(iotcon_query_h query,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_query_get_interface(iotcon_query_h query, int *iface)
+API int iotcon_query_get_interface(iotcon_query_h query, iotcon_interface_e *iface)
 {
 	char *iface_str = NULL;
 

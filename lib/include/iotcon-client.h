@@ -168,7 +168,7 @@ int iotcon_presence_get_host_address(iotcon_presence_h presence, char **host_add
  * @see iotcon_presence_get_resource_type()
  */
 int iotcon_presence_get_connectivity_type(iotcon_presence_h presence,
-		int *connectivity_type);
+		iotcon_connectivity_type_e *connectivity_type);
 
 /**
  * @brief Gets resource type from the presence handle
@@ -208,7 +208,8 @@ int iotcon_presence_get_resource_type(iotcon_presence_h presence,
  * @see iotcon_presence_response_get_connectivity_type()
  * @see iotcon_presence_response_get_resource_type()
  */
-int iotcon_presence_response_get_result(iotcon_presence_response_h response, int *result);
+int iotcon_presence_response_get_result(iotcon_presence_response_h response,
+		iotcon_presence_result_e *result);
 
 /**
  * @brief Gets trigger from the presence response handle
@@ -230,7 +231,7 @@ int iotcon_presence_response_get_result(iotcon_presence_response_h response, int
  * @see iotcon_presence_response_get_resource_type()
  */
 int iotcon_presence_response_get_trigger(iotcon_presence_response_h response,
-		int *trigger);
+		iotcon_presence_trigger_e *trigger);
 
 /**
  * @brief Gets host address from the presence response handle
@@ -273,7 +274,7 @@ int iotcon_presence_response_get_host_address(iotcon_presence_response_h respons
  * @see iotcon_presence_response_get_resource_type()
  */
 int iotcon_presence_response_get_connectivity_type(iotcon_presence_response_h response,
-		int *connectivity_type);
+		iotcon_connectivity_type_e *connectivity_type);
 
 /**
  * @brief Gets resource type from the presence response handle

@@ -324,7 +324,7 @@ int iotcon_list_remove_nth(iotcon_list_h list, int pos);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_list_get_type(iotcon_list_h list, int *type);
+int iotcon_list_get_type(iotcon_list_h list, iotcon_types_e *type);
 
 /**
  * @brief Gets the number of elements in a list.

@@ -412,7 +412,7 @@ API int iotcon_list_remove_nth(iotcon_list_h list, int pos)
 	return ret;
 }
 
-API int iotcon_list_get_type(iotcon_list_h list, int *type)
+API int iotcon_list_get_type(iotcon_list_h list, iotcon_types_e *type)
 {
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);

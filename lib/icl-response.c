@@ -88,7 +88,8 @@ API int iotcon_response_get_representation(iotcon_response_h resp,
 
 }
 
-API int iotcon_response_get_result(iotcon_response_h resp, int *result)
+API int iotcon_response_get_result(iotcon_response_h resp,
+		iotcon_response_result_e *result)
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 

@@ -514,7 +514,7 @@ int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_set_options()
  */
 int iotcon_remote_resource_get_connectivity_type(iotcon_remote_resource_h resource,
-		int *connectivity_type);
+		iotcon_connectivity_type_e *connectivity_type);
 
 /**
  * @brief Gets an host address of the remote resource

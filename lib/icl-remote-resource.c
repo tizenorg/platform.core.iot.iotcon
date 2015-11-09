@@ -321,7 +321,7 @@ API int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resourc
 
 /* The content of the resource should not be freed by user. */
 API int iotcon_remote_resource_get_connectivity_type(iotcon_remote_resource_h resource,
-		int *connectivity_type)
+		iotcon_connectivity_type_e *connectivity_type)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == connectivity_type, IOTCON_ERROR_INVALID_PARAMETER);

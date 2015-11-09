@@ -423,7 +423,8 @@ API int iotcon_state_set_state(iotcon_state_h state, const char *key, iotcon_sta
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_get_type(iotcon_state_h state, const char *key, int *type)
+API int iotcon_state_get_type(iotcon_state_h state, const char *key,
+		iotcon_types_e *type)
 {
 	iotcon_value_h value = NULL;
 

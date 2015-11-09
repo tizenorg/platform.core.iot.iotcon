@@ -123,7 +123,8 @@ int iotcon_response_get_representation(iotcon_response_h resp, iotcon_representa
  * @see iotcon_response_get_options()
  * @see iotcon_response_get_representation()
  */
-int iotcon_response_get_result(iotcon_response_h resp, int *result);
+int iotcon_response_get_result(iotcon_response_h resp,
+		iotcon_response_result_e *result);
 
 
 /**

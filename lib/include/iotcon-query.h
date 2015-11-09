@@ -117,7 +117,7 @@ int iotcon_query_get_resource_types(iotcon_query_h query, iotcon_resource_types_
  * @see iotcon_query_remove()
  * @see iotcon_query_set_interface()
  */
-int iotcon_query_get_interface(iotcon_query_h query, int *iface);
+int iotcon_query_get_interface(iotcon_query_h query, iotcon_interface_e *iface);
 
 /**
  * @brief Sets the resource types into the query.

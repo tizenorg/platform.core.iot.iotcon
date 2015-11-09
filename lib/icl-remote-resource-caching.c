@@ -198,7 +198,7 @@ static void _caching_get_cb(iotcon_remote_resource_h resource,
 		void *user_data)
 {
 	int ret;
-	int result;
+	iotcon_response_result_e result;
 	iotcon_representation_h repr = NULL;
 	iotcon_representation_h cloned_repr;
 

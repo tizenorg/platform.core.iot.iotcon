@@ -422,7 +422,8 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 	door_resource_s *door;
 	iotcon_query_h query;
 	iotcon_response_h response = NULL;
-	int ret, types, observer_id, observer_action;
+	int ret, types, observer_id;
+	iotcon_observe_action_e observer_action;
 	char *host_address;
 
 	RET_IF(NULL == request);

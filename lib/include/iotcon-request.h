@@ -80,7 +80,7 @@ int iotcon_request_get_host_address(iotcon_request_h request,
  * @see iotcon_request_get_observer_id()
  */
 int iotcon_request_get_connectivity_type(iotcon_request_h request,
-		int *connectivity_type);
+		iotcon_connectivity_type_e *connectivity_type);
 
 /**
  * @brief Gets an representation of the request
@@ -198,7 +198,8 @@ int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
  * @see iotcon_request_get_query()
  * @see iotcon_request_get_observer_id()
  */
-int iotcon_request_get_observer_action(iotcon_request_h request, int *action);
+int iotcon_request_get_observer_action(iotcon_request_h request,
+		iotcon_observe_action_e *action);
 
 /**
  * @brief Gets observation id of the request

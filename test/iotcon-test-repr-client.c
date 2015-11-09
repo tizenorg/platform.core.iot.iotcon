@@ -167,7 +167,7 @@ static void _on_get_2nd(iotcon_remote_resource_h resource,
 		void *user_data)
 {
 	int ret;
-	int response_result;
+	iotcon_response_result_e response_result;
 	iotcon_representation_h recv_repr = NULL;
 
 	RETM_IF(IOTCON_ERROR_NONE != err, "Invalid err(%d)", err);
@@ -199,7 +199,7 @@ static void _on_response_1st(iotcon_remote_resource_h resource,
 		void *user_data)
 {
 	int ret;
-	int response_result;
+	iotcon_response_result_e response_result;
 	iotcon_query_h query_params;
 	iotcon_representation_h recv_repr = NULL;
 

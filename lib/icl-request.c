@@ -31,7 +31,7 @@ API int iotcon_request_get_host_address(iotcon_request_h request,
 
 
 API int iotcon_request_get_connectivity_type(iotcon_request_h request,
-		int *connectivity_type)
+		iotcon_connectivity_type_e *connectivity_type)
 {
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == connectivity_type, IOTCON_ERROR_INVALID_PARAMETER);
@@ -90,7 +90,8 @@ API int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query
 }
 
 
-API int iotcon_request_get_observer_action(iotcon_request_h request, int *action)
+API int iotcon_request_get_observer_action(iotcon_request_h request,
+		iotcon_observe_action_e *action)
 {
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == action, IOTCON_ERROR_INVALID_PARAMETER);

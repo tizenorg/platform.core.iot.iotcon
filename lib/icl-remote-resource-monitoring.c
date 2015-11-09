@@ -28,7 +28,7 @@ static void _monitoring_get_cb(iotcon_remote_resource_h resource,
 		void *user_data)
 {
 	int ret;
-	int response_result;
+	iotcon_response_result_e response_result;
 	iotcon_remote_resource_state_e resource_state;
 
 	RET_IF(NULL == resource);
@@ -75,8 +75,10 @@ static gboolean _monitoring_get_timer(gpointer user_data)
 static void _monitoring_presence_cb(iotcon_presence_h presence, iotcon_error_e err,
 		iotcon_presence_response_h response, void *user_data)
 {
-	int ret, result, trigger;
+	int ret;
 	unsigned int get_timer_id;
+	iotcon_presence_trigger_e trigger;
+	iotcon_presence_result_e result;
 	iotcon_remote_resource_h resource = user_data;
 
 	RET_IF(NULL == resource);
@@ -115,7 +117,8 @@ API int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resourc
 		void *user_data)
 {
 	char *host_address;
-	int ret, connectivity_type;
+	int ret;
+	iotcon_connectivity_type_e connectivity_type;
 	unsigned int get_timer_id;
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);

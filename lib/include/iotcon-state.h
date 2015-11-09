@@ -340,7 +340,8 @@ int iotcon_state_unset(iotcon_state_h state, const char *key);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
-int iotcon_state_get_type(iotcon_state_h state, const char *key, int *type);
+int iotcon_state_get_type(iotcon_state_h state, const char *key,
+		iotcon_types_e *type);
 
 /**
  * @brief Specifies the type of function passed to iotcon_state_foreach()
