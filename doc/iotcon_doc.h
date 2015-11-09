@@ -236,8 +236,8 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 {
 	int ret;
 	int types;
-	int observer_id;
-	iotcon_observe_action_e observer_action;
+	int observe_id;
+	iotcon_observe_action_e observe_action;
 
 	ret = iotcon_request_get_types(request, &types);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -245,26 +245,26 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 	}
 
 	if (IOTCON_REQUEST_OBSERVE & types) {
-		ret = iotcon_request_get_observer_action(request, &observer_action);
+		ret = iotcon_request_get_observe_action(request, &observe_action);
 		if (IOTCON_ERROR_NONE != ret) {
 			return;
 		}
 
-		if (IOTCON_OBSERVE_REGISTER == observer_action) {
-			ret = iotcon_request_get_observer_id(request, &observer_id);
+		if (IOTCON_OBSERVE_REGISTER == observe_action) {
+			ret = iotcon_request_get_observe_id(request, &observe_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
-			ret = iotcon_observers_add(observers, observer_id);
+			ret = iotcon_observers_add(observers, observe_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
-		} else if (IOTCON_OBSERVE_DEREGISTER == observer_action) {
-			ret = iotcon_request_get_observer_id(request, &observer_id);
+		} else if (IOTCON_OBSERVE_DEREGISTER == observe_action) {
+			ret = iotcon_request_get_observe_id(request, &observe_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}
-			ret = iotcon_observers_remove(observers, observer_id);
+			ret = iotcon_observers_remove(observers, observe_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				return;
 			}

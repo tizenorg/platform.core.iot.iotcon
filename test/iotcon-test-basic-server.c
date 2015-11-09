@@ -422,8 +422,8 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 	door_resource_s *door;
 	iotcon_query_h query;
 	iotcon_response_h response = NULL;
-	int ret, types, observer_id;
-	iotcon_observe_action_e observer_action;
+	int ret, types, observe_id;
+	iotcon_observe_action_e observe_action;
 	char *host_address;
 
 	RET_IF(NULL == request);
@@ -472,26 +472,26 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 	INFO("host_address : %s", host_address);
 
 	if (IOTCON_REQUEST_OBSERVE & types) {
-		ret = iotcon_request_get_observer_action(request, &observer_action);
+		ret = iotcon_request_get_observe_action(request, &observe_action);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_request_get_observer_action() Fail(%d)", ret);
+			ERR("iotcon_request_get_observe_action() Fail(%d)", ret);
 			return;
 		}
 
-		if (IOTCON_OBSERVE_REGISTER == observer_action) {
-			ret = iotcon_request_get_observer_id(request, &observer_id);
+		if (IOTCON_OBSERVE_REGISTER == observe_action) {
+			ret = iotcon_request_get_observe_id(request, &observe_id);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_request_get_observer_id() Fail(%d)", ret);
+				ERR("iotcon_request_get_observe_id() Fail(%d)", ret);
 				return;
 			}
-			ret = iotcon_observers_add(door->observers, observer_id);
-		} else if (IOTCON_OBSERVE_DEREGISTER == observer_action) {
-			ret = iotcon_request_get_observer_id(request, &observer_id);
+			ret = iotcon_observers_add(door->observers, observe_id);
+		} else if (IOTCON_OBSERVE_DEREGISTER == observe_action) {
+			ret = iotcon_request_get_observe_id(request, &observe_id);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_request_get_observer_id() Fail(%d)", ret);
+				ERR("iotcon_request_get_observe_id() Fail(%d)", ret);
 				return;
 			}
-			ret = iotcon_observers_remove(door->observers, observer_id);
+			ret = iotcon_observers_remove(door->observers, observe_id);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("iotcon_observers_remove() Fail(%d)", ret);
 				return;

@@ -61,7 +61,7 @@ static void _icl_request_handler(GDBusConnection *connection,
 			&options,
 			&query,
 			&request.observation_info.action,
-			&request.observation_info.observer_id,
+			&request.observation_info.observe_id,
 			&repr_iter,
 			&request.oic_request_h,
 			&request.oic_resource_h);
@@ -112,13 +112,13 @@ static void _icl_request_handler(GDBusConnection *connection,
 
 	/* for iotcon_resource_notify */
 	if (IOTCON_REQUEST_OBSERVE & request.types) {
-		int observer_id = request.observation_info.observer_id;
+		int observe_id = request.observation_info.observe_id;
 		if (IOTCON_OBSERVE_REGISTER == request.observation_info.action) {
 			if (NULL == resource->observers)
 				iotcon_observers_create(&resource->observers);
-			iotcon_observers_add(resource->observers, observer_id);
+			iotcon_observers_add(resource->observers, observe_id);
 		} else if (IOTCON_OBSERVE_DEREGISTER == request.observation_info.action) {
-			iotcon_observers_remove(resource->observers, observer_id);
+			iotcon_observers_remove(resource->observers, observe_id);
 		}
 	}
 

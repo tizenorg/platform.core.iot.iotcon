@@ -46,7 +46,7 @@ struct icd_req_context {
 	unsigned int signal_number;
 	char *bus_name;
 	int types;
-	int observer_id;
+	int observe_id;
 	int observe_action;
 	OCRequestHandle request_h;
 	OCResourceHandle resource_h;
@@ -258,7 +258,7 @@ static int _worker_req_handler(void *context)
 			ctx->options,
 			ctx->query,
 			action,
-			ctx->observer_id,
+			ctx->observe_id,
 			&payload_builder,
 			ICD_POINTER_TO_INT64(ctx->request_h),
 			ICD_POINTER_TO_INT64(ctx->resource_h));
@@ -332,7 +332,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 			if (OC_OBSERVE_FLAG & flag) {
 				req_ctx->types |= IOTCON_REQUEST_OBSERVE;
 				/* observation info*/
-				req_ctx->observer_id = request->obsInfo.obsId;
+				req_ctx->observe_id = request->obsInfo.obsId;
 				req_ctx->observe_action = request->obsInfo.action;
 			}
 			break;

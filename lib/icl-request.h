@@ -22,7 +22,7 @@
 
 struct icl_observe_info {
 	iotcon_observe_action_e action;
-	int observer_id;
+	int observe_id;
 };
 
 struct icl_resource_request {

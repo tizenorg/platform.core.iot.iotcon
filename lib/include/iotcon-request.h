@@ -53,8 +53,8 @@
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observer_action()
- * @see iotcon_request_get_observer_id()
+ * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_id()
  */
 int iotcon_request_get_host_address(iotcon_request_h request,
 		char **host_address);
@@ -76,8 +76,8 @@ int iotcon_request_get_host_address(iotcon_request_h request,
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observer_action()
- * @see iotcon_request_get_observer_id()
+ * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_id()
  */
 int iotcon_request_get_connectivity_type(iotcon_request_h request,
 		iotcon_connectivity_type_e *connectivity_type);
@@ -101,8 +101,8 @@ int iotcon_request_get_connectivity_type(iotcon_request_h request,
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observer_action()
- * @see iotcon_request_get_observer_id()
+ * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_id()
  */
 int iotcon_request_get_representation(iotcon_request_h request,
 		iotcon_representation_h *repr);
@@ -124,8 +124,8 @@ int iotcon_request_get_representation(iotcon_request_h request,
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observer_action()
- * @see iotcon_request_get_observer_id()
+ * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_id()
  */
 int iotcon_request_get_types(iotcon_request_h request, int *types);
 
@@ -148,8 +148,8 @@ int iotcon_request_get_types(iotcon_request_h request, int *types);
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observer_action()
- * @see iotcon_request_get_observer_id()
+ * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_id()
  */
 int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *options);
 
@@ -172,8 +172,8 @@ int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *optio
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
- * @see iotcon_request_get_observer_action()
- * @see iotcon_request_get_observer_id()
+ * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_id()
  */
 int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
 
@@ -196,9 +196,9 @@ int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observer_id()
+ * @see iotcon_request_get_observe_id()
  */
-int iotcon_request_get_observer_action(iotcon_request_h request,
+int iotcon_request_get_observe_action(iotcon_request_h request,
 		iotcon_observe_action_e *action);
 
 /**
@@ -207,7 +207,7 @@ int iotcon_request_get_observer_action(iotcon_request_h request,
  * @since_tizen 3.0
  *
  * @param[in] request The handle of the request
- * @param[out] observer_id The id of the observer
+ * @param[out] observe_id The id of the observer
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -219,9 +219,9 @@ int iotcon_request_get_observer_action(iotcon_request_h request,
  * @see iotcon_request_get_types()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observer_action()
+ * @see iotcon_request_get_observe_action()
  */
-int iotcon_request_get_observer_id(iotcon_request_h request, int *observer_id);
+int iotcon_request_get_observe_id(iotcon_request_h request, int *observe_id);
 
 /**
  * @}

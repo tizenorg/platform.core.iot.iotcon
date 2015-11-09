@@ -169,7 +169,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 			NULL,	/* header options */
 			NULL,	/* query */
 			NULL,	/* observe action */
-			NULL,	/* observer_id */
+			NULL,	/* observe_id */
 			&repr_iter,
 			&oic_request_h,
 			&oic_resource_h);
