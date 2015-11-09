@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <limits.h>
+
 #include <octypes.h>
 
 #include "iotcon-constant.h"
+#include "ic-utils.h"
 #include "icd.h"
 #include "icd-ioty-type.h"
 
@@ -53,9 +59,9 @@ int icd_ioty_transport_flag_to_conn_type(OCTransportAdapter adapter,
 	/* Need to consider to allow various connectivity types */
 	switch (adapter) {
 	case OC_ADAPTER_IP:
-		if (OC_IP_USE_V4 == flag)
+		if (OC_IP_USE_V4 & flag)
 			conn_type = IOTCON_CONNECTIVITY_IPV4;
-		else if (OC_IP_USE_V6 == flag)
+		else if (OC_IP_USE_V6 & flag)
 			conn_type = IOTCON_CONNECTIVITY_IPV6;
 		break;
 	case OC_ADAPTER_RFCOMM_BTEDR:
@@ -72,8 +78,8 @@ int icd_ioty_transport_flag_to_conn_type(OCTransportAdapter adapter,
 }
 
 
-int icd_ioty_conn_type_to_oic_transport_type(int conn_type, OCTransportAdapter *adapter,
-		OCTransportFlags *flag)
+static void _icd_ioty_conn_type_to_oic_transport_type(int conn_type,
+		OCTransportAdapter *adapter, OCTransportFlags *flag)
 {
 	switch (conn_type) {
 	case IOTCON_CONNECTIVITY_IPV4:
@@ -97,7 +103,74 @@ int icd_ioty_conn_type_to_oic_transport_type(int conn_type, OCTransportAdapter *
 		*adapter = OC_DEFAULT_ADAPTER;
 		*flag = OC_DEFAULT_FLAGS;
 	}
+}
+
+
+int icd_ioty_get_dev_addr(const char *host_address, int conn_type, OCDevAddr *dev_addr)
+{
+	char host[PATH_MAX] = {0};
+	char *dev_host, *ptr = NULL;
+
+	snprintf(host, sizeof(host), "%s", host_address);
+
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+		dev_host = strtok_r(host, ":", &ptr);
+		snprintf(dev_addr->addr, sizeof(dev_addr->addr), "%s", dev_host);
+		dev_addr->port = atoi(strtok_r(NULL, ":", &ptr));
+		break;
+	case IOTCON_CONNECTIVITY_IPV6:
+		dev_host = strtok_r(host, "]", &ptr);
+		snprintf(dev_addr->addr, sizeof(dev_addr->addr), "%s", dev_host);
+		dev_addr->port = atoi(strtok_r(NULL, "]", &ptr));
+		break;
+	case IOTCON_CONNECTIVITY_BT_EDR:
+		snprintf(dev_addr->addr, sizeof(dev_addr->addr), "%s", host);
+		break;
+	case IOTCON_CONNECTIVITY_BT_LE:
+	default:
+		ERR("Invalid Connectivity Type(%d)", conn_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	_icd_ioty_conn_type_to_oic_transport_type(conn_type, &(dev_addr->adapter),
+			&(dev_addr->flags));
 
 	return IOTCON_ERROR_NONE;
 }
+
+
+int icd_ioty_get_host_address(OCDevAddr *dev_addr, char **host_address, int *conn_type)
+{
+	int connectivity_type;
+	char host_addr[PATH_MAX] = {0};
+
+	connectivity_type = icd_ioty_transport_flag_to_conn_type(dev_addr->adapter,
+			dev_addr->flags);
+
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV6:
+		snprintf(host_addr, sizeof(host_addr), "[%s]:%d", dev_addr->addr,
+				dev_addr->port);
+		break;
+	case IOTCON_CONNECTIVITY_IPV4:
+		snprintf(host_addr, sizeof(host_addr), "%s:%d", dev_addr->addr,
+				dev_addr->port);
+		break;
+	case IOTCON_CONNECTIVITY_BT_EDR:
+		snprintf(host_addr, sizeof(host_addr), "%s", dev_addr->addr);
+		break;
+	case IOTCON_CONNECTIVITY_BT_LE:
+	default:
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	*host_address = strdup(host_addr);
+
+	*conn_type = connectivity_type;
+
+	return IOTCON_ERROR_NONE;
+}
+
 

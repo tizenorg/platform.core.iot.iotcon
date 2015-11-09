@@ -13,6 +13,8 @@
 			<smack request="device::sys_logging" type="w" />
 			<smack request="system::homedir" type="x" />
 			<smack request="tizen::vconf::setting::admin" type="rl" />
+			<smack request="tizen::vconf::public::r::platform::rw" type="rl" />
+			<smack request="bluez" type="rw" />
 		</request>
 	</define>
 	<assign>

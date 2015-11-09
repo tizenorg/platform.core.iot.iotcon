@@ -145,13 +145,17 @@ API int iotcon_get_device_info(const char *host_address,
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	signal_number = icl_dbus_generate_signal_number();
 
-	ic_dbus_call_get_device_info_sync(icl_dbus_get_object(), host_address,
-			connectivity_type, signal_number, &ret, NULL, &error);
+	ic_dbus_call_get_device_info_sync(icl_dbus_get_object(),
+			ic_utils_dbus_encode_str(host_address),
+			connectivity_type,
+			signal_number,
+			&ret,
+			NULL,
+			&error);
 	if (error) {
 		ERR("ic_dbus_call_get_device_info_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
@@ -318,13 +322,17 @@ API int iotcon_get_platform_info(const char *host_address,
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	signal_number = icl_dbus_generate_signal_number();
 
-	ic_dbus_call_get_platform_info_sync(icl_dbus_get_object(), host_address,
-			connectivity_type, signal_number, &ret, NULL, &error);
+	ic_dbus_call_get_platform_info_sync(icl_dbus_get_object(),
+			ic_utils_dbus_encode_str(host_address),
+			connectivity_type,
+			signal_number,
+			&ret,
+			NULL,
+			&error);
 	if (error) {
 		ERR("ic_dbus_call_get_platform_info_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);

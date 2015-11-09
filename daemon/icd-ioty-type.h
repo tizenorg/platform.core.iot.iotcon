@@ -25,7 +25,8 @@ OCConnectivityType icd_ioty_conn_type_to_oic_conn_type(int conn_type);
 int icd_ioty_transport_flag_to_conn_type(OCTransportAdapter adapter,
 		OCTransportFlags flag);
 
-int icd_ioty_conn_type_to_oic_transport_type(int conn_type, OCTransportAdapter *adapter,
-		OCTransportFlags *flag);
+int icd_ioty_get_dev_addr(const char *host_address, int conn_type, OCDevAddr *dev_addr);
+
+int icd_ioty_get_host_address(OCDevAddr *dev_addr, char **host_address, int *conn_type);
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_TYPE_H__*/

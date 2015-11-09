@@ -229,30 +229,47 @@ static int _ioty_oic_action_to_ioty_action(int oic_action)
 	return action;
 }
 
+
+static void _icd_req_context_free(struct icd_req_context *ctx)
+{
+	free(ctx->bus_name);
+	if (ctx->payload)
+		g_variant_unref(ctx->payload);
+	g_variant_builder_unref(ctx->options);
+	g_variant_builder_unref(ctx->query);
+	free(ctx->dev_addr);
+	free(ctx);
+}
+
+
 static int _worker_req_handler(void *context)
 {
 	GVariant *value;
+	char *host_address;
 	int ret, conn_type, action;
-	struct icd_req_context *ctx = context;
 	GVariantBuilder payload_builder;
-	char addr[PATH_MAX] = {0};
+	struct icd_req_context *ctx = context;
 
 	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
 
 	g_variant_builder_init(&payload_builder, G_VARIANT_TYPE("av"));
-	if (ctx->payload)
+	if (ctx->payload) {
 		g_variant_builder_add(&payload_builder, "v", ctx->payload);
+		ctx->payload = NULL;
+	}
 
-	if (ctx->dev_addr->addr && *ctx->dev_addr->addr)
-		snprintf(addr, sizeof(addr), "%s:%d", ctx->dev_addr->addr, ctx->dev_addr->port);
-
-	conn_type = icd_ioty_transport_flag_to_conn_type(ctx->dev_addr->adapter,
-			ctx->dev_addr->flags);
+	ret = icd_ioty_get_host_address(ctx->dev_addr, &host_address, &conn_type);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_ioty_get_host_address() Fail(%d)", ret);
+		g_variant_builder_clear(&payload_builder);
+		_icd_req_context_free(ctx);
+		return ret;
+	}
 
 	action = _ioty_oic_action_to_ioty_action(ctx->observe_action);
 
 	value = g_variant_new("(siia(qs)a(ss)iiavxx)",
-			addr,
+			host_address,
 			conn_type,
 			ctx->types,
 			ctx->options,
@@ -263,16 +280,14 @@ static int _worker_req_handler(void *context)
 			ICD_POINTER_TO_INT64(ctx->request_h),
 			ICD_POINTER_TO_INT64(ctx->resource_h));
 
+	free(host_address);
+
 	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_REQUEST_HANDLER,
 			ctx->signal_number, value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 
-	free(ctx->bus_name);
-	g_variant_builder_unref(ctx->options);
-	g_variant_builder_unref(ctx->query);
-	free(ctx->dev_addr);
-	free(ctx);
+	_icd_req_context_free(ctx);
 
 	return ret;
 }
@@ -378,13 +393,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 	ret = _ocprocess_worker_start(_worker_req_handler, req_ctx);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_ocprocess_worker_start() Fail(%d)", ret);
-		free(req_ctx->bus_name);
-		if (req_ctx->payload)
-			g_variant_unref(req_ctx->payload);
-		g_variant_builder_unref(req_ctx->options);
-		g_variant_builder_unref(req_ctx->query);
-		free(req_ctx->dev_addr);
-		free(req_ctx);
+		_icd_req_context_free(req_ctx);
 		return OC_EH_ERROR;
 	}
 
@@ -826,17 +835,25 @@ static int _worker_presence_cb(void *context)
 {
 	GVariant *value;
 	int ret, conn_type;
-	char addr[PATH_MAX] = {0};
+	char *host_address;
 	struct icd_presence_context *ctx = context;
 
 	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
 
-	snprintf(addr, sizeof(addr), "%s:%d", ctx->dev_addr->addr, ctx->dev_addr->port);
-	conn_type = icd_ioty_transport_flag_to_conn_type(ctx->dev_addr->adapter,
-			ctx->dev_addr->flags);
+	ret = icd_ioty_get_host_address(ctx->dev_addr, &host_address, &conn_type);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_ioty_get_host_address() Fail(%d)", ret);
+		free(ctx->resource_type);
+		free(ctx->bus_name);
+		free(ctx->dev_addr);
+		free(ctx);
+		return ret;
+	}
 
-	value = g_variant_new("(iusiis)", ctx->result, ctx->nonce, addr, conn_type,
+	value = g_variant_new("(iusiis)", ctx->result, ctx->nonce, host_address, conn_type,
 			ctx->trigger, ic_utils_dbus_encode_str(ctx->resource_type));
+
+	free(host_address);
 
 	ret = _ocprocess_response_signal(ctx->bus_name, IC_DBUS_SIGNAL_PRESENCE,
 			ctx->signal_number, value);

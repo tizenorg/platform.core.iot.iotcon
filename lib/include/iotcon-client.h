@@ -67,7 +67,8 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  * @brief Adds callback to a server to receive presence events.
  * @details Request to receive presence to an interested server's resource with @a resource_type.\n
  * If succeed to subscribe, iotcon_presence_cb() will be invoked when the server sends presence.\n
- * A server sends presence events when adds/removes/alters a resource or start/stop presence.
+ * A server sends presence events when adds/removes/alters a resource or start/stop presence.\n
+ * @a host_address could be #IOTCON_MULTICAST_ADDRESS for IPv4 multicast.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -319,7 +320,7 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
 /**
  * @brief Finds resources, asynchronously.
  * @details Request to find a resource of @a host_address server with @a resource_type.\n
- * @a host_address could be #IOTCON_MULTICAST_ADDRESS for IPv4 multicast.\n
+ * @a host_address could be #IOTCON_MULTICAST_ADDRESS for multicast.\n
  * If succeed to find the resource, iotcon_found_resource_cb() will be invoked with
  * information of the resource.
  *
@@ -378,7 +379,7 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  * @brief Gets the device information of remote server, asynchronously.
  * @details Request device information to server and pass the information by calling
  * iotcon_device_info_cb().\n
- * @a host_address could be #IOTCON_MULTICAST_ADDRESS for IPv4 multicast.\n
+ * @a host_address could be #IOTCON_MULTICAST_ADDRESS for multicast.\n
  * If succeed to getting device information, iotcon_device_info_cb() will be invoked with
  * information.
  *
@@ -453,7 +454,7 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  * @brief Gets the platform information of remote server, asynchronously.
  * @details Request platform information to server and pass the information by calling
  * iotcon_platform_info_cb().\n
- * @a host_address could be #IOTCON_MULTICAST_ADDRESS for IPv4 multicast.\n
+ * @a host_address could be #IOTCON_MULTICAST_ADDRESS for multicast.\n
  * If succeed to getting platform information, iotcon_platform_info_cb() will be invoked
  * with information.
  *

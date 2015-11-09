@@ -106,7 +106,6 @@ API int iotcon_find_resource(const char *host_address,
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	if (resource_type && (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
 		ERR("The length of resource_type(%s) is invalid", resource_type);
@@ -115,8 +114,14 @@ API int iotcon_find_resource(const char *host_address,
 
 	signal_number = icl_dbus_generate_signal_number();
 
-	ic_dbus_call_find_resource_sync(icl_dbus_get_object(), host_address, connectivity_type,
-			ic_utils_dbus_encode_str(resource_type), signal_number, &ret, NULL, &error);
+	ic_dbus_call_find_resource_sync(icl_dbus_get_object(),
+			ic_utils_dbus_encode_str(host_address),
+			connectivity_type,
+			ic_utils_dbus_encode_str(resource_type),
+			signal_number,
+			&ret,
+			NULL,
+			&error);
 	if (error) {
 		ERR("ic_dbus_call_find_resource_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
@@ -428,8 +433,11 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 		snprintf(host_addr, sizeof(host_addr), "[%s]:%d", addr, port);
 		break;
 	case IOTCON_CONNECTIVITY_IPV4:
-	default:
 		snprintf(host_addr, sizeof(host_addr), "%s:%d", addr, port);
+		break;
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	default:
+		snprintf(host_addr, sizeof(host_addr), "%s", addr);
 	}
 
 	ret = iotcon_resource_types_create(&res_types);

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h> /* for uint8_t etc */
@@ -36,6 +35,7 @@
 #include "icd-ioty-type.h"
 #include "icd-ioty-ocprocess.h"
 
+#define ICD_MULTICAST_ADDRESS "224.0.1.187:5683"
 #define ICD_UUID_LENGTH 37
 
 static const char *ICD_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
@@ -420,7 +420,7 @@ int icd_ioty_find_resource(const char *host_address, int conn_type,
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
 
-	if (IC_STR_EQUAL == strcmp(IOTCON_MULTICAST_ADDRESS, host_address)) {
+	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, host_address)) {
 		len = snprintf(uri, sizeof(uri), "%s", OC_RSRVD_WELL_KNOWN_URI);
 	} else {
 		len = snprintf(uri, sizeof(uri), ICD_IOTY_COAP"%s%s", host_address,
@@ -581,8 +581,8 @@ static gboolean _icd_ioty_crud(int type,
 	OCStackResult result;
 	GVariantIter *options;
 	OCCallbackData cbdata = {0};
-	int conn_type, options_size;
-	char *uri_path, *host, *uri, *dev_host, *ptr = NULL;
+	int ret, conn_type, options_size;
+	char *uri_path, *uri, *host;
 	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
 	OCHeaderOption *oic_options_ptr = NULL;
 	OCPayload *payload = NULL;
@@ -653,22 +653,9 @@ static gboolean _icd_ioty_crud(int type,
 
 	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
 
-	icd_ioty_conn_type_to_oic_transport_type(conn_type, &dev_addr.adapter,
-			&dev_addr.flags);
-
-	switch (conn_type) {
-	case IOTCON_CONNECTIVITY_IPV4:
-		dev_host = strtok_r(host, ":", &ptr);
-		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
-		dev_addr.port = atoi(strtok_r(NULL, ":", &ptr));
-		break;
-	case IOTCON_CONNECTIVITY_IPV6:
-		dev_host = strtok_r(host, "]", &ptr);
-		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
-		dev_addr.port = atoi(strtok_r(NULL, "]", &ptr));
-		break;
-	default:
-		ERR("Invalid Connectivitiy Type");
+	ret = icd_ioty_get_dev_addr(host, conn_type, &dev_addr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_ioty_get_dev_addr() Fail(%d)", ret);
 		icd_ioty_complete_error(type, invocation, IOTCON_ERROR_IOTIVITY);
 		free(uri);
 		return TRUE;
@@ -729,8 +716,8 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type,
 	GVariantIter *options;
 	icd_sig_ctx_s *context;
 	OCCallbackData cbdata = {0};
-	int conn_type, options_size;
-	char *uri_path, *host, *uri, *dev_host, *ptr = NULL;
+	int ret, conn_type, options_size;
+	char *uri_path, *host, *uri;
 	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
 	OCHeaderOption *oic_options_ptr = NULL;
 	OCConnectivityType oic_conn_type;
@@ -783,22 +770,9 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type,
 
 	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
 
-	icd_ioty_conn_type_to_oic_transport_type(conn_type, &dev_addr.adapter,
-			&dev_addr.flags);
-
-	switch (conn_type) {
-	case IOTCON_CONNECTIVITY_IPV4:
-		dev_host = strtok_r(host, ":", &ptr);
-		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
-		dev_addr.port = atoi(strtok_r(NULL, ":", &ptr));
-		break;
-	case IOTCON_CONNECTIVITY_IPV6:
-		dev_host = strtok_r(host, "]", &ptr);
-		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
-		dev_addr.port = atoi(strtok_r(NULL, "]", &ptr));
-		break;
-	default:
-		ERR("Invalid Connectivitiy Type");
+	ret = icd_ioty_get_dev_addr(host, conn_type, &dev_addr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_ioty_get_dev_addr() Fail(%d)", ret);
 		free(context->bus_name);
 		free(context);
 		free(uri);
@@ -871,7 +845,7 @@ int icd_ioty_get_info(int type, const char *host_address, int conn_type,
 	else
 		return IOTCON_ERROR_INVALID_PARAMETER;
 
-	if (IC_STR_EQUAL == strcmp(IOTCON_MULTICAST_ADDRESS, host_address))
+	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, host_address))
 		snprintf(uri, sizeof(uri), "%s", uri_path);
 	else
 		snprintf(uri, sizeof(uri), "%s%s", host_address, uri_path);
@@ -1101,35 +1075,20 @@ int icd_ioty_set_tizen_info()
 gboolean icd_ioty_get_tizen_info(icDbus *object, GDBusMethodInvocation *invocation,
 		const gchar *host_address, int conn_type)
 {
+	int ret;
 	OCStackResult result;
 	OCDevAddr dev_addr = {0};
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
-	char host[PATH_MAX] = {0};
-	char *dev_host, *ptr = NULL;
-
-	snprintf(host, sizeof(host), "%s", host_address);
 
 	cbdata.cb = icd_ioty_ocprocess_get_tizen_info_cb;
 	cbdata.context = invocation;
 
 	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
-	icd_ioty_conn_type_to_oic_transport_type(conn_type, &dev_addr.adapter,
-			&dev_addr.flags);
 
-	switch (conn_type) {
-	case IOTCON_CONNECTIVITY_IPV4:
-		dev_host = strtok_r(host, ":", &ptr);
-		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
-		dev_addr.port = atoi(strtok_r(NULL, ":", &ptr));
-		break;
-	case IOTCON_CONNECTIVITY_IPV6:
-		dev_host = strtok_r(host, "]", &ptr);
-		snprintf(dev_addr.addr, sizeof(dev_addr.addr), "%s", dev_host);
-		dev_addr.port = atoi(strtok_r(NULL, "]", &ptr));
-		break;
-	default:
-		ERR("Invalid Connectivitiy Type");
+	ret = icd_ioty_get_dev_addr(host_address, conn_type, &dev_addr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_ioty_get_dev_addr() Fail(%d)", ret);
 		icd_ioty_complete_error(ICD_TIZEN_INFO, invocation, IOTCON_ERROR_IOTIVITY);
 		return TRUE;
 	}
@@ -1172,7 +1131,12 @@ OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
 
-	len = snprintf(uri, sizeof(uri), "%s%s", host_address, OC_RSRVD_PRESENCE_URI);
+	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, host_address) || '\0' == host_address[0]) {
+		len = snprintf(uri, sizeof(uri), "%s%s", ICD_MULTICAST_ADDRESS,
+				OC_RSRVD_PRESENCE_URI);
+	} else {
+		len = snprintf(uri, sizeof(uri), "%s%s", host_address, OC_RSRVD_PRESENCE_URI);
+	}
 	if (len <= 0 || sizeof(uri) <= len) {
 		ERR("snprintf() Fail(%d)", len);
 		return NULL;

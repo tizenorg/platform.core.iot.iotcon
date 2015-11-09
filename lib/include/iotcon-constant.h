@@ -219,7 +219,7 @@ typedef struct icl_state_s* iotcon_state_h;
  *
  * @since_tizen 3.0
  */
-#define IOTCON_MULTICAST_ADDRESS "224.0.1.187" /**< Multicast IP Address */
+#define IOTCON_MULTICAST_ADDRESS NULL /**< Multicast Address */
 
 /**
  * @brief Use this value as the return value to stop foreach function.

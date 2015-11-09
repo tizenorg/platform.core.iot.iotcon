@@ -167,11 +167,17 @@ API int iotcon_add_presence_cb(const char *host_address,
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (resource_type && (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
 		ERR("The length of resource_type(%s) is invalid", resource_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	if ((IOTCON_MULTICAST_ADDRESS == host_address || '\0' == host_address[0])
+			&& (IOTCON_CONNECTIVITY_IPV4 != connectivity_type
+				&& IOTCON_CONNECTIVITY_ALL != connectivity_type)) {
+		ERR("Multicast is available only if IPV4");
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
@@ -186,7 +192,7 @@ API int iotcon_add_presence_cb(const char *host_address,
 	resource_type = ic_utils_dbus_encode_str(resource_type);
 
 	ic_dbus_call_subscribe_presence_sync(icl_dbus_get_object(),
-			host_address,
+			ic_utils_dbus_encode_str(host_address),
 			connectivity_type,
 			resource_type,
 			signal_number,
@@ -213,7 +219,8 @@ API int iotcon_add_presence_cb(const char *host_address,
 	presence->cb = cb;
 	presence->user_data = user_data;
 
-	presence->host_address = ic_utils_strdup(host_address);
+	if (host_address)
+		presence->host_address = strdup(host_address);
 	presence->connectivity_type = connectivity_type;
 	if (resource_type)
 		presence->resource_type = strdup(resource_type);
