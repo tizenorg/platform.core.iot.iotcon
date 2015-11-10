@@ -24,12 +24,12 @@
  */
 
 /**
- * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE
- * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_LIST_MODULE List
+ * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE
+ * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE List
  *
  * @brief Iotcon List provides API to get data from list and set data to list.
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE_HEADER Header
  *  \#include <iotcon.h>
  *
  * @{
