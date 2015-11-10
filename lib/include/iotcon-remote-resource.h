@@ -39,7 +39,7 @@
  * @brief Creates a new resource handle.
  * @details Creates a resource proxy object so that iotcon_remote_resource_get(),
  * iotcon_remote_resource_put(), iotcon_remote_resource_post(),
- * iotcon_remote_resource_delete(), iotcon_remote_resource_start_observing(),
+ * iotcon_remote_resource_delete(), iotcon_remote_resource_set_notify_cb(),
  * iotcon_remote_resource_start_caching() and iotcon_remote_resource_start_monitoring()
  * API can be used without discovering the object in advance.\n
  * To use this API, you should provide all of the details required to correctly contact and
@@ -116,7 +116,7 @@ int iotcon_remote_resource_clone(iotcon_remote_resource_h src, iotcon_remote_res
 
 /**
  * @brief Specifies the type of response function.
- * @details The function passed to iotcon_remote_resource_start_observing(),
+ * @details The function passed to iotcon_remote_resource_set_notify_cb(),
  * iotcon_remote_resource_get(), iotcon_remote_resource_put(), iotcon_remote_resource_post(),
  * iotcon_remote_resource_delete().
  * The @a err could be one of #iotcon_error_e.
@@ -130,11 +130,11 @@ int iotcon_remote_resource_clone(iotcon_remote_resource_h src, iotcon_remote_res
  * @param[in] response The handle of the response
  * @param[in] user_data The user data passed from the callback registration function
  *
- * @pre The callback must be registered using iotcon_remote_resource_start_observing(),
+ * @pre The callback must be registered using iotcon_remote_resource_set_notify_cb(),
  * iotcon_remote_resource_get(), iotcon_remote_resource_put(), iotcon_remote_resource_post(),
  * iotcon_remote_resource_delete()
  *
- * @see iotcon_remote_resource_start_observing()
+ * @see iotcon_remote_resource_set_notify_cb()
  */
 typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h resource,
 		iotcon_error_e err,
@@ -143,7 +143,7 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
 		void *user_data);
 
 /**
- * @brief Starts observing on the resource
+ * @brief Sets notify callback on the resource
  * @details When server sends notification message, iotcon_remote_resource_response_cb() will be called.
  * The @a observe_type could be one of #iotcon_observe_type_e.
  *
@@ -168,17 +168,17 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
  * @post When the @a resource receive notification message, iotcon_remote_resource_response_cb() will be called.
  *
  * @see iotcon_remote_resource_response_cb()
- * @see iotcon_remote_resource_stop_observing()
+ * @see iotcon_remote_resource_unset_notify_cb()
  * @see iotcon_resource_notify()
  */
-int iotcon_remote_resource_start_observing(iotcon_remote_resource_h resource,
+int iotcon_remote_resource_set_notify_cb(iotcon_remote_resource_h resource,
 		iotcon_observe_type_e observe_type,
 		iotcon_query_h query,
 		iotcon_remote_resource_response_cb cb,
 		void *user_data);
 
 /**
- * @brief Stops observing on the resource
+ * @brief Unsets notify callback on the resource
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -194,10 +194,10 @@ int iotcon_remote_resource_start_observing(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_remote_resource_response_cb()
- * @see iotcon_remote_resource_start_observing()
+ * @see iotcon_remote_resource_set_notify_cb()
  * @see iotcon_resource_notify()
  */
-int iotcon_remote_resource_stop_observing(iotcon_remote_resource_h resource);
+int iotcon_remote_resource_unset_notify_cb(iotcon_remote_resource_h resource);
 
 /**
  * @brief Gets the attributes of a resource, asynchronously.

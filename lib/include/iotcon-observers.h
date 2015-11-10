@@ -74,7 +74,6 @@ void iotcon_observers_destroy(iotcon_observers_h observers);
  * @brief Sets a observer id into the observers handle
  *
  * @since_tizen 3.0
- * @remarks  If you want to make a new list, then you should set NULL to @a observers.
  *
  * @param[in] observers The handle of the observers
  * @param[in] obs_id The id to be appended to observers

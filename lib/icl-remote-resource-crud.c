@@ -456,7 +456,7 @@ int icl_remote_resource_observer_start(iotcon_remote_resource_h resource,
 }
 
 
-API int iotcon_remote_resource_start_observing(iotcon_remote_resource_h resource,
+API int iotcon_remote_resource_set_notify_cb(iotcon_remote_resource_h resource,
 		iotcon_observe_type_e observe_type,
 		iotcon_query_h query,
 		iotcon_remote_resource_response_cb cb,
@@ -532,7 +532,7 @@ int icl_remote_resource_stop_observing(iotcon_remote_resource_h resource,
 }
 
 
-API int iotcon_remote_resource_stop_observing(iotcon_remote_resource_h resource)
+API int iotcon_remote_resource_unset_notify_cb(iotcon_remote_resource_h resource)
 {
 	int ret;
 

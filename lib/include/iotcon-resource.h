@@ -213,6 +213,7 @@ int iotcon_resource_bind_type(iotcon_resource_h resource_handle,
  *
  * @param[in] resource The handle of the resource
  * @param[in] cb The request handler to be bound to the resource
+ * @param[in] user_data The user data to pass to the callback function
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -227,7 +228,7 @@ int iotcon_resource_bind_type(iotcon_resource_h resource_handle,
  * @see iotcon_request_handler_cb()
  */
 int iotcon_resource_set_request_handler(iotcon_resource_h resource,
-		iotcon_request_handler_cb cb);
+		iotcon_request_handler_cb cb, void *user_data);
 
 /**
  * @brief Binds a child resource into the parent resource.
@@ -307,8 +308,8 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_remote_resource_response_cb()
- * @see iotcon_remote_resource_start_observing()
- * @see iotcon_remote_resource_stop_observing()
+ * @see iotcon_remote_resource_set_notify_cb()
+ * @see iotcon_remote_resource_unset_notify_cb()
  * @see iotcon_observers_create()
  * @see iotcon_observers_destroy()
  * @see iotcon_observers_add()

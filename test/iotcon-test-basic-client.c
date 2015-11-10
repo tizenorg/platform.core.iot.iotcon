@@ -29,16 +29,16 @@ static GList *device_id_list;
 static void _on_response(iotcon_remote_resource_h resource, iotcon_error_e err,
 		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data);
 
-static void _on_resopnse_observe(iotcon_remote_resource_h resource, iotcon_response_h response,
+static void _on_response_notify(iotcon_remote_resource_h resource, iotcon_response_h response,
 		void *user_data)
 {
-	INFO("_on_resopnse_observe");
+	INFO("_on_response_notify");
 
 	static int i = 0;
 	i++;
 
 	if (2 == i) {
-		iotcon_remote_resource_stop_observing(resource);
+		iotcon_remote_resource_unset_notify_cb(resource);
 		iotcon_remote_resource_destroy(resource);
 	}
 }
@@ -65,15 +65,15 @@ static void _on_response_delete(iotcon_remote_resource_h resource, iotcon_respon
 
 	/* delete callback operations */
 
-	ret = iotcon_remote_resource_start_observing(door_resource, IOTCON_OBSERVE_ALL, NULL,
+	ret = iotcon_remote_resource_set_notify_cb(door_resource, IOTCON_OBSERVE_ALL, NULL,
 			_on_response, NULL);
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("iotcon_remote_resource_start_observing() Fail(%d)", ret);
+		ERR("iotcon_remote_resource_set_notify_cb() Fail(%d)", ret);
 
 	iotcon_remote_resource_destroy(resource);
 }
 
-static void _on_resopnse_post(iotcon_remote_resource_h resource, iotcon_response_h response,
+static void _on_response_post(iotcon_remote_resource_h resource, iotcon_response_h response,
 		void *user_data)
 {
 	iotcon_state_h recv_state;
@@ -93,7 +93,7 @@ static void _on_resopnse_post(iotcon_remote_resource_h resource, iotcon_response
 
 	if (IOTCON_RESPONSE_RESULT_OK != response_result
 			&& IOTCON_RESPONSE_RESULT_RESOURCE_CREATED != response_result) {
-		ERR("_on_resopnse_post Response error(%d)", response_result);
+		ERR("_on_response_post Response error(%d)", response_result);
 		return;
 	}
 	INFO("POST request was successful");
@@ -392,13 +392,13 @@ static void _on_response(iotcon_remote_resource_h resource, iotcon_error_e err,
 		_on_response_put(resource, response, user_data);
 		break;
 	case IOTCON_REQUEST_POST:
-		_on_resopnse_post(resource, response, user_data);
+		_on_response_post(resource, response, user_data);
 		break;
 	case IOTCON_REQUEST_DELETE:
 		_on_response_delete(resource, response, user_data);
 		break;
 	case IOTCON_REQUEST_OBSERVE:
-		_on_resopnse_observe(resource, response, user_data);
+		_on_response_notify(resource, response, user_data);
 		break;
 	default:
 		ERR("Invalid request type (%d)", request_type);

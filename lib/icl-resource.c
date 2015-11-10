@@ -343,15 +343,15 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resour
 	return ret;
 }
 
-
 API int iotcon_resource_set_request_handler(iotcon_resource_h resource,
-		iotcon_request_handler_cb cb)
+		iotcon_request_handler_cb cb, void *user_data)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	WARN("Request handler is changed");
+	DBG("Request handler is changed");
 	resource->cb = cb;
+	resource->user_data = user_data;
 
 	return IOTCON_ERROR_NONE;
 }
