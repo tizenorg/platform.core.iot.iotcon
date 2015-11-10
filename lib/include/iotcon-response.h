@@ -182,7 +182,7 @@ int iotcon_response_set_representation(iotcon_response_h resp,
  * @see iotcon_response_create()
  * @see iotcon_response_destroy()
  */
-int iotcon_response_set_header_options(iotcon_response_h resp, iotcon_options_h options);
+int iotcon_response_set_options(iotcon_response_h resp, iotcon_options_h options);
 
 /**
  * @brief Send response for incoming request.

@@ -383,15 +383,15 @@ API int iotcon_remote_resource_is_observable(iotcon_remote_resource_h resource,
 
 /* if header_options is NULL, then client's header_options is unset */
 API int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
-		iotcon_options_h header_options)
+		iotcon_options_h options)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (resource->header_options)
 		iotcon_options_destroy(resource->header_options);
 
-	if (header_options)
-		resource->header_options = icl_options_ref(header_options);
+	if (options)
+		resource->header_options = icl_options_ref(options);
 	else
 		resource->header_options = NULL;
 

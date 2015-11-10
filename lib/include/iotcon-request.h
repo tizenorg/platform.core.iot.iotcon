@@ -109,11 +109,12 @@ int iotcon_request_get_representation(iotcon_request_h request,
 
 /**
  * @brief Gets types of the request
+ * @details @a types could be oring the #iotcon_request_type_e
  *
  * @since_tizen 3.0
  *
  * @param[in] request The handle of the request
- * @param[out] types The types of the request
+ * @param[out] types The types of the request.
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful

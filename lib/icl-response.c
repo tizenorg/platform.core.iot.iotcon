@@ -129,7 +129,7 @@ API int iotcon_response_set_representation(iotcon_response_h resp,
 }
 
 
-API int iotcon_response_set_header_options(iotcon_response_h resp,
+API int iotcon_response_set_options(iotcon_response_h resp,
 		iotcon_options_h options)
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
