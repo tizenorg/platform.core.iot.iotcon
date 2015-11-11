@@ -277,30 +277,71 @@ static void _request_handler_put(door_resource_s *door, iotcon_request_h request
 	iotcon_state_destroy(resp_state);
 
 	ret = _send_response(response, resp_repr, IOTCON_RESPONSE_RESULT_OK);
-	if (0 != ret)
+	if (0 != ret) {
 		ERR("_send_response() Fail(%d)", ret);
+		iotcon_representation_destroy(resp_repr);
+		return;
+	}
+
+	/* notify */
+	ret = iotcon_resource_notify(door->handle, resp_repr, door->observers);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("iotcon_resource_notify() Fail(%d)", ret);
 
 	iotcon_representation_destroy(resp_repr);
 }
 
-static gboolean _notifier(gpointer user_data)
+static gboolean _door_state_changer(gpointer user_data)
 {
 	int ret;
 	static int i = 0;
-	door_resource_s *door;
+	door_resource_s *door = user_data;
+	iotcon_state_h state;
 	iotcon_representation_h repr;
 
-	door = user_data;
-
-	if ((5 == i++) || !(door->observers))
+	if ((5 == i++) || NULL == door->observers)
 		return G_SOURCE_REMOVE;
 
-	INFO("NOTIFY!");
+	if (false == door->state) {
+		door->state = true;
+		INFO("[Door] closed -> opened");
+	} else {
+		door->state = false;
+		INFO("[Door] opened -> closed");
+	}
+
 	ret = iotcon_representation_create(&repr);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_create() Fail(%d)", ret);
 		return G_SOURCE_REMOVE;
 	}
+
+	ret = iotcon_state_create(&state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_state_create() Fail(%d)", ret);
+		iotcon_representation_destroy(repr);
+		return G_SOURCE_REMOVE;
+	}
+
+	ret = iotcon_state_set_bool(state, "opened", door->state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_state_set_bool() Fail(%d)", ret);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return G_SOURCE_REMOVE;
+	}
+
+	ret = iotcon_representation_set_state(repr, state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_set_state() Fail(%d)", ret);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return G_SOURCE_REMOVE;
+	}
+
+	iotcon_state_destroy(state);
+
+	INFO("NOTIFY!");
 
 	ret = iotcon_resource_notify(door->handle, repr, door->observers);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -310,7 +351,6 @@ static gboolean _notifier(gpointer user_data)
 	}
 
 	iotcon_representation_destroy(repr);
-
 	return G_SOURCE_CONTINUE;
 }
 
@@ -377,7 +417,7 @@ static void _request_handler_post(door_resource_s *door, iotcon_response_h respo
 	iotcon_representation_destroy(resp_repr);
 
 	/* add observe */
-	g_timeout_add_seconds(5, _notifier, door);
+	g_timeout_add_seconds(5, _door_state_changer, door);
 }
 
 static void _request_handler_delete(iotcon_resource_h resource,
@@ -428,7 +468,12 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 	RET_IF(NULL == request);
 
-	door = user_data;
+	ret = iotcon_request_get_host_address(request, &host_address);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_request_get_host_address() Fail(%d)", ret);
+		return;
+	}
+	INFO("host_address : %s", host_address);
 
 	ret = iotcon_request_get_query(request, &query);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -450,6 +495,8 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		return;
 	}
 
+	door = user_data;
+
 	if (IOTCON_REQUEST_GET & types)
 		_request_handler_get(door, response);
 
@@ -463,13 +510,6 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		_request_handler_delete(resource, response);
 
 	iotcon_response_destroy(response);
-
-	ret = iotcon_request_get_host_address(request, &host_address);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_request_get_host_address() Fail(%d)", ret);
-		return;
-	}
-	INFO("host_address : %s", host_address);
 
 	if (IOTCON_REQUEST_OBSERVE & types) {
 		ret = iotcon_request_get_observe_action(request, &observe_action);
@@ -485,6 +525,10 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 				return;
 			}
 			ret = iotcon_observers_add(door->observers, observe_id);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("iotcon_observers_add() Fail(%d)", ret);
+				return;
+			}
 		} else if (IOTCON_OBSERVE_DEREGISTER == observe_action) {
 			ret = iotcon_request_get_observe_id(request, &observe_id);
 			if (IOTCON_ERROR_NONE != ret) {
@@ -505,11 +549,11 @@ static gboolean _presence_timer(gpointer user_data)
 	static int i = 0;
 	i++;
 	if (i % 2)
-		iotcon_start_presence(10);
-	else
 		iotcon_stop_presence();
+	else
+		iotcon_start_presence(10);
 
-	if (4 == i)
+	if (3 == i)
 		return G_SOURCE_REMOVE;
 
 	return G_SOURCE_CONTINUE;
@@ -545,6 +589,7 @@ int main(int argc, char **argv)
 
 	/* add presence */
 	g_timeout_add_seconds(10, _presence_timer, NULL);
+	iotcon_start_presence(10);
 
 	/* create new door resource */
 	my_door.handle = _create_door_resource(my_door.uri_path, my_door.type, my_door.ifaces,

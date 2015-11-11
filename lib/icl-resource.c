@@ -559,8 +559,8 @@ API int iotcon_resource_notify(iotcon_resource_h resource,
 	else
 		obs = icl_dbus_observers_to_gvariant(resource->observers);
 
-	ic_dbus_call_notify_sync(icl_dbus_get_object(), resource->handle, repr_gvar, obs, &ret,
-			NULL, &error);
+	ic_dbus_call_notify_sync(icl_dbus_get_object(), resource->handle, repr_gvar, obs,
+			&ret, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_notify_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
