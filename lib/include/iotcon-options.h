@@ -28,9 +28,79 @@
  *
  * @brief Iotcon Options provides API to manage options.
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_OPTIONS_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_OPTIONS_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
  *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_OPTIONS_MODULE_OVERVIEW Overview
+ * The iotcon options API provides methods for managing vendor specific options of coap packet.\n
+ * See more about coap packet in http://tools.ietf.org/html/rfc7252.
+ *
+ * Example (Client side) :
+ * @code
+#include <iotcon.h>
+...
+static void _request_get_with_option(iotcon_remote_resource_h resource)
+{
+	int i;
+	int ret;
+	unsigned short opt_id = 3000;
+	const char *opt_val = "12345";
+	iotcon_options_h options = NULL;
+
+	..
+	ret = iotcon_options_create(&options);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_options_add(options, opt_id, opt_val);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_options_destroy(options);
+		return;
+	}
+
+	ret = iotcon_remote_resource_set_options(resource, options);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_options_destroy(options);
+		return;
+	}
+
+	ret = iotcon_remote_resource_get(resource, NULL, _on_get, NULL);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_options_destroy(options);
+		return;
+	}
+
+	iotcon_options_destroy(options);
+	...
+}
+ * @endcode
+ *
+ * Example (Server side) :
+ * @code
+#include <iotcon.h>
+...
+static bool _options_foreach(unsigned short id, const char *data, void *user_data)
+{
+	// handle options
+	return IOTCON_FUNC_CONTINUE;
+}
+
+static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data)
+{
+	int ret;
+	iotcon_options_h options;
+
+	ret = iotcon_request_get_options(request, &options);
+	if (IOTCON_ERROR_NONE == ret && options) {
+		ret = iotcon_options_foreach(options, _options_foreach, NULL);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+	}
+	...
+}
+
+ * @endcode
  * @{
  */
 

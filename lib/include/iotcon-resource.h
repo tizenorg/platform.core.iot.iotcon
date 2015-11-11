@@ -28,8 +28,99 @@
  *
  * @brief Iotcon Resource provides API to manage resource.
  *
- * @section CAPI_IOT_CONNECTIVITY_SERVER_RESOURCE_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_SERVER_RESOURCE_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
+ *
+ * @section CAPI_IOT_CONNECTIVITY_SERVER_RESOURCE_MODULE_OVERVIEW Overview
+ * The iotcon resource API provides methods for managing handle and resource information.
+ *
+ * Example :
+ * @code
+#include <iotcon.h>
+
+static iotcon_resource_h _resource_room;
+
+static void _room_request_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data)
+{
+	// handle request
+	...
+}
+
+static void _door_request_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data)
+{
+	// handle request
+	...
+}
+
+static void _create_resource()
+{
+	int ret;
+	int ifaces;
+	int properties;
+	iotcon_resource_types_h resource_types = NULL;
+	iotcon_resource_h resource_door = NULL;
+
+	// 1. create room resource
+	ifaces = IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH;
+	properties = IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE;
+
+	ret = iotcon_resource_types_create(&resource_types);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_resource_types_add(resource_types, "org.tizen.room");
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+
+	ret = iotcon_resource_create("/room/1", resource_types, ifaces,
+			properties, _room_request_handler, NULL, &_resource_room);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+	iotcon_resource_types_destroy(resource_types);
+
+	// 2. create door resource
+	ifaces = IOTCON_INTERFACE_DEFAULT;
+	properties = IOTCON_OBSERVABLE;
+
+	ret = iotcon_resource_types_create(&resource_types);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_destroy(_resource_room);
+		_resource_room = NULL;
+		return;
+	}
+
+	ret = iotcon_resource_types_add(resource_types, "org.tizen.door");
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_types_destroy(resource_types);
+		iotcon_resource_destroy(_resource_room);
+		_resource_room = NULL;
+		return;
+	}
+
+	ret = iotcon_resource_create("/door/1", resource_types, ifaces,
+			properties, _door_request_handler, NULL, &resource_door);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_types_destroy(resource_types);
+		iotcon_resource_destroy(_resource_room);
+		_resource_room = NULL;
+		return;
+	}
+	iotcon_resource_types_destroy(resource_types);
+
+	// 3. bind door resouce to room resource
+	ret = iotcon_resource_bind_child_resource(_resource_room, resource_door);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_destroy(resource_door);
+		iotcon_resource_destroy(_resource_room);
+		_resource_room = NULL;
+		return;
+	}
+}
+ * @endcode
  *
  * @{
  */

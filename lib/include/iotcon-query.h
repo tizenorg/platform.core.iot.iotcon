@@ -28,8 +28,69 @@
  *
  * @brief Iotcon Query provides API to manage query.
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_QUERY_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_QUERY_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
+ *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_QUERY_MODULE_OVERVIEW Overview
+ * The iotcon query API provides methods for managing query of request.
+ *
+ * Example (Client side) :
+ * @code
+#include <iotcon.h>
+...
+static void _request_get(iotcon_remote_resource_h resource)
+{
+	int ret;
+	iotcon_query_h query = NULL;
+
+	ret = iotcon_query_create(&query);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_query_add(query, "key", "value");
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_query_destroy(query);
+		return;
+	}
+
+	ret = iotcon_remote_resource_get(resource, query, _on_get, NULL);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_query_destroy(query);
+		return;
+	}
+
+	iotcon_query_destroy(query);
+}
+ * @endcode
+ *
+ * Example (Server side) :
+ * @code
+#include <iotcon.h>
+...
+static bool _query_foreach(const char *key, const char *value, void *user_data)
+{
+	// handle query
+	return IOTCON_FUNC_CONTINUE;
+}
+
+static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data)
+{
+	int ret;
+	iotcon_query_h query = NULL;
+
+	ret = iotcon_request_get_query(request, &query);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	if (IOTCON_ERROR_NONE == ret && query) {
+		ret = iotcon_query_foreach(query, _query_foreach, NULL);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+	}
+	...
+}
+ * @endcode
  *
  * @{
  */

@@ -28,8 +28,64 @@
  *
  * @brief Iotcon Remote Resource provides API to manage remote resource.
  *
- * @section CAPI_IOT_CONNECTIVITY_CLIENT_REMOTE_RESOURCE_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_CLIENT_REMOTE_RESOURCE_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
+ *
+ * @section CAPI_IOT_CONNECTIVITY_CLIENT_REMOTE_RESOURCE_MODULE_OVERVIEW Overview
+ * The iotcon remote resource API provides methods for managing resource handle and send request.
+ *
+ * Example :
+ * @code
+#include <iotcon.h>
+...
+static void _on_get(iotcon_remote_resource_h resource, iotcon_error_e err,
+		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data)
+{
+	if (IOTCON_ERROR_NONE != err)
+		return;
+
+	// handle get result
+	...
+}
+
+static void _on_find(iotcon_remote_resource_h resource, iotcon_error_e result,
+		void *user_data)
+{
+	int ret;
+	iotcon_remote_resource_h resource_clone = NULL;
+
+	if (IOTCON_ERROR_NONE != result)
+		return;
+
+	if (NULL == resource)
+		return;
+
+	// clone handle
+	ret = iotcon_remote_resource_clone(resource, &resource_clone);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	// request get
+	ret = iotcon_remote_resource_get(resource_clone, NULL, _on_get, NULL);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_remote_resource_destroy(resource_clone);
+		return;
+	}
+
+	...
+}
+
+static void _find_light_resource()
+{
+	int ret;
+
+	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+			"org.tizen.light", _on_find, NULL);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+}
+
+ * @endcode
  *
  * @{
  */
@@ -140,14 +196,14 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
 /**
  * @brief Registers observe callback on the resource
  * @details When server sends notification message, iotcon_remote_resource_response_cb() will be called.
- * The @a observe_type could be one of #iotcon_observe_policy_e.
+ * The @a observe_policy could be one of #iotcon_observe_policy_e.
  *
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
- * @param[in] observe_type The type to specify how client wants to observe.
+ * @param[in] observe_policy The type to specify how client wants to observe.
  * @param[in] query The query to send to server
  * @param[in] cb The callback function to get notifications from server
  * @param[in] user_data The user data to pass to the function

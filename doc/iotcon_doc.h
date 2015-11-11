@@ -48,7 +48,7 @@
  * @code
 #include <iotcon.h>
 ...
-static void _request_handler(iotcon_request_h request, void *user_data)
+static void _request_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data)
 {
 	int ret;
 	iotcon_request_type_e type;
@@ -64,13 +64,26 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 		if (IOTCON_ERROR_NONE != ret)
 			return;
 
+		ret = iotcon_response_set_result(response, IOTCON_RESPONSE_RESULT_OK);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_response_destroy(response);
+			return;
+		}
+
 		ret = iotcon_representation_create(&resp_repr);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_response_destroy(response);
 			return;
 		}
 
-		ret = iotcon_representation_set_uri_path(resp_repr, "org.tizen.door");
+		ret = iotcon_representation_set_uri_path(resp_repr, "/door/1");
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_representation_destroy(resp_repr);
+			iotcon_response_destroy(response);
+			return;
+		}
+
+		ret = iotcon_state_create(&state);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_representation_destroy(resp_repr);
 			iotcon_response_destroy(response);
@@ -79,21 +92,15 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 
 		ret = iotcon_state_set_bool(resp_repr, "opened", true);
 		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_state_destroy(state);
 			iotcon_representation_destroy(resp_repr);
 			iotcon_response_destroy(response);
 			return;
 		}
 
-		ret = iotcon_response_set_result(response, IOTCON_RESPONSE_RESULT_OK);
+		ret = iotcon_response_set_representation(response, IOTCON_INTERFACE_DEFAULT, resp_repr);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_representation_destroy(resp_repr);
-			iotcon_response_destroy(response);
-			return;
-		}
-
-
-		ret = iotcon_response_set_representation(response, resp_repr);
-		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_state_destroy(state);
 			iotcon_representation_destroy(resp_repr);
 			iotcon_response_destroy(response);
 			return;
@@ -101,11 +108,13 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 
 		ret = iotcon_response_send(response);
 		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_state_destroy(state);
 			iotcon_representation_destroy(resp_repr);
 			iotcon_response_destroy(response);
 			return;
 		}
 
+		iotcon_state_destroy(state);
 		iotcon_representation_destroy(resp_repr);
 		iotcon_response_destroy(response);
 	}
@@ -118,11 +127,11 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 	const char *uri_path = "/door/1";
 	const char *type = "org.tizen.door";
 	iotcon_resource_types_h resource_types;
+	iotcon_resource_h resource = NULL;
 
 	ret = iotcon_resource_types_create(&resource_types);
-	if (IOTCON_ERROR_NONE != ret) {
+	if (IOTCON_ERROR_NONE != ret)
 		return;
-	}
 
 	ret = iotcon_resource_types_add(resource_types, type);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -130,9 +139,9 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 		return;
 	}
 
-	iotcon_resource_h handle = iotcon_resource_create(uri_path, resource_types,
-			interfaces, properties, _request_handler, NULL);
-	if (NULL == handle) {
+	ret = iotcon_resource_create(uri_path, resource_types,
+			interfaces, properties, _request_handler, NULL, &resource);
+	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(resource_types);
 		return;
 	}
@@ -155,7 +164,8 @@ static void _on_response_get(iotcon_remote_resource_h resource, iotcon_error_e e
 	// handle get from response
 }
 ...
-static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
+static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e result,
+		void *user_data)
 {
 	int ret;
 	int resource_interfaces;
@@ -164,40 +174,51 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 	char *device_id;
 	iotcon_query_h query;
 	iotcon_resource_types_h resource_types;
+	iotcon_remote_resource_h resource_clone = NULL;
+
+	if (IOTCON_ERROR_NONE != result)
+		return;
 
 	ret = iotcon_remote_resource_get_uri_path(resource, &resource_uri_path);
-	if (IOTCON_ERROR_NONE != ret) {
+	if (IOTCON_ERROR_NONE != ret)
 		return;
-	}
 
 	ret = iotcon_remote_resource_get_device_id(resource, &device_id);
-	if (IOTCON_ERROR_NONE != ret) {
+	if (IOTCON_ERROR_NONE != ret)
 		return;
-	}
 
 	ret = iotcon_remote_resource_get_host_address(resource, &resource_host);
-	if (IOTCON_ERROR_NONE != ret) {
+	if (IOTCON_ERROR_NONE != ret)
 		return;
-	}
 
 	ret = iotcon_remote_resource_get_interfaces(resource, &resource_interfaces);
-	if (IOTCON_ERROR_NONE != ret) {
+	if (IOTCON_ERROR_NONE != ret)
 		return;
-	}
 
 	ret = iotcon_remote_resource_get_types(resource, &resource_types);
-	if (IOTCON_ERROR_NONE != ret) {
+	if (IOTCON_ERROR_NONE != ret)
 		return;
-	}
 
 	ret = iotcon_query_create(&query);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_query_add(query, "key", "value");
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_remote_resource_clone(resource, &resource_clone);
 	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_query_destroy(query);
 		return;
 	}
 
-	iotcon_query_add(query, "key", "value");
+	ret = iotcon_remote_resource_get(resource_clone, query, _on_response_get, NULL);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_query_destroy(query);
+		return;
+	}
 
-	iotcon_remote_resource_get(resource, query, _on_response_get, NULL);
 	iotcon_query_destroy(query);
 }
 ...
@@ -207,9 +228,8 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
 
 	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4, type,
 			_found_resource, NULL);
-	if (IOTCON_ERROR_NONE != ret) {
+	if (IOTCON_ERROR_NONE != ret)
 		return;
-	}
 }
  * @endcode
  *
@@ -225,45 +245,50 @@ static void _found_resource(iotcon_remote_resource_h resource, void *user_data)
  * If an observed resource fails to notify a client before the max-age of a resource value update,
  * the client should attempt to re-register the observation.\n
  *
- * Example : Server side
+ * Example (Server side) :
  * @code
 #include <iotcon.h>
 ...
-static iotcon_resource_h door_handle;
-static iotcon_observers_h observers;
+static iotcon_resource_h _door_handle;
+static iotcon_observers_h _observers;
 ...
 static void _request_handler(iotcon_request_h request, void *user_data)
 {
 	int ret;
-	int types;
 	int observe_id;
 	iotcon_observe_type_e observe_type;
 
 	ret = iotcon_request_get_observe_type(request, &observe_type);
-	if (IOTCON_ERROR_NONE != ret) {
+	if (IOTCON_ERROR_NONE != ret)
 		return;
-	}
 
 	if (IOTCON_OBSERVE_REGISTER == observe_type) {
+		int observe_id;
 		ret = iotcon_request_get_observe_id(request, &observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
+		if (IOTCON_ERROR_NONE != ret)
 			return;
-		}
 
-		ret = iotcon_observers_add(observers, observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
-			return;
+		if (NULL == _observers) {
+			ret = iotcon_observers_create(&_observers);
+			if (IOTCON_ERROR_NONE != ret)
+				return;
 		}
+		ret = iotcon_observers_add(_observers, observe_id);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
 	} else if (IOTCON_OBSERVE_DEREGISTER == observe_type) {
-		ret = iotcon_request_get_observe_id(request, &observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
-			return;
-		}
+		int observe_id;
 
-		ret = iotcon_observers_remove(observers, observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
+		if (NULL == _observers)
 			return;
-		}
+
+		ret = iotcon_request_get_observe_id(request, &observe_id);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		ret = iotcon_observers_remove(_observers, observe_id);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
 	}
 }
 ...
@@ -271,15 +296,13 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 	int ret;
 	int interfaces = IOTCON_INTERFACE_DEFAULT;
 	int properties = (IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE);
-	iotcon_resource_h door_handle;
 	const char *uri_path = "/door/1";
 	const char *type = "org.tizen.door";
 	iotcon_resource_types_h resource_types;
 
 	ret = iotcon_resource_types_create(&resource_types);
-	if (IOTCON_ERROR_NONE == ret) {
+	if (IOTCON_ERROR_NONE != ret)
 		return;
-	}
 
 	ret = iotcon_resource_types_add(resource_types, type);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -288,7 +311,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 	}
 
 	ret = iotcon_resource_create(uri_path, resource_types,
-			interfaces, properties, _request_handler, NULL, door_handle);
+			interfaces, properties, _request_handler, NULL, &_door_handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(resource_types);
 		return;
@@ -306,7 +329,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 		return;
 	}
 
-	ret = iotcon_resource_notify(door_handle, resp_repr, observers);
+	ret = iotcon_resource_notify(_door_handle, resp_repr, _observers);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_representation_destroy(resp_repr);
 		return;
@@ -316,13 +339,13 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 }
  * @endcode
  *
- * Example : Client side
+ * Example (Client side) :
  * @code
 #include <iotcon.h>
 ...
-static iotcon_remote_resource_h door_resource;
+static iotcon_remote_resource_h _door_resource;
 ...
-static void _on_resopnse_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
+static void _on_response_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
 		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data)
 {
 }

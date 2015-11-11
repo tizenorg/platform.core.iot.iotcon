@@ -32,7 +32,7 @@
  *
  * @brief Iotcon Server provides API for server side.
  *
- * @section CAPI_IOT_CONNECTIVITY_SERVER_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_SERVER_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
  *
  * @section CAPI_IOT_CONNECTIVITY_SERVER_MODULE_OVERVIEW Overview

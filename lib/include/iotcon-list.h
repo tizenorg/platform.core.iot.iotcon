@@ -28,8 +28,132 @@
  *
  * @brief Iotcon List provides API to get data from list and set data to list.
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
+ *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE_OVERVIEW Overview
+ * The iotcon list API provides list of bool, integer, double, string, list and state handle.
+ *
+ * Example :
+ * @code
+static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data)
+{
+	int ret;
+	iot types;
+
+	ret = iotcon_request_get_types(request, &types);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	if (IOTCON_REQUEST_GET & types) {
+		iotcon_response_h response = NULL;
+		iotcon_representation_h representation = NULL;
+		iotcon_state_h state = NULL;
+		iotcon_list_h list = NULL;
+
+		ret = iotcon_response_create(request, &response);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		ret = iotcon_representation_create(&representation);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		...
+
+		ret = iotcon_state_create(&state);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		ret = iotcon_list_create(IOTCON_TYPE_INT, &list);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		ret = iotcon_list_add_int(list, 1);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_list_destroy(list);
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		ret = iotcon_list_add_int(list, 2);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_list_destroy(list);
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		ret = iotcon_list_add_int(list, 10);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_list_destroy(list);
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		ret = itocon_state_set_list(state, "ids", list);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_list_destroy(list);
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		ret = iotcon_representation_set_state(representation, state);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_list_destroy(list);
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		...
+
+		ret = iotcon_response_set_representation(response, IOTCON_INTERFACE_DEFAULT,
+				representation);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_list_destroy(list);
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		ret = iotcon_response_send(response);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_list_destroy(list);
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		iotcon_list_destroy(list);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(representation);
+		iotcon_response_destroy(resopnse);
+	}
+	...
+}
+ * @endcode
+ *
  *
  * @{
  */

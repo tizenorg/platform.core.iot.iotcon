@@ -28,7 +28,7 @@
  *
  * @brief Iotcon Representation provides API to manage representation
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE_OVERVIEW Overview
@@ -39,7 +39,8 @@
  * resp_repr.\n
  * A list is a container that includes number of datas of same type.\n
  * It has capabilties to store and retrieve integer, boolean, double, string, list, null, resp_repr.
- * Example
+ *
+ * Example :
  *@code
 #include <iotcon.h>
 ...

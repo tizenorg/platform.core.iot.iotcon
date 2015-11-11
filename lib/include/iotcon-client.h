@@ -29,7 +29,7 @@
  *
  * @brief Iotcon Client provides API for client side.
  *
- * @section CAPI_IOT_CONNECTIVITY_CLIENT_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_CLIENT_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
  *
  * @section CAPI_IOT_CONNECTIVITY_CLIENT_MODULE_OVERVIEW Overview

@@ -28,8 +28,97 @@
  *
  * @brief Iotcon Request provides API to manage client's request.
  *
- * @section CAPI_IOT_CONNECTIVITY_SERVER_REQUEST_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_SERVER_REQUEST_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
+ *
+ * @section CAPI_IOT_CONNECTIVITY_SERVER_REQUEST_MODULE_OVERVIEW Overview
+ * The iotcon request API provides methods for managing request handle.
+ *
+ * Example :
+ * @code
+#include <iotcon.h>
+static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data)
+{
+	int ret;
+	int types;
+	iotcon_options_h options = NULL;
+	iotcon_query_h query = NULL;
+	iotcon_representation_h repr = NULL;
+
+	ret = iotcon_request_get_options(request, &options);
+	if (IOTCON_ERROR_NONE == ret && options) {
+		// handle options
+		...
+	}
+
+	ret = iotcon_request_get_query(request, &query);
+	if (IOTCON_ERROR_NONE == ret && query) {
+		// handle query
+		...
+	}
+
+	ret = iotcon_request_get_types(request, &types);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	if (IOTCON_REQUEST_GET & types) {
+		// handle get
+		...
+	}
+	if (IOTCON_REQUEST_PUT & types) {
+		// handle put
+		ret = iotcon_request_get_representation(request, &repr);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+		...
+	}
+	if (IOTCON_REQUEST_POST & types) {
+		// handle post
+		ret = iotcon_request_get_representation(request, &repr);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+		...
+	}
+	if (IOTCON_REQUEST_DELETE & types) {
+		// handle delete
+		ret = iotcon_request_get_representation(request, &repr);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+		...
+	}
+	if (IOTCON_REQUEST_OBSERVE & types) {
+		int observe_id;
+		iotcon_observe_action_e action;
+		char *host_address;
+		iotcon_connectivity_type_e conn_type;
+
+		ret = iotcon_request_get_observe_action(request, &action);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		ret = iotcon_request_get_observe_id(request, &observe_id);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		ret = iotcon_request_get_host_address(request, &host_address);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		ret = iotcon_request_get_connectivity_type(request, &conn_type);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		if (IOTCON_OBSERVE_REGISTER == action) {
+			// handle register observe
+			...
+		} else if (IOTCON_OBSERVE_DEREGISTER == action) {
+			// handle deregister observe
+			...
+		}
+	}
+}
+ * @endcode
  *
  * @{
  */

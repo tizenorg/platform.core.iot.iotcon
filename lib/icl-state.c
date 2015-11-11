@@ -77,6 +77,21 @@ API void iotcon_state_destroy(iotcon_state_h state)
 	}
 }
 
+API int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone)
+{
+	int ret;
+	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == state_clone, IOTCON_ERROR_INVALID_PARAMETER);
+
+	ret = icl_state_clone(state, state_clone);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_state_clone() Fail(%d)", ret);
+		return ret;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
 
 int icl_state_del_value(iotcon_state_h state, const char *key)
 {

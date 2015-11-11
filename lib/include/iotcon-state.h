@@ -28,8 +28,100 @@
  *
  * @brief Iotcon State provides API to manage state.
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
+ *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE_OVERVIEW Overview
+ * The iotcon state API provides string key based hash table.
+ *
+ * Example :
+ * @code
+#include <iotcon.h>
+...
+static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data)
+{
+	int ret;
+	int types;
+
+	ret = iotcon_request_get_types(request, &types);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	if (IOTCON_REQUEST_GET & types) {
+		iotcon_response_h response = NULL;
+		iotcon_representation_h representation = NULL;
+		iotcon_state_h state = NULL;
+
+		ret = iotcon_response_create(request, &response);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		ret = iotcon_representation_create(&representation);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		...
+
+		ret = iotcon_state_create(&state);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		ret = iotcon_state_set_bool(state, "power", true);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		ret = itocon_state_set_int(state, "brightness", 75);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		ret = iotcon_representation_set_state(representation, state);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		...
+
+		ret = iotcon_response_set_representation(response, IOTCON_INTERFACE_DEFAULT,
+				representation);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		ret = iotcon_response_send(response);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(representation);
+			iotcon_response_destroy(resopnse);
+			return;
+		}
+
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(representation);
+		iotcon_response_destroy(resopnse);
+	}
+	...
+}
+ * @endcode
  *
  * @{
  */
@@ -66,6 +158,27 @@ int iotcon_state_create(iotcon_state_h *state);
  * @see iotcon_state_create()
  */
 void iotcon_state_destroy(iotcon_state_h state);
+
+/**
+ * @brief Clones a state handle.
+ *
+ * @since_tizen 3.0
+ *
+ * @remarks You must destroy @a state_clone by calling iotcon_state_destroy()
+ * if @a state_clone is no longer needed.
+ *
+ * @param[in] state The state handle
+ * @param[out] state_clone The cloned state handle
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_state_create()
+ * @see iotcon_state_destroy()
+ */
+int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone);
 
 /**
  * @brief Sets a new key and integer value into the representation.

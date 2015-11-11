@@ -28,8 +28,153 @@
  *
  * @brief Iotcon Response provides API to manage response.
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_RESPONSE_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_RESPONSE_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
+ *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_RESPONSE_MODULE_OVERVIEW Overview
+ * The iotcon response API provides methos for managing handle and get response information.
+ *
+ * Example (Client side) :
+ * @code
+#include <iotcon.h>
+
+static void _state_foreach(iotcon_state_h state, const char *key, void *user_data)
+{
+	// handle state
+	...
+}
+
+static void _on_get(iotcon_remote_resource_h resource, iotcon_error_e err,
+		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data)
+{
+	int ret;
+	iotcon_response_result_e response_result;
+	iotcon_representation_h repr = NULL;
+	iotcon_state_h state = NULL;
+
+	if (IOTCON_ERROR_NONE != err)
+		return;
+
+	ret = iotcon_response_get_result(response, &response_result);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	if (IOTCON_RESPONSE_RESULT_OK != response_result)
+		return;
+
+	ret = iotcon_response_get_representation(response, &repr);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_representation_get_state(repr, &state);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_state_foreach(state, _state_foreach, NULL);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	...
+}
+
+static void _request_get(iotcon_remote_resource_h resource)
+{
+	int ret;
+	ret = iotcon_remote_resource_get(resource, NULL, _on_get, NULL);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+}
+ * @endcode
+ *
+ *
+ * Example (Server side) :
+ * @code
+#include <iotcon.h>
+
+static iotcon_state_h _create_state()
+{
+	int ret;
+	iotcon_state_h state = NULL;
+
+	// create & set state
+	...
+
+	return state;
+}
+
+static void _request_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data)
+{
+	int ret;
+	int types;
+	iotcon_interface_e iface = IOTCON_INTERFACE_DEFAULT;
+	iotcon_query_h query = NULL;
+
+	ret = iotcon_request_get_types(request, &types);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_request_get_query(request, &query);
+	if (IOTCON_ERROR_NONE == ret && query) {
+		ret = iotcon_query_get_interface(request, &iface);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+	}
+
+	if (IOTCON_REQUEST_GET & types) {
+		iotcon_response_h response = NULL;
+		iotcon_representation_h repr = NULL;
+		iotcon_state_h state = NULL;
+
+		ret = iotcon_response_create(request, &response);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		ret = iotcon_response_set_result(response, IOTCON_RESPONSE_RESULT_OK);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_response_destroy(response);
+			return;
+		}
+
+		ret = iotcon_representation_create(&repr);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_response_destroy(response);
+			return;
+		}
+
+		ret = iotcon_representation_set_uri_path(repr, "/light/1");
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_representation_destroy(repr);
+			iotcon_response_destroy(response);
+			return;
+		}
+
+		ret = iotcon_representation_set_state(resopnse, _create_state());
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_representation_destroy(repr);
+			iotcon_response_destroy(response);
+			return;
+		}
+
+		ret = iotcon_response_set_representation(response, iface, repr);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_representation_destroy(repr);
+			iotcon_response_destroy(response);
+			return;
+		}
+
+		ret = iotcon_response_send(response);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_representation_destroy(repr);
+			iotcon_response_destroy(response);
+			return;
+		}
+
+		iotcon_representation_destroy(repr);
+		iotcon_response_destroy(response);
+	}
+	...
+}
+ * @endcode
  *
  * @{
  */

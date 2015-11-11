@@ -28,8 +28,83 @@
  *
  * @brief Iotcon Observers provides API to manage client observing a resource.
  *
- * @section CAPI_IOT_CONNECTIVITY_SERVER_OBSERVERS_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_SERVER_OBSERVERS_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
+ *
+ * @section CAPI_IOT_CONNECTIVITY_SERVER_OBSERVERS_MODULE_OVERVIEW Overview
+ * The iotcon overview API provides methods for managing oberve id.
+ *
+ * Example :
+ * @code
+#include <iotcon.h>
+static iotcon_observers_h _observers;
+static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data)
+{
+	int ret;
+	int types;
+
+	ret = iotcon_request_get_types(request, &types);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	if (IOTCON_REQUEST_OBSERVE & types) {
+		int observe_id;
+		iotcon_observe_action_e action;
+
+		ret = iotcon_request_get_observe_action(request, &action);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		ret = iotcon_request_get_observe_id(request, &observe_id);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		if (IOTCON_OBSERVE_REGISTER & action) {
+			if (NULL == _observers) {
+				ret = iotcon_observers_create(&_observers);
+				if (IOTCON_ERROR_NONE != ret)
+					return;
+			}
+			ret = iotcon_observers_add(_observers, observe_id);
+			if (IOTCON_ERROR_NONE != ret)
+				return;
+		} else if (IOTCON_OBSERVE_DEREGISTER & action) {
+			if (NULL == _observers)
+				return;
+			ret = iotcon_observers_remove(_observers, observe_id);
+			if (IOTCON_ERROR_NONE != ret)
+				return;
+		}
+	}
+	if (IOTCON_REQUEST_PUT & types) {
+		iotcon_state_h state = NULL;
+		iotcon_representation_h repr = NULL;
+		...
+
+		ret = iotcon_representation_create(&repr);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		ret = iotcon_state_create(&state);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_representation_destroy(repr);
+			return;
+		}
+		...
+		ret = iotcon_resource_notify(resource, repr, _observers);
+		if (IOTCON_ERROR_NONE != ret) {
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(repr);
+			return;
+		}
+
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+	}
+	...
+}
+ * @endcode
  *
  * @{
  */

@@ -28,14 +28,102 @@
  *
  * @brief Iotcon Lite Resource provides API to encapsulate resources.
  *
+ * @section CAPI_IOT_CONNECTIVITY_SERVER_LITE_RESOURCE_MODULE_HEADER Required Header
+ *  \#include <iotcon.h>
+ *
  * @section CAPI_IOT_CONNECTIVITY_SERVER_LITE_RESOURCE_MODULE_OVERVIEW Overview
  * This API provides that the users manages resources without request handler.
  * When client request by CRUD functions, internal default request handler will be invoked.
  * The default request handler will create response and send to client automatically.
  * When updated state by iotcon_lite_update_state(), changes will notify to observers.
  *
- * @section CAPI_IOT_CONNECTIVITY_SERVER_LITE_RESOURCE_MODULE_HEADER Header
- *  \#include <iotcon.h>
+ * Example :
+ * @code
+#include <iotcon.h>
+...
+static iotcon_lite_resource_h _resource;
+
+static void _create_light_resource()
+{
+	int ret;
+	iotcon_lite_resource_h resource = NULL;
+	iotcon_resource_types_h resource_types = NULL;
+	iotcon_state_h state = NULL;
+
+	ret = iotcon_resource_types_create(&resource_types);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_resource_types_add(resource_types, "org.tizen.light");
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+
+	ret = iotcon_state_create(&state);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+
+	ret = iotcon_state_set_bool(state, "power", true);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_state_destroy(state);
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+
+	ret = iotcon_state_set_int(state, "brightness", 75);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_state_destroy(state);
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+
+	ret = iotcon_lite_resource_create("/light/1", resource_types,
+			IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE, state, &resource);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_state_destroy(state);
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+
+	iotcon_state_destroy(state);
+	iotcon_resource_types_destroy(resource_types);
+
+	_resource = resource;
+}
+
+static void _update_brightness(int brightness)
+{
+	int ret;
+	iotcon_state_h state = NULL;
+	iotcon_state_h state_clone = NULL;
+
+	ret = iotcon_lite_resource_get_state(_resource, &state);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_state_clone(state, &state_clone);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_state_set_int(state_clone, "brightness", brightness);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_state_destroy(state_clone);
+		return;
+	}
+
+	ret = iotcon_lite_resource_update_state(_resource, state_clone);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_state_destroy(state_clone);
+		return;
+	}
+
+	iotcon_state_destroy(state_clone);
+}
+
+ * @endcode
  *
  * @{
  */

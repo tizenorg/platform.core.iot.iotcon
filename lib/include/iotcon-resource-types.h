@@ -28,8 +28,48 @@
  *
  * @brief Iotcon Resource Types provides API to manage resource types.
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE_HEADER Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
+ *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE_OVERVIEW Overview
+ * The iotcon resource types API provides methods for managing handle and add, remove resource types.
+ *
+ * Example :
+ * @code
+#include <iotcon.h>
+static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data)
+{
+	// handle request
+	...
+}
+
+static void _create_light_resource()
+{
+	int ret;
+	iotcon_resource_h resource = NULL;
+	iotcon_resource_types_h resource_types = NULL;
+
+	ret = iotcon_resource_types_create(&resource_types);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	ret = iotcon_resource_types_add(resource_types, "org.tizen.light");
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+
+	ret = iotcon_resource_create("/light/1", resource_types, IOTCON_INTERFACE_DEFAULT,
+			IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE, _request_handler, NULL, &resource);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+
+	iotcon_resource_types_destroy(resource_types);
+}
+ * @endcode
  *
  * @{
  */
