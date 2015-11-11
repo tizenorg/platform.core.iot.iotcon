@@ -636,6 +636,33 @@ int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource, int
 int iotcon_remote_resource_is_observable(iotcon_remote_resource_h resource,
 		bool *observable);
 
+
+/**
+ * @brief Gets options of the remote resource
+ *
+ * @since_tizen 3.0
+ *
+ * @remarks @a options must not be released using iotcon_options_destroy().
+ *
+ * @param[in] resource The handle of the remote resource
+ * @param[out] options The handle of the header options
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @see iotcon_remote_resource_get_uri_path()
+ * @see iotcon_remote_resource_get_host_address()
+ * @see iotcon_remote_resource_get_connectivity_type()
+ * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_types()
+ * @see iotcon_remote_resource_get_interfaces()
+ * @see iotcon_remote_resource_set_options()
+ * @see iotcon_remote_resource_is_observable()
+ */
+int iotcon_remote_resource_get_options(iotcon_remote_resource_h resource,
+		iotcon_options_h *options);
+
 /**
  * @brief Sets options into the remote resource
  *
@@ -654,6 +681,7 @@ int iotcon_remote_resource_is_observable(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
+ * @see iotcon_remote_resource_get_options()
  * @see iotcon_remote_resource_is_observable()
  */
 int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,

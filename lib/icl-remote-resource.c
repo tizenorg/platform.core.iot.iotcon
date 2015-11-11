@@ -380,6 +380,16 @@ API int iotcon_remote_resource_is_observable(iotcon_remote_resource_h resource,
 	return IOTCON_ERROR_NONE;
 }
 
+API int iotcon_remote_resource_get_options(iotcon_remote_resource_h resource,
+		iotcon_options_h *options)
+{
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*options = resource->header_options;
+
+	return IOTCON_ERROR_NONE;
+}
 
 /* if header_options is NULL, then client's header_options is unset */
 API int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
