@@ -45,9 +45,9 @@ struct icd_ioty_worker
 struct icd_req_context {
 	unsigned int signal_number;
 	char *bus_name;
-	int types;
+	int request_type;
 	int observe_id;
-	int observe_action;
+	int observe_type;
 	OCRequestHandle request_h;
 	OCResourceHandle resource_h;
 	GVariant *payload;
@@ -224,7 +224,7 @@ static int _ioty_oic_action_to_ioty_action(int oic_action)
 	case OC_OBSERVE_NO_OPTION:
 	default:
 		ERR("Invalid action (%d)", oic_action);
-		action = IOTCON_OBSERVE_NO_OPTION;
+		action = IOTCON_OBSERVE_TYPE_NONE;
 	}
 	return action;
 }
@@ -246,7 +246,7 @@ static int _worker_req_handler(void *context)
 {
 	GVariant *value;
 	char *host_address;
-	int ret, conn_type, action;
+	int ret, conn_type;
 	GVariantBuilder payload_builder;
 	struct icd_req_context *ctx = context;
 
@@ -266,15 +266,13 @@ static int _worker_req_handler(void *context)
 		return ret;
 	}
 
-	action = _ioty_oic_action_to_ioty_action(ctx->observe_action);
-
 	value = g_variant_new("(siia(qs)a(ss)iiavxx)",
 			host_address,
 			conn_type,
-			ctx->types,
+			ctx->request_type,
 			ctx->options,
 			ctx->query,
-			action,
+			ctx->observe_type,
 			ctx->observe_id,
 			&payload_builder,
 			ICD_POINTER_TO_INT64(ctx->request_h),
@@ -341,26 +339,19 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 	if (OC_REQUEST_FLAG & flag) {
 		switch (request->method) {
 		case OC_REST_GET:
-			req_ctx->types = IOTCON_REQUEST_GET;
+			req_ctx->request_type = IOTCON_REQUEST_GET;
 			req_ctx->payload = NULL;
-
-			if (OC_OBSERVE_FLAG & flag) {
-				req_ctx->types |= IOTCON_REQUEST_OBSERVE;
-				/* observation info*/
-				req_ctx->observe_id = request->obsInfo.obsId;
-				req_ctx->observe_action = request->obsInfo.action;
-			}
 			break;
 		case OC_REST_PUT:
-			req_ctx->types = IOTCON_REQUEST_PUT;
+			req_ctx->request_type = IOTCON_REQUEST_PUT;
 			req_ctx->payload = icd_payload_to_gvariant(request->payload);
 			break;
 		case OC_REST_POST:
-			req_ctx->types = IOTCON_REQUEST_POST;
+			req_ctx->request_type = IOTCON_REQUEST_POST;
 			req_ctx->payload = icd_payload_to_gvariant(request->payload);
 			break;
 		case OC_REST_DELETE:
-			req_ctx->types = IOTCON_REQUEST_DELETE;
+			req_ctx->request_type = IOTCON_REQUEST_DELETE;
 			req_ctx->payload = NULL;
 			break;
 		default:
@@ -368,6 +359,14 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 			free(req_ctx);
 			return OC_EH_ERROR;
 		}
+	}
+
+	if (OC_OBSERVE_FLAG & flag) {
+		/* observation info*/
+		req_ctx->observe_id = request->obsInfo.obsId;
+		req_ctx->observe_type = _ioty_oic_action_to_ioty_action(request->obsInfo.action);
+	} else {
+		req_ctx->observe_type = IOTCON_OBSERVE_TYPE_NONE;
 	}
 
 	/* header options */

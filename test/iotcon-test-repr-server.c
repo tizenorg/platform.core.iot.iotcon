@@ -591,20 +591,21 @@ static int _room_request_handler_get(room_resource_s *room, iotcon_request_h req
 static void _light_request_handler(iotcon_resource_h resource, iotcon_request_h request,
 		void *user_data)
 {
-	int ret, types;
+	int ret;
+	iotcon_request_type_e type;
 	light_resource_s *light = user_data;
 	int iface = IOTCON_INTERFACE_DEFAULT;
 
 	RET_IF(NULL == request);
 
-	ret = iotcon_request_get_types(request, &types);
+	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_types() Fail(%d)", ret);
 		_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
 		return;
 	}
 
-	if (IOTCON_REQUEST_GET & types) {
+	if (IOTCON_REQUEST_GET == type) {
 		ret = _light_request_handler_get(light, request);
 		if (0 != ret)
 			_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
@@ -616,20 +617,21 @@ static void _light_request_handler(iotcon_resource_h resource, iotcon_request_h 
 static void _fan_request_handler(iotcon_resource_h resource, iotcon_request_h request,
 		void *user_data)
 {
-	int ret, types;
+	int ret;
+	iotcon_request_type_e type;
 	fan_resource_s *fan = user_data;
 	int iface = IOTCON_INTERFACE_DEFAULT;
 
 	RET_IF(NULL == request);
 
-	ret = iotcon_request_get_types(request, &types);
+	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_types() Fail(%d)", ret);
 		_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
 		return;
 	}
 
-	if (IOTCON_REQUEST_GET & types) {
+	if (IOTCON_REQUEST_GET == type) {
 		ret = _fan_request_handler_get(fan, request);
 		if (0 != ret)
 			_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
@@ -642,7 +644,8 @@ static void _room_request_handler(iotcon_resource_h resource, iotcon_request_h r
 		void *user_data)
 {
 	FN_CALL;
-	int ret, types;
+	int ret;
+	iotcon_request_type_e type;
 	char *host_address;
 	room_resource_s *room = user_data;
 	int iface = IOTCON_INTERFACE_DEFAULT;
@@ -657,14 +660,14 @@ static void _room_request_handler(iotcon_resource_h resource, iotcon_request_h r
 	}
 	INFO("host address : %s", host_address);
 
-	ret = iotcon_request_get_types(request, &types);
+	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_types() Fail(%d)", ret);
 		_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
 		return;
 	}
 
-	if (IOTCON_REQUEST_GET & types) {
+	if (IOTCON_REQUEST_GET == type) {
 		ret = _room_request_handler_get(room, request);
 		if (0 != ret)
 			_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);

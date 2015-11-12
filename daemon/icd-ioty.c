@@ -706,7 +706,7 @@ gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
 }
 
 
-OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type,
+OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_policy,
 		GVariant *query, unsigned int signal_number, const char *bus_name)
 {
 	bool is_secure;
@@ -733,9 +733,9 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type,
 		return NULL;
 	}
 
-	if (IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER == observe_type)
+	if (IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER == observe_policy)
 		method = OC_REST_OBSERVE;
-	else if (IOTCON_OBSERVE_ACCEPT_OUT_OF_ORDER == observe_type)
+	else if (IOTCON_OBSERVE_ACCEPT_OUT_OF_ORDER == observe_policy)
 		method = OC_REST_OBSERVE_ALL;
 	else
 		method = OC_REST_OBSERVE_ALL;

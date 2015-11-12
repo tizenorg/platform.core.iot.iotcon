@@ -55,12 +55,13 @@ API int iotcon_request_get_representation(iotcon_request_h request,
 }
 
 
-API int iotcon_request_get_types(iotcon_request_h request, int *types)
+API int iotcon_request_get_request_type(iotcon_request_h request,
+		iotcon_request_type_e *type)
 {
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*types = request->types;
+	*type = request->type;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -90,13 +91,13 @@ API int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query
 }
 
 
-API int iotcon_request_get_observe_action(iotcon_request_h request,
-		iotcon_observe_action_e *action)
+API int iotcon_request_get_observe_type(iotcon_request_h request,
+		iotcon_observe_type_e *observe_type)
 {
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == action, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == observe_type, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*action = request->observation_info.action;
+	*observe_type = request->observation_info.action;
 
 	return IOTCON_ERROR_NONE;
 }

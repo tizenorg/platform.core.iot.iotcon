@@ -38,6 +38,12 @@ typedef struct {
 	iotcon_remote_resource_h resource;
 } icl_on_response_s;
 
+typedef struct {
+	iotcon_remote_resource_observe_cb cb;
+	void *user_data;
+	iotcon_remote_resource_h resource;
+} icl_on_observe_s;
+
 static GList *icl_crud_cb_list = NULL;
 
 void icl_remote_resource_crud_stop(iotcon_remote_resource_h resource)
@@ -54,38 +60,46 @@ void icl_remote_resource_crud_stop(iotcon_remote_resource_h resource)
 	}
 }
 
+static iotcon_options_h _icl_parse_options_iter(GVariantIter *iter)
+{
+	int ret;
+	iotcon_options_h options = NULL;
+
+	if (NULL == iter)
+		return NULL;
+
+	if (g_variant_iter_n_children(iter)) {
+		unsigned short option_id;
+		char *option_data;
+
+		ret = iotcon_options_create(&options);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_options_create() Fail(%d)", ret);
+			return NULL;
+		}
+		while (g_variant_iter_loop(iter, "(q&s)", &option_id, &option_data))
+			iotcon_options_add(options, option_id, option_data);
+	}
+	return options;
+}
+
 static int _icl_parse_crud_gvariant(iotcon_request_type_e request_type,
 		GVariant *gvar, iotcon_response_h *response)
 {
 	int res;
-	int ret;
-	int seq_number = -1;
 	GVariantIter *options_iter = NULL;
 	GVariant *repr_gvar = NULL;
 	iotcon_response_h resp = NULL;
 	iotcon_options_h options = NULL;
 	iotcon_representation_h repr = NULL;
 
-	if (IOTCON_REQUEST_OBSERVE == request_type)
-		g_variant_get(gvar, "(a(qs)vii)", &options_iter, &repr_gvar, &res, &seq_number);
-	else if (IOTCON_REQUEST_DELETE == request_type)
+	if (IOTCON_REQUEST_DELETE == request_type)
 		g_variant_get(gvar, "(a(qs)i)", &options_iter, &res);
 	else
 		g_variant_get(gvar, "(a(qs)vi)", &options_iter, &repr_gvar, &res);
 
 	if (options_iter) {
-		if (g_variant_iter_n_children(options_iter)) {
-			unsigned short option_id;
-			char *option_data;
-
-			ret = iotcon_options_create(&options);
-			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_options_create() Fail(%d)", ret);
-				return ret;
-			}
-			while (g_variant_iter_loop(options_iter, "(q&s)", &option_id, &option_data))
-				iotcon_options_add(options, option_id, option_data);
-		}
+		options = _icl_parse_options_iter(options_iter);
 		g_variant_iter_free(options_iter);
 	}
 
@@ -113,7 +127,6 @@ static int _icl_parse_crud_gvariant(iotcon_request_type_e request_type,
 	resp->result = res;
 	resp->repr = repr;
 	resp->header_options = options;
-	resp->seq_number = seq_number;
 
 	*response = resp;
 
@@ -372,24 +385,59 @@ static void _icl_on_observe_cb(GDBusConnection *connection,
 		GVariant *parameters,
 		gpointer user_data)
 {
-	int ret;
+	int res;
+	int seq_number = -1;
+	GVariantIter *options_iter = NULL;
+	GVariant *repr_gvar = NULL;
 	iotcon_response_h response = NULL;
-	icl_on_response_s *cb_container = user_data;
+	icl_on_observe_s *cb_container = user_data;
+	iotcon_options_h options = NULL;
+	iotcon_representation_h repr = NULL;
 
 	RET_IF(NULL == cb_container);
 
-	ret = _icl_parse_crud_gvariant(IOTCON_REQUEST_OBSERVE, parameters, &response);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_icl_parse_crud_gvariant() Fail(%d)", ret);
-		if (cb_container->cb) {
-			cb_container->cb(cb_container->resource, ret, IOTCON_REQUEST_OBSERVE, NULL,
-					cb_container->user_data);
-		}
-		return;
+	g_variant_get(parameters, "(a(qs)vii)", &options_iter, &repr_gvar, &res, &seq_number);
+
+	if (options_iter) {
+		options = _icl_parse_options_iter(options_iter);
+		g_variant_iter_free(options_iter);
 	}
 
+	if (repr_gvar) {
+		repr = icl_representation_from_gvariant(repr_gvar);
+		if (NULL == repr) {
+			ERR("icl_representation_from_gvariant() Fail");
+			if (options)
+				iotcon_options_destroy(options);
+
+			if (cb_container->cb)
+				cb_container->cb(cb_container->resource, IOTCON_ERROR_SYSTEM, -1,
+						NULL, cb_container->user_data);
+			return;
+		}
+	}
+
+	res = icl_dbus_convert_daemon_error(res);
+
+	response = calloc(1, sizeof(struct icl_resource_response));
+	if (NULL == response) {
+		ERR("calloc() Fail(%d)", errno);
+		if (repr)
+			iotcon_representation_destroy(repr);
+		if (options)
+			iotcon_options_destroy(options);
+
+		if (cb_container->cb)
+			cb_container->cb(cb_container->resource, IOTCON_ERROR_OUT_OF_MEMORY, -1,
+					NULL, cb_container->user_data);
+		return;
+	}
+	response->result = res;
+	response->repr = repr;
+	response->header_options = options;
+
 	if (cb_container->cb)
-		cb_container->cb(cb_container->resource, IOTCON_ERROR_NONE, IOTCON_REQUEST_OBSERVE,
+		cb_container->cb(cb_container->resource, IOTCON_ERROR_NONE, seq_number,
 				response, cb_container->user_data);
 
 	if (response)
@@ -397,7 +445,7 @@ static void _icl_on_observe_cb(GDBusConnection *connection,
 }
 
 
-static void _icl_observe_conn_cleanup(icl_on_response_s *cb_container)
+static void _icl_observe_conn_cleanup(icl_on_observe_s *cb_container)
 {
 	cb_container->resource->observe_handle = 0;
 	cb_container->resource->observe_sub_id = 0;
@@ -406,7 +454,7 @@ static void _icl_observe_conn_cleanup(icl_on_response_s *cb_container)
 
 
 int icl_remote_resource_observer_start(iotcon_remote_resource_h resource,
-		iotcon_observe_type_e observe_type,
+		iotcon_observe_policy_e observe_policy,
 		iotcon_query_h query,
 		GDBusSignalCallback sig_handler,
 		void *cb_container,
@@ -428,7 +476,7 @@ int icl_remote_resource_observer_start(iotcon_remote_resource_h resource,
 	arg_query = icl_dbus_query_to_gvariant(query);
 
 	ic_dbus_call_observer_start_sync(icl_dbus_get_object(), arg_remote_resource,
-			observe_type, arg_query, signal_number, observe_handle, NULL, &error);
+			observe_policy, arg_query, signal_number, observe_handle, NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_observer_start_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
@@ -456,22 +504,22 @@ int icl_remote_resource_observer_start(iotcon_remote_resource_h resource,
 }
 
 
-API int iotcon_remote_resource_set_notify_cb(iotcon_remote_resource_h resource,
-		iotcon_observe_type_e observe_type,
+API int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resource,
+		iotcon_observe_policy_e observe_policy,
 		iotcon_query_h query,
-		iotcon_remote_resource_response_cb cb,
+		iotcon_remote_resource_observe_cb cb,
 		void *user_data)
 {
 	int ret;
 	unsigned int sub_id;
 	int64_t observe_handle;
-	icl_on_response_s *cb_container;
+	icl_on_observe_s *cb_container;
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(resource->observe_handle || resource->observe_sub_id, IOTCON_ERROR_ALREADY);
 
-	cb_container = calloc(1, sizeof(icl_on_response_s));
+	cb_container = calloc(1, sizeof(icl_on_observe_s));
 	if (NULL == cb_container) {
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
@@ -482,7 +530,7 @@ API int iotcon_remote_resource_set_notify_cb(iotcon_remote_resource_h resource,
 	cb_container->user_data = user_data;
 
 	ret = icl_remote_resource_observer_start(resource,
-			observe_type,
+			observe_policy,
 			query,
 			_icl_on_observe_cb,
 			cb_container,
@@ -532,7 +580,7 @@ int icl_remote_resource_stop_observing(iotcon_remote_resource_h resource,
 }
 
 
-API int iotcon_remote_resource_unset_notify_cb(iotcon_remote_resource_h resource)
+API int iotcon_remote_resource_observe_deregister(iotcon_remote_resource_h resource)
 {
 	int ret;
 

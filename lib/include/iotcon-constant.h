@@ -236,25 +236,25 @@ typedef struct icl_state_s* iotcon_state_h;
 #define IOTCON_FUNC_CONTINUE true
 
 /**
- * @brief Enumeration for action of observation.
+ * @brief Enumeration for type of observation.
  *
  * @since_tizen 3.0
  */
 typedef enum {
 	IOTCON_OBSERVE_REGISTER = 0, /**< Indicates action of registering observation*/
 	IOTCON_OBSERVE_DEREGISTER = 1, /**< Indicates action of unregistering observation */
-	IOTCON_OBSERVE_NO_OPTION = 2 /**< Indicates no option */
-} iotcon_observe_action_e;
+	IOTCON_OBSERVE_TYPE_NONE = 2, /**< Indicates no option */
+} iotcon_observe_type_e;
 
 /**
- * @brief Enumeration for type of observation.
+ * @brief Enumeration for policy of observation.
  *
  * @since_tizen 3.0
  */
 typedef enum {
 	IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER = 0, /**< Indicates observation request for most up-to-date notifications only */
 	IOTCON_OBSERVE_ACCEPT_OUT_OF_ORDER = 1 /**< Indicates observation request for all notifications including stale notifications */
-} iotcon_observe_type_e;
+} iotcon_observe_policy_e;
 
 /**
  * @brief Enumeration for type of interfaces which can be held in a resource.
@@ -303,11 +303,11 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_REQUEST_GET = (1 << 0), /**< Indicates get method of request */
-	IOTCON_REQUEST_PUT = (1 << 1), /**< Indicates put method of request */
-	IOTCON_REQUEST_POST = (1 << 2), /**< Indicates post method of request */
-	IOTCON_REQUEST_DELETE = (1 << 3), /**< Indicates delete method of request */
-	IOTCON_REQUEST_OBSERVE = (1 << 4), /**< Indicates observe method of request */
+	IOTCON_REQUEST_NONE = 0, /**< Indicates none */
+	IOTCON_REQUEST_GET = 1, /**< Indicates get method of request */
+	IOTCON_REQUEST_PUT = 2, /**< Indicates put method of request */
+	IOTCON_REQUEST_POST = 3, /**< Indicates post method of request */
+	IOTCON_REQUEST_DELETE = 4, /**< Indicates delete method of request */
 } iotcon_request_type_e;
 
 /**

@@ -138,7 +138,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 		gpointer user_data)
 {
 	GVariant *repr_gvar;
-	int ret, request_types;
+	int ret, request_type;
 	iotcon_representation_h repr;
 	iotcon_state_h recv_state = NULL;
 	GVariantIter *repr_iter, *state_iter;
@@ -165,7 +165,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 	g_variant_get(parameters, "(siia(qs)a(ss)iiavxx)",
 			NULL,	/* host address */
 			NULL,	/* connectivity type */
-			&request_types,
+			&request_type,
 			NULL,	/* header options */
 			NULL,	/* query */
 			NULL,	/* observe action */
@@ -174,9 +174,8 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 			&oic_request_h,
 			&oic_resource_h);
 
-	switch (request_types) {
+	switch (request_type) {
 	case IOTCON_REQUEST_GET:
-	case (IOTCON_REQUEST_GET | IOTCON_REQUEST_OBSERVE):
 		break;
 	case IOTCON_REQUEST_PUT:
 		if (FALSE == g_variant_iter_loop(repr_iter, "v", &repr_gvar)) {
@@ -242,7 +241,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 		return;
 	}
 
-	if (IOTCON_REQUEST_PUT == request_types) {
+	if (IOTCON_REQUEST_PUT == request_type) {
 		ret = _icl_lite_resource_notify(resource);
 		if (IOTCON_ERROR_NONE != ret)
 			WARN("_icl_lite_resource_notify() Fail(%d)", ret);

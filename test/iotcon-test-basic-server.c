@@ -355,7 +355,7 @@ static int _request_handler_post(door_resource_s *door, iotcon_request_h request
 	}
 
 	new_door_handle = _create_door_resource(DOOR_RESOURCE_URI2, door->type,
-			IOTCON_INTERFACE_DEFAULT, (IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE), NULL);
+			IOTCON_INTERFACE_DEFAULT, (IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE), door);
 	if (NULL == new_door_handle) {
 		ERR("_create_door_resource() Fail");
 		return -1;
@@ -426,45 +426,6 @@ static int _request_handler_delete(iotcon_resource_h resource, iotcon_request_h 
 	return 0;
 }
 
-static int _request_handler_observe(door_resource_s *door, iotcon_request_h request)
-{
-	int ret;
-	int observe_id;
-	iotcon_observe_action_e observe_action;
-
-	ret = iotcon_request_get_observe_action(request, &observe_action);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_request_get_observe_action() Fail(%d)", ret);
-		return -1;
-	}
-
-	if (IOTCON_OBSERVE_REGISTER == observe_action) {
-		ret = iotcon_request_get_observe_id(request, &observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_request_get_observe_id() Fail(%d)", ret);
-			return -1;
-		}
-		ret = iotcon_observers_add(door->observers, observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_observers_add() Fail(%d)", ret);
-			return -1;
-		}
-	} else if (IOTCON_OBSERVE_DEREGISTER == observe_action) {
-		ret = iotcon_request_get_observe_id(request, &observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_request_get_observe_id() Fail(%d)", ret);
-			return -1;
-		}
-		ret = iotcon_observers_remove(door->observers, observe_id);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_observers_remove() Fail(%d)", ret);
-			return -1;
-		}
-	}
-
-	return 0;
-}
-
 static bool _query_cb(const char *key, const char *value, void *user_data)
 {
 	INFO("key : %s, value : %s", key, value);
@@ -475,10 +436,12 @@ static bool _query_cb(const char *key, const char *value, void *user_data)
 static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
 		void *user_data)
 {
-	int ret, types;
-	char *host_address;
-	iotcon_query_h query;
 	door_resource_s *door;
+	iotcon_query_h query;
+	int ret, observe_id;
+	iotcon_request_type_e type;
+	iotcon_observe_type_e observe_type;
+	char *host_address;
 
 	RET_IF(NULL == request);
 
@@ -499,25 +462,26 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 	if (query)
 		iotcon_query_foreach(query, _query_cb, NULL);
 
-	ret = iotcon_request_get_types(request, &types);
+	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_types() Fail(%d)", ret);
 		_send_response(request, NULL, IOTCON_RESPONSE_RESULT_ERROR);
 		return;
 	}
 
+
 	door = user_data;
 
-	if (IOTCON_REQUEST_GET & types)
+	if (IOTCON_REQUEST_GET == type)
 		ret = _request_handler_get(door, request);
 
-	else if (IOTCON_REQUEST_PUT & types)
+	else if (IOTCON_REQUEST_PUT == type)
 		ret = _request_handler_put(door, request);
 
-	else if (IOTCON_REQUEST_POST & types)
+	else if (IOTCON_REQUEST_POST == type)
 		ret = _request_handler_post(door, request);
 
-	else if (IOTCON_REQUEST_DELETE & types)
+	else if (IOTCON_REQUEST_DELETE == type)
 		ret = _request_handler_delete(resource, request);
 
 	if (0 != ret) {
@@ -525,8 +489,36 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		return;
 	}
 
-	if (IOTCON_REQUEST_OBSERVE & types)
-		_request_handler_observe(door,request);
+	ret = iotcon_request_get_observe_type(request, &observe_type);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_request_get_observe_type() Fail(%d)", ret);
+		return;
+	}
+
+	if (IOTCON_OBSERVE_REGISTER == observe_type) {
+		ret = iotcon_request_get_observe_id(request, &observe_id);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_request_get_observe_id() Fail(%d)", ret);
+			return;
+		}
+
+		ret = iotcon_observers_add(door->observers, observe_id);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_observers_add() Fail(%d)", ret);
+			return;
+		}
+	} else if (IOTCON_OBSERVE_DEREGISTER == observe_type) {
+		ret = iotcon_request_get_observe_id(request, &observe_id);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_request_get_observe_id() Fail(%d)", ret);
+			return;
+		}
+		ret = iotcon_observers_remove(door->observers, observe_id);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_observers_remove() Fail(%d)", ret);
+			return;
+		}
+	}
 }
 
 static gboolean _presence_timer(gpointer user_data)

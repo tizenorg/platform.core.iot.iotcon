@@ -203,7 +203,7 @@ API void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource)
 	RET_IF(NULL == resource);
 
 	if (resource->observe_handle)
-		iotcon_remote_resource_unset_notify_cb(resource);
+		iotcon_remote_resource_observe_deregister(resource);
 
 	icl_remote_resource_crud_stop(resource);
 

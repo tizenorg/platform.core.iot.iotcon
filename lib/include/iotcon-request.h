@@ -50,10 +50,10 @@
  *
  * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_representation()
- * @see iotcon_request_get_types()
+ * @see iotcon_request_get_request_type()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_type()
  * @see iotcon_request_get_observe_id()
  */
 int iotcon_request_get_host_address(iotcon_request_h request,
@@ -73,10 +73,10 @@ int iotcon_request_get_host_address(iotcon_request_h request,
  *
  * @see iotcon_request_get_host_address()
  * @see iotcon_request_get_representation()
- * @see iotcon_request_get_types()
+ * @see iotcon_request_get_request_type()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_type()
  * @see iotcon_request_get_observe_id()
  */
 int iotcon_request_get_connectivity_type(iotcon_request_h request,
@@ -98,23 +98,23 @@ int iotcon_request_get_connectivity_type(iotcon_request_h request,
  *
  * @see iotcon_request_get_host_address()
  * @see iotcon_request_get_connectivity_type()
- * @see iotcon_request_get_types()
+ * @see iotcon_request_get_request_type()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_type()
  * @see iotcon_request_get_observe_id()
  */
 int iotcon_request_get_representation(iotcon_request_h request,
 		iotcon_representation_h *repr);
 
 /**
- * @brief Gets types of the request
- * @details @a types could be oring the #iotcon_request_type_e
+ * @brief Gets type of the request
+ * @details @a type could be one of the #iotcon_request_type_e
  *
  * @since_tizen 3.0
  *
  * @param[in] request The handle of the request
- * @param[out] types The types of the request.
+ * @param[out] type The types of the request.
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -125,10 +125,10 @@ int iotcon_request_get_representation(iotcon_request_h request,
  * @see iotcon_request_get_representation()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_type()
  * @see iotcon_request_get_observe_id()
  */
-int iotcon_request_get_types(iotcon_request_h request, int *types);
+int iotcon_request_get_request_type(iotcon_request_h request, iotcon_request_type_e *type);
 
 /**
  * @brief Gets options of the request
@@ -147,9 +147,9 @@ int iotcon_request_get_types(iotcon_request_h request, int *types);
  * @see iotcon_request_get_host_address()
  * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_representation()
- * @see iotcon_request_get_types()
+ * @see iotcon_request_get_request_type()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_type()
  * @see iotcon_request_get_observe_id()
  */
 int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *options);
@@ -171,9 +171,9 @@ int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *optio
  * @see iotcon_request_get_host_address()
  * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_representation()
- * @see iotcon_request_get_types()
+ * @see iotcon_request_get_request_type()
  * @see iotcon_request_get_options()
- * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_type()
  * @see iotcon_request_get_observe_id()
  */
 int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
@@ -182,10 +182,10 @@ int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
  * @brief Gets observation action of the request
  *
  * @since_tizen 3.0
- * @details The @a action could be one of #iotcon_observe_action_e.
+ * @details The @a observe_type could be one of #iotcon_observe_type_e.
  *
  * @param[in] request The handle of the request
- * @param[out] action The observation action of the request
+ * @param[out] observe_type The observation type of the request
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -194,13 +194,13 @@ int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
  * @see iotcon_request_get_host_address()
  * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_representation()
- * @see iotcon_request_get_types()
+ * @see iotcon_request_get_request_type()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
  * @see iotcon_request_get_observe_id()
  */
-int iotcon_request_get_observe_action(iotcon_request_h request,
-		iotcon_observe_action_e *action);
+int iotcon_request_get_observe_type(iotcon_request_h request,
+		iotcon_observe_type_e *observe_type);
 
 /**
  * @brief Gets observation id of the request
@@ -217,10 +217,10 @@ int iotcon_request_get_observe_action(iotcon_request_h request,
  * @see iotcon_request_get_host_address()
  * @see iotcon_request_get_connectivity_type()
  * @see iotcon_request_get_representation()
- * @see iotcon_request_get_types()
+ * @see iotcon_request_get_request_type()
  * @see iotcon_request_get_options()
  * @see iotcon_request_get_query()
- * @see iotcon_request_get_observe_action()
+ * @see iotcon_request_get_observe_type()
  */
 int iotcon_request_get_observe_id(iotcon_request_h request, int *observe_id);
 

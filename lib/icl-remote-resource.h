@@ -72,7 +72,7 @@ struct icl_remote_resource {
 void icl_remote_resource_crud_stop(iotcon_remote_resource_h resource);
 
 int icl_remote_resource_observer_start(iotcon_remote_resource_h resource,
-		iotcon_observe_type_e observe_type,
+		iotcon_observe_policy_e observe_policy,
 		iotcon_query_h query,
 		GDBusSignalCallback sig_handler,
 		void *cb_container,

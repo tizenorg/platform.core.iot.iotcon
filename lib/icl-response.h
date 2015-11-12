@@ -28,7 +28,6 @@ typedef enum {
 
 
 struct icl_resource_response {
-	int seq_number;
 	iotcon_options_h header_options;
 	iotcon_interface_e iface;
 	int result;

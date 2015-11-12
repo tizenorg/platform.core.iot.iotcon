@@ -29,8 +29,8 @@ static GList *device_id_list;
 static void _on_response(iotcon_remote_resource_h resource, iotcon_error_e err,
 		iotcon_request_type_e request_type, iotcon_response_h response, void *user_data);
 
-static void _on_response_notify(iotcon_remote_resource_h resource,
-		iotcon_response_h response, void *user_data)
+static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
+		int sequece_number, iotcon_response_h response, void *user_data)
 {
 	int ret;
 	bool opened;
@@ -81,7 +81,7 @@ static void _on_response_notify(iotcon_remote_resource_h resource,
 	}
 
 	if (5 == i++) {
-		iotcon_remote_resource_unset_notify_cb(resource);
+		iotcon_remote_resource_observe_deregister(resource);
 		iotcon_remote_resource_destroy(resource);
 	}
 }
@@ -424,9 +424,6 @@ static void _on_response(iotcon_remote_resource_h resource, iotcon_error_e err,
 	case IOTCON_REQUEST_DELETE:
 		_on_response_delete(resource, response, user_data);
 		break;
-	case IOTCON_REQUEST_OBSERVE:
-		_on_response_notify(resource, response, user_data);
-		break;
 	default:
 		ERR("Invalid request type (%d)", request_type);
 		return;
@@ -569,11 +566,11 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 			return;
 		}
 
-		/* Set NOTIFY callback */
-		ret = iotcon_remote_resource_set_notify_cb(resource_clone,
-				IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER, NULL, _on_response, NULL);
+		ret = iotcon_remote_resource_observe_register(resource_clone, IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER, NULL,
+				_on_observe, NULL);
+
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_remote_resource_set_notify_cb() Fail(%d)", ret);
+			ERR("iotcon_remote_resource_observe_register() Fail(%d)", ret);
 			device_id_list = g_list_remove(device_id_list, door_resource_device_id);
 			free(door_resource_device_id);
 			return;

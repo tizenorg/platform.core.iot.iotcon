@@ -21,14 +21,14 @@
 #include "iotcon-constant.h"
 
 struct icl_observe_info {
-	iotcon_observe_action_e action;
+	iotcon_observe_type_e action;
 	int observe_id;
 };
 
 struct icl_resource_request {
 	char *host_address;
 	iotcon_connectivity_type_e connectivity_type;
-	int types;
+	iotcon_request_type_e type;
 	iotcon_options_h header_options;
 	iotcon_query_h query;
 	struct icl_observe_info observation_info;

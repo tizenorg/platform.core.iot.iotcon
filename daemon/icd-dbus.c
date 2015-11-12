@@ -517,7 +517,7 @@ static gboolean _dbus_handle_find_resource(icDbus *object,
 static gboolean _dbus_handle_observer_start(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		GVariant *resource,
-		gint observe_type,
+		gint observe_policy,
 		GVariant *query,
 		guint signal_number)
 {
@@ -525,7 +525,7 @@ static gboolean _dbus_handle_observer_start(icDbus *object,
 	const gchar *sender;
 
 	sender = g_dbus_method_invocation_get_sender(invocation);
-	observe_h = icd_ioty_observer_start(resource, observe_type, query,
+	observe_h = icd_ioty_observer_start(resource, observe_policy, query,
 			signal_number, sender);
 	if (NULL == observe_h)
 		ERR("icd_ioty_observer_start() Fail");
