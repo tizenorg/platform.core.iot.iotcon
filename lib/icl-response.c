@@ -175,7 +175,8 @@ static int _icl_response_check_representation_visibility(iotcon_response_h resp)
 	int ret;
 
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == resp->repr, IOTCON_ERROR_INVALID_PARAMETER);
+	if (NULL == resp->repr)
+		return IOTCON_ERROR_NONE;
 
 	iotcon_representation_h first = resp->repr;
 
@@ -217,7 +218,6 @@ API int iotcon_response_send(iotcon_response_h resp)
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == resp->repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = _icl_response_check_representation_visibility(resp);
 	if (IOTCON_ERROR_NONE != ret) {

@@ -158,6 +158,21 @@ static GVariant* _icl_state_value_to_gvariant(GHashTable *hash)
 }
 
 
+static GVariant* _icl_representation_empty_gvariant(void)
+{
+	GVariant *value;
+	GVariantBuilder types, repr, children;
+
+	g_variant_builder_init(&types, G_VARIANT_TYPE("as"));
+	g_variant_builder_init(&repr, G_VARIANT_TYPE("a{sv}"));
+	g_variant_builder_init(&children, G_VARIANT_TYPE("av"));
+
+	value = g_variant_new("(siasa{sv}av)", IC_STR_NULL, 0, &types, &repr, &children);
+
+	return value;
+}
+
+
 GVariant* icl_representation_to_gvariant(iotcon_representation_h repr)
 {
 	GList *node;
@@ -168,7 +183,8 @@ GVariant* icl_representation_to_gvariant(iotcon_representation_h repr)
 	GVariantBuilder *repr_gvar = NULL;
 	GVariantBuilder children, resource_types;
 
-	RETV_IF(NULL == repr, NULL);
+	if (NULL == repr)
+		return _icl_representation_empty_gvariant();
 
 	/* uri path */
 	uri_path = ic_utils_dbus_encode_str(repr->uri_path);
