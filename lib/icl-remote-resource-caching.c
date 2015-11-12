@@ -275,7 +275,7 @@ static int _caching_observer_start(iotcon_remote_resource_h resource)
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = icl_remote_resource_observer_start(resource, IOTCON_OBSERVE, NULL,
+	ret = icl_remote_resource_observer_start(resource, IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER, NULL,
 			_caching_observe_cb, resource, _caching_observe_cleanup, &sub_id, &handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icl_remote_resource_observer_start() Fail(%d)", ret);

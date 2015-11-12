@@ -570,7 +570,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		}
 
 		/* Set NOTIFY callback */
-		ret = iotcon_remote_resource_set_notify_cb(resource_clone, IOTCON_OBSERVE, NULL,
+		ret = iotcon_remote_resource_set_notify_cb(resource_clone, IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER, NULL,
 				_on_response, NULL);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_remote_resource_set_notify_cb() Fail(%d)", ret);

@@ -334,7 +334,7 @@ static void _on_resopnse_observe(iotcon_remote_resource_h resource, iotcon_error
 ...
 {
 	int ret;
-	ret = iotcon_remote_resource_set_notify_cb(door_resource, IOTCON_OBSERVE_ALL, NULL,
+	ret = iotcon_remote_resource_set_notify_cb(door_resource, IOTCON_OBSERVE_ACCEPT_OUT_OF_ORDER, NULL,
 			_on_resopnse_observe, NULL);
 	if (IOTCON_ERROR_NONE != ret)
 		return;

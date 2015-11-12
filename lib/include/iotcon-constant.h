@@ -252,8 +252,8 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_OBSERVE = 0, /**< Indicates observation request for most up-to-date notifications only */
-	IOTCON_OBSERVE_ALL = 1 /**< Indicates observation request for all notifications including stale notifications */
+	IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER = 0, /**< Indicates observation request for most up-to-date notifications only */
+	IOTCON_OBSERVE_ACCEPT_OUT_OF_ORDER = 1 /**< Indicates observation request for all notifications including stale notifications */
 } iotcon_observe_type_e;
 
 /**

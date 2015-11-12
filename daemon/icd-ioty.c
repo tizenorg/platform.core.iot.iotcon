@@ -733,9 +733,9 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type,
 		return NULL;
 	}
 
-	if (IOTCON_OBSERVE == observe_type)
+	if (IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER == observe_type)
 		method = OC_REST_OBSERVE;
-	else if (IOTCON_OBSERVE_ALL == observe_type)
+	else if (IOTCON_OBSERVE_ACCEPT_OUT_OF_ORDER == observe_type)
 		method = OC_REST_OBSERVE_ALL;
 	else
 		method = OC_REST_OBSERVE_ALL;
