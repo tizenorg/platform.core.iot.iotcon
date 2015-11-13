@@ -8,8 +8,7 @@ Source0:    %{name}-%{version}.tar.gz
 Source1:    %{name}.service
 Source1001: %{name}.manifest
 Source1002: %{name}-old.manifest
-Source1003: lib%{name}-old.manifest
-Source1004: %{name}-test-old.manifest
+Source1003: %{name}-test-old.manifest
 Source2001: %{name}.conf.in
 BuildRequires:  cmake
 BuildRequires:  boost-devel
@@ -26,22 +25,13 @@ BuildRequires:  python-xml
 %define _unitdir /usr/lib/systemd/system
 
 %description
-Tizen IoT Connectivity based on Iotivity
-
-
-%package lib
-Summary:    Tizen IoT Connectivity Library
-Group:      Network & Connectivity/Libraries
-Requires:   %{name} = %{version}
-
-%description lib
-Tizen IoT Connectivity Library(Client) for applications.
+Tizen IoT Connectivity Service & Library(Client) based on Iotivity
 
 
 %package devel
 Summary:    TizenIoT Connectivity(devel)
 Group:      Network & Connectivity/Development
-Requires:   %{name}-lib = %{version}
+Requires:   %{name} = %{version}
 
 %description devel
 IoT Connectivity Manager development Kit
@@ -50,7 +40,7 @@ IoT Connectivity Manager development Kit
 %package test
 Summary:    Tizen IoT Connectivity(test)
 Group:      Network & Connectivity/Testing
-Requires:   %{name}-lib = %{version}
+Requires:   %{name} = %{version}
 
 %description test
 Tizen IoT Connectivity Test Programs
@@ -61,11 +51,9 @@ Tizen IoT Connectivity Test Programs
 chmod g-w %_sourcedir/*
 %if 0%{?tizen_version_major} < 3
 cp %{SOURCE1002} ./%{name}.manifest
-cp %{SOURCE1003} ./lib%{name}.manifest
-cp %{SOURCE1004} ./%{name}-test.manifest
+cp %{SOURCE1003} ./%{name}-test.manifest
 %else
 cp %{SOURCE1001} ./%{name}.manifest
-cp %{SOURCE1001} ./lib%{name}.manifest
 cp %{SOURCE1001} ./%{name}-test.manifest
 cp %{SOURCE2001} .
 %endif
@@ -94,7 +82,6 @@ ln -s ../%{name}.service %{buildroot}%{_unitdir}/multi-user.target.wants/%{name}
 %if 0%{?tizen_version_major} < 3
 mkdir -p %{buildroot}/%{_datadir}/license
 cp LICENSE.APLv2 %{buildroot}/%{_datadir}/license/%{name}
-cp LICENSE.APLv2 %{buildroot}/%{_datadir}/license/%{name}-lib
 %endif
 
 
@@ -103,6 +90,7 @@ systemctl daemon-reload
 if [ $1 == 1 ]; then
     systemctl restart %{name}.service
 fi
+/sbin/ldconfig
 
 %postun
 /sbin/ldconfig
@@ -110,10 +98,7 @@ if [ $1 == 0 ]; then
     systemctl stop %{name}.service
 fi
 systemctl daemon-reload
-
-
-%post lib -p /sbin/ldconfig
-%postun lib -p /sbin/ldconfig
+/sbin/ldconfig
 
 
 %files
@@ -122,20 +107,11 @@ systemctl daemon-reload
 %{_unitdir}/%{name}.service
 %{_unitdir}/multi-user.target.wants/%{name}.service
 %{_bindir}/%{name}-daemon
+%{_libdir}/lib%{name}.so.*
 %if 0%{?tizen_version_major} < 3
 %{_datadir}/license/%{name}
 %else
 %config %{_sysconfdir}/dbus-1/system.d/%{name}.conf
-%license LICENSE.APLv2
-%endif
-
-%files lib
-%manifest lib%{name}.manifest
-%defattr(-,root,root,-)
-%{_libdir}/lib%{name}.so.*
-%if 0%{?tizen_version_major} < 3
-%{_datadir}/license/%{name}-lib
-%else
 %license LICENSE.APLv2
 %endif
 

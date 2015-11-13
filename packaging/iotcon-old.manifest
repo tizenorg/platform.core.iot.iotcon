@@ -19,6 +19,7 @@
 	</define>
 	<assign>
 		<filesystem path="/usr/share/license/iotcon" label="_" />
+		<filesystem path="/usr/lib/libiotcon.so.*" label="_" />
 
 		<dbus name="org.tizen.iotcon.dbus" own="iotcon" bus="system">
 			<node name="/org/tizen/iotcon/dbus">
