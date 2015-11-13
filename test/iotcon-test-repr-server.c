@@ -20,28 +20,202 @@
 #include <iotcon.h>
 #include "test.h"
 
-#define LIGHT_RESOURCE_URI "/light/1"
-#define LIGHT_RESOURCE_TYPE "org.tizen.light"
-
 #define ROOM_RESOURCE_URI "/room/1"
 #define ROOM_RESOURCE_TYPE "org.tizen.room"
+#define LIGHT_RESOURCE_URI "/light/1"
+#define LIGHT_RESOURCE_TYPE "org.tizen.light"
+#define FAN_RESOURCE_URI "/fan/1"
+#define FAN_RESOURCE_TYPE "org.tizen.fan"
 
-#define SWITCH_RESOURCE_URI "/switch/1"
+/* Light Resource */
+typedef struct _light_resource_s {
+	int brightness;
+	char *uri_path;
+	char *type;
+	int ifaces;
+	int properties;
+	iotcon_resource_h handle;
+} light_resource_s;
 
-static int _send_response(iotcon_response_h response, iotcon_representation_h repr,
-		iotcon_interface_e iface)
+/* Fan Resource */
+typedef struct _fan_resource_s {
+	bool state;
+	char *uri_path;
+	char *type;
+	int ifaces;
+	int properties;
+	iotcon_resource_h handle;
+} fan_resource_s;
+
+/* Room Resource */
+typedef struct _room_resource_s {
+	char *name;
+	int today_temp[5];
+	char *uri_path;
+	char *type;
+	int ifaces;
+	int properties;
+	iotcon_resource_h handle;
+	light_resource_s *child_light;
+	fan_resource_s *child_fan;
+} room_resource_s;
+
+static int _set_room_resource(room_resource_s *room)
+{
+	room->name = strdup("Michael's Room");
+	if (NULL == room->name) {
+		ERR("strdup() Fail");
+		return -1;
+	}
+
+	room->today_temp[0] = 13;
+	room->today_temp[1] = 19;
+	room->today_temp[2] = 24;
+	room->today_temp[3] = 21;
+	room->today_temp[4] = 14;
+
+	room->uri_path = strdup(ROOM_RESOURCE_URI);
+	if (NULL == room->uri_path) {
+		ERR("strdup(%s) Fail", ROOM_RESOURCE_URI);
+		free(room->name);
+		return -1;
+	}
+
+	room->type = strdup(ROOM_RESOURCE_TYPE);
+	if (NULL == room->type) {
+		ERR("strdup(%s) Fail", ROOM_RESOURCE_TYPE);
+		free(room->uri_path);
+		free(room->name);
+		return -1;
+	}
+
+	room->ifaces = IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_BATCH;
+	room->properties = IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE;
+
+	return 0;
+}
+
+static void _free_room_resource(room_resource_s *room)
+{
+	free(room->type);
+	free(room->uri_path);
+	free(room->name);
+}
+
+static int _set_light_resource(light_resource_s *light)
+{
+	light->brightness = 50;
+
+	light->uri_path = strdup(LIGHT_RESOURCE_URI);
+	if (NULL == light->uri_path) {
+		ERR("strdup(%s) Fail", LIGHT_RESOURCE_URI);
+		return -1;
+	}
+
+	light->type = strdup(LIGHT_RESOURCE_TYPE);
+	if (NULL == light->type) {
+		ERR("strdup(%s) Fail", LIGHT_RESOURCE_TYPE);
+		free(light->uri_path);
+		return -1;
+	}
+
+	light->ifaces = IOTCON_INTERFACE_DEFAULT;
+	light->properties = IOTCON_HIDDEN;
+
+	return 0;
+}
+
+static void _free_light_resource(light_resource_s *light)
+{
+	free(light->type);
+	free(light->uri_path);
+}
+
+static int _set_fan_resource(fan_resource_s *fan)
+{
+	fan->state = false;
+
+	fan->uri_path = strdup(FAN_RESOURCE_URI);
+	if (NULL == fan->uri_path) {
+		ERR("strdup(%s) Fail", FAN_RESOURCE_URI);
+		return -1;
+	}
+
+	fan->type = strdup(FAN_RESOURCE_TYPE);
+	if (NULL == fan->type) {
+		ERR("strdup(%s) Fail", FAN_RESOURCE_TYPE);
+		free(fan->uri_path);
+		return -1;
+	}
+
+	fan->ifaces = IOTCON_INTERFACE_DEFAULT;
+	fan->properties = IOTCON_HIDDEN;
+
+	return 0;
+}
+
+static void _free_fan_resource(fan_resource_s *fan)
+{
+	free(fan->type);
+	free(fan->uri_path);
+}
+
+static iotcon_resource_h _create_resource(char *uri_path, char *type, int ifaces,
+		int properties, iotcon_request_handler_cb cb, void *user_data)
 {
 	int ret;
+	iotcon_resource_h handle;
+	iotcon_resource_types_h resource_types;
+
+	ret = iotcon_resource_types_create(&resource_types);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_types_create() Fail(%d)", ret);
+		return NULL;
+	}
+
+	ret = iotcon_resource_types_add(resource_types, type);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_types_add() Fail(%d)", ret);
+		iotcon_resource_types_destroy(resource_types);
+		return NULL;
+	}
+
+	ret = iotcon_resource_create(uri_path, resource_types, ifaces, properties, cb,
+			user_data, &handle);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_create() Fail(%d)", ret);
+		iotcon_resource_types_destroy(resource_types);
+		return NULL;
+	}
+
+	iotcon_resource_types_destroy(resource_types);
+
+	return handle;
+}
+
+static int _send_response(iotcon_request_h request, iotcon_representation_h repr,
+		iotcon_interface_e iface, iotcon_response_result_e result)
+{
+	int ret;
+	iotcon_response_h response;
+
+	ret = iotcon_response_create(request, &response);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_response_create() Fail(%d)", ret);
+		return -1;
+	}
 
 	ret = iotcon_response_set_representation(response, iface, repr);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_response_set_representation() Fail(%d)", ret);
+		iotcon_response_destroy(response);
 		return -1;
 	}
 
-	ret = iotcon_response_set_result(response, IOTCON_RESPONSE_RESULT_OK);
+	ret = iotcon_response_set_result(response, result);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_response_set_result() Fail(%d)", ret);
+		iotcon_response_destroy(response);
 		return -1;
 	}
 
@@ -49,401 +223,419 @@ static int _send_response(iotcon_response_h response, iotcon_representation_h re
 	ret = iotcon_response_send(response);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_response_send() Fail(%d)", ret);
+		iotcon_response_destroy(response);
 		return -1;
 	}
+
+	iotcon_response_destroy(response);
 
 	return 0;
 }
 
-static void _light_request_handler_get(iotcon_response_h response)
+static iotcon_representation_h _get_light_representation(light_resource_s *light)
 {
 	int ret;
-	iotcon_representation_h resp_repr;
-
-	INFO("GET request - Light");
-
-	/* create a light Representation */
-	ret = iotcon_representation_create(&resp_repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_create() Fail(%d)", ret);
-		return;
-	}
-
-	ret = _send_response(response, resp_repr, IOTCON_INTERFACE_DEFAULT);
-	if (0 != ret)
-		ERR("_send_response() Fail(%d)", ret);
-
-	iotcon_representation_destroy(resp_repr);
-}
-
-static void _room_request_handler_get(iotcon_request_h request,
-		iotcon_response_h response)
-{
-	int ret;
-	iotcon_representation_h room_repr, light_repr, switch_repr;
-	iotcon_state_h room_state, light_state, switch_state;
-	iotcon_list_h temperature_list;
-
-	iotcon_query_h query;
-	char *query_str = NULL;
-
-	iotcon_interface_e iface;
-
-	INFO("GET request - Room");
-
-	/* create a room Representation */
-	ret = iotcon_representation_create(&room_repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_create() Fail(%d)", ret);
-		return;
-	}
-
-	/* create a room state */
-	ret = iotcon_state_create(&room_state);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_create() Fail(%d)", ret);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	ret = iotcon_representation_set_uri_path(room_repr, ROOM_RESOURCE_URI);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_set_uri_path() Fail(%d)", ret);
-		iotcon_state_destroy(room_state);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	ret = iotcon_state_set_str(room_state, "name", "Michael's Room");
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_str() Fail(%d)", ret);
-		iotcon_state_destroy(room_state);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	/* set null */
-	ret = iotcon_state_set_null(room_state, "null value");
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_null() Fail(%d)", ret);
-		iotcon_state_destroy(room_state);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	ret = iotcon_list_create(IOTCON_TYPE_INT, &temperature_list);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_list_create() Fail(%d)", ret);
-		iotcon_state_destroy(room_state);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	ret = iotcon_list_add_int(temperature_list, 22, -1);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_list_add_int() Fail(%d)", ret);
-		iotcon_state_destroy(room_state);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	ret = iotcon_list_add_int(temperature_list, 23, -1);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_list_add_int() Fail(%d)", ret);
-		iotcon_state_destroy(room_state);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	ret = iotcon_list_add_int(temperature_list, 24, -1);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_list_add_int() Fail(%d)", ret);
-		iotcon_state_destroy(room_state);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	ret = iotcon_list_add_int(temperature_list, 25, -1);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_list_add_int() Fail(%d)", ret);
-		iotcon_state_destroy(room_state);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	ret = iotcon_list_add_int(temperature_list, 26, -1);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_list_add_int() Fail(%d)", ret);
-		iotcon_state_destroy(room_state);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	ret = iotcon_state_set_list(room_state, "today_temp", temperature_list);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_list() Fail(%d)", ret);
-		iotcon_state_destroy(room_state);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	iotcon_list_destroy(temperature_list);
-
-	/* Set a room state into room Representation */
-	ret = iotcon_representation_set_state(room_repr, room_state);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_set_state() Fail(%d)", ret);
-		iotcon_state_destroy(room_state);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	iotcon_state_destroy(room_state);
+	iotcon_state_h state;
+	iotcon_representation_h repr;
 
 	/* create a light Representation */
-	ret = iotcon_representation_create(&light_repr);
+	ret = iotcon_representation_create(&repr);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_create() Fail(%d)", ret);
-		iotcon_representation_destroy(room_repr);
-		return;
+		return NULL;
 	}
 
-	ret = iotcon_representation_set_uri_path(light_repr, LIGHT_RESOURCE_URI);
+	ret = iotcon_representation_set_uri_path(repr, light->uri_path);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_set_uri_path() Fail(%d)", ret);
-		iotcon_representation_destroy(light_repr);
-		iotcon_representation_destroy(room_repr);
-		return;
+		iotcon_representation_destroy(repr);
+		return NULL;
 	}
 
 	/* create a light state */
-	ret = iotcon_state_create(&light_state);
+	ret = iotcon_state_create(&state);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_state_create() Fail(%d)", ret);
-		iotcon_state_destroy(light_state);
-		iotcon_representation_destroy(light_repr);
-		iotcon_representation_destroy(room_repr);
-		return;
+		iotcon_representation_destroy(repr);
+		return NULL;
 	}
 
-	ret = iotcon_state_set_int(light_state, "brightness", 50);
+	ret = iotcon_state_set_int(state, "brightness", light->brightness);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_state_set_int() Fail(%d)", ret);
-		iotcon_state_destroy(light_state);
-		iotcon_representation_destroy(light_repr);
-		iotcon_representation_destroy(room_repr);
-		return;
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
 	}
 
 	/* Set a light state into light Representation */
-	ret = iotcon_representation_set_state(light_repr, light_state);
+	ret = iotcon_representation_set_state(repr, state);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_set_state() Fail(%d)", ret);
-		iotcon_state_destroy(light_state);
-		iotcon_representation_destroy(light_repr);
-		iotcon_representation_destroy(room_repr);
-		return;
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
 	}
 
-	iotcon_state_destroy(light_state);
+	iotcon_state_destroy(state);
 
-	ret = iotcon_representation_append_child(room_repr, light_repr);
+	return repr;
+}
+
+static int _light_request_handler_get(light_resource_s *light, iotcon_request_h request)
+{
+	int ret;
+	iotcon_representation_h repr;
+
+	INFO("GET request - Light");
+
+	repr = _get_light_representation(light);
+	if (NULL == repr) {
+		ERR("_get_light_representation() Fail");
+		return -1;
+	}
+
+	ret = _send_response(request, repr, IOTCON_INTERFACE_DEFAULT,
+			IOTCON_RESPONSE_RESULT_OK);
+	if (0 != ret) {
+		ERR("_send_response() Fail(%d)", ret);
+		iotcon_representation_destroy(repr);
+		return -1;
+	}
+
+	iotcon_representation_destroy(repr);
+
+	return 0;
+}
+
+
+static iotcon_representation_h _get_fan_representation(fan_resource_s *fan)
+{
+	int ret;
+	iotcon_state_h state;
+	iotcon_representation_h repr;
+
+	/* create a fan Representation */
+	ret = iotcon_representation_create(&repr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_create() Fail(%d)", ret);
+		return NULL;
+	}
+
+	ret = iotcon_representation_set_uri_path(repr, fan->uri_path);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_set_uri_path() Fail(%d)", ret);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	/* create a fan state */
+	ret = iotcon_state_create(&state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_state_create() Fail(%d)", ret);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	ret = iotcon_state_set_bool(state, "state", fan->state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_state_set_bool() Fail(%d)", ret);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	/* Set a light state into light Representation */
+	ret = iotcon_representation_set_state(repr, state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_set_state() Fail(%d)", ret);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	iotcon_state_destroy(state);
+
+	return repr;
+}
+
+static int _fan_request_handler_get(fan_resource_s *fan, iotcon_request_h request)
+{
+	int ret;
+	iotcon_representation_h repr;
+
+	INFO("GET request - Fan");
+
+	repr = _get_fan_representation(fan);
+	if (NULL == repr) {
+		ERR("_get_fan_representation() Fail");
+		return -1;
+	}
+
+	ret = _send_response(request, repr, IOTCON_INTERFACE_DEFAULT,
+			IOTCON_RESPONSE_RESULT_OK);
+	if (0 != ret) {
+		ERR("_send_response() Fail(%d)", ret);
+		iotcon_representation_destroy(repr);
+		return -1;
+	}
+
+	iotcon_representation_destroy(repr);
+
+	return 0;
+}
+
+static iotcon_representation_h _get_room_representation(room_resource_s *room)
+{
+	int ret;
+	iotcon_state_h state;
+	iotcon_list_h today_temp;
+	iotcon_representation_h repr, light_repr, fan_repr;
+
+	/* create a room Representation */
+	ret = iotcon_representation_create(&repr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_create() Fail(%d)", ret);
+		return NULL;
+	}
+
+	ret = iotcon_representation_set_uri_path(repr, room->uri_path);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_set_uri_path() Fail(%d)", ret);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	/* create a room state */
+	ret = iotcon_state_create(&state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_state_create() Fail(%d)", ret);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	ret = iotcon_state_set_str(state, "name", room->name);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_state_set_str() Fail(%d)", ret);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	/* set null */
+	ret = iotcon_state_set_null(state, "null value");
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_state_set_null() Fail(%d)", ret);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	ret = iotcon_list_create(IOTCON_TYPE_INT, &today_temp);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_list_create() Fail(%d)", ret);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	ret = iotcon_list_add_int(today_temp, room->today_temp[0], -1);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_list_add_int() Fail(%d)", ret);
+		iotcon_list_destroy(today_temp);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	ret = iotcon_list_add_int(today_temp, room->today_temp[1], -1);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_list_add_int() Fail(%d)", ret);
+		iotcon_list_destroy(today_temp);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	ret = iotcon_list_add_int(today_temp, room->today_temp[2], -1);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_list_add_int() Fail(%d)", ret);
+		iotcon_list_destroy(today_temp);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	ret = iotcon_list_add_int(today_temp, room->today_temp[3], -1);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_list_add_int() Fail(%d)", ret);
+		iotcon_list_destroy(today_temp);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	ret = iotcon_list_add_int(today_temp, room->today_temp[4], -1);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_list_add_int() Fail(%d)", ret);
+		iotcon_list_destroy(today_temp);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	ret = iotcon_state_set_list(state, "today_temp", today_temp);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_state_set_list() Fail(%d)", ret);
+		iotcon_list_destroy(today_temp);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	iotcon_list_destroy(today_temp);
+
+	/* Set a room state into room Representation */
+	ret = iotcon_representation_set_state(repr, state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_representation_set_state() Fail(%d)", ret);
+		iotcon_state_destroy(state);
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	iotcon_state_destroy(state);
+
+	light_repr = _get_light_representation(room->child_light);
+	if (NULL == light_repr) {
+		ERR("_get_light_representation() fail");
+		iotcon_representation_destroy(repr);
+		return NULL;
+	}
+
+	ret = iotcon_representation_append_child(repr, light_repr);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_append_child() Fail(%d)", ret);
 		iotcon_representation_destroy(light_repr);
-		iotcon_representation_destroy(room_repr);
-		return;
+		iotcon_representation_destroy(repr);
+		return NULL;
 	}
 
 	iotcon_representation_destroy(light_repr);
 
-	/* create a switch Representation */
-	ret = iotcon_representation_create(&switch_repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_create() Fail(%d)", ret);
-		iotcon_representation_destroy(room_repr);
-		return;
+	fan_repr = _get_fan_representation(room->child_fan);
+	if (NULL == fan_repr) {
+		ERR("_get_fan_representation() fail");
+		iotcon_representation_destroy(repr);
+		return NULL;
 	}
 
-	ret = iotcon_representation_set_uri_path(switch_repr, SWITCH_RESOURCE_URI);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_set_uri_path() Fail(%d)", ret);
-		iotcon_representation_destroy(switch_repr);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	/* create a switch state */
-	ret = iotcon_state_create(&switch_state);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_create() Fail(%d)", ret);
-		iotcon_representation_destroy(switch_repr);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	ret = iotcon_state_set_bool(switch_state, "switch", false);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_bool() Fail(%d)", ret);
-		iotcon_state_destroy(switch_state);
-		iotcon_representation_destroy(switch_repr);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	/* Set a light state into light Representation */
-	ret = iotcon_representation_set_state(switch_repr, switch_state);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_set_state() Fail(%d)", ret);
-		iotcon_state_destroy(switch_state);
-		iotcon_representation_destroy(switch_repr);
-		iotcon_representation_destroy(room_repr);
-		return;
-	}
-
-	iotcon_state_destroy(switch_state);
-
-	ret = iotcon_representation_append_child(room_repr, switch_repr);
+	ret = iotcon_representation_append_child(repr, fan_repr);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_append_child() Fail(%d)", ret);
-		iotcon_representation_destroy(switch_repr);
-		iotcon_representation_destroy(room_repr);
-		return;
+		iotcon_representation_destroy(fan_repr);
+		iotcon_representation_destroy(repr);
+		return NULL;
 	}
 
-	iotcon_representation_destroy(switch_repr);
+	iotcon_representation_destroy(fan_repr);
+
+	return repr;
+}
+
+static int _room_request_handler_get(room_resource_s *room, iotcon_request_h request)
+{
+	int ret;
+	iotcon_query_h query;
+	iotcon_representation_h repr;
+	iotcon_interface_e iface = IOTCON_INTERFACE_DEFAULT;
+
+	INFO("GET request - Room");
+
+	repr = _get_room_representation(room);
+	if (NULL == repr) {
+		ERR("_get_room_representation() Fail");
+		return -1;
+	}
 
 	ret = iotcon_request_get_query(request, &query);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_query() Fail(%d)", ret);
-		iotcon_representation_destroy(room_repr);
-		return;
+		iotcon_representation_destroy(repr);
+		return -1;
 	}
 
 	if (query) {
-		ret = iotcon_query_lookup(query, "if", &query_str);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_query_lookup() Fail(%d)", ret);
-			iotcon_representation_destroy(room_repr);
-			return;
+		ret = iotcon_query_get_interface(query, &iface);
+		if (IOTCON_ERROR_NO_DATA == ret) {
+			iface = IOTCON_INTERFACE_DEFAULT;
+		} else if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_query_get_interface() Fail(%d)", ret);
+			iotcon_representation_destroy(repr);
+			return -1;
 		}
 	}
 
-	if (query_str && (TEST_STR_EQUAL == strcmp("oic.if.b", query_str))) {
-		DBG("operation for BATCH interface");
-		iface = IOTCON_INTERFACE_BATCH;
-	} else {
-		DBG("operation for DEFAULT interface");
-		iface = IOTCON_INTERFACE_DEFAULT;
+	ret = _send_response(request, repr, iface, IOTCON_RESPONSE_RESULT_OK);
+	if (0 != ret) {
+		ERR("_send_response() Fail(%d)", ret);
+		iotcon_representation_destroy(repr);
+		return -1;
 	}
 
-	ret = _send_response(response, room_repr, iface);
-	if (0 != ret)
-		ERR("_send_response() Fail(%d)", ret);
+	iotcon_representation_destroy(repr);
 
-	iotcon_representation_destroy(room_repr);
-}
-
-static void _request_handler_put(iotcon_request_h request, iotcon_response_h response)
-{
-	int ret;
-	iotcon_representation_h resp_repr;
-
-	ret = iotcon_representation_create(&resp_repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_create() Fail(%d)", ret);
-		return;
-	}
-
-	INFO("PUT request");
-
-	/* do PUT operation */
-
-	ret = _send_response(response, resp_repr, IOTCON_INTERFACE_DEFAULT);
-	if (0 != ret)
-		ERR("_send_response() Fail(%d)", ret);
-
-	iotcon_representation_destroy(resp_repr);
-}
-
-static void _request_handler_post(iotcon_response_h response)
-{
-	int ret;
-	iotcon_representation_h resp_repr;
-
-	ret = iotcon_representation_create(&resp_repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_create() Fail(%d)", ret);
-		return;
-	}
-
-	INFO("POST request");
-
-	/* do POST operation */
-
-	ret = _send_response(response, resp_repr, IOTCON_INTERFACE_DEFAULT);
-	if (0 != ret)
-		ERR("_send_response() Fail(%d)", ret);
-
-	iotcon_representation_destroy(resp_repr);
-}
-
-static void _request_handler_delete(iotcon_response_h response)
-{
-	int ret;
-	iotcon_representation_h resp_repr;
-
-	ret = iotcon_representation_create(&resp_repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_create() Fail(%d)", ret);
-		return;
-	}
-
-	INFO("DELETE request");
-
-	/* do DELETE operation */
-
-	ret = _send_response(response, resp_repr, IOTCON_INTERFACE_DEFAULT);
-	if (0 != ret)
-		ERR("_send_response() Fail(%d)", ret);
-
-	iotcon_representation_destroy(resp_repr);
+	return 0;
 }
 
 static void _light_request_handler(iotcon_resource_h resource, iotcon_request_h request,
 		void *user_data)
 {
-	int ret;
-	int types;
-	iotcon_response_h response;
+	int ret, types;
+	light_resource_s *light = user_data;
+	int iface = IOTCON_INTERFACE_DEFAULT;
 
 	RET_IF(NULL == request);
 
 	ret = iotcon_request_get_types(request, &types);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_types() Fail(%d)", ret);
+		_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
 		return;
 	}
 
-	ret = iotcon_response_create(request, &response);
+	if (IOTCON_REQUEST_GET & types) {
+		ret = _light_request_handler_get(light, request);
+		if (0 != ret)
+			_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
+	} else {
+		_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_FORBIDDEN);
+	}
+}
+
+static void _fan_request_handler(iotcon_resource_h resource, iotcon_request_h request,
+		void *user_data)
+{
+	int ret, types;
+	fan_resource_s *fan = user_data;
+	int iface = IOTCON_INTERFACE_DEFAULT;
+
+	RET_IF(NULL == request);
+
+	ret = iotcon_request_get_types(request, &types);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_response_create() Fail");
+		ERR("iotcon_request_get_types() Fail(%d)", ret);
+		_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
 		return;
 	}
 
-	if (IOTCON_REQUEST_GET & types)
-		_light_request_handler_get(response);
-
-	else if (IOTCON_REQUEST_PUT & types)
-		_request_handler_put(request, response);
-
-	else if (IOTCON_REQUEST_POST & types)
-		_request_handler_post(response);
-
-	else if (IOTCON_REQUEST_DELETE & types)
-		_request_handler_delete(response);
-
-	iotcon_response_destroy(response);
+	if (IOTCON_REQUEST_GET & types) {
+		ret = _fan_request_handler_get(fan, request);
+		if (0 != ret)
+			_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
+	} else {
+		_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_FORBIDDEN);
+	}
 }
 
 static void _room_request_handler(iotcon_resource_h resource, iotcon_request_h request,
@@ -451,35 +643,34 @@ static void _room_request_handler(iotcon_resource_h resource, iotcon_request_h r
 {
 	FN_CALL;
 	int ret, types;
-	iotcon_response_h response;
+	char *host_address;
+	room_resource_s *room = user_data;
+	int iface = IOTCON_INTERFACE_DEFAULT;
 
 	RET_IF(NULL == request);
+
+	ret = iotcon_request_get_host_address(request, &host_address);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_request_get_host_address() Fail(%d)", ret);
+		_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
+		return;
+	}
+	INFO("host address : %s", host_address);
 
 	ret = iotcon_request_get_types(request, &types);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_types() Fail(%d)", ret);
+		_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
 		return;
 	}
 
-	ret = iotcon_response_create(request, &response);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_response_create() Fail(%d)", ret);
-		return;
+	if (IOTCON_REQUEST_GET & types) {
+		ret = _room_request_handler_get(room, request);
+		if (0 != ret)
+			_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_ERROR);
+	} else {
+		_send_response(request, NULL, iface, IOTCON_RESPONSE_RESULT_FORBIDDEN);
 	}
-
-	if (IOTCON_REQUEST_GET & types)
-		_room_request_handler_get(request, response);
-
-	else if (IOTCON_REQUEST_PUT & types)
-		_request_handler_put(request, response);
-
-	else if (IOTCON_REQUEST_POST & types)
-		_request_handler_post(response);
-
-	else if (IOTCON_REQUEST_DELETE & types)
-		_request_handler_delete(response);
-
-	iotcon_response_destroy(response);
 }
 
 int main(int argc, char **argv)
@@ -487,8 +678,9 @@ int main(int argc, char **argv)
 	FN_CALL;
 	int ret;
 	GMainLoop *loop;
-	iotcon_resource_h room_handle, light_handle;
-	iotcon_resource_types_h room_rtypes, light_rtypes;
+	room_resource_s room = {0};
+	light_resource_s light = {0};
+	fan_resource_s fan = {0};
 
 	loop = g_main_loop_new(NULL, FALSE);
 
@@ -499,68 +691,94 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	/* register room resource */
-	ret = iotcon_resource_types_create(&room_rtypes);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_types_create() Fail(%d)", ret);
-		iotcon_disconnect();
-		return -1;
-	}
-	ret = iotcon_resource_types_add(room_rtypes, ROOM_RESOURCE_TYPE);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_types_add(%s) Fail(%d)", ROOM_RESOURCE_TYPE, ret);
-		iotcon_resource_types_destroy(room_rtypes);
+	/* set resource */
+	ret = _set_room_resource(&room);
+	if (0 != ret) {
+		ERR("_set_room_resource() Fail(%d)", ret);
 		iotcon_disconnect();
 		return -1;
 	}
 
-	ret = iotcon_resource_create(ROOM_RESOURCE_URI, room_rtypes,
-			(IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_BATCH),
-			(IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE), _room_request_handler,
-			NULL, &room_handle);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_create() Fail(%d)", ret);
-		iotcon_resource_types_destroy(room_rtypes);
+	ret = _set_light_resource(&light);
+	if (0 != ret) {
+		ERR("_set_room_resource() Fail(%d)", ret);
+		_free_room_resource(&room);
 		iotcon_disconnect();
 		return -1;
 	}
-	iotcon_resource_types_destroy(room_rtypes);
+
+	ret = _set_fan_resource(&fan);
+	if (0 != ret) {
+		ERR("_set_room_resource() Fail(%d)", ret);
+		_free_room_resource(&room);
+		_free_light_resource(&light);
+		iotcon_disconnect();
+		return -1;
+	}
+
+	room.child_light = &light;
+	room.child_fan = &fan;
+
+	/* register room resource */
+	room.handle = _create_resource(room.uri_path, room.type, room.ifaces, room.properties,
+			_room_request_handler, &room);
+	if (NULL == room.handle) {
+		ERR("_create_resource() Fail");
+		_free_fan_resource(&fan);
+		_free_light_resource(&light);
+		_free_room_resource(&room);
+		iotcon_disconnect();
+		return -1;
+	}
 
 	/* register light resource */
-	ret = iotcon_resource_types_create(&light_rtypes);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_types_create() Fail(%d)", ret);
-		iotcon_resource_destroy(room_handle);
-		iotcon_disconnect();
-		return -1;
-	}
-	ret = iotcon_resource_types_add(light_rtypes, LIGHT_RESOURCE_TYPE);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_types_add(%s) Fail(%d)", LIGHT_RESOURCE_TYPE, ret);
-		iotcon_resource_types_destroy(light_rtypes);
-		iotcon_resource_destroy(room_handle);
+	light.handle = _create_resource(light.uri_path, light.type, light.ifaces,
+			light.properties, _light_request_handler, &light);
+	if (NULL == light.handle) {
+		ERR("_create_resource() Fail");
+		iotcon_resource_destroy(room.handle);
+		_free_fan_resource(&fan);
+		_free_light_resource(&light);
+		_free_room_resource(&room);
 		iotcon_disconnect();
 		return -1;
 	}
 
-	ret = iotcon_resource_create(LIGHT_RESOURCE_URI, light_rtypes,
-			(IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_BATCH),
-			(IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE), _light_request_handler,
-			NULL, &light_handle);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_create() Fail");
-		iotcon_resource_types_destroy(light_rtypes);
-		iotcon_resource_destroy(room_handle);
-		iotcon_disconnect();
-		return -1;
-	}
-	iotcon_resource_types_destroy(light_rtypes);
-
-	ret = iotcon_resource_bind_child_resource(room_handle, light_handle);
+	ret = iotcon_resource_bind_child_resource(room.handle, light.handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_bind_child_resource() Fail");
-		iotcon_resource_destroy(light_handle);
-		iotcon_resource_destroy(room_handle);
+		iotcon_resource_destroy(light.handle);
+		iotcon_resource_destroy(room.handle);
+		_free_fan_resource(&fan);
+		_free_light_resource(&light);
+		_free_room_resource(&room);
+		iotcon_disconnect();
+		return -1;
+	}
+
+	/* register fan resource */
+	fan.handle = _create_resource(fan.uri_path, fan.type, fan.ifaces, fan.properties,
+			_fan_request_handler, &fan);
+	if (NULL == fan.handle) {
+		ERR("_create_resource() Fail");
+		iotcon_resource_destroy(light.handle);
+		iotcon_resource_destroy(room.handle);
+		_free_fan_resource(&fan);
+		_free_light_resource(&light);
+		_free_room_resource(&room);
+		iotcon_disconnect();
+		return -1;
+	}
+
+	ret = iotcon_resource_bind_child_resource(room.handle, fan.handle);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_bind_child_resource() Fail");
+		iotcon_resource_destroy(fan.handle);
+		iotcon_resource_destroy(light.handle);
+		iotcon_resource_destroy(room.handle);
+		_free_fan_resource(&fan);
+		_free_light_resource(&light);
+		_free_room_resource(&room);
 		iotcon_disconnect();
 		return -1;
 	}
@@ -568,8 +786,12 @@ int main(int argc, char **argv)
 	g_main_loop_run(loop);
 	g_main_loop_unref(loop);
 
-	iotcon_resource_destroy(light_handle);
-	iotcon_resource_destroy(room_handle);
+	iotcon_resource_destroy(fan.handle);
+	iotcon_resource_destroy(light.handle);
+	iotcon_resource_destroy(room.handle);
+	_free_fan_resource(&fan);
+	_free_light_resource(&light);
+	_free_room_resource(&room);
 
 	/* disconnect iotcon */
 	iotcon_disconnect();

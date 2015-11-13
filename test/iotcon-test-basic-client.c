@@ -570,8 +570,8 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		}
 
 		/* Set NOTIFY callback */
-		ret = iotcon_remote_resource_set_notify_cb(resource_clone, IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER, NULL,
-				_on_response, NULL);
+		ret = iotcon_remote_resource_set_notify_cb(resource_clone,
+				IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER, NULL, _on_response, NULL);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_remote_resource_set_notify_cb() Fail(%d)", ret);
 			device_id_list = g_list_remove(device_id_list, door_resource_device_id);

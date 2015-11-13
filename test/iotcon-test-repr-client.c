@@ -25,7 +25,7 @@ static GList *device_id_list;
 #define ROOM_RESOURCE_TYPE "org.tizen.room"
 #define ROOM_RESOURCE_URI_PREFIX "/room"
 #define LIGHT_RESOURCE_URI_PREFIX "/light"
-#define SWITCH_RESOURCE_URI_PREFIX "/switch"
+#define FAN_RESOURCE_URI_PREFIX "/fan"
 
 static bool _get_int_list_cb(int pos, const int value, void *user_data)
 {
@@ -141,20 +141,20 @@ static void _print_repr(iotcon_representation_h recv_repr)
 				}
 				DBG("brightness : %d", int_val);
 			}
-		} else if (TEST_STR_EQUAL == strncmp(SWITCH_RESOURCE_URI_PREFIX, uri_path,
-				strlen(SWITCH_RESOURCE_URI_PREFIX))) {
+		} else if (TEST_STR_EQUAL == strncmp(FAN_RESOURCE_URI_PREFIX, uri_path,
+				strlen(FAN_RESOURCE_URI_PREFIX))) {
 			ret = iotcon_state_get_keys_count(child_state, &key_count);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("iotcon_state_get_keys_count() Fail(%d)", ret);
 				continue;
 			}
 			if (key_count) {
-				ret = iotcon_state_get_bool(child_state, "switch", &bool_val);
+				ret = iotcon_state_get_bool(child_state, "state", &bool_val);
 				if (IOTCON_ERROR_NONE != ret) {
 					ERR("iotcon_state_get_bool() Fail(%d)", ret);
 					continue;
 				}
-				DBG("switch : %d", bool_val);
+				DBG("state : %d", bool_val);
 			}
 		}
 	}
@@ -228,9 +228,9 @@ static void _on_response_1st(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	ret = iotcon_query_add(query_params, "if", "oic.if.b");
+	ret = iotcon_query_set_interface(query_params, IOTCON_INTERFACE_BATCH);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_query_add() Fail(%d)", ret);
+		ERR("iotcon_query_set_interface() Fail(%d)", ret);
 		iotcon_query_destroy(query_params);
 		return;
 	}
