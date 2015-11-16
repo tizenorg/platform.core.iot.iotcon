@@ -1,0 +1,48 @@
+ IoTCon(Tizen IoT Connectivity) Test Program
+
+
+If you install the "iotcon package", you can test operations of iotcon.
+The result of test is printed out through DLOG. If you specify the LOG_TAG value
+to 'ICTEST'(&'IOTCON'), you can see the output of test programs.
+
+There are four pairs of test programs.
+
+
+1. Basic Test
+
+It is for testing CRUDN methods. A client can require CRUDN operations to server's resource
+through iotcon_remote_resource_get/put/post/delete() and iotcon_remote_resource_observe_register().
+
+ $ /usr/bin/iotcon-test-basic-server
+ $ /usr/bin/iotcon-test-basic-client
+
+
+2. Interface Test
+
+You can check the operations of resource that contains child resources. If the client
+require GET operation to server's parent resource, server sends response with representation
+including children's information. The contents of information are decided by the resource
+interface set by server. Client can send desired interface with request to server.
+
+ $ /usr/bin/iotcon-test-iface-server
+ $ /usr/bin/iotcon-test-iface-client
+
+
+3. Get Device/Platform Information Test
+
+Because device information and platform information are set by iotcon, you can check the
+information through iotcon_get_device_info() and iotcon_get_platform_info().
+
+ $ /usr/bin/iotcon-test-device-client
+
+
+4. Resource Encapsulation Test
+
+It is for testing resource encapsulation. Resource Encapsulation consists of lite resource,
+resource monitoring, and resource caching. If the server uses lite resource, there is no
+need to create a request handler. The client can check resource's state
+using iotcon_remote_resource_start_monitoring(). Also, the client can keep the resource's
+representation up to date using iotcon_remote_resource_start_caching().
+
+ $ /usr/bin/iotcon-test-encap-server
+ $ /usr/bin/iotcon-test-encap-client

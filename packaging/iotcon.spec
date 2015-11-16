@@ -127,7 +127,7 @@ systemctl daemon-reload
 %{_bindir}/iotcon-test-basic-client
 %{_bindir}/iotcon-test-basic-server
 %{_bindir}/iotcon-test-device-client
-%{_bindir}/iotcon-test-repr-client
-%{_bindir}/iotcon-test-repr-server
+%{_bindir}/iotcon-test-iface-client
+%{_bindir}/iotcon-test-iface-server
 %{_bindir}/iotcon-test-encap-client
 %{_bindir}/iotcon-test-encap-server
