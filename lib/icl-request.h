@@ -17,8 +17,7 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REQUEST_H__
 
 #include <stdint.h>
-#include "iotcon-struct.h"
-#include "iotcon-constant.h"
+#include "iotcon-types.h"
 
 struct icl_observe_info {
 	iotcon_observe_type_e action;

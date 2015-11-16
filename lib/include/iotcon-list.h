@@ -16,8 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_STRUCT_LIST_H__
 #define __IOT_CONNECTIVITY_MANAGER_STRUCT_LIST_H__
 
-#include <tizen_type.h>
-#include <iotcon-constant.h>
+#include <iotcon-types.h>
 
 /**
  * @file iotcon-list.h

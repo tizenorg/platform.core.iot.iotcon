@@ -18,7 +18,7 @@
 
 #include <glib.h>
 
-#include "iotcon-constant.h"
+#include "iotcon-types.h"
 
 #define IC_EQUAL 0
 #define IC_STR_EQUAL 0

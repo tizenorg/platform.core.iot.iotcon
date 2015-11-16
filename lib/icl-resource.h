@@ -17,7 +17,9 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_H__
 
 #include <stdint.h>
-#include "iotcon.h"
+
+#include "iotcon-types.h"
+
 #include "icl-dbus.h"
 
 /**

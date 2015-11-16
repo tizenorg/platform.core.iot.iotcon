@@ -16,8 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_SERVER_RESOURCE_H__
 #define __IOT_CONNECTIVITY_MANAGER_SERVER_RESOURCE_H__
 
-#include <tizen_type.h>
-#include <iotcon-constant.h>
+#include <iotcon-types.h>
 
 /**
  * @file iotcon-resource.h

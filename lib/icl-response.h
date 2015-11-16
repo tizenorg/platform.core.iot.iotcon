@@ -17,8 +17,7 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESPONSE_H__
 
 #include <stdint.h>
-#include "iotcon-struct.h"
-#include "iotcon-constant.h"
+#include "iotcon-types.h"
 
 typedef enum {
 	ICL_VISIBILITY_NONE = 0,

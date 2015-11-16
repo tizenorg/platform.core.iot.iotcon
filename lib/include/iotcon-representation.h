@@ -16,7 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_STRUCT_REPRESENTATION_H__
 #define __IOT_CONNECTIVITY_MANAGER_STRUCT_REPRESENTATION_H__
 
-#include <iotcon-constant.h>
+#include <iotcon-types.h>
 
 /**
  * @file iotcon-representation.h

@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "iotcon-struct.h"
-#include "iotcon-constant.h"
+#include "iotcon-types.h"
 #include "icl.h"
 #include "icl-request.h"
 

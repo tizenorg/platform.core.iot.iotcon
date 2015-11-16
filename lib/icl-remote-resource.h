@@ -17,9 +17,11 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__
 
 #include <stdint.h>
-#include <glib.h>
 #include <gio/gio.h>
-#include "iotcon.h"
+
+#include "iotcon-types.h"
+#include "iotcon-remote-resource.h"
+
 #include "icl-options.h"
 
 #define ICL_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL 10 /* 10 sec */

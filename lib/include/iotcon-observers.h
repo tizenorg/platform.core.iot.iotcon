@@ -16,7 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_SERVER_OBSERVERS_H__
 #define __IOT_CONNECTIVITY_MANAGER_SERVER_OBSERVERS_H__
 
-#include <iotcon-constant.h>
+#include <iotcon-types.h>
 
 /**
  * @file iotcon-observers.h

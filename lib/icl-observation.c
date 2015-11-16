@@ -17,7 +17,7 @@
 #include <errno.h>
 #include <glib.h>
 
-#include "iotcon-struct.h"
+#include "iotcon-types.h"
 #include "icl.h"
 #include "icl-observation.h"
 

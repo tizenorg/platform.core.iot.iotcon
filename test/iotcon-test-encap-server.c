@@ -16,7 +16,6 @@
 
 #include <stdlib.h>
 #include <glib.h>
-#include <tizen_type.h>
 
 #include <iotcon.h>
 #include <iotcon-internal.h>

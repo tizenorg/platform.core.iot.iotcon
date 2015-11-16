@@ -16,9 +16,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <glib.h>
-#include <tizen_type.h>
 
-#include "iotcon-struct.h"
+#include "iotcon-types.h"
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-options.h"

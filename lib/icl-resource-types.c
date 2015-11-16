@@ -18,8 +18,7 @@
 #include <errno.h>
 #include <glib.h>
 
-#include "iotcon-struct.h"
-#include "iotcon-constant.h"
+#include "iotcon-types.h"
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-resource-types.h"

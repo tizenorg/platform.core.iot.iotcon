@@ -16,9 +16,8 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_STATE_H__
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_STATE_H__
 
-#include "iotcon-struct.h"
-#include "iotcon-constant.h"
 #include "icl-value.h"
+#include "icl-representation.h"
 
 void icl_state_inc_ref_count(iotcon_state_h val);
 int icl_state_dec_ref_count(iotcon_state_h val);

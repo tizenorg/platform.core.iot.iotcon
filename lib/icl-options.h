@@ -17,7 +17,7 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_OPTIONS_H__
 
 #include <glib.h>
-#include "iotcon-struct.h"
+#include "iotcon-types.h"
 
 struct icl_options {
 	int ref_count;

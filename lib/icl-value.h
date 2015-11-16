@@ -17,9 +17,8 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_VALUE_H__
 
 #include <glib.h>
-#include <tizen_type.h>
 
-#include "iotcon-struct.h"
+#include "iotcon-types.h"
 
 struct icl_value_s {
 	int type;

@@ -16,8 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_STRUCT_QUERY_H__
 #define __IOT_CONNECTIVITY_MANAGER_STRUCT_QUERY_H__
 
-#include <stdbool.h>
-#include <iotcon-constant.h>
+#include <iotcon-types.h>
 
 /**
  * @file iotcon-query.h

@@ -20,11 +20,8 @@
 extern "C" {
 #endif
 
-#include <tizen_type.h>
-
-#include <iotcon-constant.h>
+#include <iotcon-types.h>
 #include <iotcon-errors.h>
-#include <iotcon-struct.h>
 #include <iotcon-server.h>
 #include <iotcon-client.h>
 

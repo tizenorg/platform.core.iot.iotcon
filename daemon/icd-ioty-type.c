@@ -20,7 +20,7 @@
 
 #include <octypes.h>
 
-#include "iotcon-constant.h"
+#include "iotcon-types.h"
 #include "ic-utils.h"
 #include "icd.h"
 #include "icd-ioty-type.h"

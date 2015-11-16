@@ -17,6 +17,7 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_OBSERVATION_H__
 
 #include <glib.h>
+#include "iotcon-types.h"
 
 struct icl_observers {
 	GList *observers_list;

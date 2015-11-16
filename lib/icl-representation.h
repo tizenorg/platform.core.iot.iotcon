@@ -17,10 +17,14 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__
 
 #include <glib.h>
-#include <tizen_type.h>
 
-#include "iotcon-struct.h"
+#include "iotcon-types.h"
 #include "icl-value.h"
+
+struct icl_state_s {
+	int ref_count;
+	GHashTable *hash_table;
+};
 
 struct icl_representation_s {
 	char *uri_path;
@@ -30,11 +34,6 @@ struct icl_representation_s {
 	GList *children;
 	iotcon_resource_types_h res_types;
 	struct icl_state_s *state;
-};
-
-struct icl_state_s {
-	int ref_count;
-	GHashTable *hash_table;
 };
 
 void icl_representation_inc_ref_count(iotcon_representation_h val);

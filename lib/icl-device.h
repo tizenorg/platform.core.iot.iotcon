@@ -16,6 +16,8 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_DEVICE_H__
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_DEVICE_H__
 
+#include "iotcon-types.h"
+
 struct icl_device_info {
 	char *device_name;
 	char *spec_ver;

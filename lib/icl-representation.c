@@ -20,10 +20,8 @@
 #include <errno.h>
 #include <limits.h>
 #include <glib.h>
-#include <tizen_type.h>
 
-#include "iotcon-struct.h"
-#include "iotcon-representation.h"
+#include "iotcon-types.h"
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-resource.h"

@@ -16,7 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_COMMON_RESPONSE_H__
 #define __IOT_CONNECTIVITY_MANAGER_COMMON_RESPONSE_H__
 
-#include <iotcon-constant.h>
+#include <iotcon-types.h>
 
 /**
  * @file iotcon-response.h

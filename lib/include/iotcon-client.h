@@ -16,7 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_MANAGER_CLIENT_H__
 #define __IOT_CONNECTIVITY_MANAGER_CLIENT_H__
 
-#include <iotcon-constant.h>
+#include <iotcon-types.h>
 #include <iotcon-remote-resource.h>
 
 /**

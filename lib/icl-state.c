@@ -16,9 +16,7 @@
 #include <stdlib.h>
 #include <glib.h>
 
-#include "iotcon-struct.h"
-#include "iotcon-constant.h"
-#include "iotcon-representation.h"
+#include "iotcon-types.h"
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-list.h"

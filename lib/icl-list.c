@@ -17,9 +17,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include "iotcon-struct.h"
-#include "iotcon-constant.h"
-#include "iotcon-representation.h"
+#include "iotcon-types.h"
 #include "icl.h"
 #include "icl-state.h"
 #include "icl-representation.h"

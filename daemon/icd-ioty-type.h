@@ -18,8 +18,6 @@
 
 #include <octypes.h>
 
-#include "iotcon-constant.h"
-
 OCConnectivityType icd_ioty_conn_type_to_oic_conn_type(int conn_type);
 
 int icd_ioty_transport_flag_to_conn_type(OCTransportAdapter adapter,
