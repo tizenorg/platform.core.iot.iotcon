@@ -72,7 +72,7 @@ NEW_SECURE=1
 
 
 %install
-rm -rf %{buildroot}/BUILD/%{name}*
+rm -rf %{buildroot}
 %make_install
 
 mkdir -p %{buildroot}%{_unitdir}/multi-user.target.wants
