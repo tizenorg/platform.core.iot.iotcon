@@ -60,13 +60,13 @@ cp %{SOURCE2001} .
 
 
 %build
-MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %if 0%{?tizen_version_major} < 3
 NEW_SECURE=0
 %else
 NEW_SECURE=1
 %endif
 
+MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %cmake . -DMAJORVER=${MAJORVER} -DFULLVER=%{version} -DBIN_INSTALL_DIR:PATH=%{_bindir} \
 		-DNEW_SECURE=${NEW_SECURE}
 
@@ -93,7 +93,6 @@ fi
 /sbin/ldconfig
 
 %postun
-/sbin/ldconfig
 if [ $1 == 0 ]; then
     systemctl stop %{name}.service
 fi
@@ -104,10 +103,10 @@ systemctl daemon-reload
 %files
 %manifest %{name}.manifest
 %defattr(-,root,root,-)
-%{_unitdir}/%{name}.service
-%{_unitdir}/multi-user.target.wants/%{name}.service
 %{_bindir}/%{name}-daemon
 %{_libdir}/lib%{name}.so.*
+%{_unitdir}/%{name}.service
+%{_unitdir}/multi-user.target.wants/%{name}.service
 %if 0%{?tizen_version_major} < 3
 %{_datadir}/license/%{name}
 %else
@@ -124,10 +123,5 @@ systemctl daemon-reload
 %files test
 %manifest %{name}-test.manifest
 %defattr(-,root,root,-)
-%{_bindir}/iotcon-test-basic-client
-%{_bindir}/iotcon-test-basic-server
-%{_bindir}/iotcon-test-device-client
-%{_bindir}/iotcon-test-iface-client
-%{_bindir}/iotcon-test-iface-server
-%{_bindir}/iotcon-test-encap-client
-%{_bindir}/iotcon-test-encap-server
+%{_bindir}/iotcon-test-*
+%license LICENSE.APLv2
