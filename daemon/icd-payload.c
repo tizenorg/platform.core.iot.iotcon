@@ -41,6 +41,8 @@ struct icd_state_list_s {
 };
 
 static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr, gboolean is_parent);
+static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *iter);
+static GVariantBuilder* _icd_state_value_to_gvariant_builder(OCRepPayload *repr);
 
 GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 {
@@ -158,7 +160,8 @@ static GVariant* _icd_state_array_attr_to_gvariant(OCRepPayloadValueArray *arr, 
 		break;
 	case OCREP_PROP_OBJECT:
 		for (i = 0; i < len; i++) {
-			var = _icd_payload_representation_to_gvariant(arr->objArray[index + i], TRUE);
+			GVariantBuilder *state_var = _icd_state_value_to_gvariant_builder(arr->objArray[index + i]);
+			var = g_variant_builder_end(state_var);
 			g_variant_builder_add(&builder, "v", var);
 		}
 		break;
@@ -197,8 +200,18 @@ static GVariant* _icd_state_array_to_gvariant(OCRepPayloadValueArray *arr,
 	return g_variant_builder_end(&builder);
 }
 
+static GVariant* _icd_state_value_to_gvariant(OCRepPayload *state)
+{
+	GVariantBuilder *builder;
+	GVariant *var;
 
-static GVariantBuilder* _icd_state_value_to_gvariant(OCRepPayload *repr)
+	builder = _icd_state_value_to_gvariant_builder(state);
+	var = g_variant_builder_end(builder);
+
+	return var;
+}
+
+static GVariantBuilder* _icd_state_value_to_gvariant_builder(OCRepPayload *repr)
 {
 	int total_len;
 	GVariant *var = NULL;
@@ -229,7 +242,7 @@ static GVariantBuilder* _icd_state_value_to_gvariant(OCRepPayload *repr)
 			var = _icd_state_array_to_gvariant(&(val->arr), 0, total_len, 0);
 			break;
 		case OCREP_PROP_OBJECT:
-			var = _icd_payload_representation_to_gvariant(val->obj, TRUE);
+			var = _icd_state_value_to_gvariant(val->obj);
 			break;
 		default:
 			ERR("Invalid Type");
@@ -281,7 +294,7 @@ static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr,
 	}
 
 	/* Representation */
-	repr_gvar = _icd_state_value_to_gvariant(repr);
+	repr_gvar = _icd_state_value_to_gvariant_builder(repr);
 
 	/* Children */
 	g_variant_builder_init(&children, G_VARIANT_TYPE("av"));
@@ -441,15 +454,17 @@ static void _icd_state_list_from_gvariant(GVariant *var,
 			value_list->list = g_list_append(value_list->list, s);
 	} else if (g_variant_type_equal(G_VARIANT_TYPE("av"), type)) {
 		GVariant *value;
-
 		if (g_variant_iter_loop(&iter, "v", &value)) {
-			if (g_variant_is_of_type(value, G_VARIANT_TYPE("(siasa{sv}av)"))) {
-				OCRepPayload *repr_value;
+			if (g_variant_is_of_type(value, G_VARIANT_TYPE("a{sv}"))) {
+				OCRepPayload *repr;
+				GVariantIter state_iter;
 				value_list->type = OCREP_PROP_OBJECT;
 				do {
-					repr_value = icd_payload_representation_from_gvariant(value);
-					value_list->list = g_list_append(value_list->list, repr_value);
-
+					repr = OCRepPayloadCreate();
+					g_variant_iter_init(&state_iter, value);
+					_icd_state_value_from_gvariant(repr, &state_iter);
+					value_list->list = g_list_append(value_list->list, repr);
+					g_variant_iter_free(&state_iter);
 				} while (g_variant_iter_loop(&iter, "v", &value));
 
 			} else if (g_variant_is_of_type(value, G_VARIANT_TYPE_ARRAY)) {
@@ -554,7 +569,6 @@ static void _icd_state_array_from_list(OCRepPayload *repr,
 	}
 }
 
-
 static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *iter)
 {
 	char *key;
@@ -594,7 +608,6 @@ static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *ite
 
 	return;
 }
-
 
 OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var)
 {

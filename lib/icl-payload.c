@@ -232,7 +232,6 @@ void icl_state_from_gvariant(iotcon_state_h state, GVariantIter *iter)
 	iotcon_state_h state_value = NULL;
 
 	while (g_variant_iter_loop(iter, "{sv}", &key, &var)) {
-
 		if (g_variant_is_of_type(var, G_VARIANT_TYPE_BOOLEAN)) {
 			value = icl_value_create_bool(g_variant_get_boolean(var));
 
@@ -248,17 +247,18 @@ void icl_state_from_gvariant(iotcon_state_h state, GVariantIter *iter)
 				value = icl_value_create_null();
 			else
 				value = icl_value_create_str(str_value);
-
+		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE("a{sv}"))) {
+			GVariantIter state_iter;
+			iotcon_state_create(&state_value);
+			g_variant_iter_init(&state_iter, var);
+			icl_state_from_gvariant(state_value, &state_iter);
+			value = icl_value_create_state(state_value);
 		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_ARRAY)) {
 			list_value = _icl_state_list_from_gvariant(var);
 			value = icl_value_create_list(list_value);
-		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE("a{sv}"))) {
-			GVariantIter *state_iter;
-			g_variant_get(var, "(&a{sv})", &state_iter);
-			icl_state_from_gvariant(state_value, state_iter);
-			value = icl_value_create_state(state_value);
+		} else {
+			ERR("Invalid type(%s)", g_variant_get_type_string(var));
 		}
-
 		g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
 	}
 
@@ -317,22 +317,41 @@ static iotcon_list_h _icl_state_list_from_gvariant(GVariant *var)
 
 		while (g_variant_iter_loop(&iter, "s", &s))
 			iotcon_list_add_str(list, s, -1);
-	} else if (g_variant_type_equal(G_VARIANT_TYPE("v"), type)) {
-		GVariant *value;
+	} else if (g_variant_type_equal(G_VARIANT_TYPE("av"), type)) {
+		GVariant *variant;
 		iotcon_list_h list_value;
 		iotcon_state_h state_value = NULL;
 
-		while (g_variant_iter_loop(&iter, "v", &value)) {
-			if (g_variant_is_of_type(value, G_VARIANT_TYPE_ARRAY)) {
-				list_value = _icl_state_list_from_gvariant(value);
-				iotcon_list_add_list(list, list_value, -1);
-			} else if (g_variant_is_of_type(value, G_VARIANT_TYPE("a{sv}"))) {
-				GVariantIter *state_iter;
-				g_variant_get(value, "(&a{sv})", &state_iter);
-				icl_state_from_gvariant(state_value, state_iter);
+		while (g_variant_iter_loop(&iter, "v", &variant)) {
+			if (g_variant_is_of_type(variant, G_VARIANT_TYPE("a{sv}"))) {
+				GVariantIter state_iter;
+				if (NULL == list) {
+					ret = iotcon_list_create(IOTCON_TYPE_STATE, &list);
+					if (IOTCON_ERROR_NONE != ret) {
+						ERR("iotcon_list_create() Fail(%d)", ret);
+						return NULL;
+					}
+				}
+				iotcon_state_create(&state_value);
+				g_variant_iter_init(&state_iter, variant);
+				icl_state_from_gvariant(state_value, &state_iter);
 				iotcon_list_add_state(list, state_value, -1);
+			} else if (g_variant_is_of_type(variant, G_VARIANT_TYPE_ARRAY)) {
+				if (NULL == list) {
+					ret = iotcon_list_create(IOTCON_TYPE_LIST, &list);
+					if (IOTCON_ERROR_NONE != ret) {
+						ERR("iotcon_list_create() Fail(%d)", ret);
+						return NULL;
+					}
+				}
+				list_value = _icl_state_list_from_gvariant(variant);
+				iotcon_list_add_list(list, list_value, -1);
+			} else {
+				ERR("Invalid type(%s)", g_variant_get_type_string(variant));
 			}
 		}
+	} else {
+		ERR("Invalid type(%s)", g_variant_get_type_string(var));
 	}
 
 	return list;
