@@ -50,6 +50,14 @@ icDbus* icd_dbus_get_object()
 }
 
 
+int64_t icd_dbus_generate_signal_number()
+{
+	static int64_t i = 0;
+
+	return i++;
+}
+
+
 static void _icd_dbus_resource_handle_free(OCResourceHandle handle)
 {
 	icd_dbus_client_s *client;
@@ -385,18 +393,19 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 		const gchar *uri_path,
 		const gchar* const *resource_types,
 		gint ifaces,
-		gint properties,
-		gint64 signal_number)
+		gint properties)
 {
 	FN_CALL;
 	int ret;
 	const gchar *sender;
 	OCResourceHandle handle;
+	int64_t signal_number = 0;
 
 	handle = icd_ioty_register_resource(uri_path, resource_types, ifaces, properties);
 	if (handle) {
 		sender = g_dbus_method_invocation_get_sender(invocation);
 
+		signal_number = icd_dbus_generate_signal_number();
 		ret = _icd_dbus_resource_list_append_handle(sender, handle, signal_number);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_icd_dbus_resource_list_append_handle() Fail(%d)", ret);
@@ -409,7 +418,8 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 		}
 	}
 
-	ic_dbus_complete_register_resource(object, invocation, ICD_POINTER_TO_INT64(handle));
+	ic_dbus_complete_register_resource(object, invocation, signal_number,
+			ICD_POINTER_TO_INT64(handle));
 
 	return TRUE;
 }
@@ -500,18 +510,20 @@ static gboolean _dbus_handle_find_resource(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
 		gint connectivity,
-		const gchar *type,
-		gint64 signal_number)
+		const gchar *type)
 {
 	int ret;
 	const gchar *sender;
+	int64_t signal_number;
 
 	sender = g_dbus_method_invocation_get_sender(invocation);
+
+	signal_number = icd_dbus_generate_signal_number();
 	ret = icd_ioty_find_resource(host_address, connectivity, type, signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_find_resource() Fail(%d)", ret);
 
-	ic_dbus_complete_find_resource(object, invocation, ret);
+	ic_dbus_complete_find_resource(object, invocation, signal_number, ret);
 
 	return TRUE;
 }
@@ -521,19 +533,22 @@ static gboolean _dbus_handle_observer_start(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		GVariant *resource,
 		gint observe_policy,
-		GVariant *query,
-		gint64 signal_number)
+		GVariant *query)
 {
 	OCDoHandle observe_h;
 	const gchar *sender;
+	int64_t signal_number;
 
+	signal_number = icd_dbus_generate_signal_number();
 	sender = g_dbus_method_invocation_get_sender(invocation);
+
 	observe_h = icd_ioty_observer_start(resource, observe_policy, query,
 			signal_number, sender);
 	if (NULL == observe_h)
 		ERR("icd_ioty_observer_start() Fail");
 
-	ic_dbus_complete_observer_start(object, invocation, ICD_POINTER_TO_INT64(observe_h));
+	ic_dbus_complete_observer_start(object, invocation, signal_number,
+			ICD_POINTER_TO_INT64(observe_h));
 
 	/* observe_h will be freed in _dbus_handle_observer_stop() */
 	return TRUE;
@@ -592,19 +607,21 @@ static gboolean _dbus_handle_send_response(icDbus *object,
 static gboolean _dbus_handle_get_device_info(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
-		gint connectivity,
-		gint64 signal_number)
+		gint connectivity)
 {
 	int ret;
 	const gchar *sender;
+	int64_t signal_number;
 
+	signal_number = icd_dbus_generate_signal_number();
 	sender = g_dbus_method_invocation_get_sender(invocation);
+
 	ret = icd_ioty_get_info(ICD_DEVICE_INFO, host_address, connectivity, signal_number,
 			sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_get_info(device info) Fail(%d)", ret);
 
-	ic_dbus_complete_get_device_info(object, invocation, ret);
+	ic_dbus_complete_get_device_info(object, invocation, signal_number, ret);
 
 	return TRUE;
 }
@@ -612,19 +629,21 @@ static gboolean _dbus_handle_get_device_info(icDbus *object,
 static gboolean _dbus_handle_get_platform_info(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
-		gint connectivity,
-		gint64 signal_number)
+		gint connectivity)
 {
 	int ret;
 	const gchar *sender;
+	int64_t signal_number;
 
+	signal_number = icd_dbus_generate_signal_number();
 	sender = g_dbus_method_invocation_get_sender(invocation);
+
 	ret = icd_ioty_get_info(ICD_PLATFORM_INFO, host_address, connectivity, signal_number,
 			sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_get_info(platform info) Fail(%d)", ret);
 
-	ic_dbus_complete_get_platform_info(object, invocation, ret);
+	ic_dbus_complete_get_platform_info(object, invocation, signal_number, ret);
 
 	return TRUE;
 }
@@ -669,7 +688,8 @@ static gboolean _dbus_handle_subscribe_presence(icDbus *object,
 {
 	OCDoHandle presence_h;
 
-	presence_h = icd_ioty_subscribe_presence(host_address, connectivity, type);
+	presence_h = icd_ioty_subscribe_presence(ICD_PRESENCE, host_address, connectivity,
+			type, NULL);
 	if (NULL == presence_h)
 		ERR("icd_ioty_subscribe_presence() Fail");
 
@@ -692,6 +712,105 @@ static gboolean _dbus_handle_unsubscribe_presence(icDbus *object,
 		ERR("icd_ioty_unsubscribe_presence() Fail(%d)", ret);
 
 	ic_dbus_complete_unsubscribe_presence(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_encap_get_time_interval(icDbus *object,
+		GDBusMethodInvocation *invocation)
+{
+	int time_interval;
+
+	time_interval = icd_ioty_encap_get_time_interval();
+
+	ic_dbus_complete_encap_get_time_interval(object, invocation, time_interval);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_encap_set_time_interval(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		gint time_interval)
+{
+	icd_ioty_encap_set_time_interval(time_interval);
+
+	ic_dbus_complete_encap_set_time_interval(object, invocation);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_start_monitoring(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		const gchar *uri_path,
+		const gchar *host_address,
+		gint connectivity)
+{
+	int ret;
+	int64_t signal_number;
+
+	ret = icd_ioty_start_encap(ICD_ENCAP_MONITORING, uri_path, host_address,
+			connectivity, &signal_number);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_start_encap() Fail(%d)", ret);
+
+	ic_dbus_complete_start_monitoring(object, invocation, signal_number, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_stop_monitoring(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		const gchar *uri_path,
+		const gchar *host_address)
+{
+	int ret;
+
+	ret = icd_ioty_stop_encap(ICD_ENCAP_MONITORING, uri_path, host_address);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_stop_encap() Fail(%d)", ret);
+
+	ic_dbus_complete_stop_monitoring(object, invocation, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_start_caching(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		const gchar *uri_path,
+		const gchar *host_address,
+		gint connectivity)
+{
+	int ret;
+	int64_t signal_number;
+
+	ret = icd_ioty_start_encap(ICD_ENCAP_CACHING, uri_path, host_address,
+			connectivity, &signal_number);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_start_encap() Fail(%d)", ret);
+
+	ic_dbus_complete_start_monitoring(object, invocation, signal_number, ret);
+
+	return TRUE;
+}
+
+
+static gboolean _dbus_handle_stop_caching(icDbus *object,
+		GDBusMethodInvocation *invocation,
+		const gchar *uri_path,
+		const gchar *host_address)
+{
+	int ret;
+
+	ret = icd_ioty_stop_encap(ICD_ENCAP_CACHING, uri_path, host_address);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_stop_encap() Fail(%d)", ret);
+
+	ic_dbus_complete_stop_monitoring(object, invocation, ret);
 
 	return TRUE;
 }
@@ -753,6 +872,18 @@ static void _dbus_on_bus_acquired(GDBusConnection *conn, const gchar *name,
 			G_CALLBACK(_dbus_handle_subscribe_presence), NULL);
 	g_signal_connect(icd_dbus_object, "handle-unsubscribe-presence",
 			G_CALLBACK(_dbus_handle_unsubscribe_presence), NULL);
+	g_signal_connect(icd_dbus_object, "handle-encap-get-time-interval",
+			G_CALLBACK(_dbus_handle_encap_get_time_interval), NULL);
+	g_signal_connect(icd_dbus_object, "handle-encap-set-time-interval",
+			G_CALLBACK(_dbus_handle_encap_set_time_interval), NULL);
+	g_signal_connect(icd_dbus_object, "handle-start-monitoring",
+			G_CALLBACK(_dbus_handle_start_monitoring), NULL);
+	g_signal_connect(icd_dbus_object, "handle-stop-monitoring",
+			G_CALLBACK(_dbus_handle_stop_monitoring), NULL);
+	g_signal_connect(icd_dbus_object, "handle-start-caching",
+			G_CALLBACK(_dbus_handle_start_caching), NULL);
+	g_signal_connect(icd_dbus_object, "handle-stop-caching",
+			G_CALLBACK(_dbus_handle_stop_caching), NULL);
 
 	ret = g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(icd_dbus_object),
 			conn, IOTCON_DBUS_OBJPATH, &error);

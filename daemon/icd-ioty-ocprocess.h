@@ -56,4 +56,13 @@ OCEntityHandlerResult icd_ioty_ocprocess_tizen_info_handler(OCEntityHandlerFlag 
 OCStackApplicationResult icd_ioty_ocprocess_get_tizen_info_cb(void *ctx,
 		OCDoHandle handle, OCClientResponse* resp);
 
+OCStackApplicationResult icd_ioty_ocprocess_encap_get_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse* resp);
+
+OCStackApplicationResult icd_ioty_ocprocess_encap_observe_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse* resp);
+
+OCStackApplicationResult icd_ioty_ocprocess_encap_presence_cb(void *ctx,
+		OCDoHandle handle, OCClientResponse* resp);
+
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_OCPROCESS_H__*/

@@ -46,7 +46,21 @@ typedef struct {
 typedef struct {
 	OCDoHandle handle;
 	int client_count;
-} icd_presence_handle_info;
+} icd_presence_handle_info_s;
+
+typedef struct {
+	char *uri_path;
+	OCDevAddr* dev_addr;
+	OCConnectivityType oic_conn_type;
+	int64_t signal_number;
+	int get_timer_id;
+	int monitoring_count;
+	int caching_count;
+	OCDoHandle presence_handle;
+	OCDoHandle observe_handle;
+	iotcon_remote_resource_state_e resource_state;
+	OCRepPayload *oic_payload;
+} icd_encap_info_s;
 
 enum {
 	ICD_CRUD_GET,
@@ -56,6 +70,9 @@ enum {
 	ICD_DEVICE_INFO,
 	ICD_PLATFORM_INFO,
 	ICD_TIZEN_INFO,
+	ICD_ENCAP_MONITORING,
+	ICD_ENCAP_CACHING,
+	ICD_PRESENCE,
 };
 
 void icd_ioty_csdk_lock();
@@ -120,14 +137,25 @@ int icd_ioty_tizen_info_get_property(char **device_name, char **tizen_device_id)
 
 OCDoHandle icd_ioty_presence_table_get_handle(const char *host_address);
 
-OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
-		const char *resource_type);
+OCDoHandle icd_ioty_subscribe_presence(int type, const char *host_address, int conn_type,
+		const char *resource_type, void *context);
 
 int icd_ioty_unsubscribe_presence(OCDoHandle handle, const char *host_address);
 
 int icd_ioty_start_presence(unsigned int time_to_live);
 
 int icd_ioty_stop_presence();
+
+int icd_ioty_encap_get_time_interval();
+
+void icd_ioty_encap_set_time_interval(int time_interval);
+
+gboolean icd_ioty_encap_get(gpointer user_data);
+
+int icd_ioty_start_encap(int type, const char *uri_path, const char *host_address,
+		int conn_type, int64_t *signal_number);
+
+int icd_ioty_stop_encap(int type, const char  *uri_path, const char *host_address);
 
 static inline int icd_ioty_convert_error(int ret)
 {

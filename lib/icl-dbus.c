@@ -43,14 +43,6 @@ icDbus* icl_dbus_get_object()
 }
 
 
-int64_t icl_dbus_generate_signal_number()
-{
-	static int64_t i = 0;
-
-	return i++;
-}
-
-
 unsigned int icl_dbus_subscribe_signal(char *signal_name, void *cb_container,
 		void *cb_free, GDBusSignalCallback sig_handler)
 {

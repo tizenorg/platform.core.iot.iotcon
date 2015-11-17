@@ -648,3 +648,286 @@ OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var)
 	return repr;
 }
 
+
+static int _oic_string_list_length(OCStringLL *str_list)
+{
+	int len = 0;
+
+	while (str_list) {
+		len++;
+		str_list = str_list->next;
+	}
+
+	return len;
+}
+
+
+static bool _oic_string_list_contain(OCStringLL *str_list, char *str_value)
+{
+	OCStringLL *c;
+
+	for (c = str_list; c; c = c->next) {
+		if (IC_STR_EQUAL == g_strcmp0(str_value, str_list->value))
+			return true;
+	}
+
+	return false;
+}
+
+
+static int _representation_compare_string_list(OCStringLL *list1, OCStringLL *list2)
+{
+	OCStringLL *c;
+
+	if (NULL == list1 || NULL == list2)
+		return !!(list1 - list2);
+
+	if (_oic_string_list_length(list1) != _oic_string_list_length(list2))
+		return 1;
+
+	for (c = list1; c; c = c->next) {
+		if (false == _oic_string_list_contain(list2, c->value))
+			return 1;
+	}
+
+	return IC_EQUAL;
+}
+
+
+static int _representation_compare_array(OCRepPayloadValueArray arr1,
+		OCRepPayloadValueArray arr2)
+{
+	int i, len1, len2;
+
+	len1 = calcDimTotal(arr1.dimensions);
+	len2 = calcDimTotal(arr2.dimensions);
+
+	if (len1 != len2)
+		return 1;
+
+	switch (arr1.type) {
+	case OCREP_PROP_INT:
+		for (i = 0; i < len1; i++) {
+			if (arr1.iArray[i] != arr2.iArray[i])
+				return 1;
+		}
+		break;
+	case OCREP_PROP_BOOL:
+		for (i = 0; i < len1; i++) {
+			if (arr1.bArray[i] != arr2.bArray[i])
+				return 1;
+		}
+		break;
+	case OCREP_PROP_DOUBLE:
+		for (i = 0; i < len1; i++) {
+			if (arr1.dArray[i] != arr2.dArray[i])
+				return 1;
+		}
+		break;
+	case OCREP_PROP_STRING:
+		for (i = 0; i < len1; i++) {
+			if (IC_STR_EQUAL != g_strcmp0(arr1.strArray[i], arr2.strArray[i]))
+				return 1;
+		}
+		break;
+	case OCREP_PROP_OBJECT:
+		for (i = 0; i < len1; i++) {
+			if (IC_EQUAL != icd_payload_representation_compare(arr1.objArray[i],
+						arr2.objArray[i]))
+				return 1;
+		}
+		break;
+	default:
+		ERR("Invalid Type (%d)", arr1.type);
+		return 1;
+	}
+
+	return IC_EQUAL;
+}
+
+
+static int _representation_compare_value(OCRepPayloadValue *value1,
+		OCRepPayloadValue *value2)
+{
+	int ret = 1;
+
+	if (NULL == value1 || NULL == value2)
+		return !!(value1 - value2);
+
+	/* compare key */
+	if (IC_STR_EQUAL != g_strcmp0(value1->name, value2->name))
+		return 1;
+
+	/* compare value */
+	if (value1->type != value2->type)
+		return 1;
+
+	switch (value1->type) {
+	case OCREP_PROP_NULL:
+		ret = IC_EQUAL;
+		break;
+	case OCREP_PROP_INT:
+		ret = (value1->i == value2->i)? IC_EQUAL : 1;
+		break;
+	case OCREP_PROP_DOUBLE:
+		ret = (value1->d == value2->d)? IC_EQUAL : 1;
+		break;
+	case OCREP_PROP_BOOL:
+		ret = (value1->b == value2->b)? IC_EQUAL : 1;
+		break;
+	case OCREP_PROP_STRING:
+		ret = (IC_STR_EQUAL == g_strcmp0(value1->str, value2->str))? IC_EQUAL : 1;
+		break;
+	case OCREP_PROP_OBJECT:
+		ret = icd_payload_representation_compare(value1->obj, value2->obj);
+		break;
+	case OCREP_PROP_ARRAY:
+		ret = _representation_compare_array(value1->arr, value2->arr);
+		break;
+	default:
+		ERR("Invalid Type (%d)", value1->type);
+	}
+
+	return ret;
+}
+
+
+static int _representation_values_list_length(OCRepPayloadValue *value_list)
+{
+	int len = 0;
+
+	while (value_list) {
+		len++;
+		value_list = value_list->next;
+	}
+
+	return len;
+}
+
+
+static bool _representation_values_list_contain(OCRepPayloadValue *value_list,
+		OCRepPayloadValue *value)
+{
+	OCRepPayloadValue *c;
+
+	for (c = value_list; c; c = c->next) {
+		if (IC_EQUAL == _representation_compare_value(c, value))
+			return true;
+	}
+
+	return false;
+}
+
+
+static int _representation_compare_values_list(OCRepPayloadValue *value1,
+		OCRepPayloadValue *value2)
+{
+	OCRepPayloadValue *c;
+
+	if (NULL == value1 || NULL == value2)
+		return !!(value1 - value2);
+
+	if (_representation_values_list_length(value1)
+			!= _representation_values_list_length(value2))
+		return 1;
+
+	for (c = value1; c; c = c->next) {
+		if (false == _representation_values_list_contain(value2, c))
+			return 1;
+	}
+
+	return IC_EQUAL;
+}
+
+
+static int _representation_compare_without_children(OCRepPayload *repr1,
+		OCRepPayload *repr2)
+{
+	int ret;
+
+	if (NULL == repr1 || NULL == repr2)
+		return !!(repr1 - repr2);
+
+	/* compare uri */
+	if (IC_STR_EQUAL != g_strcmp0(repr1->uri, repr2->uri))
+		return 1;
+
+	/* compare resource types */
+	ret = _representation_compare_string_list(repr1->types, repr2->types);
+	if (IC_EQUAL != ret)
+		return ret;
+
+	/* compare resource interfaces */
+	ret = _representation_compare_string_list(repr1->interfaces, repr2->interfaces);
+	if (IC_EQUAL != ret)
+		return ret;
+
+	/* compare values */
+	ret = _representation_compare_values_list(repr1->values, repr2->values);
+	if (IC_EQUAL != ret)
+		return ret;
+
+	return IC_EQUAL;
+}
+
+
+static int _representation_list_length(OCRepPayload *repr_list)
+{
+	int len = 0;
+
+	while (repr_list) {
+		len++;
+		repr_list = repr_list->next;
+	}
+
+	return len;
+}
+
+
+static bool _representation_list_contain(OCRepPayload *repr_list, OCRepPayload *repr)
+{
+	OCRepPayload *c;
+
+	for (c = repr_list; c; c = c->next) {
+		if (IC_EQUAL == _representation_compare_without_children(c, repr))
+			return true;
+	}
+
+	return false;
+}
+
+
+static int _representation_compare_children(OCRepPayload *repr1, OCRepPayload *repr2)
+{
+	OCRepPayload *c;
+
+	if (NULL == repr1 || NULL == repr2)
+		return !!(repr1 - repr2);
+
+	if (_representation_list_length(repr1) != _representation_list_length(repr2))
+		return 1;
+
+	for (c = repr1; c; c = c->next) {
+		if (false == _representation_list_contain(repr2, c))
+			return 1;
+	}
+
+	return IC_EQUAL;
+}
+
+
+int icd_payload_representation_compare(OCRepPayload *repr1, OCRepPayload *repr2)
+{
+	int ret;
+
+	ret = _representation_compare_without_children(repr1, repr2);
+	if (IC_EQUAL != ret)
+		return ret;
+
+	/* compare childrean */
+	ret = _representation_compare_children(repr1->next, repr2->next);
+	if (IC_EQUAL != ret)
+		return ret;
+
+	return IC_EQUAL;
+}

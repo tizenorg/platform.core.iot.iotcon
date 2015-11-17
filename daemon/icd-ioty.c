@@ -36,6 +36,9 @@
 #include "icd-ioty-ocprocess.h"
 
 #define ICD_UUID_LENGTH 37
+#define ICD_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL 10 /* 10 sec */
+
+static int icd_remote_resource_time_interval = ICD_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
 
 static const char *ICD_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
 static const char *ICD_SYSTEM_INFO_PLATFORM_NAME = "http://tizen.org/system/platform.name";
@@ -51,6 +54,7 @@ typedef struct {
 
 static icd_tizen_info_s icd_tizen_info = {0};
 
+static GHashTable *icd_ioty_encap_table;
 static GHashTable *icd_ioty_presence_table;
 
 static GMutex icd_csdk_mutex;
@@ -707,22 +711,64 @@ gboolean icd_ioty_delete(icDbus *object, GDBusMethodInvocation *invocation,
 }
 
 
+static OCDoHandle _icd_ioty_observe_register(const char *uri_path,
+		OCDevAddr *dev_addr,
+		GVariantIter *options,
+		OCMethod method,
+		OCConnectivityType oic_conn_type,
+		OCCallbackData *cbdata)
+{
+	OCDoHandle handle;
+	int options_size = 0;
+	OCStackResult result;
+	OCHeaderOption *oic_options_ptr = NULL;
+	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
+
+	if (options) {
+		options_size = g_variant_iter_n_children(options);
+		if (0 != options_size) {
+			int ret = _ioty_get_header_options(options, options_size, oic_options,
+					sizeof(oic_options) / sizeof(oic_options[0]));
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("_ioty_get_header_options() Fail(%d)", ret);
+				if (cbdata->cd)
+					cbdata->cd(cbdata->context);
+				return NULL;
+			}
+			oic_options_ptr = oic_options;
+		}
+	}
+
+	icd_ioty_csdk_lock();
+	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
+	result = OCDoResource(&handle, method, uri_path, dev_addr, NULL, oic_conn_type,
+			OC_LOW_QOS, cbdata, oic_options_ptr, options_size);
+	icd_ioty_csdk_unlock();
+
+	if (OC_STACK_OK != result) {
+		ERR("OCDoResource() Fail(%d)", result);
+		if (cbdata->cd)
+			cbdata->cd(cbdata->context);
+		return NULL;
+	}
+
+	return handle;
+}
+
+
 OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_policy,
 		GVariant *query, int64_t signal_number, const char *bus_name)
 {
 	bool is_secure;
 	OCMethod method;
 	OCDoHandle handle;
-	OCStackResult result;
 	GVariantIter *options;
+	int ret, conn_type;
 	icd_sig_ctx_s *context;
-	OCCallbackData cbdata = {0};
-	int ret, conn_type, options_size;
 	char *uri_path, *host, *uri;
-	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
-	OCHeaderOption *oic_options_ptr = NULL;
-	OCConnectivityType oic_conn_type;
 	OCDevAddr dev_addr = {0};
+	OCCallbackData cbdata = {0};
+	OCConnectivityType oic_conn_type;
 
 	g_variant_get(resource, "(&s&sba(qs)i)", &uri_path, &host, &is_secure, &options,
 			&conn_type);
@@ -741,58 +787,38 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_policy,
 	else
 		method = OC_REST_OBSERVE_ALL;
 
-	context = calloc(1, sizeof(icd_sig_ctx_s));
-	if (NULL == context) {
-		ERR("calloc() Fail(%d)", errno);
-		free(uri);
-		return NULL;
-	}
-	context->bus_name = ic_utils_strdup(bus_name);
-	context->signal_number = signal_number;
-
-	cbdata.context = context;
-	cbdata.cb = icd_ioty_ocprocess_observe_cb;
-	cbdata.cd = _ioty_free_signal_context;
-
-	options_size = g_variant_iter_n_children(options);
-	if (0 != options_size) {
-		int ret = _ioty_get_header_options(options, options_size, oic_options,
-				sizeof(oic_options) / sizeof(oic_options[0]));
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("_ioty_get_header_options() Fail(%d)", ret);
-			free(context->bus_name);
-			free(context);
-			free(uri);
-			g_variant_iter_free(options);
-			return NULL;
-		}
-		oic_options_ptr = oic_options;
-	}
-	g_variant_iter_free(options);
-
 	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
 
 	ret = icd_ioty_get_dev_addr(host, conn_type, &dev_addr);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icd_ioty_get_dev_addr() Fail(%d)", ret);
-		free(context->bus_name);
-		free(context);
 		free(uri);
+		g_variant_iter_free(options);
 		return NULL;
 	}
 
-	icd_ioty_csdk_lock();
-	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
-	result = OCDoResource(&handle, method, uri, &dev_addr, NULL, oic_conn_type,
-			OC_LOW_QOS, &cbdata, oic_options_ptr, options_size);
-	icd_ioty_csdk_unlock();
-	free(uri);
-	if (OC_STACK_OK != result) {
-		ERR("OCDoResource() Fail(%d)", result);
-		free(context->bus_name);
-		free(context);
+	context = calloc(1, sizeof(icd_sig_ctx_s));
+	if (NULL == context) {
+		ERR("calloc() Fail(%d)", errno);
+		free(uri);
+		g_variant_iter_free(options);
 		return NULL;
 	}
+
+	context->signal_number = signal_number;
+	context->bus_name = ic_utils_strdup(bus_name);
+
+	cbdata.context = context;
+	cbdata.cb = icd_ioty_ocprocess_observe_cb;
+	cbdata.cd = _ioty_free_signal_context;
+
+	handle = _icd_ioty_observe_register(uri, &dev_addr, options, method, oic_conn_type,
+			&cbdata);
+	if (NULL == handle)
+		ERR("_icd_ioty_observe_register() Fail");
+
+	free(uri);
+	g_variant_iter_free(options);
 
 	return handle;
 }
@@ -800,23 +826,25 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_policy,
 
 int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options)
 {
-	int options_size;
 	OCStackResult ret;
+	int options_size = 0;
 	GVariantIter options_iter;
 	OCHeaderOption oic_options[MAX_HEADER_OPTIONS];
 	OCHeaderOption *oic_options_ptr = NULL;
 
-	g_variant_iter_init(&options_iter, options);
+	if (options) {
+		g_variant_iter_init(&options_iter, options);
 
-	options_size = g_variant_iter_n_children(&options_iter);
-	if (0 != options_size) {
-		int ret = _ioty_get_header_options(&options_iter, options_size, oic_options,
-				sizeof(oic_options) / sizeof(oic_options[0]));
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("_ioty_get_header_options() Fail(%d)", ret);
-			return ret;
+		options_size = g_variant_iter_n_children(&options_iter);
+		if (0 != options_size) {
+			int ret = _ioty_get_header_options(&options_iter, options_size, oic_options,
+					sizeof(oic_options) / sizeof(oic_options[0]));
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("_ioty_get_header_options() Fail(%d)", ret);
+				return ret;
+			}
+			oic_options_ptr = oic_options;
 		}
-		oic_options_ptr = oic_options;
 	}
 
 	icd_ioty_csdk_lock();
@@ -1131,11 +1159,11 @@ static void _icd_ioty_presence_table_create()
 }
 
 
-static icd_presence_handle_info* _icd_ioty_presence_table_add(const char *host_address)
+static icd_presence_handle_info_s* _icd_ioty_presence_table_add(const char *host_address)
 {
-	icd_presence_handle_info *handle_info;
+	icd_presence_handle_info_s *handle_info;
 
-	handle_info = calloc(1, sizeof(icd_presence_handle_info));
+	handle_info = calloc(1, sizeof(icd_presence_handle_info_s));
 	if (NULL == handle_info) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;
@@ -1159,7 +1187,7 @@ static void _icd_ioty_presence_table_destroy()
 
 static void _icd_ioty_presence_table_remove(const char *host_address)
 {
-	icd_presence_handle_info *handle_info;
+	icd_presence_handle_info_s *handle_info;
 
 	handle_info = g_hash_table_lookup(icd_ioty_presence_table, host_address);
 	if (NULL == handle_info)
@@ -1178,7 +1206,7 @@ static void _icd_ioty_presence_table_remove(const char *host_address)
 }
 
 
-static icd_presence_handle_info* _icd_ioty_presence_table_get_handle_info(
+static icd_presence_handle_info_s* _icd_ioty_presence_table_get_handle_info(
 		const char *host_address)
 {
 	return g_hash_table_lookup(icd_ioty_presence_table, host_address);
@@ -1187,7 +1215,7 @@ static icd_presence_handle_info* _icd_ioty_presence_table_get_handle_info(
 
 OCDoHandle icd_ioty_presence_table_get_handle(const char *host_address)
 {
-	icd_presence_handle_info *handle_info;
+	icd_presence_handle_info_s *handle_info;
 
 	handle_info = g_hash_table_lookup(icd_ioty_presence_table, host_address);
 	if (NULL == handle_info)
@@ -1197,8 +1225,8 @@ OCDoHandle icd_ioty_presence_table_get_handle(const char *host_address)
 }
 
 
-OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
-		const char *resource_type)
+OCDoHandle icd_ioty_subscribe_presence(int type, const char *host_address, int conn_type,
+		const char *resource_type, void *context)
 {
 	OCDoHandle handle;
 	const char *address;
@@ -1206,7 +1234,7 @@ OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
 	char uri[PATH_MAX] = {0};
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
-	icd_presence_handle_info *handle_info;
+	icd_presence_handle_info_s *handle_info;
 
 	_icd_ioty_presence_table_create();
 
@@ -1230,8 +1258,15 @@ OCDoHandle icd_ioty_subscribe_presence(const char *host_address, int conn_type,
 
 	snprintf(uri, sizeof(uri), "%s%s", address, OC_RSRVD_PRESENCE_URI);
 
-	cbdata.cb = icd_ioty_ocprocess_presence_cb;
-	cbdata.cd = _ioty_free_signal_context;
+	switch (type) {
+	case ICD_ENCAP_MONITORING:
+		cbdata.context = context;
+		cbdata.cb = icd_ioty_ocprocess_encap_presence_cb;
+		break;
+	case ICD_PRESENCE:
+	default:
+		cbdata.cb = icd_ioty_ocprocess_presence_cb;
+	}
 
 	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
 
@@ -1300,3 +1335,290 @@ int icd_ioty_stop_presence()
 
 	return IOTCON_ERROR_NONE;
 }
+
+
+int icd_ioty_encap_get_time_interval()
+{
+	return icd_remote_resource_time_interval;
+}
+
+
+static void _encap_set_time_interval(gpointer key, gpointer value, gpointer user_data)
+{
+	icd_encap_info_s *encap_info = value;
+
+	g_source_remove(encap_info->get_timer_id);
+
+	encap_info->get_timer_id = g_timeout_add_seconds(icd_remote_resource_time_interval,
+			icd_ioty_encap_get, encap_info);
+}
+
+
+void icd_ioty_encap_set_time_interval(int time_interval)
+{
+	icd_remote_resource_time_interval = time_interval;
+
+	g_hash_table_foreach(icd_ioty_encap_table, _encap_set_time_interval, NULL);
+}
+
+
+static void _free_encap_info(void *user_data)
+{
+	icd_encap_info_s *encap_info = user_data;
+
+	OCRepPayloadDestroy(encap_info->oic_payload);
+	free(encap_info->uri_path);
+	free(encap_info->dev_addr);
+	free(encap_info);
+}
+
+
+static icd_encap_info_s* _icd_ioty_encap_table_add(const char *uri_path,
+		const char *host_address, int conn_type)
+{
+	int ret;
+	char key_str[PATH_MAX];
+	icd_encap_info_s *encap_info;
+
+	if (NULL == icd_ioty_encap_table) {
+		icd_ioty_encap_table = g_hash_table_new_full(g_str_hash, g_str_equal, free,
+				_free_encap_info);
+	}
+
+	encap_info = calloc(1, sizeof(icd_encap_info_s));
+	if (NULL == encap_info) {
+		ERR("calloc() Fail(%d)", errno);
+		return NULL;
+	}
+
+	encap_info->dev_addr = calloc(1, sizeof(OCDevAddr));
+	if (NULL == encap_info->dev_addr) {
+		ERR("calloc() Fail(%d)", errno);
+		free(encap_info);
+		return NULL;
+	}
+
+	ret = icd_ioty_get_dev_addr(host_address, conn_type, encap_info->dev_addr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_ioty_get_dev_addr() Fail(%d)", ret);
+		free(encap_info->dev_addr);
+		free(encap_info);
+		return NULL;
+	}
+
+	encap_info->uri_path = ic_utils_strdup(uri_path);
+	encap_info->oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
+	snprintf(key_str, sizeof(key_str), "%s%s", uri_path, host_address);
+	encap_info->signal_number = icd_dbus_generate_signal_number();
+
+	g_hash_table_insert(icd_ioty_encap_table, ic_utils_strdup(key_str),
+			encap_info);
+
+	return encap_info;
+}
+
+
+static void _icd_ioty_encap_table_remove(icd_encap_info_s *encap_info,
+		const char *host_address)
+{
+	char key_str[PATH_MAX];
+
+	snprintf(key_str, sizeof(key_str), "%s%s", encap_info->uri_path, host_address);
+
+	g_hash_table_remove(icd_ioty_encap_table, key_str);
+
+	if (0 == g_hash_table_size(icd_ioty_encap_table)) {
+		g_hash_table_destroy(icd_ioty_encap_table);
+		icd_ioty_encap_table = NULL;
+	}
+}
+
+
+static icd_encap_info_s* _icd_ioty_encap_table_get_info(const char *uri_path,
+		const char *host_address)
+{
+	char key_str[PATH_MAX];
+	icd_encap_info_s *encap_info;
+
+	if (NULL == icd_ioty_encap_table)
+		return NULL;
+
+	snprintf(key_str, sizeof(key_str), "%s%s", uri_path, host_address);
+
+	encap_info = g_hash_table_lookup(icd_ioty_encap_table, key_str);
+	if (NULL == encap_info)
+		return NULL;
+
+	return encap_info;
+}
+
+
+gboolean icd_ioty_encap_get(gpointer user_data)
+{
+	FN_CALL;
+	OCStackResult result;
+	OCCallbackData cbdata = {0};
+	icd_encap_info_s *encap_info = user_data;
+
+	cbdata.context = encap_info;
+	cbdata.cb = icd_ioty_ocprocess_encap_get_cb;
+
+	icd_ioty_csdk_lock();
+	result = OCDoResource(NULL, OC_REST_GET, encap_info->uri_path, encap_info->dev_addr,
+			NULL, encap_info->oic_conn_type, OC_LOW_QOS, &cbdata, NULL, 0);
+	icd_ioty_csdk_unlock();
+
+	if (OC_STACK_OK != result)
+		ERR("OCDoResource() Fail(%d)", result);
+
+	return G_SOURCE_CONTINUE;
+}
+
+
+int icd_ioty_start_encap(int type, const char *uri_path, const char *host_address,
+		int conn_type, int64_t *signal_number)
+{
+	OCCallbackData cbdata = {0};
+	icd_encap_info_s *encap_info;
+
+	encap_info = _icd_ioty_encap_table_get_info(uri_path, host_address);
+	if (NULL == encap_info) {
+		encap_info = _icd_ioty_encap_table_add(uri_path, host_address, conn_type);
+		if (NULL == encap_info) {
+			ERR("_icd_ioty_encap_table_add() Fail");
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+	}
+
+	if (0 == encap_info->monitoring_count + encap_info->caching_count) {
+		/* GET METHOD */
+		icd_ioty_encap_get(encap_info);
+		encap_info->get_timer_id = g_timeout_add_seconds(
+				icd_remote_resource_time_interval, icd_ioty_encap_get, encap_info);
+	}
+
+	switch (type) {
+	case ICD_ENCAP_MONITORING:
+		if (0 != encap_info->monitoring_count) {
+			*signal_number = encap_info->signal_number;
+			encap_info->monitoring_count++;
+			return IOTCON_ERROR_NONE;
+		}
+		/* DEVICE PRESENCE */
+		encap_info->presence_handle = icd_ioty_subscribe_presence(ICD_ENCAP_MONITORING,
+				host_address, conn_type, NULL, encap_info);
+		if (NULL == encap_info->presence_handle) {
+			ERR("icd_ioty_subscribe_presence() Fail");
+			if (0 == encap_info->monitoring_count + encap_info->caching_count) {
+				g_source_remove(encap_info->get_timer_id);
+				encap_info->get_timer_id = 0;
+				_icd_ioty_encap_table_remove(encap_info, host_address);
+			}
+			return IOTCON_ERROR_IOTIVITY;
+		}
+		encap_info->monitoring_count++;
+		break;
+	case ICD_ENCAP_CACHING:
+		if (0 != encap_info->caching_count) {
+			*signal_number = encap_info->signal_number;
+			encap_info->caching_count++;
+			return IOTCON_ERROR_NONE;
+		}
+		/* OBSERVE METHOD */
+		cbdata.context = encap_info;
+		cbdata.cb = icd_ioty_ocprocess_encap_observe_cb;
+
+		encap_info->observe_handle = _icd_ioty_observe_register(uri_path,
+				encap_info->dev_addr,
+				NULL,
+				OC_REST_OBSERVE,
+				encap_info->oic_conn_type,
+				&cbdata);
+		if (NULL == encap_info->observe_handle) {
+			ERR("_icd_ioty_observe_register() Fail");
+			if (0 == encap_info->monitoring_count + encap_info->caching_count) {
+				g_source_remove(encap_info->get_timer_id);
+				encap_info->get_timer_id = 0;
+				_icd_ioty_encap_table_remove(encap_info, host_address);
+			}
+			return IOTCON_ERROR_IOTIVITY;
+		}
+		encap_info->caching_count++;
+		break;
+	default:
+		ERR("Invalid Type(%d)", type);
+		if (0 == encap_info->monitoring_count + encap_info->caching_count) {
+			g_source_remove(encap_info->get_timer_id);
+			encap_info->get_timer_id = 0;
+			_icd_ioty_encap_table_remove(encap_info, host_address);
+		}
+		return IOTCON_ERROR_INVALID_TYPE;
+	}
+	*signal_number = encap_info->signal_number;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+int icd_ioty_stop_encap(int type, const char *uri_path, const char *host_address)
+{
+	int ret;
+	icd_encap_info_s *encap_info;
+
+	encap_info = _icd_ioty_encap_table_get_info(uri_path, host_address);
+	if (NULL == encap_info) {
+		ERR("_icd_ioty_encap_table_get_info() Fail");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	switch (type) {
+	case ICD_ENCAP_MONITORING:
+		if (0 == encap_info->monitoring_count) {
+			ERR("Not Monitoring(%s%s)", host_address, uri_path);
+			return IOTCON_ERROR_INVALID_PARAMETER;
+		}
+
+		encap_info->monitoring_count--;
+		if (0 != encap_info->monitoring_count)
+			return IOTCON_ERROR_NONE;
+
+		/* DEVICE PRESENCE */
+		ret = icd_ioty_unsubscribe_presence(encap_info->presence_handle, host_address);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icd_ioty_unsubscribe_presence() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case ICD_ENCAP_CACHING:
+		if (0 == encap_info->caching_count) {
+			ERR("Not Caching(%s%s)", host_address, uri_path);
+			return IOTCON_ERROR_INVALID_PARAMETER;
+		}
+
+		encap_info->caching_count--;
+		if (0 != encap_info->caching_count)
+			return IOTCON_ERROR_NONE;
+
+		/* OBSERVE METHOD */
+		ret = icd_ioty_observer_stop(encap_info->observe_handle, NULL);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icd_ioty_observer_stop() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	default:
+		ERR("Invalid Type(%d)", type);
+		return IOTCON_ERROR_INVALID_TYPE;
+	}
+
+	if (0 != encap_info->monitoring_count + encap_info->caching_count)
+		return IOTCON_ERROR_NONE;
+
+	/* GET METHOD */
+	g_source_remove(encap_info->get_timer_id);
+
+	_icd_ioty_encap_table_remove(encap_info, host_address);
+
+	return IOTCON_ERROR_NONE;
+}
+

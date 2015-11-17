@@ -30,7 +30,6 @@
 #include "icl-resource-types.h"
 #include "icl-payload.h"
 
-#define ICL_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL 10 /* 10 sec */
 #define ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL 3600 /* 60 min */
 
 typedef struct {
@@ -39,9 +38,6 @@ typedef struct {
 	unsigned int id;
 	int timeout_id;
 } icl_found_resource_s;
-
-static int icl_remote_resource_time_interval;
-
 
 static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *payload,
 		iotcon_connectivity_type_e connectivity_type);
@@ -119,13 +115,11 @@ API int iotcon_find_resource(const char *host_address,
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	signal_number = icl_dbus_generate_signal_number();
-
 	ic_dbus_call_find_resource_sync(icl_dbus_get_object(),
 			ic_utils_dbus_encode_str(host_address),
 			connectivity_type,
 			ic_utils_dbus_encode_str(resource_type),
-			signal_number,
+			&signal_number,
 			&ret,
 			NULL,
 			&error);
@@ -214,9 +208,9 @@ API void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource)
 
 	icl_remote_resource_crud_stop(resource);
 
-	if (resource->caching_handle)
+	if (0 != resource->caching_sub_id)
 		iotcon_remote_resource_stop_caching(resource);
-	if (resource->monitoring_handle)
+	if (0 != resource->monitoring_sub_id)
 		iotcon_remote_resource_stop_monitoring(resource);
 
 	free(resource->uri_path);
@@ -481,12 +475,21 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 
 API int iotcon_remote_resource_get_time_interval(int *time_interval)
 {
+	GError *error = NULL;
+	int ret, arg_time_interval;
+
 	RETV_IF(NULL == time_interval, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (0 == icl_remote_resource_time_interval)
-		*time_interval = ICL_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
-	else
-		*time_interval = icl_remote_resource_time_interval;
+	ic_dbus_call_encap_get_time_interval_sync(icl_dbus_get_object(), &arg_time_interval,
+			NULL, &error);
+	if (error) {
+		ERR("ic_dbus_call_encap_get_time_interval_sync() Fail(%s)", error->message);
+		ret = icl_dbus_convert_dbus_error(error->code);
+		g_error_free(error);
+		return ret;
+	}
+
+	*time_interval = arg_time_interval;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -494,10 +497,20 @@ API int iotcon_remote_resource_get_time_interval(int *time_interval)
 
 API int iotcon_remote_resource_set_time_interval(int time_interval)
 {
+	int ret;
+	GError *error = NULL;
+
 	RETV_IF(ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL < time_interval || time_interval <= 0,
 			IOTCON_ERROR_INVALID_PARAMETER);
 
-	icl_remote_resource_time_interval = time_interval;
+	ic_dbus_call_encap_set_time_interval_sync(icl_dbus_get_object(), time_interval,
+			NULL, &error);
+	if (error) {
+		ERR("ic_dbus_call_encap_set_time_interval_sync() Fail(%s)", error->message);
+		ret = icl_dbus_convert_dbus_error(error->code);
+		g_error_free(error);
+		return ret;
+	}
 
 	return IOTCON_ERROR_NONE;
 }

@@ -426,8 +426,8 @@ typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
  * @brief Starts caching of a remote resource.
  * @details Use this function to start caching the resource's attribute.\n
  * Although, remote resource is not observable, it keeps the representation up-to-date.
- * Because It checks whether representation is changed, periodically.
- * The default checking interval is 10 seconds, But it may be changed by a administrator.
+ * Because It checks whether representation is changed, periodically.\n
+ * The default checking interval is 10 seconds, but it may be changed by an administrator.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -494,8 +494,9 @@ typedef void (*iotcon_remote_resource_state_changed_cb)(iotcon_remote_resource_h
 /**
  * @brief Starts monitoring of a remote resource.
  * @details When remote resource's state are changed, registered callbacks will be called
- * in turn. Internally, it checks the state of resource, periodically. Thus, it may not
- * receive the state, immediately.
+ * in turn. Although, remote resource does not call iotcon_start_presence(), it knows
+ * the state of resource. Because it checks the state of resource, periodically.\n
+ * The default checking interval is 10 seconds, but it may be changed by an administrator.
  *
  * @since_tizen 3.0
  * @privlevel public

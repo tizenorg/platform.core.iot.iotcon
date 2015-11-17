@@ -110,6 +110,14 @@ struct icd_presence_context {
 };
 
 
+struct icd_encap_context {
+	int64_t signal_number;
+	OCRepPayload *oic_payload;
+	OCStackResult ret;
+	icd_encap_info_s *encap_info;
+};
+
+
 void icd_ioty_ocprocess_stop()
 {
 	icd_ioty_alive = 0;
@@ -1184,3 +1192,158 @@ OCStackApplicationResult icd_ioty_ocprocess_get_tizen_info_cb(void *ctx,
 
 	return OC_STACK_DELETE_TRANSACTION;
 }
+
+
+static int _worker_encap_get_cb(void *context)
+{
+	int ret;
+	struct icd_encap_context *ctx = context;
+	iotcon_remote_resource_state_e resource_state;
+	GVariant *monitoring_value, *caching_value;
+
+	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
+
+	/* MONITORING */
+	if (0 < ctx->encap_info->monitoring_count) {
+		switch (ctx->ret) {
+		case OC_STACK_OK:
+			resource_state = IOTCON_REMOTE_RESOURCE_ALIVE;
+			break;
+		case OC_STACK_ERROR:
+		default:
+			resource_state = IOTCON_REMOTE_RESOURCE_LOST_SIGNAL;
+		}
+		if (resource_state != ctx->encap_info->resource_state) {
+			ctx->encap_info->resource_state = resource_state;
+			monitoring_value = g_variant_new("(i)", resource_state);
+			ret = _ocprocess_response_signal(NULL, IC_DBUS_SIGNAL_MONITORING,
+					ctx->encap_info->signal_number, monitoring_value);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("_ocprocess_response_signal() Fail(%d)", ret);
+				OCRepPayloadDestroy(ctx->oic_payload);
+				free(ctx);
+				return ret;
+			}
+		}
+	}
+
+	/* CACHING */
+	if (0 < ctx->encap_info->caching_count) {
+		if (OC_STACK_OK != ctx->ret) {
+			OCRepPayloadDestroy(ctx->oic_payload);
+			free(ctx);
+			return IOTCON_ERROR_NONE;
+		}
+
+		ret = icd_payload_representation_compare(ctx->encap_info->oic_payload,
+				ctx->oic_payload);
+		if (IC_EQUAL == ret) {
+			OCRepPayloadDestroy(ctx->oic_payload);
+			free(ctx);
+			return IOTCON_ERROR_NONE;
+		}
+
+		ctx->encap_info->oic_payload = ctx->oic_payload;
+		caching_value = icd_payload_to_gvariant((OCPayload*)ctx->oic_payload);
+
+		ret = _ocprocess_response_signal(NULL, IC_DBUS_SIGNAL_CACHING,
+				ctx->encap_info->signal_number, caching_value);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_ocprocess_response_signal() Fail(%d)", ret);
+			OCRepPayloadDestroy(ctx->oic_payload);
+			free(ctx);
+			return ret;
+		}
+	}
+
+	OCRepPayloadDestroy(ctx->oic_payload);
+	free(ctx);
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+OCStackApplicationResult icd_ioty_ocprocess_encap_get_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp)
+{
+	FN_CALL;
+	int ret;
+	icd_encap_info_s *encap_info = ctx;
+	struct icd_encap_context *encap_ctx;
+
+	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
+
+	encap_ctx = calloc(1, sizeof(struct icd_encap_context));
+	if (NULL == encap_ctx) {
+		ERR("calloc() Fail(%d)", errno);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	encap_ctx->ret = resp->result;
+	encap_ctx->oic_payload = OCRepPayloadClone((OCRepPayload*)resp->payload);
+	encap_ctx->encap_info = encap_info;
+
+	ret = _ocprocess_worker_start(_worker_encap_get_cb, encap_ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker_start() Fail(%d)", ret);
+		OCRepPayloadDestroy((OCRepPayload*)encap_ctx->oic_payload);
+		free(encap_ctx);
+		return OC_STACK_DELETE_TRANSACTION;
+	}
+
+	return OC_STACK_DELETE_TRANSACTION;
+}
+
+
+static int _worker_encap_get(void *context)
+{
+	icd_encap_info_s *encap_info = context;
+
+	g_source_remove(encap_info->get_timer_id);
+	icd_ioty_encap_get(encap_info);
+	encap_info->get_timer_id = g_timeout_add_seconds(icd_ioty_encap_get_time_interval(),
+			icd_ioty_encap_get, encap_info);
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+OCStackApplicationResult icd_ioty_ocprocess_encap_observe_cb(void *ctx, OCDoHandle handle,
+		OCClientResponse *resp)
+{
+	FN_CALL;
+	int ret;
+
+	RETV_IF(NULL == resp, OC_STACK_KEEP_TRANSACTION);
+
+	ret = _ocprocess_worker_start(_worker_encap_get, ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker_start() Fail(%d)", ret);
+		return OC_STACK_KEEP_TRANSACTION;
+	}
+
+	return OC_STACK_KEEP_TRANSACTION;
+}
+
+
+OCStackApplicationResult icd_ioty_ocprocess_encap_presence_cb(void *ctx,
+		OCDoHandle handle, OCClientResponse *resp)
+{
+	FN_CALL;
+	int ret;
+	OCPresencePayload *payload = (OCPresencePayload*)resp->payload;
+
+	RETV_IF(NULL == resp, OC_STACK_KEEP_TRANSACTION);
+
+	if ((OC_STACK_OK == resp->result) && (OC_PRESENCE_TRIGGER_DELETE != payload->trigger))
+		return OC_STACK_KEEP_TRANSACTION;
+
+	ret = _ocprocess_worker_start(_worker_encap_get, ctx);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_ocprocess_worker_start() Fail(%d)", ret);
+		return OC_STACK_KEEP_TRANSACTION;
+	}
+
+	return OC_STACK_KEEP_TRANSACTION;
+}
+
