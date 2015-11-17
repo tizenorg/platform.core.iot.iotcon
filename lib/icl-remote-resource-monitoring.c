@@ -18,6 +18,7 @@
 #include <glib.h>
 
 #include "iotcon.h"
+#include "iotcon-internal.h"
 #include "icl.h"
 #include "icl-remote-resource.h"
 
@@ -75,10 +76,10 @@ static gboolean _monitoring_get_timer(gpointer user_data)
 static void _monitoring_presence_cb(iotcon_presence_h presence, iotcon_error_e err,
 		iotcon_presence_response_h response, void *user_data)
 {
-	int ret;
+	int ret, time_interval;
 	unsigned int get_timer_id;
-	iotcon_presence_trigger_e trigger;
 	iotcon_presence_result_e result;
+	iotcon_presence_trigger_e trigger;
 	iotcon_remote_resource_h resource = user_data;
 
 	RET_IF(NULL == resource);
@@ -102,29 +103,30 @@ static void _monitoring_presence_cb(iotcon_presence_h presence, iotcon_error_e e
 			return;
 	}
 
+	ret = iotcon_remote_resource_get_time_interval(&time_interval);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_remote_resource_get_time_interval() Fail(%d)", ret);
+		return;
+	}
+
 	g_source_remove(resource->monitoring_handle->get_timer_id);
 
 	_monitoring_get_timer(resource);
-	get_timer_id = g_timeout_add_seconds(resource->caching_handle->get_timer_interval,
-			_monitoring_get_timer, resource);
+	get_timer_id = g_timeout_add_seconds(time_interval, _monitoring_get_timer, resource);
 	resource->monitoring_handle->get_timer_id = get_timer_id;
 }
 
 
 API int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resource,
-		int monitoring_interval,
-		iotcon_remote_resource_state_changed_cb cb,
-		void *user_data)
+		iotcon_remote_resource_state_changed_cb cb, void *user_data)
 {
 	char *host_address;
-	int ret;
-	iotcon_connectivity_type_e connectivity_type;
+	int ret, time_interval;
 	unsigned int get_timer_id;
+	iotcon_connectivity_type_e connectivity_type;
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL < monitoring_interval,
-			IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (resource->monitoring_handle) {
 		ERR("Already Start Monitoring");
@@ -139,22 +141,21 @@ API int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resourc
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	if (monitoring_interval <= 0) {
-		WARN("Because time interval is negative, it sets default time interval.(10 sec)");
-		resource->monitoring_handle->get_timer_interval
-			= ICL_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
-	} else {
-		resource->monitoring_handle->get_timer_interval = monitoring_interval;
-	}
-
 	_monitoring_get_timer(resource);
 
 	/* GET METHOD (Resource Presence) */
 	resource->monitoring_handle->cb = cb;
 	resource->monitoring_handle->user_data = user_data;
 
-	get_timer_id = g_timeout_add_seconds(resource->monitoring_handle->get_timer_interval,
-			_monitoring_get_timer, resource);
+	ret = iotcon_remote_resource_get_time_interval(&time_interval);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_remote_resource_get_time_interval() Fail(%d)", ret);
+		free(resource->monitoring_handle);
+		resource->monitoring_handle = NULL;
+		return ret;
+	}
+
+	get_timer_id = g_timeout_add_seconds(time_interval, _monitoring_get_timer, resource);
 	resource->monitoring_handle->get_timer_id = get_timer_id;
 
 	/* Device Presence */

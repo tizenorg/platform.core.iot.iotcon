@@ -425,16 +425,15 @@ typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
 /**
  * @brief Starts caching of a remote resource.
  * @details Use this function to start caching the resource's attribute.\n
- * Default caching time interval is 10 seconds.
- * Internally, it operates GET method, periodically, and it observes the remote resource.
+ * Although, remote resource is not observable, it keeps the representation up-to-date.
+ * Because It checks whether representation is changed, periodically.
+ * The default checking interval is 10 seconds, But it may be changed by a administrator.
  *
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the remote resource to be cached
- * @param[in] caching_interval Seconds for caching time interval.\n
- * If value is 0, then it sets 10 seconds(default caching time).
  * @param[in] cb The callback function to add into callback list
  * @param[in] user_data The user data to pass to the callback function
  *
@@ -451,9 +450,7 @@ typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
  * @see iotcon_remote_resource_cached_representation_changed_cb()
  */
 int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
-		int caching_interval,
-		iotcon_remote_resource_cached_representation_changed_cb cb,
-		void *user_data);
+		iotcon_remote_resource_cached_representation_changed_cb cb, void *user_data);
 
 /**
  * @brief Stops caching of a remote resource.
@@ -496,17 +493,15 @@ typedef void (*iotcon_remote_resource_state_changed_cb)(iotcon_remote_resource_h
 
 /**
  * @brief Starts monitoring of a remote resource.
- * @details When remote resource's state are changed, registered callbacks will be called\n
- * in turn. Default monitoring time interval is 10 seconds.
- * Internally, it operates GET method, periodically, and it subscribes the devices's presence.
+ * @details When remote resource's state are changed, registered callbacks will be called
+ * in turn. Internally, it checks the state of resource, periodically. Thus, it may not
+ * receive the state, immediately.
  *
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the remote resource
- * @param[in] monitoring_interval Seconds for monitoring time interval.\n
- * If value is 0, then it sets 10 seconds(default monitoring time).
  * @param[in] cb The callback function to add into callback list
  * @param[in] user_data The user data to pass to the callback function
  *
@@ -520,9 +515,7 @@ typedef void (*iotcon_remote_resource_state_changed_cb)(iotcon_remote_resource_h
  * @see iotcon_remote_resource_state_changed_cb()
  */
 int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resource,
-		int monitoring_interval,
-		iotcon_remote_resource_state_changed_cb cb,
-		void *user_data);
+		iotcon_remote_resource_state_changed_cb cb, void *user_data);
 
 /**
  * @brief Stops monitoring of a remote resource.

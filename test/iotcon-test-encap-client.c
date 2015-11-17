@@ -192,7 +192,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 	}
 
 	/* Start Monitoring */
-	ret = iotcon_remote_resource_start_monitoring(cloned_resource, 10, _state_changed_cb,
+	ret = iotcon_remote_resource_start_monitoring(cloned_resource, _state_changed_cb,
 			NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_remote_resource_start_monitoring() Fail(%d)", ret);
@@ -202,7 +202,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 	}
 
 	/* Start Caching */
-	ret = iotcon_remote_resource_start_caching(cloned_resource, 10,
+	ret = iotcon_remote_resource_start_caching(cloned_resource,
 			_representation_changed_cb, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_remote_resource_start_caching() Fail(%d)", ret);

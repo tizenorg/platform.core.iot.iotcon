@@ -24,9 +24,6 @@
 
 #include "icl-options.h"
 
-#define ICL_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL 10 /* 10 sec */
-#define ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL 3600 /* 60 min */
-
 typedef enum {
 	ICL_DEVICE_STATE_ALIVE,
 	ICL_DEVICE_STATE_LOST_SIGNAL,
@@ -34,7 +31,6 @@ typedef enum {
 
 struct icl_remote_resource_caching {
 	unsigned int get_timer_id;
-	int get_timer_interval;
 	iotcon_representation_h repr;
 	iotcon_remote_resource_cached_representation_changed_cb cb;
 	void *user_data;
@@ -44,7 +40,6 @@ struct icl_remote_resource_caching {
 
 struct icl_remote_resource_monitoring {
 	unsigned int get_timer_id;
-	int get_timer_interval;
 	iotcon_remote_resource_state_e resource_state;
 	iotcon_remote_resource_state_changed_cb cb;
 	void *user_data;

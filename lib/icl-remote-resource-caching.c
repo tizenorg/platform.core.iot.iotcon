@@ -20,6 +20,7 @@
 #include <glib.h>
 
 #include "iotcon.h"
+#include "iotcon-internal.h"
 #include "ic-dbus.h"
 #include "ic-utils.h"
 #include "icl.h"
@@ -329,16 +330,12 @@ static gboolean _caching_get_timer(gpointer user_data)
 
 
 API int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
-		int caching_interval,
-		iotcon_remote_resource_cached_representation_changed_cb cb,
-		void *user_data)
+		iotcon_remote_resource_cached_representation_changed_cb cb, void *user_data)
 {
-	int ret;
+	int ret, time_interval;
 	unsigned int get_timer_id;
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL < caching_interval,
-			IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (resource->caching_handle) {
 		ERR("Already Start Caching");
@@ -351,14 +348,6 @@ API int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
 	if (NULL == resource->caching_handle) {
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
-
-	if (caching_interval <= 0) {
-		WARN("Because time interval is negative, it sets default time interval.(10 sec)");
-		resource->caching_handle->get_timer_interval
-			= ICL_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
-	} else {
-		resource->caching_handle->get_timer_interval = caching_interval;
 	}
 
 	_caching_get_timer(resource);
@@ -376,8 +365,13 @@ API int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
 	resource->caching_handle->cb = cb;
 	resource->caching_handle->user_data = user_data;
 
-	get_timer_id = g_timeout_add_seconds(resource->caching_handle->get_timer_interval,
-			_caching_get_timer, resource);
+	ret = iotcon_remote_resource_get_time_interval(&time_interval);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_remote_resource_get_time_interval() Fail(%d)", ret);
+		return ret;
+	}
+
+	get_timer_id = g_timeout_add_seconds(time_interval, _caching_get_timer, resource);
 	resource->caching_handle->get_timer_id = get_timer_id;
 
 	return IOTCON_ERROR_NONE;

@@ -30,12 +30,18 @@
 #include "icl-resource-types.h"
 #include "icl-payload.h"
 
+#define ICL_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL 10 /* 10 sec */
+#define ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL 3600 /* 60 min */
+
 typedef struct {
 	iotcon_found_resource_cb cb;
 	void *user_data;
 	unsigned int id;
 	int timeout_id;
 } icl_found_resource_s;
+
+static int icl_remote_resource_time_interval;
+
 
 static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *payload,
 		iotcon_connectivity_type_e connectivity_type);
@@ -470,5 +476,29 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 	resource->is_secure = is_secure;
 
 	return resource;
+}
+
+
+API int iotcon_remote_resource_get_time_interval(int *time_interval)
+{
+	RETV_IF(NULL == time_interval, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (0 == icl_remote_resource_time_interval)
+		*time_interval = ICL_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
+	else
+		*time_interval = icl_remote_resource_time_interval;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_remote_resource_set_time_interval(int time_interval)
+{
+	RETV_IF(ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL < time_interval || time_interval <= 0,
+			IOTCON_ERROR_INVALID_PARAMETER);
+
+	icl_remote_resource_time_interval = time_interval;
+
+	return IOTCON_ERROR_NONE;
 }
 

@@ -72,6 +72,46 @@ int iotcon_start_presence(unsigned int time_to_live);
  */
 int iotcon_stop_presence(void);
 
+/**
+ * @brief Gets the time interval of monitoring & caching API of remote resource.
+ * @details This API get the time interval of iotcon_remote_resource_start_monitoring(),
+ * and iotcon_remote_resource_start_caching().\n
+ * The functions operate GET method, every saved time interval.
+ * Default time interval is 10 seconds.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[out] time_interval Seconds for time interval
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @see iotcon_remote_resource_set_time_interval()
+ * @see iotcon_remote_resource_start_monitoring()
+ * @see iotcon_remote_resource_start_caching()
+ */
+int iotcon_remote_resource_get_time_interval(int *time_interval);
+
+/**
+ * @brief Sets the time interval of monitoring & caching API of remote resource.
+ * @details This API set the time interval of iotcon_remote_resource_start_monitoring(),
+ * and iotcon_remote_resource_start_caching().
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] time_interval Seconds for time interval (must be in range from 1 to 3600)
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @see iotcon_remote_resource_get_time_interval()
+ * @see iotcon_remote_resource_start_monitoring()
+ * @see iotcon_remote_resource_start_caching()
+ */
+int iotcon_remote_resource_set_time_interval(int time_interval);
+
 #ifdef __cplusplus
 }
 #endif
