@@ -744,6 +744,7 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_policy,
 	context = calloc(1, sizeof(icd_sig_ctx_s));
 	if (NULL == context) {
 		ERR("calloc() Fail(%d)", errno);
+		free(uri);
 		return NULL;
 	}
 	context->bus_name = ic_utils_strdup(bus_name);

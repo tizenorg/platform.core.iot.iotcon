@@ -16,7 +16,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <unistd.h> /* for usleep() */
+#include <unistd.h>
 #include <glib.h>
 
 #include <ocstack.h>
@@ -329,6 +329,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 	dev_addr = calloc(1, sizeof(OCDevAddr));
 	if (NULL == dev_addr) {
 		ERR("calloc() Fail(%d)", errno);
+		free(req_ctx->bus_name);
 		free(req_ctx);
 		return OC_EH_ERROR;
 	}
@@ -355,6 +356,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 			req_ctx->payload = NULL;
 			break;
 		default:
+			free(req_ctx->dev_addr);
 			free(req_ctx->bus_name);
 			free(req_ctx);
 			return OC_EH_ERROR;
@@ -406,6 +408,7 @@ gpointer icd_ioty_ocprocess_thread(gpointer data)
 {
 	FN_CALL;
 	OCStackResult result;
+	const struct timespec delay = {0, 10 * 1000 * 1000}; /* 10 ms */
 
 	icd_ioty_alive = 1;
 	while (icd_ioty_alive) {
@@ -417,8 +420,9 @@ gpointer icd_ioty_ocprocess_thread(gpointer data)
 			break;
 		}
 
-		/* TODO : SHOULD revise time or usleep */
-		usleep(10);
+		/* TODO : Current '10ms' is not proven sleep time. Revise the time after test.
+		 * Or recommend changes to event driven architecture */
+		nanosleep(&delay, NULL);
 	}
 
 	return NULL;

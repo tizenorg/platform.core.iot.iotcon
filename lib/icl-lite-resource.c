@@ -139,10 +139,11 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 {
 	GVariant *repr_gvar;
 	int ret, request_type;
+	int64_t oic_request_h = 0;
+	int64_t oic_resource_h = 0;
 	iotcon_representation_h repr;
 	iotcon_state_h recv_state = NULL;
 	GVariantIter *repr_iter, *state_iter;
-	int64_t oic_request_h, oic_resource_h;
 	iotcon_lite_resource_h resource = user_data;
 
 	ret = iotcon_representation_create(&repr);
