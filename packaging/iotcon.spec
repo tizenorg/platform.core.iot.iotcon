@@ -82,6 +82,7 @@ ln -s ../%{name}.service %{buildroot}%{_unitdir}/multi-user.target.wants/%{name}
 %if 0%{?tizen_version_major} < 3
 mkdir -p %{buildroot}/%{_datadir}/license
 cp LICENSE.APLv2 %{buildroot}/%{_datadir}/license/%{name}
+cp LICENSE.APLv2 %{buildroot}/%{_datadir}/license/%{name}-test
 %endif
 
 
@@ -124,4 +125,8 @@ systemctl daemon-reload
 %manifest %{name}-test.manifest
 %defattr(-,root,root,-)
 %{_bindir}/iotcon-test-*
+%if 0%{?tizen_version_major} < 3
+%{_datadir}/license/%{name}-test
+%else
 %license LICENSE.APLv2
+%endif

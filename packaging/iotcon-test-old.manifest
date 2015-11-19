@@ -7,6 +7,9 @@
 			<smack request="device::sys_logging" type="w" />
 		</request>
 	</define>
+	<assign>
+		<filesystem path="/usr/share/license/iotcon-test" label="_" />
+	</assign>
 	<request>
 		<domain name="iotcon-test" />
 	</request>
