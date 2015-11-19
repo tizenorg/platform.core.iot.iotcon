@@ -109,22 +109,22 @@ static int _ioty_properties_to_oic_properties(int properties)
 {
 	int prop = OC_RES_PROP_NONE;
 
-	if (IOTCON_DISCOVERABLE & properties)
+	if (IOTCON_RESOURCE_DISCOVERABLE & properties)
 		prop |= OC_DISCOVERABLE;
 
-	if (IOTCON_OBSERVABLE & properties)
+	if (IOTCON_RESOURCE_OBSERVABLE & properties)
 		prop |= OC_OBSERVABLE;
 
-	if (IOTCON_ACTIVE & properties)
+	if (IOTCON_RESOURCE_ACTIVE & properties)
 		prop |= OC_ACTIVE;
 
-	if (IOTCON_SLOW & properties)
+	if (IOTCON_RESOURCE_SLOW & properties)
 		prop |= OC_SLOW;
 
-	if (IOTCON_SECURE & properties)
+	if (IOTCON_RESOURCE_SECURE & properties)
 		prop |= OC_SECURE;
 
-	if (IOTCON_EXPLICIT_DISCOVERABLE & properties)
+	if (IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE & properties)
 		prop |= OC_EXPLICIT_DISCOVERABLE;
 
 	/* TODO: Secure option is not supported yet. */

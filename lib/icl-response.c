@@ -29,7 +29,7 @@
 #include "icl-response.h"
 
 /* the last index of iotcon_response_result_e */
-#define ICL_RESPONSE_RESULT_MAX (IOTCON_RESPONSE_RESULT_FORBIDDEN + 1)
+#define ICL_RESPONSE_RESULT_MAX (IOTCON_RESPONSE_FORBIDDEN + 1)
 
 API int iotcon_response_create(iotcon_request_h request,
 		iotcon_response_h *response)
@@ -103,7 +103,7 @@ API int iotcon_response_set_result(iotcon_response_h resp,
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (result < IOTCON_RESPONSE_RESULT_OK || ICL_RESPONSE_RESULT_MAX <= result) {
+	if (result < IOTCON_RESPONSE_OK || ICL_RESPONSE_RESULT_MAX <= result) {
 		ERR("Invalid result(%d)", result);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}

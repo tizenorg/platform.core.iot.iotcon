@@ -113,7 +113,7 @@ static int _icl_lite_resource_notify(iotcon_lite_resource_h lite_resource)
 	struct icl_resource resource = {0};
 
 	RETV_IF(NULL == lite_resource, IOTCON_ERROR_INVALID_PARAMETER);
-	if (false == (IOTCON_OBSERVABLE & lite_resource->properties))
+	if (false == (IOTCON_RESOURCE_OBSERVABLE & lite_resource->properties))
 		return IOTCON_ERROR_NONE;
 
 	resource.handle = lite_resource->handle;
@@ -150,7 +150,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_create() Fail(%d)", ret);
 		_icl_lite_resource_response_send(NULL, oic_request_h, oic_resource_h,
-				IOTCON_RESPONSE_RESULT_ERROR);
+				IOTCON_RESPONSE_ERROR);
 		return;
 	}
 
@@ -158,7 +158,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_set_uri_path() Fail(%d)", ret);
 		_icl_lite_resource_response_send(repr, oic_request_h, oic_resource_h,
-				IOTCON_RESPONSE_RESULT_ERROR);
+				IOTCON_RESPONSE_ERROR);
 		iotcon_representation_destroy(repr);
 		return;
 	}
@@ -182,7 +182,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 		if (FALSE == g_variant_iter_loop(repr_iter, "v", &repr_gvar)) {
 			ERR("Received representation is empty.");
 			_icl_lite_resource_response_send(repr, oic_request_h, oic_resource_h,
-					IOTCON_RESPONSE_RESULT_ERROR);
+					IOTCON_RESPONSE_ERROR);
 			iotcon_representation_destroy(repr);
 			return;
 		}
@@ -194,7 +194,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_state_create() Fail(%d)", ret);
 			_icl_lite_resource_response_send(repr, oic_request_h, oic_resource_h,
-					IOTCON_RESPONSE_RESULT_ERROR);
+					IOTCON_RESPONSE_ERROR);
 			iotcon_representation_destroy(repr);
 			return;
 		}
@@ -205,7 +205,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_icl_lite_resource_set_state() Fail(%d)", ret);
 			_icl_lite_resource_response_send(repr, oic_request_h, oic_resource_h,
-					IOTCON_RESPONSE_RESULT_ERROR);
+					IOTCON_RESPONSE_ERROR);
 			iotcon_state_destroy(recv_state);
 			iotcon_representation_destroy(repr);
 			return;
@@ -218,7 +218,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 	default:
 		WARN("Not supported request (only GET / PUT / OBSERVE)");
 		ret = _icl_lite_resource_response_send(repr, oic_request_h, oic_resource_h,
-				IOTCON_RESPONSE_RESULT_FORBIDDEN);
+				IOTCON_RESPONSE_FORBIDDEN);
 		if (IOTCON_ERROR_NONE != ret)
 			ERR("_icl_lite_resource_response_send() Fail(%d)", ret);
 		iotcon_representation_destroy(repr);
@@ -229,13 +229,13 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_set_state() Fail(%d)", ret);
 		_icl_lite_resource_response_send(repr, oic_request_h, oic_resource_h,
-				IOTCON_RESPONSE_RESULT_ERROR);
+				IOTCON_RESPONSE_ERROR);
 		iotcon_representation_destroy(repr);
 		return;
 	}
 
 	ret = _icl_lite_resource_response_send(repr, oic_request_h, oic_resource_h,
-			IOTCON_RESPONSE_RESULT_OK);
+			IOTCON_RESPONSE_OK);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_icl_lite_resource_response_send() Fail(%d)", ret);
 		iotcon_representation_destroy(repr);

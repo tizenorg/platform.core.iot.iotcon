@@ -59,7 +59,7 @@ static void _on_get(iotcon_remote_resource_h resource, iotcon_error_e err,
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 
-	if (IOTCON_RESPONSE_RESULT_OK != response_result)
+	if (IOTCON_RESPONSE_OK != response_result)
 		return;
 
 	ret = iotcon_response_get_representation(response, &repr);
@@ -129,7 +129,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		if (IOTCON_ERROR_NONE != ret)
 			return;
 
-		ret = iotcon_response_set_result(response, IOTCON_RESPONSE_RESULT_OK);
+		ret = iotcon_response_set_result(response, IOTCON_RESPONSE_OK);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_response_destroy(response);
 			return;

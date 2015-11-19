@@ -62,7 +62,7 @@ static void _create_resource()
 
 	// 1. create room resource
 	ifaces = IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH;
-	properties = IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE;
+	properties = IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE;
 
 	ret = iotcon_resource_types_create(&resource_types);
 	if (IOTCON_ERROR_NONE != ret)
@@ -84,7 +84,7 @@ static void _create_resource()
 
 	// 2. create door resource
 	ifaces = IOTCON_INTERFACE_DEFAULT;
-	properties = IOTCON_OBSERVABLE;
+	properties = IOTCON_RESOURCE_OBSERVABLE;
 
 	ret = iotcon_resource_types_create(&resource_types);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -155,7 +155,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @a ifaces can contain multiple interfaces like
  * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.\n
  * @a properties also can contain multiple properties like
- * IOTCON_ACTIVE | IOTCON_DISCOVERABLE.\n
+ * IOTCON_RESOURCE_ACTIVE | IOTCON_RESOURCE_DISCOVERABLE.\n
  * iotcon_request_handler_cb() will be called when receive CRUD request to the registered
  * resource.
  *

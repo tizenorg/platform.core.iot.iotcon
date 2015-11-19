@@ -42,10 +42,10 @@ static void _monitoring_get_cb(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	if (IOTCON_RESPONSE_RESULT_OK <= response_result)
-		resource_state = IOTCON_REMOTE_RESOURCE_STATE_ALIVE;
+	if (IOTCON_RESPONSE_OK <= response_result)
+		resource_state = IOTCON_REMOTE_RESOURCE_ALIVE;
 	else
-		resource_state = IOTCON_REMOTE_RESOURCE_STATE_LOST_SIGNAL;
+		resource_state = IOTCON_REMOTE_RESOURCE_LOST_SIGNAL;
 
 	if (resource_state == resource->monitoring_handle->resource_state)
 		return;
@@ -99,7 +99,7 @@ static void _monitoring_presence_cb(iotcon_presence_h presence, iotcon_error_e e
 			return;
 		}
 
-		if (IOTCON_PRESENCE_TRIGGER_RESOURCE_DESTROYED != trigger)
+		if (IOTCON_PRESENCE_RESOURCE_DESTROYED != trigger)
 			return;
 	}
 

@@ -48,7 +48,7 @@ static bool _icl_list_dec_ref_count(iotcon_list_h val)
 	return ret;
 }
 
-static int _icl_list_create(iotcon_types_e type, iotcon_list_h *ret_list)
+static int _icl_list_create(iotcon_type_e type, iotcon_list_h *ret_list)
 {
 	iotcon_list_h list;
 
@@ -65,7 +65,7 @@ static int _icl_list_create(iotcon_types_e type, iotcon_list_h *ret_list)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_list_create(iotcon_types_e type, iotcon_list_h *ret_list)
+API int iotcon_list_create(iotcon_type_e type, iotcon_list_h *ret_list)
 {
 	int ret;
 	iotcon_list_h list;
@@ -410,7 +410,7 @@ API int iotcon_list_remove_nth(iotcon_list_h list, int pos)
 	return ret;
 }
 
-API int iotcon_list_get_type(iotcon_list_h list, iotcon_types_e *type)
+API int iotcon_list_get_type(iotcon_list_h list, iotcon_type_e *type)
 {
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);

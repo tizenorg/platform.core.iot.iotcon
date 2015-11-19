@@ -175,7 +175,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_list_create(iotcon_types_e type, iotcon_list_h *list);
+int iotcon_list_create(iotcon_type_e type, iotcon_list_h *list);
 
 /**
  * @brief Destroys a list handle.
@@ -436,7 +436,7 @@ int iotcon_list_remove_nth(iotcon_list_h list, int pos);
 /**
  * @brief Gets the type of the list.
  * @details It gets the data type of value related the @a key in @a state.
- * The data type could be one of #iotcon_types_e.
+ * The data type could be one of #iotcon_type_e.
  *
  * @since_tizen 3.0
  *
@@ -447,7 +447,7 @@ int iotcon_list_remove_nth(iotcon_list_h list, int pos);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_list_get_type(iotcon_list_h list, iotcon_types_e *type);
+int iotcon_list_get_type(iotcon_list_h list, iotcon_type_e *type);
 
 /**
  * @brief Gets the number of elements in a list.

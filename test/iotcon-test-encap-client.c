@@ -45,10 +45,10 @@ static void _state_changed_cb(iotcon_remote_resource_h resource,
 	INFO("Resource State is Changed");
 
 	switch (state) {
-	case IOTCON_REMOTE_RESOURCE_STATE_ALIVE:
+	case IOTCON_REMOTE_RESOURCE_ALIVE:
 		INFO(" --- ALIVE");
 		break;
-	case IOTCON_REMOTE_RESOURCE_STATE_LOST_SIGNAL:
+	case IOTCON_REMOTE_RESOURCE_LOST_SIGNAL:
 		INFO(" --- LOST_SIGNAL");
 		break;
 	default:

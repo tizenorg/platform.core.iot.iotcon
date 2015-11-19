@@ -439,7 +439,7 @@ int iotcon_state_unset(iotcon_state_h state, const char *key);
 /**
  * @brief Gets the type of a value at the given key.
  * @details It gets the data type of value related the @a key in @a state.
- * The data type could be one of #iotcon_types_e.
+ * The data type could be one of #iotcon_type_e.
  *
  * @since_tizen 3.0
  *
@@ -453,7 +453,7 @@ int iotcon_state_unset(iotcon_state_h state, const char *key);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
 int iotcon_state_get_type(iotcon_state_h state, const char *key,
-		iotcon_types_e *type);
+		iotcon_type_e *type);
 
 /**
  * @brief Specifies the type of function passed to iotcon_state_foreach()

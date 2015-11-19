@@ -45,7 +45,7 @@ static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
 		return;
 	}
 
-	if (IOTCON_RESPONSE_RESULT_OK != response_result) {
+	if (IOTCON_RESPONSE_OK != response_result) {
 		ERR("_on_response_observe Response error(%d)", response_result);
 		return;
 	}
@@ -98,8 +98,8 @@ static void _on_response_delete(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	if (IOTCON_RESPONSE_RESULT_OK != response_result
-			&& IOTCON_RESPONSE_RESULT_RESOURCE_DELETED != response_result) {
+	if (IOTCON_RESPONSE_OK != response_result
+			&& IOTCON_RESPONSE_RESULT_DELETED != response_result) {
 		ERR("_on_response_delete Response error(%d)", response_result);
 		return;
 	}
@@ -128,8 +128,8 @@ static void _on_response_post(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	if (IOTCON_RESPONSE_RESULT_OK != response_result
-			&& IOTCON_RESPONSE_RESULT_RESOURCE_CREATED != response_result) {
+	if (IOTCON_RESPONSE_OK != response_result
+			&& IOTCON_RESPONSE_RESOURCE_CREATED != response_result) {
 		ERR("_on_response_post Response error(%d)", response_result);
 		return;
 	}
@@ -206,7 +206,7 @@ static void _on_response_put(iotcon_remote_resource_h resource, iotcon_response_
 		return;
 	}
 
-	if (IOTCON_RESPONSE_RESULT_OK != response_result) {
+	if (IOTCON_RESPONSE_OK != response_result) {
 		ERR("_on_response_put Response error(%d)", response_result);
 		return;
 	}
@@ -243,7 +243,7 @@ static void _on_response_get(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	if (IOTCON_RESPONSE_RESULT_OK != response_result) {
+	if (IOTCON_RESPONSE_OK != response_result) {
 		ERR("_on_response_get Response error(%d)", response_result);
 		return;
 	}

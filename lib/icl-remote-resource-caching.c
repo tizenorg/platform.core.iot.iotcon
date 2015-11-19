@@ -209,7 +209,7 @@ static void _caching_get_cb(iotcon_remote_resource_h resource,
 	RETM_IF(IOTCON_ERROR_NONE != err, "_caching_get() Fail(%d)", err);
 
 	ret = iotcon_response_get_result(resp, &result);
-	if (IOTCON_ERROR_NONE != ret || IOTCON_RESPONSE_RESULT_OK != result) {
+	if (IOTCON_ERROR_NONE != ret || IOTCON_RESPONSE_OK != result) {
 		ERR("Invalid result (%d)", result);
 		return;
 	}

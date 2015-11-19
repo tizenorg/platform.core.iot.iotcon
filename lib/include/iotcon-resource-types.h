@@ -61,7 +61,7 @@ static void _create_light_resource()
 	}
 
 	ret = iotcon_resource_create("/light/1", resource_types, IOTCON_INTERFACE_DEFAULT,
-			IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE, _request_handler, NULL, &resource);
+			IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE, _request_handler, NULL, &resource);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(resource_types);
 		return;

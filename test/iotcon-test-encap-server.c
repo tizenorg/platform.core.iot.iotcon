@@ -50,7 +50,7 @@ static int _set_door_resource(door_resource_s *door)
 		return -1;
 	}
 
-	door->properties = IOTCON_DISCOVERABLE;
+	door->properties = IOTCON_RESOURCE_DISCOVERABLE;
 
 	return 0;
 }
@@ -203,7 +203,7 @@ int main(int argc, char **argv)
 	}
 
 	/* add resource options */
-	my_door.properties |= IOTCON_OBSERVABLE;
+	my_door.properties |= IOTCON_RESOURCE_OBSERVABLE;
 
 	/* create new door resource */
 	my_door.handle = _create_door_resource(my_door.uri_path, my_door.type,

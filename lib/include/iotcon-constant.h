@@ -55,9 +55,9 @@
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_OBSERVE_REGISTER = 0, /**< Indicates action of registering observation*/
-	IOTCON_OBSERVE_DEREGISTER = 1, /**< Indicates action of unregistering observation */
-	IOTCON_OBSERVE_TYPE_NONE = 2, /**< Indicates no option */
+	IOTCON_OBSERVE_NO_TYPE = 0, /**< Indicates no option */
+	IOTCON_OBSERVE_REGISTER = 1, /**< Indicates action of registering observation*/
+	IOTCON_OBSERVE_DEREGISTER = 2, /**< Indicates action of unregistering observation */
 } iotcon_observe_type_e;
 
 /**
@@ -102,13 +102,13 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_HIDDEN = 0, /**< Indicates resource uninitialized */
-	IOTCON_DISCOVERABLE = (1 << 0), /**< Indicates resource that is allowed to be discovered */
-	IOTCON_OBSERVABLE = (1 << 1), /**< Indicates resource that is allowed to be observed */
-	IOTCON_ACTIVE = (1 << 2), /**< Indicates resource initialized and activated */
-	IOTCON_SLOW = (1 << 3), /**< Indicates resource which takes some delay to respond */
-	IOTCON_SECURE = (1 << 4), /**< Indicates secure resource */
-	IOTCON_EXPLICIT_DISCOVERABLE = (1 << 5), /**< When this bit is set, the resource is allowed to be discovered only if discovery request contains an explicit querystring. */
+	IOTCON_RESOURCE_NO_PROPERTY = 0, /**< Indicates resource uninitialized */
+	IOTCON_RESOURCE_DISCOVERABLE = (1 << 0), /**< Indicates resource that is allowed to be discovered */
+	IOTCON_RESOURCE_OBSERVABLE = (1 << 1), /**< Indicates resource that is allowed to be observed */
+	IOTCON_RESOURCE_ACTIVE = (1 << 2), /**< Indicates resource initialized and activated */
+	IOTCON_RESOURCE_SLOW = (1 << 3), /**< Indicates resource which takes some delay to respond */
+	IOTCON_RESOURCE_SECURE = (1 << 4), /**< Indicates secure resource */
+	IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE = (1 << 5), /**< When this bit is set, the resource is allowed to be discovered only if discovery request contains an explicit querystring. */
 } iotcon_resource_property_e;
 
 /**
@@ -117,7 +117,7 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_REQUEST_NONE = 0, /**< Indicates none */
+	IOTCON_REQUEST_UNKNOWN = 0, /**< Indicates none */
 	IOTCON_REQUEST_GET = 1, /**< Indicates get method of request */
 	IOTCON_REQUEST_PUT = 2, /**< Indicates put method of request */
 	IOTCON_REQUEST_POST = 3, /**< Indicates post method of request */
@@ -130,12 +130,12 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_RESPONSE_RESULT_OK = 0, /**< Indicates result of response for success */
-	IOTCON_RESPONSE_RESULT_ERROR, /**< Indicates result of response for something error */
-	IOTCON_RESPONSE_RESULT_RESOURCE_CREATED, /**< Indicates result of response for resource has created */
-	IOTCON_RESPONSE_RESULT_RESOURCE_DELETED, /**< Indicates result of response for resource has deleted */
-	IOTCON_RESPONSE_RESULT_SLOW, /**< Indicates result of response for slow resource */
-	IOTCON_RESPONSE_RESULT_FORBIDDEN, /**< Indicates result of response for accessing unauthorized resource */
+	IOTCON_RESPONSE_OK = 0, /**< Indicates result of response for success */
+	IOTCON_RESPONSE_ERROR, /**< Indicates result of response for something error */
+	IOTCON_RESPONSE_RESOURCE_CREATED, /**< Indicates result of response for resource has created */
+	IOTCON_RESPONSE_RESULT_DELETED, /**< Indicates result of response for resource has deleted */
+	IOTCON_RESPONSE_SLOW, /**< Indicates result of response for slow resource */
+	IOTCON_RESPONSE_FORBIDDEN, /**< Indicates result of response for accessing unauthorized resource */
 } iotcon_response_result_e;
 
 /**
@@ -155,9 +155,9 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum  {
-    IOTCON_PRESENCE_TRIGGER_RESOURCE_CREATED, /**< Indicates for resource creation operation of server */
-    IOTCON_PRESENCE_TRIGGER_RESOURCE_UPDATED, /**< Indicates for resource update operation of server */
-    IOTCON_PRESENCE_TRIGGER_RESOURCE_DESTROYED, /**< Indicates for resource destruction operation of server */
+    IOTCON_PRESENCE_RESOURCE_CREATED, /**< Indicates for resource creation operation of server */
+    IOTCON_PRESENCE_RESOURCE_UPDATED, /**< Indicates for resource update operation of server */
+    IOTCON_PRESENCE_RESOURCE_DESTROYED, /**< Indicates for resource destruction operation of server */
 } iotcon_presence_trigger_e;
 
 /**
@@ -174,7 +174,7 @@ typedef enum {
 	IOTCON_TYPE_NULL, /**< Indicates for representation that have null type */
 	IOTCON_TYPE_LIST, /**< Indicates for representation that have list type */
 	IOTCON_TYPE_STATE, /**< Indicates for representation that have another representation type */
-} iotcon_types_e;
+} iotcon_type_e;
 
 /**
  * @brief Enumeration for properties of device information.
@@ -223,8 +223,8 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_REMOTE_RESOURCE_STATE_ALIVE, /**< Indicates remote resource is alive */
-	IOTCON_REMOTE_RESOURCE_STATE_LOST_SIGNAL, /**< Indicates remote resource is lost */
+	IOTCON_REMOTE_RESOURCE_ALIVE, /**< Indicates remote resource is alive */
+	IOTCON_REMOTE_RESOURCE_LOST_SIGNAL, /**< Indicates remote resource is lost */
 } iotcon_remote_resource_state_e;
 
 /**

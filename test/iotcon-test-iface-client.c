@@ -184,7 +184,7 @@ static void _on_get_2nd(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	if (IOTCON_RESPONSE_RESULT_OK == response_result)
+	if (IOTCON_RESPONSE_OK == response_result)
 		_print_repr(recv_repr);
 	else
 		ERR("Invalid result(%d)", response_result);
@@ -217,7 +217,7 @@ static void _on_response_1st(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	if (IOTCON_RESPONSE_RESULT_OK == response_result)
+	if (IOTCON_RESPONSE_OK == response_result)
 		_print_repr(recv_repr);
 	else
 		ERR("Invalid result(%d)", response_result);

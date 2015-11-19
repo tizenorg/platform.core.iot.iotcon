@@ -64,7 +64,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		if (IOTCON_ERROR_NONE != ret)
 			return;
 
-		ret = iotcon_response_set_result(response, IOTCON_RESPONSE_RESULT_OK);
+		ret = iotcon_response_set_result(response, IOTCON_RESPONSE_OK);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_response_destroy(response);
 			return;
@@ -123,7 +123,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 {
 	int ret;
 	int interfaces = IOTCON_INTERFACE_DEFAULT;
-	int properties = (IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE);
+	int properties = (IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE);
 	const char *uri_path = "/door/1";
 	const char *type = "org.tizen.door";
 	iotcon_resource_types_h resource_types;
@@ -295,7 +295,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 {
 	int ret;
 	int interfaces = IOTCON_INTERFACE_DEFAULT;
-	int properties = (IOTCON_DISCOVERABLE | IOTCON_OBSERVABLE);
+	int properties = (IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE);
 	const char *uri_path = "/door/1";
 	const char *type = "org.tizen.door";
 	iotcon_resource_types_h resource_types;

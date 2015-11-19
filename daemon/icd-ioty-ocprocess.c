@@ -224,7 +224,7 @@ static int _ioty_oic_action_to_ioty_action(int oic_action)
 	case OC_OBSERVE_NO_OPTION:
 	default:
 		ERR("Invalid action (%d)", oic_action);
-		action = IOTCON_OBSERVE_TYPE_NONE;
+		action = IOTCON_OBSERVE_NO_TYPE;
 	}
 	return action;
 }
@@ -368,7 +368,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 		req_ctx->observe_id = request->obsInfo.obsId;
 		req_ctx->observe_type = _ioty_oic_action_to_ioty_action(request->obsInfo.action);
 	} else {
-		req_ctx->observe_type = IOTCON_OBSERVE_TYPE_NONE;
+		req_ctx->observe_type = IOTCON_OBSERVE_NO_TYPE;
 	}
 
 	/* header options */
@@ -587,20 +587,20 @@ static int _ocprocess_parse_oic_result(OCStackResult result)
 
 	switch (result) {
 	case OC_STACK_OK:
-		res = IOTCON_RESPONSE_RESULT_OK;
+		res = IOTCON_RESPONSE_OK;
 		break;
 	case OC_STACK_RESOURCE_CREATED:
-		res = IOTCON_RESPONSE_RESULT_RESOURCE_CREATED;
+		res = IOTCON_RESPONSE_RESOURCE_CREATED;
 		break;
 	case OC_STACK_RESOURCE_DELETED:
-		res = IOTCON_RESPONSE_RESULT_RESOURCE_DELETED;
+		res = IOTCON_RESPONSE_RESULT_DELETED;
 		break;
 	case OC_STACK_UNAUTHORIZED_REQ:
-		res = IOTCON_RESPONSE_RESULT_FORBIDDEN;
+		res = IOTCON_RESPONSE_FORBIDDEN;
 		break;
 	default:
 		WARN("response error(%d)", result);
-		res = IOTCON_RESPONSE_RESULT_ERROR;
+		res = IOTCON_RESPONSE_ERROR;
 		break;
 	}
 
@@ -892,7 +892,7 @@ static void _presence_cb_response_error(OCDoHandle handle, int ret_val)
 	GVariant *value, *value2;
 
 	value = g_variant_new("(iusiis)", ret_val, 0, IC_STR_NULL, IOTCON_CONNECTIVITY_ALL,
-			IOTCON_PRESENCE_TRIGGER_RESOURCE_CREATED, IC_STR_NULL);
+			IOTCON_PRESENCE_RESOURCE_CREATED, IC_STR_NULL);
 	value2 = g_variant_ref(value);
 
 	ret = _ocprocess_response_signal(NULL, IC_DBUS_SIGNAL_PRESENCE,
@@ -919,13 +919,13 @@ static int _presence_trigger_to_ioty_trigger(OCPresenceTrigger src,
 
 	switch (src) {
 	case OC_PRESENCE_TRIGGER_CREATE:
-		*dest = IOTCON_PRESENCE_TRIGGER_RESOURCE_CREATED;
+		*dest = IOTCON_PRESENCE_RESOURCE_CREATED;
 		break;
 	case OC_PRESENCE_TRIGGER_CHANGE:
-		*dest = IOTCON_PRESENCE_TRIGGER_RESOURCE_UPDATED;
+		*dest = IOTCON_PRESENCE_RESOURCE_UPDATED;
 		break;
 	case OC_PRESENCE_TRIGGER_DELETE:
-		*dest = IOTCON_PRESENCE_TRIGGER_RESOURCE_DESTROYED;
+		*dest = IOTCON_PRESENCE_RESOURCE_DESTROYED;
 		break;
 	default:
 		ERR("Invalid trigger(%d)", src);
@@ -1174,9 +1174,9 @@ OCStackApplicationResult icd_ioty_ocprocess_get_tizen_info_cb(void *ctx,
 	tizen_device_id = val->str;
 
 	if (OC_STACK_OK == resp->result)
-		res = IOTCON_RESPONSE_RESULT_OK;
+		res = IOTCON_RESPONSE_OK;
 	else
-		res = IOTCON_RESPONSE_RESULT_ERROR;
+		res = IOTCON_RESPONSE_ERROR;
 
 	tizen_info = g_variant_new("(ssi)", device_name, tizen_device_id, res);
 
