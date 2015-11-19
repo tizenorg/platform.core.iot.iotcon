@@ -368,20 +368,7 @@ int iotcon_representation_set_state(iotcon_representation_h repr, iotcon_state_h
 int iotcon_representation_get_state(iotcon_representation_h repr, iotcon_state_h *state);
 
 /**
- * @brief Deletes state handle in the representation.
- *
- * @since_tizen 3.0
- *
- * @param[in] repr The representation handle
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- */
-int iotcon_representation_del_state(iotcon_representation_h repr);
-
-/**
- * @brief Appends a new child representation on to the end of the parent representation
+ * @brief Adds a new child representation on to the end of the parent representation
  * @details Duplicated child representation is allowed to append.
  *
  * @since_tizen 3.0
@@ -393,7 +380,7 @@ int iotcon_representation_del_state(iotcon_representation_h repr);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_representation_append_child(iotcon_representation_h parent,
+int iotcon_representation_add_child(iotcon_representation_h parent,
 		iotcon_representation_h child);
 
 /**

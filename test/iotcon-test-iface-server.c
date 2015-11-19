@@ -513,9 +513,9 @@ static iotcon_representation_h _get_room_representation(room_resource_s *room)
 		return NULL;
 	}
 
-	ret = iotcon_representation_append_child(repr, light_repr);
+	ret = iotcon_representation_add_child(repr, light_repr);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_append_child() Fail(%d)", ret);
+		ERR("iotcon_representation_add_child() Fail(%d)", ret);
 		iotcon_representation_destroy(light_repr);
 		iotcon_representation_destroy(repr);
 		return NULL;
@@ -530,9 +530,9 @@ static iotcon_representation_h _get_room_representation(room_resource_s *room)
 		return NULL;
 	}
 
-	ret = iotcon_representation_append_child(repr, fan_repr);
+	ret = iotcon_representation_add_child(repr, fan_repr);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_append_child() Fail(%d)", ret);
+		ERR("iotcon_representation_add_child() Fail(%d)", ret);
 		iotcon_representation_destroy(fan_repr);
 		iotcon_representation_destroy(repr);
 		return NULL;

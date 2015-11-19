@@ -174,19 +174,22 @@ API int iotcon_representation_set_resource_interfaces(iotcon_representation_h re
 	return IOTCON_ERROR_NONE;
 }
 
-
 API int iotcon_representation_set_state(iotcon_representation_h repr,
 		iotcon_state_h state)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (state == repr->state)
+		return IOTCON_ERROR_NONE;
 
 	if (repr->state) {
-		ERR("state already set. Remove first !");
-		return IOTCON_ERROR_ALREADY;
+		iotcon_state_destroy(repr->state);
+		repr->state = NULL;
 	}
 
-	icl_state_inc_ref_count(state);
+	if (state)
+		icl_state_inc_ref_count(state);
+
 	repr->state = state;
 
 	return IOTCON_ERROR_NONE;
@@ -204,19 +207,7 @@ API int iotcon_representation_get_state(iotcon_representation_h repr,
 	return IOTCON_ERROR_NONE;
 }
 
-
-API int iotcon_representation_del_state(iotcon_representation_h repr)
-{
-	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
-
-	if (repr->state)
-		iotcon_state_destroy(repr->state);
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-API int iotcon_representation_append_child(iotcon_representation_h parent,
+API int iotcon_representation_add_child(iotcon_representation_h parent,
 		iotcon_representation_h child)
 {
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
