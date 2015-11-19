@@ -7,14 +7,25 @@
 		</permit>
 		<request>
 			<smack request="system::use_internet" type="w" />
-			<smack request="connman::get" type="w" />
 			<smack request="dbus" type="rwx" />
 			<smack request="device::app_logging" type="w" />
 			<smack request="device::sys_logging" type="w" />
 			<smack request="system::homedir" type="x" />
 			<smack request="tizen::vconf::setting::admin" type="rl" />
 			<smack request="tizen::vconf::public::r::platform::rw" type="rl" />
+
 			<smack request="bluez" type="rw" />
+			<smack request="bt-service::public" type="w" />
+			<smack request="privilege::tizen::bluetooth" type="rw" />
+
+			<smack request="connman" type="rw" />
+			<smack request="connman::get" type="rw" />
+			<smack request="net-config" type="rw" />
+			<smack request="privilege::tizen::network.get" type="rw" />
+			<smack request="telephony_framework::api_ps_public" type="rw" />
+			<smack request="telephony_framework::properties" type="rw" />
+			<smack request="telephony_framework::properties" type="rw" />
+			<smack request="tizen::vconf::network" type="r" />
 		</request>
 	</define>
 	<assign>
