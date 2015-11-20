@@ -72,7 +72,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 			return;
 		}
 
-		ret = iotcon_state_set_bool(state, "power", true);
+		ret = iotcon_state_add_bool(state, "power", true);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_state_destroy(state);
 			iotcon_representation_destroy(representation);
@@ -181,7 +181,7 @@ void iotcon_state_destroy(iotcon_state_h state);
 int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone);
 
 /**
- * @brief Sets a new key and integer value into the representation.
+ * @brief Adds a new key and integer value into the representation.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
@@ -195,10 +195,10 @@ int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_set_int(iotcon_state_h state, const char *key, int val);
+int iotcon_state_add_int(iotcon_state_h state, const char *key, int val);
 
 /**
- * @brief Sets a new key and boolean value into the representation.
+ * @brief Adds a new key and boolean value into the representation.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
@@ -212,10 +212,10 @@ int iotcon_state_set_int(iotcon_state_h state, const char *key, int val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_set_bool(iotcon_state_h state, const char *key, bool val);
+int iotcon_state_add_bool(iotcon_state_h state, const char *key, bool val);
 
 /**
- * @brief Sets a new key and double value into the representation.
+ * @brief Adds a new key and double value into the representation.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
@@ -229,10 +229,10 @@ int iotcon_state_set_bool(iotcon_state_h state, const char *key, bool val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_set_double(iotcon_state_h state, const char *key, double val);
+int iotcon_state_add_double(iotcon_state_h state, const char *key, double val);
 
 /**
- * @brief Sets a new key and string value into the representation.
+ * @brief Adds a new key and string value into the representation.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
@@ -246,10 +246,10 @@ int iotcon_state_set_double(iotcon_state_h state, const char *key, double val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_set_str(iotcon_state_h state, const char *key, char *val);
+int iotcon_state_add_str(iotcon_state_h state, const char *key, char *val);
 
 /**
- * @brief Sets a new key and list value into the representation.
+ * @brief Adds a new key and list value into the representation.
  * @details If @a key is already exists, current list will be replaced with new @a list.
  *
  * @since_tizen 3.0
@@ -263,10 +263,10 @@ int iotcon_state_set_str(iotcon_state_h state, const char *key, char *val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_set_list(iotcon_state_h state, const char *key, iotcon_list_h list);
+int iotcon_state_add_list(iotcon_state_h state, const char *key, iotcon_list_h list);
 
 /**
- * @brief Sets a new key and state value into the representation.
+ * @brief Adds a new key and state value into the representation.
  * @details If @a key is already exists, current state will be replaced with new @a src.
  *
  * @since_tizen 3.0
@@ -280,10 +280,10 @@ int iotcon_state_set_list(iotcon_state_h state, const char *key, iotcon_list_h l
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_set_state(iotcon_state_h dest, const char *key, iotcon_state_h src);
+int iotcon_state_add_state(iotcon_state_h dest, const char *key, iotcon_state_h src);
 
 /**
- * @brief Sets a new key with NULL value into the representation.
+ * @brief Adds a new key with NULL value into the representation.
  * @details If @a key is already exists, current value will be replaced with NULL
  *
  * @since_tizen 3.0
@@ -296,7 +296,7 @@ int iotcon_state_set_state(iotcon_state_h dest, const char *key, iotcon_state_h 
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_set_null(iotcon_state_h state, const char *key);
+int iotcon_state_add_null(iotcon_state_h state, const char *key);
 
 /**
  * @brief Gets the integer value from the given key.
@@ -422,7 +422,7 @@ int iotcon_state_get_state(iotcon_state_h src, const char *key, iotcon_state_h *
 int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null);
 
 /**
- * @brief Unsets the key and its associated value from the state.
+ * @brief Removes the key and its associated value from the state.
  *
  * @since_tizen 3.0
  *
@@ -434,7 +434,7 @@ int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
-int iotcon_state_unset(iotcon_state_h state, const char *key);
+int iotcon_state_remove(iotcon_state_h state, const char *key);
 
 /**
  * @brief Gets the type of a value at the given key.

@@ -66,14 +66,14 @@ static void _create_light_resource()
 		return;
 	}
 
-	ret = iotcon_state_set_bool(state, "power", true);
+	ret = iotcon_state_add_bool(state, "power", true);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_state_destroy(state);
 		iotcon_resource_types_destroy(resource_types);
 		return;
 	}
 
-	ret = iotcon_state_set_int(state, "brightness", 75);
+	ret = iotcon_state_add_int(state, "brightness", 75);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_state_destroy(state);
 		iotcon_resource_types_destroy(resource_types);
@@ -108,7 +108,7 @@ static void _update_brightness(int brightness)
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 
-	ret = iotcon_state_set_int(state_clone, "brightness", brightness);
+	ret = iotcon_state_add_int(state_clone, "brightness", brightness);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_state_destroy(state_clone);
 		return;

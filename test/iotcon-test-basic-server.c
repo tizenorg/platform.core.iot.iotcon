@@ -192,9 +192,9 @@ static iotcon_representation_h _get_door_representation(door_resource_s *door)
 		return NULL;
 	}
 
-	ret = iotcon_state_set_bool(state, "opened", door->state);
+	ret = iotcon_state_add_bool(state, "opened", door->state);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_bool() Fail(%d)", ret);
+		ERR("iotcon_state_add_bool() Fail(%d)", ret);
 		iotcon_state_destroy(state);
 		iotcon_representation_destroy(repr);
 		return NULL;
@@ -375,9 +375,9 @@ static int _request_handler_post(door_resource_s *door, iotcon_request_h request
 		return -1;
 	}
 
-	ret = iotcon_state_set_str(resp_state, "createduripath", DOOR_RESOURCE_URI2);
+	ret = iotcon_state_add_str(resp_state, "createduripath", DOOR_RESOURCE_URI2);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_str() Fail(%d)", ret);
+		ERR("iotcon_state_add_str() Fail(%d)", ret);
 		iotcon_state_destroy(resp_state);
 		iotcon_representation_destroy(resp_repr);
 		return -1;

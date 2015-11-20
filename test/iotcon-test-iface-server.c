@@ -260,9 +260,9 @@ static iotcon_representation_h _get_light_representation(light_resource_s *light
 		return NULL;
 	}
 
-	ret = iotcon_state_set_int(state, "brightness", light->brightness);
+	ret = iotcon_state_add_int(state, "brightness", light->brightness);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_int() Fail(%d)", ret);
+		ERR("iotcon_state_add_int() Fail(%d)", ret);
 		iotcon_state_destroy(state);
 		iotcon_representation_destroy(repr);
 		return NULL;
@@ -337,9 +337,9 @@ static iotcon_representation_h _get_fan_representation(fan_resource_s *fan)
 		return NULL;
 	}
 
-	ret = iotcon_state_set_bool(state, "state", fan->state);
+	ret = iotcon_state_add_bool(state, "state", fan->state);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_bool() Fail(%d)", ret);
+		ERR("iotcon_state_add_bool() Fail(%d)", ret);
 		iotcon_state_destroy(state);
 		iotcon_representation_destroy(repr);
 		return NULL;
@@ -414,18 +414,18 @@ static iotcon_representation_h _get_room_representation(room_resource_s *room)
 		return NULL;
 	}
 
-	ret = iotcon_state_set_str(state, "name", room->name);
+	ret = iotcon_state_add_str(state, "name", room->name);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_str() Fail(%d)", ret);
+		ERR("iotcon_state_add_str() Fail(%d)", ret);
 		iotcon_state_destroy(state);
 		iotcon_representation_destroy(repr);
 		return NULL;
 	}
 
 	/* set null */
-	ret = iotcon_state_set_null(state, "null value");
+	ret = iotcon_state_add_null(state, "null value");
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_null() Fail(%d)", ret);
+		ERR("iotcon_state_add_null() Fail(%d)", ret);
 		iotcon_state_destroy(state);
 		iotcon_representation_destroy(repr);
 		return NULL;
@@ -484,9 +484,9 @@ static iotcon_representation_h _get_room_representation(room_resource_s *room)
 		return NULL;
 	}
 
-	ret = iotcon_state_set_list(state, "today_temp", today_temp);
+	ret = iotcon_state_add_list(state, "today_temp", today_temp);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_list() Fail(%d)", ret);
+		ERR("iotcon_state_add_list() Fail(%d)", ret);
 		iotcon_list_destroy(today_temp);
 		iotcon_state_destroy(state);
 		iotcon_representation_destroy(repr);

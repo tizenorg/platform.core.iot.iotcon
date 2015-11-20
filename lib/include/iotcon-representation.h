@@ -88,35 +88,35 @@
 		return;
 	}
 
-	ret = iotcon_state_set_str(resp_repr, "type", "lamp");
+	ret = iotcon_state_add_str(resp_repr, "type", "lamp");
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(types);
 		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_state_set_str(resp_repr, "where", "desk");
+	ret = iotcon_state_add_str(resp_repr, "where", "desk");
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(types);
 		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_state_set_double(resp_repr, "default_bright", 200.0);
+	ret = iotcon_state_add_double(resp_repr, "default_bright", 200.0);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(types);
 		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_state_set_str(resp_repr, "unit", "lux");
+	ret = iotcon_state_add_str(resp_repr, "unit", "lux");
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(types);
 		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_state_set_bool(resp_repr, "bright_step", true);
+	ret = iotcon_state_add_bool(resp_repr, "bright_step", true);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(types);
 		iotcon_representation_destroy(resp_repr);
@@ -170,7 +170,7 @@
 		return;
 	}
 
-	ret = iotcon_state_set_list(resp_repr, "bright_step_list", bright_step_list);
+	ret = iotcon_state_add_list(resp_repr, "bright_step_list", bright_step_list);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_list_destroy(bright_step_list);
 		iotcon_resource_types_destroy(types);

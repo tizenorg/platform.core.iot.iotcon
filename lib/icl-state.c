@@ -144,7 +144,7 @@ API int iotcon_state_get_int(iotcon_state_h state, const char *key, int *val)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_set_int(iotcon_state_h state, const char *key, int val)
+API int iotcon_state_add_int(iotcon_state_h state, const char *key, int val)
 {
 	iotcon_value_h value;
 
@@ -162,7 +162,7 @@ API int iotcon_state_set_int(iotcon_state_h state, const char *key, int val)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_unset(iotcon_state_h state, const char *key)
+API int iotcon_state_remove(iotcon_state_h state, const char *key)
 {
 	int ret;
 
@@ -202,7 +202,7 @@ API int iotcon_state_get_bool(iotcon_state_h state, const char *key, bool *val)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_set_bool(iotcon_state_h state, const char *key, bool val)
+API int iotcon_state_add_bool(iotcon_state_h state, const char *key, bool val)
 {
 	iotcon_value_h value = NULL;
 
@@ -246,7 +246,7 @@ API int iotcon_state_get_double(iotcon_state_h state, const char *key, double *v
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_set_double(iotcon_state_h state, const char *key, double val)
+API int iotcon_state_add_double(iotcon_state_h state, const char *key, double val)
 {
 	iotcon_value_h value = NULL;
 
@@ -290,7 +290,7 @@ API int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_set_str(iotcon_state_h state, const char *key, char *val)
+API int iotcon_state_add_str(iotcon_state_h state, const char *key, char *val)
 {
 	iotcon_value_h value = NULL;
 
@@ -329,7 +329,7 @@ API int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_nul
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_set_null(iotcon_state_h state, const char *key)
+API int iotcon_state_add_null(iotcon_state_h state, const char *key)
 {
 	iotcon_value_h value = NULL;
 
@@ -373,7 +373,7 @@ API int iotcon_state_get_list(iotcon_state_h state, const char *key, iotcon_list
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_set_list(iotcon_state_h state, const char *key, iotcon_list_h list)
+API int iotcon_state_add_list(iotcon_state_h state, const char *key, iotcon_list_h list)
 {
 	iotcon_value_h value = NULL;
 
@@ -419,7 +419,7 @@ API int iotcon_state_get_state(iotcon_state_h src, const char *key, iotcon_state
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_set_state(iotcon_state_h state, const char *key, iotcon_state_h val)
+API int iotcon_state_add_state(iotcon_state_h state, const char *key, iotcon_state_h val)
 {
 	iotcon_value_h value = NULL;
 

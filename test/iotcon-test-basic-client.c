@@ -284,9 +284,9 @@ static void _on_response_get(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	ret = iotcon_state_set_bool(send_state, "opened", !opened);
+	ret = iotcon_state_add_bool(send_state, "opened", !opened);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_set_bool() Fail(%d)", ret);
+		ERR("iotcon_state_add_bool() Fail(%d)", ret);
 		iotcon_state_destroy(send_state);
 		iotcon_representation_destroy(send_repr);
 		return;

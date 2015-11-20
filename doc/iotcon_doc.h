@@ -90,7 +90,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 			return;
 		}
 
-		ret = iotcon_state_set_bool(resp_repr, "opened", true);
+		ret = iotcon_state_add_bool(resp_repr, "opened", true);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_state_destroy(state);
 			iotcon_representation_destroy(resp_repr);
