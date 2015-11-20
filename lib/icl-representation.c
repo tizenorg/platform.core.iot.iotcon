@@ -43,18 +43,14 @@ void icl_representation_inc_ref_count(iotcon_representation_h val)
 
 static bool _icl_representation_dec_ref_count(iotcon_representation_h val)
 {
-	bool ret;
-
-	RETV_IF(NULL == val, -1);
+	RETV_IF(NULL == val, false);
 	RETVM_IF(val->ref_count <= 0, false, "Invalid Count(%d)", val->ref_count);
 
 	val->ref_count--;
 	if (0 == val->ref_count)
-		ret = true;
-	else
-		ret = false;
+		return true;
 
-	return ret;
+	return false;
 }
 
 
@@ -118,13 +114,9 @@ API int iotcon_representation_set_uri_path(iotcon_representation_h repr,
 		const char *uri_path)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 
 	free(repr->uri_path);
-	repr->uri_path = NULL;
-
-	if (NULL == uri_path)
-		return IOTCON_ERROR_INVALID_PARAMETER;
-
 	repr->uri_path = strdup(uri_path);
 	if (NULL == repr->uri_path) {
 		ERR("strdup() Fail");

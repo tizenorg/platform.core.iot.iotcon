@@ -34,18 +34,14 @@ void icl_list_inc_ref_count(iotcon_list_h val)
 
 static bool _icl_list_dec_ref_count(iotcon_list_h val)
 {
-	bool ret;
-
 	RETV_IF(NULL == val, false);
 	RETVM_IF(val->ref_count <= 0, false, "Invalid Count(%d)", val->ref_count);
 
 	val->ref_count--;
 	if (0 == val->ref_count)
-		ret = true;
-	else
-		ret = false;
+		return true;
 
-	return ret;
+	return false;
 }
 
 static int _icl_list_create(iotcon_type_e type, iotcon_list_h *ret_list)

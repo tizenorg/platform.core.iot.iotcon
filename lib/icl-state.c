@@ -33,14 +33,16 @@ void icl_state_inc_ref_count(iotcon_state_h val)
 }
 
 
-int icl_state_dec_ref_count(iotcon_state_h val)
+static bool _icl_state_dec_ref_count(iotcon_state_h val)
 {
-	RETV_IF(NULL == val, -1);
-	RETVM_IF(val->ref_count <= 0, 0, "Invalid Count(%d)", val->ref_count);
+	RETV_IF(NULL == val, false);
+	RETVM_IF(val->ref_count <= 0, false, "Invalid Count(%d)", val->ref_count);
 
 	val->ref_count--;
+	if (0 == val->ref_count)
+		return true;
 
-	return val->ref_count;
+	return false;
 }
 
 
@@ -71,10 +73,11 @@ API void iotcon_state_destroy(iotcon_state_h state)
 {
 	RET_IF(NULL == state);
 
-	if (0 == icl_state_dec_ref_count(state)) {
-		g_hash_table_destroy(state->hash_table);
-		free(state);
-	}
+	if (false == _icl_state_dec_ref_count(state))
+		return;
+
+	g_hash_table_destroy(state->hash_table);
+	free(state);
 }
 
 API int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone)

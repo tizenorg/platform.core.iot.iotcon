@@ -464,7 +464,6 @@ static void _icd_state_list_from_gvariant(GVariant *var,
 					g_variant_iter_init(&state_iter, value);
 					_icd_state_value_from_gvariant(repr, &state_iter);
 					value_list->list = g_list_append(value_list->list, repr);
-					g_variant_iter_free(&state_iter);
 				} while (g_variant_iter_loop(&iter, "v", &value));
 
 			} else if (g_variant_is_of_type(value, G_VARIANT_TYPE_ARRAY)) {
