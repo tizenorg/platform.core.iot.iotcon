@@ -665,6 +665,8 @@ int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
 
 /**
  * @brief Gets resource interfaces of the remote resource
+ * @details @a ifaces can contain multiple interfaces like
+ * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.
  *
  * @since_tizen 3.0
  *

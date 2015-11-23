@@ -155,7 +155,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @a ifaces can contain multiple interfaces like
  * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.\n
  * @a properties also can contain multiple properties like
- * IOTCON_RESOURCE_ACTIVE | IOTCON_RESOURCE_DISCOVERABLE.\n
+ * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.\n
  * iotcon_request_handler_cb() will be called when receive CRUD request to the registered
  * resource.
  *
@@ -498,6 +498,8 @@ int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_
 
 /**
  * @brief Gets the interfaces of the resource
+ * @a ifaces can contain multiple interfaces like
+ * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.
  *
  * @since_tizen 3.0
  *
@@ -517,7 +519,9 @@ int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_
 int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces);
 
 /**
- * @brief Checks whether the resource is observable or not.
+ * @brief Gets the properties in the resource
+ * @details @a properties can contain multiple properties like
+ * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.
  *
  * @since_tizen 3.0
  *

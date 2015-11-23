@@ -325,6 +325,8 @@ int iotcon_representation_set_resource_interfaces(iotcon_representation_h repr,
 
 /**
  * @brief Gets resource interfaces from the representation.
+ * @details @a ifaces can contain multiple interfaces like
+ * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.
  *
  * @since_tizen 3.0
  *

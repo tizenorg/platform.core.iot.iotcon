@@ -33,6 +33,7 @@
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE_OVERVIEW Overview
  * The iotcon resource types API provides methods for managing handle and add, remove resource types.
+ * A resource type indicates a class or category of resources.
  *
  * Example :
  * @code
@@ -122,7 +123,7 @@ void iotcon_resource_types_destroy(iotcon_resource_types_h types);
  * Duplicate strings are not allowed.
  *
  * @param[in] types The handle of the resource types
- * @param[in] type The string data to insert into the resource types
+ * @param[in] type The string data to insert into the resource types (e.g. "org.tizen.light")
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful

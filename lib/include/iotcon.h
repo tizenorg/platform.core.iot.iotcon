@@ -137,7 +137,8 @@ typedef void (*iotcon_connection_changed_cb)(bool is_connected, void *user_data)
 /**
  * @brief Adds a callback to Iotcon
  * @details When Iotcon connection status is changed with unexpected reason, registered
- * callbacks will be called in turn. The handles are validate no more after broken connection.
+ * callbacks will be called in turn. The handles(e.g. iotcon_resource_h,
+ * iotcon_remote_resource_h, ...) are validate no more after broken connection.
  * The handles must creates again when connection recovered.
  *
  * @since_tizen 3.0

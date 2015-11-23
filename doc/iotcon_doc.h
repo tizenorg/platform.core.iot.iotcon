@@ -27,8 +27,11 @@
  * \#include <iotcon.h>
  *
  * @section CAPI_IOT_CONNECTIVITY_MODULE_OVERVIEW Overview
- * The Iotcon API provides to register resources, discover resources and access them via
- * RESTful API.\n\n
+ * The iotcon module provides various features based on Iotivity project.\n
+ * The IoTivity project is sponsored by the Open Interconnect Consortium
+ * a group of industry leaders who will be developing a standard specification and
+ * certification program to address these challenges.\n
+ * See http://iotivity.org and http://openinterconnect.org for more information.
  *
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_RESOURCE Resource
  * A Resource is a component in a server that can be viewed and conrolled by another client.\n
