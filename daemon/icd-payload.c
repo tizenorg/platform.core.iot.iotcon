@@ -594,14 +594,20 @@ static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *ite
 			else
 				OCRepPayloadSetPropString(repr, key, str_value);
 
+		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE ("a{sv}"))) {
+			GVariantIter state_iter;
+			repr_value = OCRepPayloadCreate();
+			g_variant_iter_init(&state_iter, var);
+			_icd_state_value_from_gvariant(repr_value, &state_iter);
+			OCRepPayloadSetPropObjectAsOwner(repr, key, repr_value);
+
 		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_ARRAY)) {
 			memset(&value_list, 0, sizeof(struct icd_state_list_s));
 			_icd_state_list_from_gvariant(var, &value_list, 0);
 			_icd_state_array_from_list(repr, &value_list, key);
 
-		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE("(siasa{sv}av)"))) {
-			repr_value = icd_payload_representation_from_gvariant(var);
-			OCRepPayloadSetPropObjectAsOwner(repr, key, repr_value);
+		} else {
+			ERR("Invalid type(%s)", g_variant_get_type_string(var));
 		}
 	}
 
