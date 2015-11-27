@@ -174,3 +174,27 @@ int icd_ioty_get_host_address(OCDevAddr *dev_addr, char **host_address, int *con
 }
 
 
+int icd_ioty_oic_properties_to_properties(int oic_properties)
+{
+	int prop = IOTCON_RESOURCE_NO_PROPERTY;
+
+	if (OC_DISCOVERABLE & oic_properties)
+		prop |= IOTCON_RESOURCE_DISCOVERABLE;
+
+	if (OC_OBSERVABLE & oic_properties)
+		prop |= IOTCON_RESOURCE_OBSERVABLE;
+
+	if (OC_ACTIVE & oic_properties)
+		prop |= IOTCON_RESOURCE_ACTIVE;
+
+	if (OC_SLOW & oic_properties)
+		prop |= IOTCON_RESOURCE_SLOW;
+
+	if (OC_SECURE & oic_properties)
+		prop |= IOTCON_RESOURCE_SECURE;
+
+	if (OC_EXPLICIT_DISCOVERABLE & oic_properties)
+		prop |= IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE;
+
+	return prop;
+}

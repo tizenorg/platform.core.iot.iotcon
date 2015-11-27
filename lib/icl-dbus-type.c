@@ -116,6 +116,7 @@ GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 GVariant* icl_dbus_remote_resource_to_gvariant(struct icl_remote_resource *resource)
 {
 	FN_CALL;
+	bool is_secure;
 	GVariant *value;
 	GHashTableIter iter;
 	GVariantBuilder options;
@@ -130,8 +131,9 @@ GVariant* icl_dbus_remote_resource_to_gvariant(struct icl_remote_resource *resou
 		}
 	}
 
+	is_secure = resource->properties & IOTCON_RESOURCE_SECURE;
 	value = g_variant_new("(ssba(qs)i)", resource->uri_path, resource->host_address,
-			resource->is_secure, &options, resource->connectivity_type);
+			is_secure, &options, resource->connectivity_type);
 
 	return value;
 }

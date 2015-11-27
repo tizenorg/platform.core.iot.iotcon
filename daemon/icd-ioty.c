@@ -40,19 +40,11 @@
 
 static int icd_remote_resource_time_interval = ICD_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
 
-static const char *ICD_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
 static const char *ICD_SYSTEM_INFO_PLATFORM_NAME = "http://tizen.org/system/platform.name";
 static const char *ICD_SYSTEM_INFO_PLATFORM_VERSION = "http://tizen.org/feature/platform.version";
 static const char *ICD_SYSTEM_INFO_MANUF_NAME = "http://tizen.org/system/manufacturer";
 static const char *ICD_SYSTEM_INFO_MODEL_NAME = "http://tizen.org/system/model_name";
 static const char *ICD_SYSTEM_INFO_BUILD_STRING = "http://tizen.org/system/build.string";
-
-typedef struct {
-	char *device_name;
-	char *tizen_device_id;
-} icd_tizen_info_s;
-
-static icd_tizen_info_s icd_tizen_info = {0};
 
 static GHashTable *icd_ioty_encap_table;
 static GHashTable *icd_ioty_presence_table;
@@ -415,20 +407,27 @@ static void _ioty_free_signal_context(void *data)
 }
 
 
-int icd_ioty_find_resource(const char *host_address, int conn_type,
-		const char *resource_type, int64_t signal_number, const char *bus_name)
+int icd_ioty_find_resource(const char *host_address,
+		int conn_type,
+		const char *resource_type,
+		bool is_secure,
+		int64_t signal_number,
+		const char *bus_name)
 {
 	int len;
+	char *coap_str;
 	OCStackResult result;
 	icd_sig_ctx_s *context;
 	char uri[PATH_MAX] = {0};
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
 
+	coap_str = is_secure? ICD_IOTY_COAPS:ICD_IOTY_COAP;
+
 	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, host_address)) {
 		len = snprintf(uri, sizeof(uri), "%s", OC_RSRVD_WELL_KNOWN_URI);
 	} else {
-		len = snprintf(uri, sizeof(uri), ICD_IOTY_COAP"%s%s", host_address,
+		len = snprintf(uri, sizeof(uri), "%s%s%s", coap_str, host_address,
 				OC_RSRVD_WELL_KNOWN_URI);
 	}
 	if (len <= 0 || sizeof(uri) <= len) {
@@ -526,11 +525,8 @@ void icd_ioty_complete(int type, GDBusMethodInvocation *invocation, GVariant *va
 	case ICD_CRUD_DELETE:
 		ic_dbus_complete_delete(icd_dbus_get_object(), invocation, value);
 		break;
-	case ICD_TIZEN_INFO:
-		ic_dbus_complete_get_tizen_info(icd_dbus_get_object(), invocation, value);
-		break;
 	default:
-		INFO("Invalid type(%d)", type);
+		INFO("Invalid Type(%d)", type);
 	}
 }
 
@@ -565,10 +561,8 @@ void icd_ioty_complete_error(int type, GDBusMethodInvocation *invocation, int re
 		value = g_variant_new("(a(qs)i)", &options, ret_val);
 		ic_dbus_complete_delete(icd_dbus_get_object(), invocation, value);
 		break;
-	case ICD_TIZEN_INFO:
-		value = g_variant_new("(ssi)", IC_STR_NULL, IC_STR_NULL, ret_val);
-		ic_dbus_complete_get_tizen_info(icd_dbus_get_object(), invocation, value);
-		break;
+	default:
+		INFO("Invalid Type(%d)", type);
 	}
 
 }
@@ -910,21 +904,6 @@ int icd_ioty_get_info(int type, const char *host_address, int conn_type,
 	return IOTCON_ERROR_NONE;
 }
 
-static int _icd_ioty_get_tizen_id(char **tizen_device_id)
-{
-	int ret;
-	char *tizen_id = NULL;
-
-	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_TIZEN_ID, &tizen_id);
-	if (SYSTEM_INFO_ERROR_NONE != ret) {
-		ERR("system_info_get_platform_string() Fail(%d)", ret);
-		return IOTCON_ERROR_SYSTEM;
-	}
-	*tizen_device_id = tizen_id;
-
-	return IOTCON_ERROR_NONE;
-}
-
 static int _ioty_set_device_info()
 {
 	int ret;
@@ -948,9 +927,6 @@ static int _ioty_set_device_info()
 		free(device_name);
 		return icd_ioty_convert_error(ret);
 	}
-
-	free(icd_tizen_info.device_name);
-	icd_tizen_info.device_name = device_name;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -1064,87 +1040,6 @@ int icd_ioty_set_platform_info()
 		return icd_ioty_convert_error(ret);
 	}
 	_ioty_free_platform_info(platform_info);
-
-	return IOTCON_ERROR_NONE;
-}
-
-int icd_ioty_set_tizen_info()
-{
-	int result;
-	OCStackResult ret;
-	OCResourceHandle handle;
-	char *tizen_device_id = NULL;
-
-	result = _icd_ioty_get_tizen_id(&tizen_device_id);
-	if (IOTCON_ERROR_NONE != result) {
-		ERR("_icd_ioty_get_tizen_id() Fail(%d)", result);
-		return result;
-	}
-
-	icd_tizen_info.tizen_device_id = tizen_device_id;
-	DBG("tizen_device_id : %s", icd_tizen_info.tizen_device_id);
-
-	icd_ioty_csdk_lock();
-	ret = OCCreateResource(&handle,
-			ICD_IOTY_TIZEN_INFO_TYPE,
-			IC_INTERFACE_DEFAULT,
-			ICD_IOTY_TIZEN_INFO_URI,
-			icd_ioty_ocprocess_tizen_info_handler,
-			NULL,
-			OC_EXPLICIT_DISCOVERABLE);
-	icd_ioty_csdk_unlock();
-	if (OC_STACK_OK != ret) {
-		ERR("OCCreateResource() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
-	}
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-gboolean icd_ioty_get_tizen_info(icDbus *object, GDBusMethodInvocation *invocation,
-		const gchar *host_address, int conn_type)
-{
-	int ret;
-	OCStackResult result;
-	OCDevAddr dev_addr = {0};
-	OCCallbackData cbdata = {0};
-	OCConnectivityType oic_conn_type;
-
-	cbdata.cb = icd_ioty_ocprocess_get_tizen_info_cb;
-	cbdata.context = invocation;
-
-	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
-
-	ret = icd_ioty_get_dev_addr(host_address, conn_type, &dev_addr);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_ioty_get_dev_addr() Fail(%d)", ret);
-		icd_ioty_complete_error(ICD_TIZEN_INFO, invocation, IOTCON_ERROR_IOTIVITY);
-		return TRUE;
-	}
-
-	icd_ioty_csdk_lock();
-	result = OCDoResource(NULL, OC_REST_GET, ICD_IOTY_TIZEN_INFO_URI, &dev_addr, NULL,
-			oic_conn_type, OC_LOW_QOS, &cbdata, NULL, 0);
-	icd_ioty_csdk_unlock();
-
-	if (OC_STACK_OK != result) {
-		ERR("OCDoResource() Fail(%d)", result);
-		icd_ioty_complete_error(ICD_TIZEN_INFO, invocation, icd_ioty_convert_error(result));
-		return TRUE;
-	}
-
-	return TRUE;
-}
-
-
-int icd_ioty_tizen_info_get_property(char **device_name, char **tizen_device_id)
-{
-	RETV_IF(NULL == device_name, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == tizen_device_id, IOTCON_ERROR_INVALID_PARAMETER);
-
-	*device_name = icd_tizen_info.device_name;
-	*tizen_device_id = icd_tizen_info.tizen_device_id;
 
 	return IOTCON_ERROR_NONE;
 }

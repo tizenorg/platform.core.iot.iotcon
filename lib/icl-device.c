@@ -57,11 +57,6 @@ typedef struct {
 	int timeout_id;
 } icl_platform_info_s;
 
-typedef struct {
-	iotcon_tizen_info_cb cb;
-	void *user_data;
-} icl_tizen_info_s;
-
 
 API int iotcon_device_info_get_property(iotcon_device_info_h device_info,
 		iotcon_device_info_e property, char **value)
@@ -369,92 +364,4 @@ API int iotcon_get_platform_info(const char *host_address,
 			_icl_timeout_get_platform_info, cb_container);
 
 	return ret;
-}
-
-
-static void _icl_tizen_info_cb(GObject *object, GAsyncResult *g_async_res,
-		gpointer user_data)
-{
-	int res;
-	GVariant *result;
-	char *device_name;
-	char *tizen_device_id;
-	GError *error = NULL;
-	struct icl_tizen_info info = {0};
-	icl_tizen_info_s *cb_container = user_data;
-	iotcon_tizen_info_cb cb = cb_container->cb;
-
-	ic_dbus_call_get_tizen_info_finish(IC_DBUS(object), &result, g_async_res, &error);
-	if (error) {
-		ERR("ic_dbus_call_get_tizen_info_finish() Fail(%s)", error->message);
-		if (cb) {
-			int ret = icl_dbus_convert_dbus_error(error->code);
-			cb(&info, ret, cb_container->user_data);
-		}
-		g_error_free(error);
-		/* TODO contain time out error */
-		free(cb_container);
-		return;
-	}
-
-	g_variant_get(result, "(&s&si)", &device_name, &tizen_device_id, &res);
-
-	if (IOTCON_ERROR_NONE == res && NULL != ic_utils_dbus_decode_str(tizen_device_id)) {
-		info.device_name = ic_utils_dbus_decode_str(device_name);
-		info.tizen_device_id = tizen_device_id;
-	}
-
-	if (cb)
-		cb(&info, res, cb_container->user_data);
-
-	free(cb_container);
-}
-
-
-API int iotcon_get_tizen_info(const char *host_address,
-		iotcon_connectivity_type_e connectivity_type,
-		iotcon_tizen_info_cb cb,
-		void *user_data)
-{
-	icl_tizen_info_s *cb_container;
-
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
-
-	cb_container = calloc(1, sizeof(icl_tizen_info_s));
-	if (NULL == cb_container) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
-
-	cb_container->cb = cb;
-	cb_container->user_data = user_data;
-
-	ic_dbus_call_get_tizen_info(icl_dbus_get_object(), host_address, connectivity_type,
-			NULL, _icl_tizen_info_cb, cb_container);
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-API int iotcon_tizen_info_get_property(iotcon_tizen_info_h tizen_info,
-		iotcon_tizen_info_e property, char **value)
-{
-	RETV_IF(NULL == tizen_info, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
-
-	switch (property) {
-	case IOTCON_TIZEN_INFO_DEVICE_NAME:
-		*value = tizen_info->device_name;
-		break;
-	case IOTCON_TIZEN_INFO_TIZEN_DEVICE_ID:
-		*value = tizen_info->tizen_device_id;
-		break;
-	default:
-		ERR("Invalid property(%d)", property);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-
-	return IOTCON_ERROR_NONE;
 }

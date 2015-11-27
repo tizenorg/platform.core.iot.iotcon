@@ -170,7 +170,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @param[in] uri_path The URI path of the resource.
  * @param[in] res_types The list of type of the resource.
  * @param[in] ifaces The interfaces of the resource.
- * @param[in] properties The property of the resource.
+ * @param[in] properties The properties of the resource.
  * @param[in] cb The request handler callback function
  * @param[in] user_data The user data to pass to the callback function
  * @param[out] resource_handle The handle of the resource

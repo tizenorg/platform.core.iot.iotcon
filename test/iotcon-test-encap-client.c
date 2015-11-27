@@ -234,7 +234,7 @@ int main(int argc, char **argv)
 
 	/* find door typed resources */
 	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
-			DOOR_RESOURCE_TYPE, _found_resource, &resource);
+			DOOR_RESOURCE_TYPE, false, _found_resource, &resource);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
 		iotcon_disconnect();

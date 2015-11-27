@@ -148,14 +148,6 @@ typedef struct icl_device_info* iotcon_device_info_h;
 typedef struct icl_platform_info* iotcon_platform_info_h;
 
 /**
- * @brief The handle of tizen device information.
- * @details @a iotcon_tizen_info_h is a handle of tizen device information.
- *
- * @since_tizen 3.0
- */
-typedef struct icl_tizen_info* iotcon_tizen_info_h;
-
-/**
  * @brief The handle of resource types
  * @details @a iotcon_resource_types_h is an opaque data structure to have list
  * of resource types. A resource type is datatype of string.

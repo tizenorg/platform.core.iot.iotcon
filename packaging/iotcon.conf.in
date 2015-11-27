@@ -60,9 +60,6 @@
 				send_interface="@DBUS_INTERFACE@" send_member="getPlatformInfo"
 				privilege="http://tizen.org/privilege/internet"/>
 		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="getTizenInfo"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
 				send_interface="@DBUS_INTERFACE@" send_member="subscribePresence"
 				privilege="http://tizen.org/privilege/internet"/>
 		<check send_destination="@DBUS_INTERFACE@"

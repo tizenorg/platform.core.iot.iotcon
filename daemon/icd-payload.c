@@ -26,6 +26,7 @@
 #include "ic-utils.h"
 #include "icd.h"
 #include "icd-ioty.h"
+#include "icd-ioty-type.h"
 #include "icd-payload.h"
 
 union icd_state_value_u {
@@ -55,7 +56,7 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 	OCRandomUuidResult random_res;
 	OCDiscoveryPayload *discovered;
 	struct OCResourcePayload *resource;
-	int i, is_observable, ret, res_count;
+	int i, properties, ret, res_count;
 	char device_id[UUID_STRING_SIZE] = {0};
 
 	discovered = (OCDiscoveryPayload*)payload;
@@ -111,14 +112,16 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 			node = node->next;
 		}
 
-		/* is_observable */
-		is_observable = resource->bitmap & OC_OBSERVABLE;
+		/* Resource Properties */
+		properties = icd_ioty_oic_properties_to_properties(resource->bitmap);
 
 		/* port */
 		port = (resource->port)? resource->port:dev_addr->port;
 
+		/* TODO
+		 * Check "resource->secure" and "resource->bitmap" */
 		value[i] = g_variant_new("(ssiasibsi)", resource->uri, device_id, ifaces, &types,
-				is_observable, resource->secure, dev_addr->addr, port);
+				properties, resource->secure, dev_addr->addr, port);
 		DBG("found resource[%d] : %s", i, g_variant_print(value[i], FALSE));
 
 		resource = resource->next;

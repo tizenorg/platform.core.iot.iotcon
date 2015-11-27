@@ -39,9 +39,4 @@ struct icl_platform_info {
 	char *system_time;
 };
 
-struct icl_tizen_info {
-	char *device_name;
-	char *tizen_device_id;
-};
-
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_DEVICE_H__ */

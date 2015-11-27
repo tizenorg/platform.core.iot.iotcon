@@ -60,14 +60,6 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	ret = icd_ioty_set_tizen_info();
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_ioty_set_tizen_info() Fail(%d)", ret);
-		icd_ioty_deinit(thread);
-		icd_dbus_deinit(id);
-		return -1;
-	}
-
 	g_main_loop_run(loop);
 
 	icd_ioty_deinit(thread);

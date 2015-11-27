@@ -27,4 +27,6 @@ int icd_ioty_get_dev_addr(const char *host_address, int conn_type, OCDevAddr *de
 
 int icd_ioty_get_host_address(OCDevAddr *dev_addr, char **host_address, int *conn_type);
 
+int icd_ioty_oic_properties_to_properties(int oic_properties);
+
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_TYPE_H__*/

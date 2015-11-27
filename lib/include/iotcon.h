@@ -74,7 +74,7 @@ void iotcon_disconnect(void);
 /**
  * @brief Gets the timeout seconds of asynchronous API.
  * @details This API get the timeout of iotcon_get_device_info(),
- * iotcon_get_platform_info(), iotcon_get_tizen_info(), iotcon_find_resource(),
+ * iotcon_get_platform_info(), iotcon_find_resource(),
  * iotcon_remote_resource_get(), iotcon_remote_resource_put(),
  * iotcon_remote_resource_post() and iotcon_remote_resource_delete().
  *
@@ -95,7 +95,7 @@ int iotcon_get_timeout(int *timeout_seconds);
 /**
  * @brief Sets the timeout seconds of asynchrous APIs.
  * @details This API set the timeout of iotcon_get_device_info(),
- * iotcon_get_platform_info(), iotcon_get_tizen_info(), iotcon_find_resource(),
+ * iotcon_get_platform_info(), iotcon_find_resource(),
  * iotcon_remote_resource_get(), iotcon_remote_resource_put(),
  * iotcon_remote_resource_post() and iotcon_remote_resource_delete().\n
  * Default timeout interval value is 30.

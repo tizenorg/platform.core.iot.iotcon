@@ -335,6 +335,7 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
  * @param[in] host_address The address or addressable name of server
  * @param[in] connectivity_type The connectivity type
  * @param[in] resource_type The resource type specified as a filter for the resource
+ * @param[in] is_secure The flag for secure communication with the server
  * @param[in] cb The callback function to invoke
  * @param[in] user_data The user data to pass to the function
  *
@@ -354,6 +355,7 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
 int iotcon_find_resource(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		const char *resource_type,
+		bool is_secure,
 		iotcon_found_resource_cb cb,
 		void *user_data);
 
@@ -508,80 +510,6 @@ int iotcon_get_platform_info(const char *host_address,
  */
 int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
 		iotcon_platform_info_e property, char **value);
-
-/**
- * @brief Specifies the type of function passed to iotcon_get_tizen_info().
- * @details The @a result could be one of #iotcon_error_e.
- *
- * @since_tizen 3.0
- *
- * @param[in] tizen_info The information of tizen device from remote server.
- * @param[in] result The result code (0 on success, other wise a negative error value)
- * @param[in] user_data The user data to pass to the function
- *
- * @pre iotcon_get_tizen_info() will invoke this callback function.
- *
- * @see iotcon_get_tizen_info()
- * @see iotcon_tizen_info_get_property()
- */
-typedef void (*iotcon_tizen_info_cb)(iotcon_tizen_info_h tizen_info,
-		iotcon_error_e result, void *user_data);
-
-/**
- * @brief Gets the tizen device information of remote server, asynchronously.
- * @details Request tizen device information to server and pass the information by calling
- * iotcon_tizen_info_cb().\n
- * If succeed to getting tizen information, iotcon_tizen_info_cb() will be invoked with
- * information.
- *
- * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/internet
- *
- * @param[in] host_address The host address of remote server
- * @param[in] connectivity_type The connectivity type
- * @param[in] cb The callback function to invoke
- * @param[in] user_data The user data to pass to the function
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
- * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
- * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
- *
- * @pre iotcon_connect() should be called to connect a connection to the iotcon.
- * @post iotcon_tizen_info_cb() will be invoked.
- *
- * @see iotcon_tizen_info_cb()
- * @see iotcon_tizen_info_get_property()
- * @see iotcon_set_timeout()
- */
-int iotcon_get_tizen_info(const char *host_address,
-		iotcon_connectivity_type_e connectivity_type,
-		iotcon_tizen_info_cb cb,
-		void *user_data);
-
-/**
- * @brief Gets tizen device properties from the tizen device information handle
- *
- * @since_tizen 3.0
- *
- * @remarks @a value must not be released using free().
- *
- * @param[in] tizen_info The handle of the tizen device information
- * @param[in] property The properties of the tizen device information
- * @param[out] value The value of the property
- *
- * @return 0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE  Successful
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- *
- * @see iotcon_tizen_info_cb()
- * @see iotcon_get_tizen_info()
- */
-int iotcon_tizen_info_get_property(iotcon_tizen_info_h tizen_info,
-			iotcon_tizen_info_e property, char **value);
 
 /**
  * @}

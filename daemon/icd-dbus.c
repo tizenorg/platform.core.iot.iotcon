@@ -510,7 +510,8 @@ static gboolean _dbus_handle_find_resource(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
 		gint connectivity,
-		const gchar *type)
+		const gchar *type,
+		bool is_secure)
 {
 	int ret;
 	const gchar *sender;
@@ -519,7 +520,8 @@ static gboolean _dbus_handle_find_resource(icDbus *object,
 	sender = g_dbus_method_invocation_get_sender(invocation);
 
 	signal_number = icd_dbus_generate_signal_number();
-	ret = icd_ioty_find_resource(host_address, connectivity, type, signal_number, sender);
+	ret = icd_ioty_find_resource(host_address, connectivity, type, is_secure,
+			signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_find_resource() Fail(%d)", ret);
 
@@ -862,8 +864,6 @@ static void _dbus_on_bus_acquired(GDBusConnection *conn, const gchar *name,
 			G_CALLBACK(_dbus_handle_get_device_info), NULL);
 	g_signal_connect(icd_dbus_object, "handle-get-platform-info",
 			G_CALLBACK(_dbus_handle_get_platform_info), NULL);
-	g_signal_connect(icd_dbus_object, "handle-get-tizen-info",
-			G_CALLBACK(icd_ioty_get_tizen_info), NULL);
 	g_signal_connect(icd_dbus_object, "handle-start-presence",
 			G_CALLBACK(_dbus_handle_start_presence), NULL);
 	g_signal_connect(icd_dbus_object, "handle-stop-presence",

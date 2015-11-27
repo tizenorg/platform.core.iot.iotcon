@@ -31,13 +31,6 @@
 
 #define ICD_MULTICAST_ADDRESS "224.0.1.187:5683"
 
-/* TODO Define Tizen Information Resource(uri, resource type) */
-#define ICD_IOTY_TIZEN_INFO_URI "/org/tizen/iot/d"
-#define ICD_IOTY_TIZEN_INFO_TYPE "org.tizen.iot.d"
-
-#define ICD_IOTY_TIZEN_INFO_DEVICE_NAME "device_name"
-#define ICD_IOTY_TIZEN_INFO_TIZEN_DEVICE_ID "tizen_device_id"
-
 typedef struct {
 	int64_t signal_number;
 	char *bus_name;
@@ -69,7 +62,6 @@ enum {
 	ICD_CRUD_DELETE,
 	ICD_DEVICE_INFO,
 	ICD_PLATFORM_INFO,
-	ICD_TIZEN_INFO,
 	ICD_ENCAP_MONITORING,
 	ICD_ENCAP_CACHING,
 	ICD_PRESENCE,
@@ -100,8 +92,12 @@ int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers)
 
 int icd_ioty_send_response(GVariant *resp);
 
-int icd_ioty_find_resource(const char *host_address, int conn_type,
-		const char *resource_type, int64_t signal_number, const char *bus_name);
+int icd_ioty_find_resource(const char *host_address,
+		int conn_type,
+		const char *resource_type,
+		bool is_secure,
+		int64_t signal_number,
+		const char *bus_name);
 
 void icd_ioty_complete(int type, GDBusMethodInvocation *invocation, GVariant *value);
 void icd_ioty_complete_error(int type, GDBusMethodInvocation *invocation, int ret_val);
@@ -128,12 +124,6 @@ int icd_ioty_get_info(int type, const char *host_address, int conn_type,
 
 int icd_ioty_set_device_info();
 int icd_ioty_set_platform_info();
-int icd_ioty_set_tizen_info();
-
-gboolean icd_ioty_get_tizen_info(icDbus *object, GDBusMethodInvocation *invocation,
-		const gchar *host_address, int conn_type);
-
-int icd_ioty_tizen_info_get_property(char **device_name, char **tizen_device_id);
 
 OCDoHandle icd_ioty_presence_table_get_handle(const char *host_address);
 

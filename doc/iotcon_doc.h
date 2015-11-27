@@ -230,7 +230,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 	const char *type = "org.tizen.door";
 
 	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4, type,
-			_found_resource, NULL);
+			false, _found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 }

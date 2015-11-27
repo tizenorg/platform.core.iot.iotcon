@@ -98,6 +98,7 @@ static gboolean _icl_timeout_find_resource(gpointer p)
 API int iotcon_find_resource(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		const char *resource_type,
+		bool is_secure,
 		iotcon_found_resource_cb cb,
 		void *user_data)
 {
@@ -119,6 +120,7 @@ API int iotcon_find_resource(const char *host_address,
 			ic_utils_dbus_encode_str(host_address),
 			connectivity_type,
 			ic_utils_dbus_encode_str(resource_type),
+			is_secure,
 			&signal_number,
 			&ret,
 			NULL,
@@ -167,7 +169,7 @@ API int iotcon_find_resource(const char *host_address,
 API int iotcon_remote_resource_create(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		const char *uri_path,
-		bool is_observable,
+		int properties,
 		iotcon_resource_types_h resource_types,
 		int resource_ifs,
 		iotcon_remote_resource_h *resource_handle)
@@ -189,7 +191,7 @@ API int iotcon_remote_resource_create(const char *host_address,
 	resource->host_address = ic_utils_strdup(host_address);
 	resource->connectivity_type = connectivity_type;
 	resource->uri_path = ic_utils_strdup(uri_path);
-	resource->is_observable = is_observable;
+	resource->properties = properties;
 	resource->types = icl_resource_types_ref(resource_types);
 	resource->ifaces = resource_ifs;
 
@@ -268,8 +270,7 @@ API int iotcon_remote_resource_clone(iotcon_remote_resource_h src,
 	resource->host_address = ic_utils_strdup(src->host_address);
 	resource->connectivity_type = src->connectivity_type;
 	resource->device_id = ic_utils_strdup(src->device_id);
-	resource->is_secure = src->is_secure;
-	resource->is_observable = src->is_observable;
+	resource->properties = src->properties;
 
 	if (src->header_options) {
 		ret = iotcon_options_foreach(src->header_options,
@@ -375,13 +376,13 @@ API int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource,
 }
 
 
-API int iotcon_remote_resource_is_observable(iotcon_remote_resource_h resource,
-		bool *observable)
+API int iotcon_remote_resource_get_properties(iotcon_remote_resource_h resource,
+		int *properties)
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == observable, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == properties, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*observable = resource->is_observable;
+	*properties = resource->properties;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -424,10 +425,10 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 	char host_addr[PATH_MAX] = {0};
 	iotcon_resource_types_h res_types;
 	char *uri_path, *device_id, *res_type, *addr;
-	int ifaces, is_observable, is_secure, port;
+	int ifaces, properties, is_secure, port;
 
 	g_variant_get(payload, "(&s&siasib&si)", &uri_path, &device_id, &ifaces, &types_iter,
-			&is_observable, &is_secure, &addr, &port);
+			&properties, &is_secure, &addr, &port);
 
 	switch (connectivity_type) {
 	case IOTCON_CONNECTIVITY_IPV6:
@@ -451,7 +452,7 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 		iotcon_resource_types_add(res_types, res_type);
 
 	ret = iotcon_remote_resource_create(host_addr, connectivity_type, uri_path,
-			!!is_observable, res_types, ifaces, &resource);
+			properties, res_types, ifaces, &resource);
 	if (res_types)
 		iotcon_resource_types_destroy(res_types);
 
@@ -467,7 +468,7 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 		return NULL;
 	}
 	resource->connectivity_type = connectivity_type;
-	resource->is_secure = is_secure;
+	resource->properties = properties;
 
 	return resource;
 }

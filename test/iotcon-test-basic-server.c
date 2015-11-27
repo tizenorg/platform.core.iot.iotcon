@@ -354,7 +354,7 @@ static int _request_handler_post(door_resource_s *door, iotcon_request_h request
 	}
 
 	new_door_handle = _create_door_resource(DOOR_RESOURCE_URI2, door->type,
-			IOTCON_INTERFACE_DEFAULT, (IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE), door);
+			IOTCON_INTERFACE_DEFAULT, IOTCON_RESOURCE_NO_PROPERTY, door);
 	if (NULL == new_door_handle) {
 		ERR("_create_door_resource() Fail");
 		return -1;

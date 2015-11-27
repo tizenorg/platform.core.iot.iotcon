@@ -390,7 +390,7 @@ int main(int argc, char **argv)
 
 	/* find room typed resources */
 	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
-			ROOM_RESOURCE_TYPE, _found_resource, NULL);
+			ROOM_RESOURCE_TYPE, false, _found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
 		iotcon_disconnect();
