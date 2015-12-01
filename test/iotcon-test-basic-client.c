@@ -522,7 +522,6 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		ret = iotcon_remote_resource_clone(resource, &resource_clone);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_remote_resource_clone() Fail(%d)", ret);
-			iotcon_query_destroy(query);
 			device_id_list = g_list_remove(device_id_list, door_resource_device_id);
 			free(door_resource_device_id);
 			return;

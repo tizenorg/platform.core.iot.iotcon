@@ -42,8 +42,17 @@ typedef struct {
 } icd_presence_handle_info_s;
 
 typedef struct {
+	GMutex icd_worker_mutex;
+	OCDevAddr dev_addr;
 	char *uri_path;
-	OCDevAddr* dev_addr;
+	bool presence_flag;
+	bool observe_flag;
+	bool is_valid;
+} icd_encap_worker_ctx_s;
+
+typedef struct {
+	char *uri_path;
+	OCDevAddr dev_addr;
 	OCConnectivityType oic_conn_type;
 	int64_t signal_number;
 	int get_timer_id;
@@ -53,6 +62,7 @@ typedef struct {
 	OCDoHandle observe_handle;
 	iotcon_remote_resource_state_e resource_state;
 	OCRepPayload *oic_payload;
+	icd_encap_worker_ctx_s *worker_ctx;
 } icd_encap_info_s;
 
 enum {
@@ -139,6 +149,9 @@ int icd_ioty_stop_presence();
 int icd_ioty_encap_get_time_interval();
 
 void icd_ioty_encap_set_time_interval(int time_interval);
+
+icd_encap_info_s* _icd_ioty_encap_table_get_info(const char *uri_path,
+		const char *host_address);
 
 gboolean icd_ioty_encap_get(gpointer user_data);
 

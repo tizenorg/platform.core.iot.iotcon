@@ -854,9 +854,6 @@ static int _representation_compare_without_children(OCRepPayload *repr1,
 {
 	int ret;
 
-	if (NULL == repr1 || NULL == repr2)
-		return !!(repr1 - repr2);
-
 	/* compare uri */
 	if (IC_STR_EQUAL != g_strcmp0(repr1->uri, repr2->uri))
 		return 1;
@@ -928,6 +925,9 @@ static int _representation_compare_children(OCRepPayload *repr1, OCRepPayload *r
 int icd_payload_representation_compare(OCRepPayload *repr1, OCRepPayload *repr2)
 {
 	int ret;
+
+	if (NULL == repr1 || NULL == repr2)
+		return !!(repr1 - repr2);
 
 	ret = _representation_compare_without_children(repr1, repr2);
 	if (IC_EQUAL != ret)

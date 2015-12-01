@@ -1120,6 +1120,34 @@ OCDoHandle icd_ioty_presence_table_get_handle(const char *host_address)
 }
 
 
+static void _free_encap_worker_presence_ctx(void *data)
+{
+	FN_CALL;
+	icd_encap_worker_ctx_s *encap_ctx = data;
+
+	encap_ctx->presence_flag = false;
+	if (true == encap_ctx->observe_flag)
+		return;
+
+	free(encap_ctx->uri_path);
+	free(encap_ctx);
+}
+
+
+static void _free_encap_worker_observe_ctx(void *data)
+{
+	FN_CALL;
+	icd_encap_worker_ctx_s *encap_ctx = data;
+
+	encap_ctx->observe_flag = false;
+	if (true == encap_ctx->presence_flag)
+		return;
+
+	free(encap_ctx->uri_path);
+	free(encap_ctx);
+}
+
+
 OCDoHandle icd_ioty_subscribe_presence(int type, const char *host_address, int conn_type,
 		const char *resource_type, void *context)
 {
@@ -1157,6 +1185,7 @@ OCDoHandle icd_ioty_subscribe_presence(int type, const char *host_address, int c
 	case ICD_ENCAP_MONITORING:
 		cbdata.context = context;
 		cbdata.cb = icd_ioty_ocprocess_encap_presence_cb;
+		cbdata.cd = _free_encap_worker_presence_ctx;
 		break;
 	case ICD_PRESENCE:
 	default:
@@ -1263,7 +1292,6 @@ static void _free_encap_info(void *user_data)
 
 	OCRepPayloadDestroy(encap_info->oic_payload);
 	free(encap_info->uri_path);
-	free(encap_info->dev_addr);
 	free(encap_info);
 }
 
@@ -1286,20 +1314,22 @@ static icd_encap_info_s* _icd_ioty_encap_table_add(const char *uri_path,
 		return NULL;
 	}
 
-	encap_info->dev_addr = calloc(1, sizeof(OCDevAddr));
-	if (NULL == encap_info->dev_addr) {
-		ERR("calloc() Fail(%d)", errno);
+	ret = icd_ioty_get_dev_addr(host_address, conn_type, &encap_info->dev_addr);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_ioty_get_dev_addr() Fail(%d)", ret);
 		free(encap_info);
 		return NULL;
 	}
 
-	ret = icd_ioty_get_dev_addr(host_address, conn_type, encap_info->dev_addr);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_ioty_get_dev_addr() Fail(%d)", ret);
-		free(encap_info->dev_addr);
+	/* encap_worker_ctx */
+	encap_info->worker_ctx = calloc(1, sizeof(icd_encap_worker_ctx_s));
+	if (NULL == encap_info->worker_ctx) {
+		ERR("calloc() Fail(%d)", errno);
 		free(encap_info);
 		return NULL;
 	}
+	encap_info->worker_ctx->uri_path = ic_utils_strdup(uri_path);
+	encap_info->worker_ctx->is_valid = true;
 
 	encap_info->uri_path = ic_utils_strdup(uri_path);
 	encap_info->oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
@@ -1329,7 +1359,7 @@ static void _icd_ioty_encap_table_remove(icd_encap_info_s *encap_info,
 }
 
 
-static icd_encap_info_s* _icd_ioty_encap_table_get_info(const char *uri_path,
+icd_encap_info_s* _icd_ioty_encap_table_get_info(const char *uri_path,
 		const char *host_address)
 {
 	char key_str[PATH_MAX];
@@ -1355,11 +1385,10 @@ gboolean icd_ioty_encap_get(gpointer user_data)
 	OCCallbackData cbdata = {0};
 	icd_encap_info_s *encap_info = user_data;
 
-	cbdata.context = encap_info;
 	cbdata.cb = icd_ioty_ocprocess_encap_get_cb;
 
 	icd_ioty_csdk_lock();
-	result = OCDoResource(NULL, OC_REST_GET, encap_info->uri_path, encap_info->dev_addr,
+	result = OCDoResource(NULL, OC_REST_GET, encap_info->uri_path, &encap_info->dev_addr,
 			NULL, encap_info->oic_conn_type, OC_LOW_QOS, &cbdata, NULL, 0);
 	icd_ioty_csdk_unlock();
 
@@ -1385,13 +1414,6 @@ int icd_ioty_start_encap(int type, const char *uri_path, const char *host_addres
 		}
 	}
 
-	if (0 == encap_info->monitoring_count + encap_info->caching_count) {
-		/* GET METHOD */
-		icd_ioty_encap_get(encap_info);
-		encap_info->get_timer_id = g_timeout_add_seconds(
-				icd_remote_resource_time_interval, icd_ioty_encap_get, encap_info);
-	}
-
 	switch (type) {
 	case ICD_ENCAP_MONITORING:
 		if (0 != encap_info->monitoring_count) {
@@ -1401,16 +1423,14 @@ int icd_ioty_start_encap(int type, const char *uri_path, const char *host_addres
 		}
 		/* DEVICE PRESENCE */
 		encap_info->presence_handle = icd_ioty_subscribe_presence(ICD_ENCAP_MONITORING,
-				host_address, conn_type, NULL, encap_info);
+				host_address, conn_type, NULL, encap_info->worker_ctx);
 		if (NULL == encap_info->presence_handle) {
 			ERR("icd_ioty_subscribe_presence() Fail");
-			if (0 == encap_info->monitoring_count + encap_info->caching_count) {
-				g_source_remove(encap_info->get_timer_id);
-				encap_info->get_timer_id = 0;
+			if (0 == encap_info->monitoring_count + encap_info->caching_count)
 				_icd_ioty_encap_table_remove(encap_info, host_address);
-			}
 			return IOTCON_ERROR_IOTIVITY;
 		}
+		encap_info->worker_ctx->presence_flag = true;
 		encap_info->monitoring_count++;
 		break;
 	case ICD_ENCAP_CACHING:
@@ -1420,50 +1440,73 @@ int icd_ioty_start_encap(int type, const char *uri_path, const char *host_addres
 			return IOTCON_ERROR_NONE;
 		}
 		/* OBSERVE METHOD */
-		cbdata.context = encap_info;
+		cbdata.context = encap_info->worker_ctx;
 		cbdata.cb = icd_ioty_ocprocess_encap_observe_cb;
+		cbdata.cd = _free_encap_worker_observe_ctx;
 
 		encap_info->observe_handle = _icd_ioty_observe_register(uri_path,
-				encap_info->dev_addr,
+				&encap_info->dev_addr,
 				NULL,
 				OC_REST_OBSERVE,
 				encap_info->oic_conn_type,
 				&cbdata);
 		if (NULL == encap_info->observe_handle) {
 			ERR("_icd_ioty_observe_register() Fail");
-			if (0 == encap_info->monitoring_count + encap_info->caching_count) {
-				g_source_remove(encap_info->get_timer_id);
-				encap_info->get_timer_id = 0;
+			if (0 == encap_info->monitoring_count + encap_info->caching_count)
 				_icd_ioty_encap_table_remove(encap_info, host_address);
-			}
 			return IOTCON_ERROR_IOTIVITY;
 		}
+		encap_info->worker_ctx->observe_flag = true;
 		encap_info->caching_count++;
 		break;
 	default:
 		ERR("Invalid Type(%d)", type);
-		if (0 == encap_info->monitoring_count + encap_info->caching_count) {
-			g_source_remove(encap_info->get_timer_id);
-			encap_info->get_timer_id = 0;
+		if (0 == encap_info->monitoring_count + encap_info->caching_count)
 			_icd_ioty_encap_table_remove(encap_info, host_address);
-		}
 		return IOTCON_ERROR_INVALID_TYPE;
 	}
+
+	/* GET METHOD */
+	if (1 == encap_info->monitoring_count + encap_info->caching_count) {
+		icd_ioty_encap_get(encap_info);
+		encap_info->get_timer_id = g_timeout_add_seconds(
+				icd_remote_resource_time_interval, icd_ioty_encap_get, encap_info);
+	}
+
 	*signal_number = encap_info->signal_number;
 
 	return IOTCON_ERROR_NONE;
 }
 
 
+static void _icd_ioty_stop_encap_get(icd_encap_info_s *encap_info,
+		const char *host_address)
+{
+	icd_encap_worker_ctx_s *worker_ctx = encap_info->worker_ctx;
+
+	if (0 != encap_info->monitoring_count + encap_info->caching_count)
+		return;
+
+	g_mutex_lock(&worker_ctx->icd_worker_mutex);
+	g_source_remove(encap_info->get_timer_id);
+	encap_info->get_timer_id = 0;
+	encap_info->worker_ctx->is_valid = false;
+	_icd_ioty_encap_table_remove(encap_info, host_address);
+	g_mutex_unlock(&worker_ctx->icd_worker_mutex);
+
+}
+
+
 int icd_ioty_stop_encap(int type, const char *uri_path, const char *host_address)
 {
 	int ret;
+	OCDoHandle handle;
 	icd_encap_info_s *encap_info;
 
 	encap_info = _icd_ioty_encap_table_get_info(uri_path, host_address);
 	if (NULL == encap_info) {
 		ERR("_icd_ioty_encap_table_get_info() Fail");
-		return IOTCON_ERROR_INVALID_PARAMETER;
+		return IOTCON_ERROR_NO_DATA;
 	}
 
 	switch (type) {
@@ -1477,8 +1520,12 @@ int icd_ioty_stop_encap(int type, const char *uri_path, const char *host_address
 		if (0 != encap_info->monitoring_count)
 			return IOTCON_ERROR_NONE;
 
+		/* GET METHOD */
+		handle = encap_info->presence_handle;
+		_icd_ioty_stop_encap_get(encap_info, host_address);
+
 		/* DEVICE PRESENCE */
-		ret = icd_ioty_unsubscribe_presence(encap_info->presence_handle, host_address);
+		ret = icd_ioty_unsubscribe_presence(handle, host_address);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icd_ioty_unsubscribe_presence() Fail(%d)", ret);
 			return ret;
@@ -1494,8 +1541,12 @@ int icd_ioty_stop_encap(int type, const char *uri_path, const char *host_address
 		if (0 != encap_info->caching_count)
 			return IOTCON_ERROR_NONE;
 
+		/* GET METHOD */
+		handle = encap_info->observe_handle;
+		_icd_ioty_stop_encap_get(encap_info, host_address);
+
 		/* OBSERVE METHOD */
-		ret = icd_ioty_observer_stop(encap_info->observe_handle, NULL);
+		ret = icd_ioty_observer_stop(handle, NULL);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icd_ioty_observer_stop() Fail(%d)", ret);
 			return ret;
@@ -1505,14 +1556,6 @@ int icd_ioty_stop_encap(int type, const char *uri_path, const char *host_address
 		ERR("Invalid Type(%d)", type);
 		return IOTCON_ERROR_INVALID_TYPE;
 	}
-
-	if (0 != encap_info->monitoring_count + encap_info->caching_count)
-		return IOTCON_ERROR_NONE;
-
-	/* GET METHOD */
-	g_source_remove(encap_info->get_timer_id);
-
-	_icd_ioty_encap_table_remove(encap_info, host_address);
 
 	return IOTCON_ERROR_NONE;
 }
