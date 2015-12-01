@@ -111,7 +111,6 @@ static void _find_light_resource()
  * @param[in] host_address The host address of the resource
  * @param[in] connectivity_type The connectivity type
  * @param[in] uri_path The URI path of the resource.
- * @param[in] is_observable Allow observation
  * @param[in] properties The properties of the resource
  * @param[in] resource_types The resource type of the resource. For example, "core.light"
  * @param[in] resource_ifaces The resource interfaces (whether it is collection etc)
