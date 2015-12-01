@@ -101,7 +101,9 @@ static void _find_light_resource()
  * observe the object.\n
  * If not, you should discover the resource object manually.\n
  * The @a properties can contain multiple properties like
- * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.
+ * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.\n
+ * The @a ifaces can contain multiple interfaces like
+ * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.
  *
  * @since_tizen 3.0
  *
@@ -110,10 +112,11 @@ static void _find_light_resource()
  *
  * @param[in] host_address The host address of the resource
  * @param[in] connectivity_type The connectivity type
- * @param[in] uri_path The URI path of the resource.
- * @param[in] properties The properties of the resource
+ * @param[in] uri_path The URI path of the resource
+ * @param[in] properties The properties of the resource\n Set of #iotcon_resource_property_e
  * @param[in] resource_types The resource type of the resource. For example, "core.light"
- * @param[in] resource_ifaces The resource interfaces (whether it is collection etc)
+ * @param[in] resource_ifaces The resource interfaces (whether it is collection etc)\n
+ * Set of #iotcon_interface_e
  * @param[out] remote_resource Generated resource handle
  *
  * @return 0 on success, otherwise a negative error value.
@@ -485,7 +488,7 @@ int iotcon_remote_resource_stop_caching(iotcon_remote_resource_h resource);
  * @param[in] state The state of the remote resource
  * @param[in] user_data The user data to pass to the function
  *
- * @pre The callback must be registered using iotcon_remote_resource_start_monitoring()\n
+ * @pre The callback must be registered using iotcon_remote_resource_start_monitoring()
  *
  * @see iotcon_remote_resource_start_monitoring()
  * @see iotcon_remote_resource_stop_monitoring()
@@ -674,7 +677,7 @@ int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of the remote resource
- * @param[out] ifaces The resource interfaces of the remote resource
+ * @param[out] ifaces The resource interfaces of the remote resource\n Set of #iotcon_interface_e
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -698,7 +701,7 @@ int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource, int
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of the resource
- * @param[out] properties The Properties of the resource
+ * @param[out] properties The Properties of the resource\n Set of #iotcon_resource_property_e
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful

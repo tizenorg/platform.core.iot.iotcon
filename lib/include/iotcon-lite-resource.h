@@ -133,6 +133,8 @@ static void _update_brightness(int brightness)
  * @details Registers a resource specified by @a uri_path, @a res_types, @a state which have
  * @a properties in Iotcon server.\n
  * When client requests some operations, it send a response to client, automatically.\n
+ * The @a properties can contain multiple properties like
+ * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.
  *
  * @since_tizen 3.0
  * @privlevel public
@@ -142,10 +144,10 @@ static void _update_brightness(int brightness)
  * You must destroy @a resource_handle by calling iotcon_lite_resource_destroy()
  * if @a remote_handle is no longer needed.
  *
- * @param[in] uri_path The URI path of the resource.
- * @param[in] res_types The list of type of the resource.
- * @param[in] properties The property of the resource.
- * @param[in] state The state handle to set.
+ * @param[in] uri_path The URI path of the resource
+ * @param[in] res_types The list of type of the resource
+ * @param[in] properties The property of the resource\n Set of #iotcon_resource_property_e
+ * @param[in] state The state handle to set
  * @param[out] resource_handle The handle of the resource
  *
  * @return 0 on success, otherwise a negative error value.

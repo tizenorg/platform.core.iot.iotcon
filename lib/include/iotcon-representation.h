@@ -314,7 +314,7 @@ int iotcon_representation_get_resource_types(iotcon_representation_h repr,
  * @since_tizen 3.0
  *
  * @param[in] repr The representation handle
- * @param[in] ifaces The interfaces to set
+ * @param[in] ifaces The interfaces to set\n Set of #iotcon_interface_e
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -331,7 +331,7 @@ int iotcon_representation_set_resource_interfaces(iotcon_representation_h repr,
  * @since_tizen 3.0
  *
  * @param[in] repr The representation handle
- * @param[out] ifaces The interfaces to get
+ * @param[out] ifaces The interfaces to get\n Set of #iotcon_interface_e
  *
  * @return Interfaces to get. Interfaces may contain multiple interfaces.
  * @retval #IOTCON_INTERFACE_NONE  Not set
