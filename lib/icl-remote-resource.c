@@ -102,7 +102,7 @@ API int iotcon_find_resource(const char *host_address,
 		iotcon_found_resource_cb cb,
 		void *user_data)
 {
-	int ret;
+	int ret, timeout;
 	unsigned int sub_id;
 	GError *error = NULL;
 	int64_t signal_number;
@@ -116,11 +116,14 @@ API int iotcon_find_resource(const char *host_address,
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
+	timeout = icl_dbus_get_timeout();
+
 	ic_dbus_call_find_resource_sync(icl_dbus_get_object(),
 			ic_utils_dbus_encode_str(host_address),
 			connectivity_type,
 			ic_utils_dbus_encode_str(resource_type),
 			is_secure,
+			timeout,
 			&signal_number,
 			&ret,
 			NULL,
@@ -158,8 +161,8 @@ API int iotcon_find_resource(const char *host_address,
 
 	cb_container->id = sub_id;
 
-	cb_container->timeout_id = g_timeout_add_seconds(icl_dbus_get_timeout(),
-			_icl_timeout_find_resource, cb_container);
+	cb_container->timeout_id = g_timeout_add_seconds(timeout, _icl_timeout_find_resource,
+			cb_container);
 
 	return ret;
 }

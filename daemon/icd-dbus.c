@@ -511,7 +511,8 @@ static gboolean _dbus_handle_find_resource(icDbus *object,
 		const gchar *host_address,
 		gint connectivity,
 		const gchar *type,
-		bool is_secure)
+		bool is_secure,
+		gint timeout)
 {
 	int ret;
 	const gchar *sender;
@@ -520,7 +521,7 @@ static gboolean _dbus_handle_find_resource(icDbus *object,
 	sender = g_dbus_method_invocation_get_sender(invocation);
 
 	signal_number = icd_dbus_generate_signal_number();
-	ret = icd_ioty_find_resource(host_address, connectivity, type, is_secure,
+	ret = icd_ioty_find_resource(host_address, connectivity, type, is_secure, timeout,
 			signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_find_resource() Fail(%d)", ret);
@@ -609,7 +610,8 @@ static gboolean _dbus_handle_send_response(icDbus *object,
 static gboolean _dbus_handle_get_device_info(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
-		gint connectivity)
+		gint connectivity,
+		gint timeout)
 {
 	int ret;
 	const gchar *sender;
@@ -618,8 +620,8 @@ static gboolean _dbus_handle_get_device_info(icDbus *object,
 	signal_number = icd_dbus_generate_signal_number();
 	sender = g_dbus_method_invocation_get_sender(invocation);
 
-	ret = icd_ioty_get_info(ICD_DEVICE_INFO, host_address, connectivity, signal_number,
-			sender);
+	ret = icd_ioty_get_info(ICD_DEVICE_INFO, host_address, connectivity, timeout,
+			signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_get_info(device info) Fail(%d)", ret);
 
@@ -631,7 +633,8 @@ static gboolean _dbus_handle_get_device_info(icDbus *object,
 static gboolean _dbus_handle_get_platform_info(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *host_address,
-		gint connectivity)
+		gint connectivity,
+		gint timeout)
 {
 	int ret;
 	const gchar *sender;
@@ -640,8 +643,8 @@ static gboolean _dbus_handle_get_platform_info(icDbus *object,
 	signal_number = icd_dbus_generate_signal_number();
 	sender = g_dbus_method_invocation_get_sender(invocation);
 
-	ret = icd_ioty_get_info(ICD_PLATFORM_INFO, host_address, connectivity, signal_number,
-			sender);
+	ret = icd_ioty_get_info(ICD_PLATFORM_INFO, host_address, connectivity, timeout,
+			signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_get_info(platform info) Fail(%d)", ret);
 

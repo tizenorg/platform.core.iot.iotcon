@@ -106,6 +106,7 @@ int icd_ioty_find_resource(const char *host_address,
 		int conn_type,
 		const char *resource_type,
 		bool is_secure,
+		int timeout,
 		int64_t signal_number,
 		const char *bus_name);
 
@@ -129,7 +130,7 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_type,
 
 int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options);
 
-int icd_ioty_get_info(int type, const char *host_address, int conn_type,
+int icd_ioty_get_info(int type, const char *host_address, int conn_type, int timeout,
 		int64_t signal_number, const char *bus_name);
 
 int icd_ioty_set_device_info();

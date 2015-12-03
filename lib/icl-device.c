@@ -134,7 +134,7 @@ API int iotcon_get_device_info(const char *host_address,
 		iotcon_device_info_cb cb,
 		void *user_data)
 {
-	int ret;
+	int ret, timeout;
 	unsigned int sub_id;
 	GError *error = NULL;
 	icl_device_info_s *cb_container;
@@ -144,9 +144,12 @@ API int iotcon_get_device_info(const char *host_address,
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
+	timeout = icl_dbus_get_timeout();
+
 	ic_dbus_call_get_device_info_sync(icl_dbus_get_object(),
 			ic_utils_dbus_encode_str(host_address),
 			connectivity_type,
+			timeout,
 			&signal_number,
 			&ret,
 			NULL,
@@ -185,7 +188,7 @@ API int iotcon_get_device_info(const char *host_address,
 
 	cb_container->id = sub_id;
 
-	cb_container->timeout_id = g_timeout_add_seconds(icl_dbus_get_timeout(),
+	cb_container->timeout_id = g_timeout_add_seconds(timeout,
 			_icl_timeout_get_device_info, cb_container);
 
 	return ret;
@@ -310,7 +313,7 @@ API int iotcon_get_platform_info(const char *host_address,
 		iotcon_platform_info_cb cb,
 		void *user_data)
 {
-	int ret;
+	int ret, timeout;
 	unsigned int sub_id;
 	GError *error = NULL;
 	icl_platform_info_s *cb_container;
@@ -320,9 +323,12 @@ API int iotcon_get_platform_info(const char *host_address,
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
+	timeout = icl_dbus_get_timeout();
+
 	ic_dbus_call_get_platform_info_sync(icl_dbus_get_object(),
 			ic_utils_dbus_encode_str(host_address),
 			connectivity_type,
+			timeout,
 			&signal_number,
 			&ret,
 			NULL,
@@ -360,7 +366,7 @@ API int iotcon_get_platform_info(const char *host_address,
 	}
 
 	cb_container->id = sub_id;
-	cb_container->timeout_id = g_timeout_add_seconds(icl_dbus_get_timeout(),
+	cb_container->timeout_id = g_timeout_add_seconds(timeout,
 			_icl_timeout_get_platform_info, cb_container);
 
 	return ret;

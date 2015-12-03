@@ -407,15 +407,34 @@ static void _ioty_free_signal_context(void *data)
 }
 
 
+static gboolean _icd_ioty_discovery_timeout(gpointer user_data)
+{
+	int ret;
+	OCDoHandle handle = user_data;
+
+	icd_ioty_csdk_lock();
+	ret = OCCancel(handle, OC_LOW_QOS, NULL, 0);
+	icd_ioty_csdk_unlock();
+	if (OC_STACK_OK != ret) {
+		ERR("OCCancel() Fail(%d)", ret);
+		return G_SOURCE_REMOVE;
+	}
+
+	return G_SOURCE_REMOVE;
+}
+
+
 int icd_ioty_find_resource(const char *host_address,
 		int conn_type,
 		const char *resource_type,
 		bool is_secure,
+		int timeout,
 		int64_t signal_number,
 		const char *bus_name)
 {
 	int len;
 	char *coap_str;
+	OCDoHandle handle;
 	OCStackResult result;
 	icd_sig_ctx_s *context;
 	char uri[PATH_MAX] = {0};
@@ -455,7 +474,7 @@ int icd_ioty_find_resource(const char *host_address,
 
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. */
-	result = OCDoResource(NULL, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
+	result = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);
 	icd_ioty_csdk_unlock();
 
@@ -465,6 +484,8 @@ int icd_ioty_find_resource(const char *host_address,
 		free(context);
 		return icd_ioty_convert_error(result);
 	}
+
+	g_timeout_add_seconds(timeout, _icd_ioty_discovery_timeout, handle);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -852,9 +873,10 @@ int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options)
 	return IOTCON_ERROR_NONE;
 }
 
-int icd_ioty_get_info(int type, const char *host_address, int conn_type,
+int icd_ioty_get_info(int type, const char *host_address, int conn_type, int timeout,
 		int64_t signal_number, const char *bus_name)
 {
+	OCDoHandle handle;
 	OCStackResult result;
 	icd_sig_ctx_s *context;
 	OCCallbackData cbdata = {0};
@@ -890,7 +912,7 @@ int icd_ioty_get_info(int type, const char *host_address, int conn_type,
 
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
-	result = OCDoResource(NULL, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
+	result = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);
 	icd_ioty_csdk_unlock();
 
@@ -900,6 +922,8 @@ int icd_ioty_get_info(int type, const char *host_address, int conn_type,
 		free(context);
 		return icd_ioty_convert_error(result);
 	}
+
+	g_timeout_add_seconds(timeout, _icd_ioty_discovery_timeout, handle);
 
 	return IOTCON_ERROR_NONE;
 }
