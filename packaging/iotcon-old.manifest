@@ -4,6 +4,7 @@
 		<permit>
 			<smack permit="system::use_internet" type="w" />
 			<smack permit="dbus" type="rwx" />
+			<smack permit="system::debugging_network" type="w" />
 		</permit>
 		<request>
 			<smack request="system::use_internet" type="w" />
@@ -26,6 +27,8 @@
 			<smack request="telephony_framework::properties" type="rw" />
 			<smack request="telephony_framework::properties" type="rw" />
 			<smack request="tizen::vconf::network" type="r" />
+
+			<smack request="system::debugging_network" type="w" />
 		</request>
 	</define>
 	<assign>
