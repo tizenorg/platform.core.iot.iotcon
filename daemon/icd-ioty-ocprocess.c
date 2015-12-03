@@ -785,14 +785,19 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx,
 	GVariantBuilder *options;
 	struct icd_observe_context *observe_ctx;
 	icd_sig_ctx_s *sig_context = ctx;
+	OCStackApplicationResult cb_result;
 
 	RETV_IF(NULL == ctx, OC_STACK_KEEP_TRANSACTION);
+	RETV_IF(NULL == resp, OC_STACK_KEEP_TRANSACTION);
+
+	cb_result = (OC_OBSERVE_DEREGISTER == resp->sequenceNumber)?
+		OC_STACK_DELETE_TRANSACTION:OC_STACK_KEEP_TRANSACTION;
 
 	if (NULL == resp->payload) {
 		ERR("payload is empty");
 		_observe_cb_response_error(sig_context->bus_name, sig_context->signal_number,
 				IOTCON_ERROR_IOTIVITY);
-		return OC_STACK_KEEP_TRANSACTION;
+		return cb_result;
 	}
 
 	observe_ctx = calloc(1, sizeof(struct icd_observe_context));
@@ -800,7 +805,7 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx,
 		ERR("calloc() Fail(%d)", errno);
 		_observe_cb_response_error(sig_context->bus_name, sig_context->signal_number,
 				IOTCON_ERROR_OUT_OF_MEMORY);
-		return OC_STACK_KEEP_TRANSACTION;
+		return cb_result;
 	}
 
 	res = _ocprocess_parse_oic_result(resp->result);
@@ -824,13 +829,13 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx,
 			g_variant_unref(observe_ctx->payload);
 		g_variant_builder_unref(observe_ctx->options);
 		free(observe_ctx);
-		return OC_STACK_KEEP_TRANSACTION;
+		return cb_result;
 	}
 
 	/* DO NOT FREE sig_context. It MUST be freed in the ocstack */
 	/* DO NOT FREE observe_ctx. It MUST be freed in the _worker_observe_cb func */
 
-	return OC_STACK_KEEP_TRANSACTION;
+	return cb_result;
 }
 
 

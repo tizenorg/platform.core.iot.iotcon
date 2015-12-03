@@ -88,6 +88,7 @@ static gboolean _icl_timeout_find_resource(gpointer p)
 		cb_container->cb(NULL, IOTCON_ERROR_TIMEOUT, cb_container->user_data);
 
 	icl_dbus_unsubscribe_signal(cb_container->id);
+	cb_container->id = 0;
 
 	return G_SOURCE_REMOVE;
 }

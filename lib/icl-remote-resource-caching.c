@@ -180,6 +180,7 @@ API int iotcon_remote_resource_stop_caching(iotcon_remote_resource_h resource)
 	}
 
 	icl_dbus_unsubscribe_signal(resource->caching_sub_id);
+	resource->caching_sub_id = 0;
 
 	return IOTCON_ERROR_NONE;
 }

@@ -156,6 +156,7 @@ API int iotcon_remote_resource_stop_monitoring(iotcon_remote_resource_h resource
 	}
 
 	icl_dbus_unsubscribe_signal(resource->monitoring_sub_id);
+	resource->monitoring_sub_id = 0;
 
 	return IOTCON_ERROR_NONE;
 }

@@ -281,6 +281,7 @@ API int iotcon_remove_presence_cb(iotcon_presence_h presence)
 	presence->handle = 0;
 
 	icl_dbus_unsubscribe_signal(presence->sub_id);
+	presence->sub_id = 0;
 
 	return IOTCON_ERROR_NONE;
 }

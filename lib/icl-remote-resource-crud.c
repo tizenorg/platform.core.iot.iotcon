@@ -550,8 +550,11 @@ API int iotcon_remote_resource_observe_deregister(iotcon_remote_resource_h resou
 		ERR("iotcon-daemon Fail(%d)", ret);
 		return icl_dbus_convert_daemon_error(ret);
 	}
+	resource->observe_handle = 0;
 
 	icl_dbus_unsubscribe_signal(resource->observe_sub_id);
+	resource->observe_sub_id = 0;
+
 
 	return IOTCON_ERROR_NONE;
 }

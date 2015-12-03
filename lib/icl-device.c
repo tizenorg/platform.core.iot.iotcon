@@ -125,6 +125,7 @@ static gboolean _icl_timeout_get_device_info(gpointer p)
 		cb_container->cb(&info, IOTCON_ERROR_TIMEOUT, cb_container->user_data);
 
 	icl_dbus_unsubscribe_signal(cb_container->id);
+	cb_container->id = 0;
 
 	return G_SOURCE_REMOVE;
 }
@@ -304,6 +305,7 @@ static gboolean _icl_timeout_get_platform_info(gpointer p)
 		cb_container->cb(&info, IOTCON_ERROR_TIMEOUT, cb_container->user_data);
 
 	icl_dbus_unsubscribe_signal(cb_container->id);
+	cb_container->id = 0;
 
 	return G_SOURCE_REMOVE;
 }

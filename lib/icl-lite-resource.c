@@ -385,6 +385,7 @@ API int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource)
 	resource->handle = 0;
 
 	icl_dbus_unsubscribe_signal(resource->sub_id);
+	resource->sub_id = 0;
 
 	return IOTCON_ERROR_NONE;
 }
