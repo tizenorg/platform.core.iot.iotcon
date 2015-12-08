@@ -116,7 +116,7 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 		properties = icd_ioty_oic_properties_to_properties(resource->bitmap);
 
 		/* port */
-		port = (resource->port)? resource->port:dev_addr->port;
+		port = (resource->port) ? resource->port : dev_addr->port;
 
 		/* TODO
 		 * Check "resource->secure" and "resource->bitmap" */
@@ -597,7 +597,7 @@ static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *ite
 			else
 				OCRepPayloadSetPropString(repr, key, str_value);
 
-		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE ("a{sv}"))) {
+		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE("a{sv}"))) {
 			GVariantIter state_iter;
 			repr_value = OCRepPayloadCreate();
 			g_variant_iter_init(&state_iter, var);
@@ -776,16 +776,16 @@ static int _representation_compare_value(OCRepPayloadValue *value1,
 		ret = IC_EQUAL;
 		break;
 	case OCREP_PROP_INT:
-		ret = (value1->i == value2->i)? IC_EQUAL : 1;
+		ret = (value1->i == value2->i) ? IC_EQUAL : 1;
 		break;
 	case OCREP_PROP_DOUBLE:
-		ret = (value1->d == value2->d)? IC_EQUAL : 1;
+		ret = (value1->d == value2->d) ? IC_EQUAL : 1;
 		break;
 	case OCREP_PROP_BOOL:
-		ret = (value1->b == value2->b)? IC_EQUAL : 1;
+		ret = (value1->b == value2->b) ? IC_EQUAL : 1;
 		break;
 	case OCREP_PROP_STRING:
-		ret = (IC_STR_EQUAL == g_strcmp0(value1->str, value2->str))? IC_EQUAL : 1;
+		ret = (IC_STR_EQUAL == g_strcmp0(value1->str, value2->str)) ? IC_EQUAL : 1;
 		break;
 	case OCREP_PROP_OBJECT:
 		ret = icd_payload_representation_compare(value1->obj, value2->obj);

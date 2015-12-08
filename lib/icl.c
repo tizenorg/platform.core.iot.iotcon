@@ -23,7 +23,7 @@ API int iotcon_connect(void)
 {
 	int ret;
 
-#if !GLIB_CHECK_VERSION(2,35,0)
+#if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
 #endif
 

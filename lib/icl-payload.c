@@ -98,7 +98,6 @@ static GVariantBuilder* _icl_state_value_to_gvariant_builder(GHashTable *hash)
 	GVariant *var = NULL;
 	iotcon_state_h state;
 	GVariantBuilder *builder;
-//	GVariantBuilder *state_builder;
 	struct icl_value_s *state_value = NULL;
 
 	if (NULL == hash)
@@ -131,7 +130,6 @@ static GVariantBuilder* _icl_state_value_to_gvariant_builder(GHashTable *hash)
 		case IOTCON_TYPE_STATE:
 			state = ((icl_val_state_s*)state_value)->state;
 			var = _icl_state_value_to_gvariant(state->hash_table);
-//			var = g_variant_new("a{sv}", state_builder);
 			break;
 		case IOTCON_TYPE_NONE:
 		default:

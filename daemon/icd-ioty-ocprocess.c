@@ -37,8 +37,7 @@ static int icd_ioty_alive;
 typedef int (*_ocprocess_cb)(void *user_data);
 typedef void (*_free_context)(void *context);
 
-struct icd_ioty_worker
-{
+struct icd_ioty_worker {
 	void *ctx;
 	_ocprocess_cb cb;
 	_free_context free_ctx;
@@ -790,8 +789,8 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx,
 	RETV_IF(NULL == ctx, OC_STACK_KEEP_TRANSACTION);
 	RETV_IF(NULL == resp, OC_STACK_KEEP_TRANSACTION);
 
-	cb_result = (OC_OBSERVE_DEREGISTER == resp->sequenceNumber)?
-		OC_STACK_DELETE_TRANSACTION:OC_STACK_KEEP_TRANSACTION;
+	cb_result = (OC_OBSERVE_DEREGISTER == resp->sequenceNumber) ?
+		OC_STACK_DELETE_TRANSACTION : OC_STACK_KEEP_TRANSACTION;
 
 	if (NULL == resp->payload) {
 		ERR("payload is empty");

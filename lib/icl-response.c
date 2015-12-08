@@ -150,7 +150,7 @@ static bool _icl_response_representation_child_cb(iotcon_representation_h child,
 {
 	int iface = GPOINTER_TO_INT(user_data);
 
-	switch(iface) {
+	switch (iface) {
 	case IOTCON_INTERFACE_BATCH:
 		child->visibility = ICL_VISIBILITY_REPR;
 		break;
@@ -182,7 +182,7 @@ static int _icl_response_check_representation_visibility(iotcon_response_h resp)
 
 	DBG("interface type of response : %d", resp->iface);
 
-	switch(resp->iface) {
+	switch (resp->iface) {
 	case IOTCON_INTERFACE_NONE:
 	case IOTCON_INTERFACE_DEFAULT:
 	case IOTCON_INTERFACE_GROUP:

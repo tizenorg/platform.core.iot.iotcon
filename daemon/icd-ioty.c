@@ -124,13 +124,13 @@ static int _ioty_properties_to_oic_properties(int properties)
 		prop |= OC_EXPLICIT_DISCOVERABLE;
 
 	/* TODO: Secure option is not supported yet. */
-	properties = (properties & OC_SECURE)? (properties ^ OC_SECURE):properties;
+	properties = (properties & OC_SECURE) ? (properties ^ OC_SECURE) : properties;
 
 	return prop;
 }
 
 OCResourceHandle icd_ioty_register_resource(const char *uri_path,
-		const char* const* res_types, int ifaces, int properties)
+		const char * const *res_types, int ifaces, int properties)
 {
 	FN_CALL;
 	int i;
@@ -301,11 +301,11 @@ int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers)
 
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. */
-	if (msg_length) {
+	if (msg_length)
 		ret = OCNotifyListOfObservers(handle, obs_ids, obs_length, payload, OC_LOW_QOS);
-	} else {
+	else
 		ret = OCNotifyAllObservers(handle, OC_LOW_QOS);
-	}
+
 	icd_ioty_csdk_unlock();
 
 	if (OC_STACK_NO_OBSERVERS == ret) {
@@ -370,7 +370,7 @@ int icd_ioty_send_response(GVariant *resp)
 	response.numSendVendorSpecificHeaderOptions = options_size;
 
 	if (0 != options_size) {
-		int ret= _ioty_get_header_options(options,
+		int ret = _ioty_get_header_options(options,
 				response.numSendVendorSpecificHeaderOptions,
 				response.sendVendorSpecificHeaderOptions,
 				sizeof(response.sendVendorSpecificHeaderOptions)
@@ -441,7 +441,7 @@ int icd_ioty_find_resource(const char *host_address,
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
 
-	coap_str = is_secure? ICD_IOTY_COAPS:ICD_IOTY_COAP;
+	coap_str = is_secure ? ICD_IOTY_COAPS : ICD_IOTY_COAP;
 
 	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, host_address)) {
 		len = snprintf(uri, sizeof(uri), "%s", OC_RSRVD_WELL_KNOWN_URI);
@@ -533,7 +533,7 @@ static char* _icd_ioty_resource_generate_uri(char *uri_path, GVariant *query)
 
 void icd_ioty_complete(int type, GDBusMethodInvocation *invocation, GVariant *value)
 {
-	switch(type) {
+	switch (type) {
 	case ICD_CRUD_GET:
 		ic_dbus_complete_get(icd_dbus_get_object(), invocation, value);
 		break;
