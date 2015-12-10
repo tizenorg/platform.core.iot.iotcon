@@ -71,5 +71,17 @@
 		<check send_destination="@DBUS_INTERFACE@"
 				send_interface="@DBUS_INTERFACE@" send_member="stopPresence"
 				privilege="http://tizen.org/privilege/internet"/>
+		<check send_destination="@DBUS_INTERFACE@"
+				send_interface="@DBUS_INTERFACE@" send_member="startCaching"
+				privilege="http://tizen.org/privilege/internet"/>
+		<check send_destination="@DBUS_INTERFACE@"
+				send_interface="@DBUS_INTERFACE@" send_member="stopCaching"
+				privilege="http://tizen.org/privilege/internet"/>
+		<check send_destination="@DBUS_INTERFACE@"
+				send_interface="@DBUS_INTERFACE@" send_member="startMonitoring"
+				privilege="http://tizen.org/privilege/internet"/>
+		<check send_destination="@DBUS_INTERFACE@"
+				send_interface="@DBUS_INTERFACE@" send_member="stopMonitoring"
+				privilege="http://tizen.org/privilege/internet"/>
 	</policy>
 </busconfig>
