@@ -172,6 +172,7 @@ API int iotcon_resource_create(const char *uri_path,
 			IOTCON_ERROR_INVALID_PARAMETER, "Invalid uri_path(%s)", uri_path);
 	RETV_IF(NULL == res_types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
 	resource = calloc(1, sizeof(struct icl_resource));
 	if (NULL == resource) {
