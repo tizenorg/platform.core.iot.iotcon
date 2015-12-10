@@ -384,8 +384,6 @@ API int iotcon_representation_clone(const iotcon_representation_h src,
 	int ret;
 	GList *node;
 	iotcon_resource_types_h list;
-	iotcon_state_h ori_state;
-	iotcon_state_h cloned_state = NULL;
 	iotcon_representation_h cloned_repr, copied_repr;
 
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
@@ -418,35 +416,26 @@ API int iotcon_representation_clone(const iotcon_representation_h src,
 		cloned_repr->res_types = list;
 	}
 
-	for (node = g_list_first(src->children); node; node = node->next) {
-		ret = iotcon_representation_clone((iotcon_representation_h)node->data,
-				&copied_repr);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_representation_clone(child) Fail(%d)", ret);
-			iotcon_representation_destroy(cloned_repr);
-			return ret;
+	if (src->children) {
+		for (node = g_list_first(src->children); node; node = node->next) {
+			ret = iotcon_representation_clone((iotcon_representation_h)node->data,
+					&copied_repr);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("iotcon_representation_clone(child) Fail(%d)", ret);
+				iotcon_representation_destroy(cloned_repr);
+				return ret;
+			}
+			cloned_repr->children = g_list_append(cloned_repr->children, copied_repr);
 		}
-		cloned_repr->children = g_list_append(cloned_repr->children, copied_repr);
 	}
 
-	ori_state = src->state;
-	if (ori_state->hash_table) {
-		ret = iotcon_state_create(&cloned_state);
+	if (src->state) {
+		ret = iotcon_state_clone(src->state, &cloned_repr->state);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_state_create() Fail");
+			ERR("iotcon_state_clone() Fail(%d)", ret);
 			iotcon_representation_destroy(cloned_repr);
 			return ret;
 		}
-		g_hash_table_foreach(ori_state->hash_table, (GHFunc)icl_state_clone_foreach,
-				cloned_state);
-		ret = iotcon_representation_set_state(cloned_repr, cloned_state);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_representation_set_state() Fail");
-			iotcon_state_destroy(cloned_state);
-			iotcon_representation_destroy(cloned_repr);
-			return ret;
-		}
-		iotcon_state_destroy(cloned_state);
 	}
 
 	*dest = cloned_repr;
