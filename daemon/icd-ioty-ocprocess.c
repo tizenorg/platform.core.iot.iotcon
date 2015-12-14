@@ -334,9 +334,10 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 	req_ctx->request_h = request->requestHandle;
 	req_ctx->resource_h = request->resource;
 
-	ret = icd_dbus_client_list_get_info(req_ctx->resource_h, &signal_number, &bus_name);
+	ret = icd_dbus_client_list_get_resource_info(req_ctx->resource_h, &signal_number,
+			&bus_name);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_dbus_client_list_get_info() Fail(%d)", ret);
+		ERR("icd_dbus_client_list_get_resource_info() Fail(%d)", ret);
 		free(req_ctx);
 		return OC_EH_ERROR;
 	}

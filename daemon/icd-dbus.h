@@ -25,7 +25,7 @@
 
 icDbus* icd_dbus_get_object();
 int64_t icd_dbus_generate_signal_number();
-int icd_dbus_client_list_get_info(void *handle, int64_t *signal_number,
+int icd_dbus_client_list_get_resource_info(void *handle, int64_t *signal_number,
 		gchar **bus_name);
 int icd_dbus_emit_signal(const char *dest, const char *signal_name,
 		GVariant *value);

@@ -35,13 +35,20 @@ static GMutex icd_dbus_client_list_mutex;
 
 typedef struct _icd_dbus_client_s {
 	gchar *bus_name;
-	GList *hdlist;
+	GList *resource_list;
+	GList *presence_list;
+	GList *observe_list;
 } icd_dbus_client_s;
 
 typedef struct _icd_resource_handle {
 	OCResourceHandle handle;
 	int64_t signal_number;
 } icd_resource_handle_s;
+
+typedef struct _icd_presence_handle {
+	OCDoHandle handle;
+	char *host_address;
+} icd_presence_handle_s;
 
 
 icDbus* icd_dbus_get_object()
@@ -58,45 +65,7 @@ int64_t icd_dbus_generate_signal_number()
 }
 
 
-static void _icd_dbus_resource_handle_free(OCResourceHandle handle)
-{
-	icd_dbus_client_s *client;
-	GList *cur_client, *cur_hd;
-	icd_resource_handle_s *rsrc_handle;
-
-	g_mutex_lock(&icd_dbus_client_list_mutex);
-	cur_client = icd_dbus_client_list;
-	while (cur_client) {
-		client = cur_client->data;
-		if (NULL == client) {
-			ERR("client is NULL");
-			g_mutex_unlock(&icd_dbus_client_list_mutex);
-			return;
-		}
-
-		cur_hd = client->hdlist;
-		while (cur_hd) {
-			rsrc_handle = cur_hd->data;
-
-			if (rsrc_handle->handle == handle) {
-				DBG("resource handle(%u, %u) removed from handle list", handle,
-						rsrc_handle->signal_number);
-				client->hdlist = g_list_delete_link(client->hdlist, cur_hd);
-				free(rsrc_handle);
-				g_mutex_unlock(&icd_dbus_client_list_mutex);
-				return;
-			}
-			cur_hd = cur_hd->next;
-		}
-
-		cur_client = cur_client->next;
-	}
-
-	g_mutex_unlock(&icd_dbus_client_list_mutex);
-	return;
-}
-
-int icd_dbus_client_list_get_info(OCResourceHandle handle,
+int icd_dbus_client_list_get_resource_info(OCResourceHandle handle,
 		int64_t *signal_number, gchar **bus_name)
 {
 	FN_CALL;
@@ -117,7 +86,7 @@ int icd_dbus_client_list_get_info(OCResourceHandle handle,
 			return IOTCON_ERROR_NO_DATA;
 		}
 
-		cur_hd = client->hdlist;
+		cur_hd = client->resource_list;
 		while (cur_hd) {
 			rsrc_handle = cur_hd->data;
 
@@ -175,22 +144,57 @@ int icd_dbus_emit_signal(const char *dest, const char *signal_name, GVariant *va
 	return IOTCON_ERROR_NONE;
 }
 
-static void _icd_dbus_cleanup_handle(OCResourceHandle data)
+
+static void _icd_dbus_cleanup_resource_list(void *data)
 {
 	int ret;
-	icd_resource_handle_s *rsrc_handle = data;
+	icd_resource_handle_s *resource_handle = data;
 
-	RET_IF(NULL == rsrc_handle);
-	RET_IF(NULL == rsrc_handle->handle);
+	RET_IF(NULL == resource_handle);
+	RET_IF(NULL == resource_handle->handle);
 
-	DBG("handle(%u, %u) deregistering", rsrc_handle->handle, rsrc_handle->signal_number);
+	DBG("handle(%u, %u) deregistering", resource_handle->handle,
+			resource_handle->signal_number);
 
-	ret = icd_ioty_unregister_resource(rsrc_handle->handle);
+	ret = icd_ioty_unregister_resource(resource_handle->handle);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_unregister_resource() Fail(%d)", ret);
 
-	free(rsrc_handle);
+	free(resource_handle);
 }
+
+
+static void _icd_dbus_cleanup_presence_list(void *data)
+{
+	int ret;
+	icd_presence_handle_s *presence_handle = data;
+
+	RET_IF(NULL == presence_handle);
+	RET_IF(NULL == presence_handle->handle);
+
+	DBG("handle(%u) deregistering", presence_handle->handle);
+
+	ret = icd_ioty_unsubscribe_presence(presence_handle->handle,
+			presence_handle->host_address);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_unsubscribe_presence() Fail(%d)", ret);
+
+	free(presence_handle->host_address);
+	free(presence_handle);
+}
+
+
+static void _icd_dbus_cleanup_observe_list(OCDoHandle data)
+{
+	int ret;
+
+	DBG("handle(%u) deregistering", data);
+
+	ret = icd_ioty_observer_stop(data, NULL);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_observer_stop() Fail(%d)", ret);
+}
+
 
 static int _icd_dbus_client_list_cleanup_handle_list(GList *client_list)
 {
@@ -199,7 +203,14 @@ static int _icd_dbus_client_list_cleanup_handle_list(GList *client_list)
 	RETV_IF(NULL == client_list, IOTCON_ERROR_INVALID_PARAMETER);
 
 	client = client_list->data;
-	g_list_free_full(client->hdlist, _icd_dbus_cleanup_handle);
+
+	/* resource list */
+	g_list_free_full(client->resource_list, _icd_dbus_cleanup_resource_list);
+	/* presence list */
+	g_list_free_full(client->presence_list, _icd_dbus_cleanup_presence_list);
+	/* observe list */
+	g_list_free_full(client->observe_list, _icd_dbus_cleanup_observe_list);
+
 	free(client->bus_name);
 	client->bus_name = NULL;
 	free(client);
@@ -208,32 +219,57 @@ static int _icd_dbus_client_list_cleanup_handle_list(GList *client_list)
 	return IOTCON_ERROR_NONE;
 }
 
-static int _icd_dbus_client_list_find_client(const gchar *owner, GList **ret_list)
+
+static int _icd_dbus_client_list_compare_bus_name(const void *a, const void *b)
 {
-	GList *client_list;
-	icd_dbus_client_s *client;
+	const icd_dbus_client_s *client = a;
 
-	RETV_IF(NULL == owner, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == ret_list, IOTCON_ERROR_INVALID_PARAMETER);
+	return g_strcmp0(client->bus_name, b);
+}
 
-	client_list = icd_dbus_client_list;
-	while (client_list) {
-		client = client_list->data;
-		if (NULL == client) {
-			ERR("client is NULL");
-			return IOTCON_ERROR_NO_DATA;
-		}
 
-		if (IC_STR_EQUAL == g_strcmp0(client->bus_name, owner)) {
-			*ret_list = client_list;
-			return IOTCON_ERROR_NONE;
-		}
+static inline GList* _icd_dbus_client_list_find_client(const gchar *owner)
+{
+	return g_list_find_custom(icd_dbus_client_list, owner,
+			_icd_dbus_client_list_compare_bus_name);
+}
 
-		client_list = client_list->next;
+
+static int _icd_dbus_client_list_get_client(const gchar *bus_name,
+		icd_dbus_client_s **ret_client)
+{
+	GList *found_client = NULL;
+	icd_dbus_client_s *client = NULL;
+
+	RETV_IF(NULL == bus_name, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == ret_client, IOTCON_ERROR_INVALID_PARAMETER);
+
+	found_client = _icd_dbus_client_list_find_client(bus_name);
+	if (found_client) {
+		*ret_client = found_client->data;
+		return IOTCON_ERROR_NONE;
 	}
+
+	client = calloc(1, sizeof(icd_dbus_client_s));
+	if (NULL == client) {
+		ERR("calloc(client) Fail(%d)", errno);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
+
+	client->bus_name = ic_utils_strdup(bus_name);
+	if (NULL == client->bus_name) {
+		ERR("ic_utils_strdup() Fail");
+		free(client);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
+
+	DBG("new client(%s) added", bus_name);
+	icd_dbus_client_list = g_list_append(icd_dbus_client_list, client);
+	*ret_client = client;
 
 	return IOTCON_ERROR_NONE;
 }
+
 
 static void _icd_dbus_name_owner_changed_cb(GDBusConnection *conn,
 		const gchar *sender_name,
@@ -251,13 +287,7 @@ static void _icd_dbus_name_owner_changed_cb(GDBusConnection *conn,
 
 	if (0 == strlen(new_owner)) {
 		g_mutex_lock(&icd_dbus_client_list_mutex);
-		ret = _icd_dbus_client_list_find_client(old_owner, &client);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("_icd_dbus_client_list_find_client() Fail(%d)", ret);
-			g_mutex_unlock(&icd_dbus_client_list_mutex);
-			return;
-		}
-
+		client = _icd_dbus_client_list_find_client(old_owner);
 		if (client) { /* found bus name in our bus list */
 			DBG("bus(%s) stopped", old_owner);
 			icd_dbus_client_list = g_list_remove_link(icd_dbus_client_list, client);
@@ -266,13 +296,12 @@ static void _icd_dbus_name_owner_changed_cb(GDBusConnection *conn,
 
 		if (client) {
 			ret = _icd_dbus_client_list_cleanup_handle_list(client);
-			if (IOTCON_ERROR_NONE != ret) {
+			if (IOTCON_ERROR_NONE != ret)
 				ERR("_icd_dbus_client_list_cleanup_handle_list() Fail(%d)", ret);
-				return;
-			}
 		}
 	}
 }
+
 
 static int _icd_dbus_subscribe_name_owner_changed(GDBusConnection *conn)
 {
@@ -297,96 +326,204 @@ static int _icd_dbus_subscribe_name_owner_changed(GDBusConnection *conn)
 	return IOTCON_ERROR_NONE;
 }
 
-static int _icd_dbus_resource_list_append_handle(const gchar *bus_name,
-		OCResourceHandle handle, int64_t signal_number)
+static int _icd_dbus_resource_list_add(const gchar *bus_name, OCResourceHandle handle,
+		int64_t signal_number)
 {
-	FN_CALL;
-	GList *cur_client, *cur_hd;
-	bool client_exist = false;
-	icd_resource_handle_s *rsrc_handle;
+	int ret;
+	icd_dbus_client_s *client = NULL;
+	icd_resource_handle_s *resource_handle;
+
+	RETV_IF(NULL == bus_name, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == handle, IOTCON_ERROR_INVALID_PARAMETER);
+
+	resource_handle = calloc(1, sizeof(icd_resource_handle_s));
+	if (NULL == resource_handle) {
+		ERR("calloc() Fail(%d)", errno);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
+	resource_handle->handle = handle;
+	resource_handle->signal_number = signal_number;
+
+	g_mutex_lock(&icd_dbus_client_list_mutex);
+	ret = _icd_dbus_client_list_get_client(bus_name, &client);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_icd_dbus_client_list_get_client() Fail");
+		free(resource_handle);
+		g_mutex_unlock(&icd_dbus_client_list_mutex);
+		return ret;
+	}
+
+	DBG("resource handle(%u) added in the client(%s)", handle, bus_name);
+
+	client->resource_list = g_list_append(client->resource_list, resource_handle);
+
+	g_mutex_unlock(&icd_dbus_client_list_mutex);
+	return IOTCON_ERROR_NONE;
+}
+
+
+static void _icd_dbus_resource_list_remove(const gchar *bus_name, OCResourceHandle handle)
+{
+	GList *cur_hd;
+	GList *client_list = NULL;
+	icd_dbus_client_s *client = NULL;
+	icd_resource_handle_s *resource_handle;
+
+	g_mutex_lock(&icd_dbus_client_list_mutex);
+	client_list = _icd_dbus_client_list_find_client(bus_name);
+	if (NULL == client_list) {
+		ERR("_icd_dbus_client_list_find_client() Fail");
+		g_mutex_unlock(&icd_dbus_client_list_mutex);
+		return;
+	}
+
+	client = client_list->data;
+	cur_hd = client->resource_list;
+	while (cur_hd) {
+		resource_handle = cur_hd->data;
+
+		if (resource_handle->handle == handle) {
+			DBG("resource handle(%u) removed from handle list", handle);
+			client->resource_list = g_list_delete_link(client->resource_list, cur_hd);
+			free(resource_handle);
+			g_mutex_unlock(&icd_dbus_client_list_mutex);
+			return;
+		}
+		cur_hd = cur_hd->next;
+	}
+	g_mutex_unlock(&icd_dbus_client_list_mutex);
+}
+
+
+static int _icd_dbus_presence_list_add(const gchar *bus_name,
+		OCDoHandle handle, const char *host_address)
+{
+	int ret;
+	icd_dbus_client_s *client = NULL;
+	icd_presence_handle_s *presence_handle;
+
+	RETV_IF(NULL == bus_name, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == handle, IOTCON_ERROR_INVALID_PARAMETER);
+
+	presence_handle = calloc(1, sizeof(icd_presence_handle_s));
+	if (NULL == presence_handle) {
+		ERR("calloc(handle) Fail(%d)", errno);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
+	presence_handle->handle = handle;
+	presence_handle->host_address = ic_utils_strdup(host_address);
+
+	g_mutex_lock(&icd_dbus_client_list_mutex);
+	ret = _icd_dbus_client_list_get_client(bus_name, &client);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_icd_dbus_client_list_get_client() Fail(%d)", ret);
+		free(presence_handle->host_address);
+		free(presence_handle);
+		g_mutex_unlock(&icd_dbus_client_list_mutex);
+		return ret;
+	}
+
+	DBG("presence handle(%u) added in the client(%s)", handle, bus_name);
+
+	client->presence_list = g_list_append(client->presence_list, presence_handle);
+
+	g_mutex_unlock(&icd_dbus_client_list_mutex);
+	return IOTCON_ERROR_NONE;
+}
+
+
+static void _icd_dbus_presence_list_remove(const gchar *bus_name,
+		OCDoHandle handle)
+{
+	GList *cur_hd;
+	GList *client_list = NULL;
+	icd_dbus_client_s *client = NULL;
+	icd_presence_handle_s *presence_handle;
+
+	g_mutex_lock(&icd_dbus_client_list_mutex);
+	client_list = _icd_dbus_client_list_find_client(bus_name);
+	if (NULL == client_list) {
+		ERR("_icd_dbus_client_list_find_client() Fail");
+		g_mutex_unlock(&icd_dbus_client_list_mutex);
+		return;
+	}
+
+	client = client_list->data;
+	cur_hd = client->presence_list;
+	while (cur_hd) {
+		presence_handle = cur_hd->data;
+
+		if (presence_handle->handle == handle) {
+			DBG("presence handle(%u) removed from handle list", handle);
+			client->presence_list = g_list_delete_link(client->presence_list, cur_hd);
+			free(presence_handle->host_address);
+			free(presence_handle);
+			g_mutex_unlock(&icd_dbus_client_list_mutex);
+			return;
+		}
+		cur_hd = cur_hd->next;
+	}
+	g_mutex_unlock(&icd_dbus_client_list_mutex);
+}
+
+
+static int _icd_dbus_observe_list_add(const gchar *bus_name, OCDoHandle handle)
+{
+	int ret;
 	icd_dbus_client_s *client = NULL;
 
 	RETV_IF(NULL == bus_name, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == handle, IOTCON_ERROR_INVALID_PARAMETER);
 
 	g_mutex_lock(&icd_dbus_client_list_mutex);
-	cur_client = icd_dbus_client_list;
-
-	while (cur_client) {
-		client = cur_client->data;
-		if (NULL == client) {
-			ERR("client is NULL");
-			g_mutex_unlock(&icd_dbus_client_list_mutex);
-			return IOTCON_ERROR_NO_DATA;
-		}
-
-		if (IC_STR_EQUAL == g_strcmp0(client->bus_name, bus_name)) {
-			DBG("bus_name(%s) already exist", bus_name);
-			client_exist = true;
-			break;
-		}
-
-		cur_client = cur_client->next;
-	}
-
-	if (true == client_exist) {
-		cur_hd = client->hdlist;
-		while (cur_hd) {
-			rsrc_handle = cur_hd->data;
-
-			if (rsrc_handle->handle == handle) {
-				ERR("resource handle(%u, %u) already exist", rsrc_handle->handle,
-						rsrc_handle->signal_number);
-				g_mutex_unlock(&icd_dbus_client_list_mutex);
-				return IOTCON_ERROR_ALREADY;
-			}
-			cur_hd = cur_hd->next;
-		}
-	} else {
-		DBG("bus_name(%s) not exist. make new one.", bus_name);
-
-		client = calloc(1, sizeof(icd_dbus_client_s));
-		if (NULL == client) {
-			ERR("calloc(client) Fail(%d)", errno);
-			g_mutex_unlock(&icd_dbus_client_list_mutex);
-			return IOTCON_ERROR_OUT_OF_MEMORY;
-		}
-
-		client->bus_name = ic_utils_strdup(bus_name);
-		if (NULL == client->bus_name) {
-			ERR("ic_utils_strdup() Fail");
-			free(client);
-			g_mutex_unlock(&icd_dbus_client_list_mutex);
-			return IOTCON_ERROR_OUT_OF_MEMORY;
-		}
-
-		DBG("new client(%s, %d) added", bus_name, signal_number);
-	}
-
-	rsrc_handle = calloc(1, sizeof(icd_resource_handle_s));
-	if (NULL == rsrc_handle) {
-		ERR("calloc(handle) Fail(%d)", errno);
-		if (false == client_exist) {
-			free(client->bus_name);
-			free(client);
-		}
+	ret = _icd_dbus_client_list_get_client(bus_name, &client);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_icd_dbus_client_list_get_client() Fail(%d)", ret);
 		g_mutex_unlock(&icd_dbus_client_list_mutex);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
+		return ret;
 	}
 
-	rsrc_handle->handle = handle;
-	rsrc_handle->signal_number = signal_number;
+	DBG("observe handle(%u) added in the client(%s)", handle, bus_name);
 
-	DBG("handle(%u) added in the client(%s, %u)", handle, bus_name, signal_number);
-
-	client->hdlist = g_list_append(client->hdlist, rsrc_handle);
-
-	if (false == client_exist)
-		icd_dbus_client_list = g_list_append(icd_dbus_client_list, client);
+	client->observe_list = g_list_append(client->observe_list, handle);
 
 	g_mutex_unlock(&icd_dbus_client_list_mutex);
 	return IOTCON_ERROR_NONE;
 }
+
+
+static void _icd_dbus_observe_list_remove(const gchar *bus_name,
+		OCDoHandle handle)
+{
+	GList *cur_hd;
+	GList *client_list = NULL;
+	OCDoHandle observe_handle;
+	icd_dbus_client_s *client = NULL;
+
+	g_mutex_lock(&icd_dbus_client_list_mutex);
+	client_list = _icd_dbus_client_list_find_client(bus_name);
+	if (NULL == client_list) {
+		ERR("_icd_dbus_client_list_find_client() Fail");
+		g_mutex_unlock(&icd_dbus_client_list_mutex);
+		return;
+	}
+
+	client = client_list->data;
+	cur_hd = client->observe_list;
+	while (cur_hd) {
+		observe_handle = cur_hd->data;
+
+		if (observe_handle == handle) {
+			DBG("presence handle(%u) removed from handle list", handle);
+			client->observe_list = g_list_delete_link(client->observe_list, cur_hd);
+			g_mutex_unlock(&icd_dbus_client_list_mutex);
+			return;
+		}
+		cur_hd = cur_hd->next;
+	}
+	g_mutex_unlock(&icd_dbus_client_list_mutex);
+}
+
 
 static gboolean _dbus_handle_register_resource(icDbus *object,
 		GDBusMethodInvocation *invocation,
@@ -406,9 +543,9 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 		sender = g_dbus_method_invocation_get_sender(invocation);
 
 		signal_number = icd_dbus_generate_signal_number();
-		ret = _icd_dbus_resource_list_append_handle(sender, handle, signal_number);
+		ret = _icd_dbus_resource_list_add(sender, handle, signal_number);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("_icd_dbus_resource_list_append_handle() Fail(%d)", ret);
+			ERR("_icd_dbus_resource_list_add() Fail(%d)", ret);
 
 			ret = icd_ioty_unregister_resource(handle);
 			if (IOTCON_ERROR_NONE != ret)
@@ -416,6 +553,8 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 
 			handle = NULL;
 		}
+	} else {
+		ERR("icd_ioty_register_resource() Fail");
 	}
 
 	ic_dbus_complete_register_resource(object, invocation, signal_number,
@@ -429,14 +568,14 @@ static gboolean _dbus_handle_unregister_resource(icDbus *object,
 		GDBusMethodInvocation *invocation, gint64 resource)
 {
 	int ret;
+	const gchar *sender;
+
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	_icd_dbus_resource_list_remove(sender, ICD_INT64_TO_POINTER(resource));
 
 	ret = icd_ioty_unregister_resource(ICD_INT64_TO_POINTER(resource));
 	if (IOTCON_ERROR_NONE != ret)
-		ERR("icd_ioty_unregister_resource(%u) Fail(%d)", resource, ret);
-	else
-		DBG("handle(%u) deregistered", resource);
-
-	_icd_dbus_resource_handle_free(ICD_INT64_TO_POINTER(resource));
+		ERR("icd_ioty_unregister_resource() Fail(%d)", ret);
 
 	ic_dbus_complete_unregister_resource(object, invocation);
 
@@ -538,8 +677,9 @@ static gboolean _dbus_handle_observer_start(icDbus *object,
 		gint observe_policy,
 		GVariant *query)
 {
-	OCDoHandle observe_h;
+	int ret;
 	const gchar *sender;
+	OCDoHandle observe_h;
 	int64_t signal_number;
 
 	signal_number = icd_dbus_generate_signal_number();
@@ -547,8 +687,20 @@ static gboolean _dbus_handle_observer_start(icDbus *object,
 
 	observe_h = icd_ioty_observer_start(resource, observe_policy, query,
 			signal_number, sender);
-	if (NULL == observe_h)
+	if (observe_h) {
+		ret = _icd_dbus_observe_list_add(sender, observe_h);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_icd_dbus_observe_list_add() Fail(%d)", ret);
+
+			ret = icd_ioty_observer_stop(ICD_INT64_TO_POINTER(observe_h), NULL);
+			if (IOTCON_ERROR_NONE != ret)
+				ERR("icd_ioty_observer_stop() fail(%d)", ret);
+
+			observe_h = NULL;
+		}
+	} else {
 		ERR("icd_ioty_observer_start() Fail");
+	}
 
 	ic_dbus_complete_observer_start(object, invocation, signal_number,
 			ICD_POINTER_TO_INT64(observe_h));
@@ -564,6 +716,10 @@ static gboolean _dbus_handle_observer_stop(icDbus *object,
 		GVariant *options)
 {
 	int ret;
+	const gchar *sender;
+
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	_icd_dbus_observe_list_remove(sender, ICD_INT64_TO_POINTER(observe_h));
 
 	ret = icd_ioty_observer_stop(ICD_INT64_TO_POINTER(observe_h), options);
 	if (IOTCON_ERROR_NONE != ret)
@@ -691,12 +847,28 @@ static gboolean _dbus_handle_subscribe_presence(icDbus *object,
 		gint connectivity,
 		const gchar *type)
 {
+	int ret;
+	const gchar *sender;
 	OCDoHandle presence_h;
 
 	presence_h = icd_ioty_subscribe_presence(ICD_PRESENCE, host_address, connectivity,
 			type, NULL);
-	if (NULL == presence_h)
+	if (presence_h) {
+		sender = g_dbus_method_invocation_get_sender(invocation);
+
+		ret = _icd_dbus_presence_list_add(sender, presence_h, host_address);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_icd_dbus_presence_list_add() Fail(%d)", ret);
+
+			ret = icd_ioty_unsubscribe_presence(presence_h, host_address);
+			if (IOTCON_ERROR_NONE != ret)
+				ERR("icd_ioty_unsubscribe_presence(%u) Fail(%d)", presence_h, ret);
+
+			presence_h = NULL;
+		}
+	} else {
 		ERR("icd_ioty_subscribe_presence() Fail");
+	}
 
 	ic_dbus_complete_subscribe_presence(object, invocation,
 			ICD_POINTER_TO_INT64(presence_h));
@@ -711,6 +883,10 @@ static gboolean _dbus_handle_unsubscribe_presence(icDbus *object,
 		const gchar *host_address)
 {
 	int ret;
+	const gchar *sender;
+
+	sender = g_dbus_method_invocation_get_sender(invocation);
+	_icd_dbus_presence_list_remove(sender, ICD_INT64_TO_POINTER(presence_h));
 
 	ret = icd_ioty_unsubscribe_presence(ICD_INT64_TO_POINTER(presence_h), host_address);
 	if (IOTCON_ERROR_NONE != ret)

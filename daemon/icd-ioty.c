@@ -1104,24 +1104,24 @@ static void _icd_ioty_presence_table_destroy()
 }
 
 
-static void _icd_ioty_presence_table_remove(const char *host_address)
+static bool _icd_ioty_presence_table_remove(const char *host_address)
 {
 	icd_presence_handle_info_s *handle_info;
 
 	handle_info = g_hash_table_lookup(icd_ioty_presence_table, host_address);
 	if (NULL == handle_info)
-		return;
+		return false;
 
 	handle_info->client_count--;
 	if (0 < handle_info->client_count)
-		return;
+		return false;
 
 	g_hash_table_remove(icd_ioty_presence_table, host_address);
 
 	if (0 == g_hash_table_size(icd_ioty_presence_table))
 		_icd_ioty_presence_table_destroy();
 
-	return;
+	return true;
 }
 
 
@@ -1237,7 +1237,18 @@ OCDoHandle icd_ioty_subscribe_presence(int type, const char *host_address, int c
 
 int icd_ioty_unsubscribe_presence(OCDoHandle handle, const char *host_address)
 {
+	bool removed;
 	OCStackResult ret;
+	const char *address;
+
+	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, host_address) || '\0' == host_address[0])
+		address = ICD_MULTICAST_ADDRESS;
+	else
+		address = host_address;
+
+	removed = _icd_ioty_presence_table_remove(address);
+	if (false == removed)
+		return IOTCON_ERROR_NONE;
 
 	icd_ioty_csdk_lock();
 	ret = OCCancel(handle, OC_LOW_QOS, NULL, 0);
@@ -1246,8 +1257,6 @@ int icd_ioty_unsubscribe_presence(OCDoHandle handle, const char *host_address)
 		ERR("OCCancel() Fail(%d)", ret);
 		return icd_ioty_convert_error(ret);
 	}
-
-	_icd_ioty_presence_table_remove(host_address);
 
 	return IOTCON_ERROR_NONE;
 }
