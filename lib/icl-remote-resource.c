@@ -33,6 +33,7 @@
 #define ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL 3600 /* 60 min */
 
 typedef struct {
+	bool found;
 	iotcon_found_resource_cb cb;
 	void *user_data;
 	unsigned int id;
@@ -58,8 +59,7 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 	icl_found_resource_s *cb_container = user_data;
 	iotcon_found_resource_cb cb = cb_container->cb;
 
-	if (cb_container->timeout_id)
-		cb_container->timeout_id = 0;
+	cb_container->found = true;
 
 	g_variant_get(parameters, "(vi)", &payload, &connectivity_type);
 
@@ -84,13 +84,22 @@ static gboolean _icl_timeout_find_resource(gpointer p)
 		return G_SOURCE_REMOVE;
 	}
 
-	if (cb_container->timeout_id && cb_container->cb)
+	if (false == cb_container->found && cb_container->cb)
 		cb_container->cb(NULL, IOTCON_ERROR_TIMEOUT, cb_container->user_data);
+	cb_container->timeout_id = 0;
 
 	icl_dbus_unsubscribe_signal(cb_container->id);
 	cb_container->id = 0;
 
 	return G_SOURCE_REMOVE;
+}
+
+static void _icl_find_resource_conn_cleanup(icl_found_resource_s *cb_container)
+{
+	RET_IF(NULL == cb_container);
+	if (cb_container->timeout_id)
+		g_source_remove(cb_container->timeout_id);
+	free(cb_container);
 }
 
 
@@ -153,8 +162,8 @@ API int iotcon_find_resource(const char *host_address,
 	cb_container->cb = cb;
 	cb_container->user_data = user_data;
 
-	sub_id = icl_dbus_subscribe_signal(signal_name, cb_container, free,
-			_icl_found_resource_cb);
+	sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
+			_icl_find_resource_conn_cleanup, _icl_found_resource_cb);
 	if (0 == sub_id) {
 		ERR("icl_dbus_subscribe_signal() Fail");
 		return IOTCON_ERROR_DBUS;
