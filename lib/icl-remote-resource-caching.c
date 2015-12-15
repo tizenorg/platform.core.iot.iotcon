@@ -79,6 +79,7 @@ static void _icl_caching_conn_cleanup(icl_caching_s *cb_container)
 		cb_container->resource->cached_repr = NULL;
 	}
 	cb_container->resource->caching_sub_id = 0;
+	icl_remote_resource_unref(cb_container->resource);
 	free(cb_container);
 }
 
@@ -142,6 +143,7 @@ API int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
 	}
 	resource->caching_sub_id = sub_id;
 	cb_container->resource = resource;
+	icl_remote_resource_ref(resource);
 
 	return IOTCON_ERROR_NONE;
 }

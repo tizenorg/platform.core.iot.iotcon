@@ -30,6 +30,7 @@ typedef enum {
 } icl_remote_resource_device_state_e;
 
 struct icl_remote_resource {
+	int ref_count;
 	char *uri_path;
 	char *host_address;
 	char *device_id;
@@ -45,6 +46,8 @@ struct icl_remote_resource {
 	iotcon_representation_h cached_repr;
 };
 
+void icl_remote_resource_ref(iotcon_remote_resource_h resource);
+void icl_remote_resource_unref(iotcon_remote_resource_h resource);
 void icl_remote_resource_crud_stop(iotcon_remote_resource_h resource);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__ */

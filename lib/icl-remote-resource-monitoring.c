@@ -54,6 +54,7 @@ static void _icl_monitoring_cb(GDBusConnection *connection,
 static void _icl_monitoring_conn_cleanup(icl_monitoring_s *cb_container)
 {
 	cb_container->resource->monitoring_sub_id = 0;
+	icl_remote_resource_unref(cb_container->resource);
 	free(cb_container);
 }
 
@@ -118,6 +119,7 @@ API int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resourc
 	}
 	resource->monitoring_sub_id = sub_id;
 	cb_container->resource = resource;
+	icl_remote_resource_ref(resource);
 
 	return IOTCON_ERROR_NONE;
 }

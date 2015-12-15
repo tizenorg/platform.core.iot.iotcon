@@ -168,7 +168,6 @@ API int iotcon_find_resource(const char *host_address,
 	return ret;
 }
 
-
 /* If you know the information of resource, then you can make a proxy of the resource. */
 API int iotcon_remote_resource_create(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
@@ -198,27 +197,18 @@ API int iotcon_remote_resource_create(const char *host_address,
 	resource->properties = properties;
 	resource->types = icl_resource_types_ref(resource_types);
 	resource->ifaces = resource_ifs;
+	resource->ref_count = 1;
 
 	*resource_handle = resource;
 
 	return IOTCON_ERROR_NONE;
 }
 
-
-API void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource)
+static void _icl_remote_resource_destroy(iotcon_remote_resource_h resource)
 {
 	RET_IF(NULL == resource);
-
-	if (resource->observe_handle)
-		iotcon_remote_resource_observe_deregister(resource);
-
-	icl_remote_resource_crud_stop(resource);
-
-	if (0 != resource->caching_sub_id)
-		iotcon_remote_resource_stop_caching(resource);
-	if (0 != resource->monitoring_sub_id)
-		iotcon_remote_resource_stop_monitoring(resource);
-
+	if (resource->ref_count < 0)
+		ERR("Invalid ref_count (%d)", resource->ref_count);
 	free(resource->uri_path);
 	free(resource->host_address);
 	free(resource->device_id);
@@ -229,6 +219,36 @@ API void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource)
 		iotcon_options_destroy(resource->header_options);
 
 	free(resource);
+}
+
+void icl_remote_resource_ref(iotcon_remote_resource_h resource)
+{
+	RET_IF(NULL == resource);
+	resource->ref_count++;
+}
+
+void icl_remote_resource_unref(iotcon_remote_resource_h resource)
+{
+	RET_IF(NULL == resource);
+	resource->ref_count--;
+	if (0 == resource->ref_count)
+		_icl_remote_resource_destroy(resource);
+}
+
+
+API void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource)
+{
+	RET_IF(NULL == resource);
+
+	if (resource->observe_handle)
+		iotcon_remote_resource_observe_deregister(resource);
+	icl_remote_resource_crud_stop(resource);
+	if (0 != resource->caching_sub_id)
+		iotcon_remote_resource_stop_caching(resource);
+	if (0 != resource->monitoring_sub_id)
+		iotcon_remote_resource_stop_monitoring(resource);
+
+	icl_remote_resource_unref(resource);
 }
 
 static bool _icl_remote_resource_header_foreach_cb(unsigned short id,
@@ -275,6 +295,7 @@ API int iotcon_remote_resource_clone(iotcon_remote_resource_h src,
 	resource->connectivity_type = src->connectivity_type;
 	resource->device_id = ic_utils_strdup(src->device_id);
 	resource->properties = src->properties;
+	resource->ref_count = 1;
 
 	if (src->header_options) {
 		ret = iotcon_options_foreach(src->header_options,

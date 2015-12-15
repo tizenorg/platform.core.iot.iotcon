@@ -449,6 +449,7 @@ static void _icl_observe_conn_cleanup(icl_on_observe_s *cb_container)
 {
 	cb_container->resource->observe_handle = 0;
 	cb_container->resource->observe_sub_id = 0;
+	icl_remote_resource_unref(cb_container->resource);
 	free(cb_container);
 }
 
@@ -518,6 +519,7 @@ API int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resourc
 
 	resource->observe_sub_id = sub_id;
 	resource->observe_handle = observe_handle;
+	icl_remote_resource_ref(resource);
 
 	return IOTCON_ERROR_NONE;
 }
