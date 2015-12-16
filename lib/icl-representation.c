@@ -155,6 +155,7 @@ API int iotcon_representation_get_resource_interfaces(iotcon_representation_h re
 		int *ifaces)
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*ifaces = repr->interfaces;
 
@@ -255,6 +256,7 @@ API int iotcon_representation_get_children_count(iotcon_representation_h parent,
 		unsigned int *count)
 {
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == count, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == parent->children, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*count = g_list_length(parent->children);
@@ -299,6 +301,7 @@ API int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb, void *use
 API int iotcon_state_get_keys_count(iotcon_state_h state, unsigned int *count)
 {
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == count, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == state->hash_table, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*count = g_hash_table_size(state->hash_table);
@@ -387,6 +390,7 @@ API int iotcon_representation_clone(const iotcon_representation_h src,
 	iotcon_representation_h cloned_repr, copied_repr;
 
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = iotcon_representation_create(&cloned_repr);
 	if (IOTCON_ERROR_NONE != ret) {

@@ -420,6 +420,7 @@ API int iotcon_list_get_type(iotcon_list_h list, iotcon_type_e *type)
 API int iotcon_list_get_length(iotcon_list_h list, unsigned int *length)
 {
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == length, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == list->list, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*length = g_list_length(list->list);

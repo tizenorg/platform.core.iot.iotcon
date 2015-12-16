@@ -316,6 +316,7 @@ API int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_nul
 
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == is_null, IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = (iotcon_value_h) g_hash_table_lookup(state->hash_table, key);
 	if (NULL == value) {

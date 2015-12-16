@@ -170,6 +170,7 @@ API int iotcon_resource_types_clone(iotcon_resource_types_h src,
 	iotcon_resource_types_h resource_types;
 
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
 
 	resource_types = calloc(1, sizeof(struct icl_resource_types));
 	if (NULL == resource_types) {
