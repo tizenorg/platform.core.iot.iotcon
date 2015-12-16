@@ -134,12 +134,11 @@ static void* _ocprocess_worker_thread(void *data)
 {
 	int ret;
 	struct icd_ioty_worker *worker = data;
-	struct icd_worker_context *ctx = worker->ctx;
+	struct icd_worker_context *ctx;
 
-	if (NULL == data) {
-		ERR("worker is NULL");
-		return NULL;
-	}
+	RETV_IF(NULL == worker, NULL);
+
+	ctx = worker->ctx;
 
 	g_mutex_lock(&ctx->icd_worker_mutex);
 	ret = worker->cb(worker->ctx);
