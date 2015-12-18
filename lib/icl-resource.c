@@ -288,6 +288,11 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource,
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
+	if (resource->ifaces & iface) {
+		ERR("iface(%d) is already contained.", iface);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
 	ic_dbus_call_bind_interface_sync(icl_dbus_get_object(), resource->handle,
 			iface, &ret, NULL, &error);
 	if (error) {
@@ -301,6 +306,7 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource,
 		ERR("iotcon-daemon Fail(%d)", ret);
 		return icl_dbus_convert_daemon_error(ret);
 	}
+	resource->ifaces |= iface;
 
 	return ret;
 }
@@ -311,18 +317,27 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resour
 	FN_CALL;
 	int ret;
 	GError *error = NULL;
+	iotcon_resource_types_h resource_types;
 
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
-	if (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type)) {
-		ERR("Invalid resource_type(%s)", resource_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-
 	if (0 == resource->sub_id) {
 		ERR("Invalid Resource handle");
 		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = iotcon_resource_types_clone(resource->types, &resource_types);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_types_clone() Fail(%d)", ret);
+		return ret;
+	}
+
+	ret = iotcon_resource_types_add(resource_types, resource_type);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_types_add() Fail(%d)", ret);
+		iotcon_resource_types_destroy(resource_types);
+		return ret;
 	}
 
 	ic_dbus_call_bind_type_sync(icl_dbus_get_object(), resource->handle, resource_type,
@@ -331,13 +346,18 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resour
 		ERR("ic_dbus_call_bind_type_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
+		iotcon_resource_types_destroy(resource_types);
 		return ret;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon-daemon Fail(%d)", ret);
+		iotcon_resource_types_destroy(resource_types);
 		return icl_dbus_convert_daemon_error(ret);
 	}
+
+	iotcon_resource_types_destroy(resource->types);
+	resource->types = resource_types;
 
 	return ret;
 }
