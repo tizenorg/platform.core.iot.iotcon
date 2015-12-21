@@ -25,6 +25,7 @@
 #include "ic-dbus.h"
 #include "icd.h"
 #include "icd-ioty.h"
+#include "icd-cynara.h"
 #include "icd-dbus.h"
 
 static icDbus *icd_dbus_object;
@@ -50,6 +51,16 @@ typedef struct _icd_presence_handle {
 	char *host_address;
 } icd_presence_handle_s;
 
+
+static const char *_icd_privileges_network[] = {
+	"http://tizen.org/privilege/bluetooth",
+	"http://tizen.org/privilege/network.get",
+	"http://tizen.org/privilege/wifidirect",
+	NULL,
+};
+
+#define ICD_PRIVILEGES_NETWORK _icd_privileges_network
+#define ICD_PRIVILEGES_FIND_RESOURCE ICD_PRIVILEGES_NETWORK
 
 icDbus* icd_dbus_get_object()
 {
@@ -658,8 +669,15 @@ static gboolean _dbus_handle_find_resource(icDbus *object,
 	int64_t signal_number;
 
 	sender = g_dbus_method_invocation_get_sender(invocation);
-
 	signal_number = icd_dbus_generate_signal_number();
+
+	ret = icd_cynara_check(invocation, ICD_PRIVILEGES_NETWORK);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_cynara_check() Fail(%d)", ret);
+		ic_dbus_complete_find_resource(object, invocation, signal_number, ret);
+		return TRUE;
+	}
+
 	ret = icd_ioty_find_resource(host_address, connectivity, type, is_secure, timeout,
 			signal_number, sender);
 	if (IOTCON_ERROR_NONE != ret)
