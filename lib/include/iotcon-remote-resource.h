@@ -139,9 +139,6 @@ int iotcon_remote_resource_create(const char *host_address,
 
 /**
  * @brief Destroys a resource handle.
- * @details Decrements reference count of the source resource.\n
- * If the reference count drops to 0, releases a resource handle.
- *
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of the resource
