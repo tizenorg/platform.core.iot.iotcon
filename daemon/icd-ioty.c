@@ -795,12 +795,14 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_policy,
 		return NULL;
 	}
 
-	if (IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER == observe_policy)
+	switch (observe_policy) {
+	case IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER:
 		method = OC_REST_OBSERVE;
-	else if (IOTCON_OBSERVE_ACCEPT_OUT_OF_ORDER == observe_policy)
+		break;
+	case IOTCON_OBSERVE_ACCEPT_OUT_OF_ORDER:
+	default:
 		method = OC_REST_OBSERVE_ALL;
-	else
-		method = OC_REST_OBSERVE_ALL;
+	}
 
 	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
 

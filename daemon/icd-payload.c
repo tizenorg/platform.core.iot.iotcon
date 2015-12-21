@@ -592,6 +592,10 @@ static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *ite
 
 		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_STRING)) {
 			str_value = g_variant_get_string(var, NULL);
+			if (NULL == str_value) {
+				ERR("g_variant_get_string() Fail");
+				return;
+			}
 			if (IC_STR_EQUAL == strcmp(IC_STR_NULL, str_value))
 				OCRepPayloadSetNull(repr, key);
 			else
@@ -652,6 +656,11 @@ OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var)
 	cur = repr;
 	while (g_variant_iter_loop(children, "v", &child)) {
 		cur->next = icd_payload_representation_from_gvariant(child);
+		if (NULL == cur->next) {
+			ERR("icd_payload_representation_from_gvariant() Fail");
+			OCRepPayloadDestroy(repr);
+			return NULL;
+		}
 		cur = cur->next;
 	}
 	return repr;
