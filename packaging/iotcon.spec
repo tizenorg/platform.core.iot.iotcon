@@ -18,6 +18,9 @@ BuildRequires:  pkgconfig(capi-base-common)
 BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(capi-system-system-settings)
 BuildRequires:  pkgconfig(iotivity)
+BuildRequires:  pkgconfig(cynara-client)
+BuildRequires:  pkgconfig(cynara-session)
+BuildRequires:  pkgconfig(cynara-creds-gdbus)
 %if "%{tizen}" == "2.3"
 BuildRequires:  python-xml
 %endif

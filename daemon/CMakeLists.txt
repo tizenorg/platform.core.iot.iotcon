@@ -8,7 +8,7 @@ SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/common/ic-dbus.c
 	PROPERTIES GENERATED TRUE)
 
 pkg_check_modules(daemon_pkgs REQUIRED gio-2.0 dlog gio-unix-2.0 capi-system-info
-	capi-system-system-settings iotivity)
+	capi-system-system-settings iotivity cynara-client cynara-session cynara-creds-gdbus)
 
 FOREACH(flag ${daemon_pkgs_CFLAGS_OTHER})
 	IF(${flag} MATCHES "\\-D+")
