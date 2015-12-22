@@ -18,6 +18,7 @@
 #include "icd.h"
 #include "icd-dbus.h"
 #include "icd-ioty.h"
+#include "icd-cynara.h"
 #include "icd-ioty-ocprocess.h"
 
 #define ICD_ALL_INTERFACES "0.0.0.0"
@@ -60,8 +61,16 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	ret = icd_cynara_init();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_cynara_init() Fail(%d)", ret);
+		icd_ioty_deinit(thread);
+		icd_dbus_deinit(id);
+	}
+
 	g_main_loop_run(loop);
 
+	icd_cynara_deinit();
 	icd_ioty_deinit(thread);
 	icd_dbus_deinit(id);
 	g_main_loop_unref(loop);

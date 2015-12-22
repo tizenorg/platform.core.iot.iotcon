@@ -29,6 +29,7 @@
 #include "ic-dbus.h"
 #include "ic-utils.h"
 #include "icd.h"
+#include "icd-cynara.h"
 #include "icd-payload.h"
 #include "icd-dbus.h"
 #include "icd-ioty.h"
@@ -609,6 +610,13 @@ static gboolean _icd_ioty_crud(int type,
 	OCConnectivityType oic_conn_type;
 	OCDevAddr dev_addr = {0};
 
+	ret = icd_cynara_check_data(invocation);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_cynara_check_data() Fail(%d)", ret);
+		icd_ioty_complete_error(type, invocation, ret);
+		return TRUE;
+	}
+
 	switch (type) {
 	case ICD_CRUD_GET:
 		cbdata.cb = icd_ioty_ocprocess_get_cb;
@@ -628,7 +636,7 @@ static gboolean _icd_ioty_crud(int type,
 		break;
 	default:
 		ERR("Invalid CRUD Type(%d)", type);
-		return FALSE;
+		return TRUE;
 	}
 
 	g_variant_get(resource, "(&s&sba(qs)i)", &uri_path, &host, &is_secure, &options,

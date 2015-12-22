@@ -188,7 +188,7 @@ API int iotcon_resource_create(const char *uri_path,
 	}
 
 	ic_dbus_call_register_resource_sync(icl_dbus_get_object(), uri_path, types, ifaces,
-			properties, &signal_number, &(resource->handle), NULL, &error);
+			properties, false, &signal_number, &(resource->handle), NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_register_resource_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);

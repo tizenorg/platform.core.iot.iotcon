@@ -5,6 +5,7 @@
 			<arg type="as" name="resource_types" direction="in"/>
 			<arg type="i" name="ifaces" direction="in"/>
 			<arg type="i" name="properties" direction="in"/>
+			<arg type="b" name="is_lite" direction="in"/>
 			<arg type="x" name="signal_number" direction="out"/>
 			<arg type="x" name="resource" direction="out"/>
 		</method>

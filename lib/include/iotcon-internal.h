@@ -31,7 +31,9 @@ extern "C" {
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/internet
+ * @privilege %http://tizen.org/privilege/bluetooth
+ * @privilege %http://tizen.org/privilege/network.get
+ * @privilege %http://tizen.org/privilege/wifidirect
  *
  * @remarks If @a time_to_live is 0, server will set default value as 60 seconds.\n
  * If @a time_to_live is very big, server will set maximum value as (60 * 60 * 24) seconds.
@@ -58,7 +60,9 @@ int iotcon_start_presence(unsigned int time_to_live);
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/internet
+ * @privilege %http://tizen.org/privilege/bluetooth
+ * @privilege %http://tizen.org/privilege/network.get
+ * @privilege %http://tizen.org/privilege/wifidirect
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful

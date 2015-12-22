@@ -334,7 +334,10 @@ int iotcon_response_set_options(iotcon_response_h resp, iotcon_options_h options
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/internet
+ * @privilege %http://tizen.org/privilege/bluetooth
+ * @privilege %http://tizen.org/privilege/network.get
+ * @privilege %http://tizen.org/privilege/wifidirect
+ * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resp The handle of the response to send
  *

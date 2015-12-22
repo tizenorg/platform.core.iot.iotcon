@@ -7,8 +7,15 @@ SET(DAEMON_SRCS ${DAEMON_SRCS} ${CMAKE_SOURCE_DIR}/common/ic-dbus.c)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/common/ic-dbus.c
 	PROPERTIES GENERATED TRUE)
 
-pkg_check_modules(daemon_pkgs REQUIRED gio-2.0 dlog gio-unix-2.0 capi-system-info
-	capi-system-system-settings iotivity)
+SET(PKG_MODULES gio-2.0 dlog gio-unix-2.0 capi-system-info capi-system-system-settings
+	iotivity)
+
+IF(NEW_SECURE)
+	SET(PKG_MODULES ${PKG_MODULES} cynara-client cynara-session cynara-creds-gdbus)
+	ADD_DEFINITIONS("-DIOTCON_CYNARA")
+ENDIF(NEW_SECURE)
+
+pkg_check_modules(daemon_pkgs REQUIRED ${PKG_MODULES})
 
 FOREACH(flag ${daemon_pkgs_CFLAGS_OTHER})
 	IF(${flag} MATCHES "\\-D+")

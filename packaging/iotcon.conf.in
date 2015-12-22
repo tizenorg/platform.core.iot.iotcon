@@ -2,86 +2,8 @@
 		"http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
 
 <busconfig>
-	<policy user="root">
+	<policy context="default">
 		<allow own="@DBUS_INTERFACE@"/>
 		<allow send_destination="@DBUS_INTERFACE@" send_interface="@DBUS_INTERFACE@"/>
-	</policy>
-
-	<policy context="default">
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="registerResource"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="unregisterResource"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="bindInterface"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="bindType"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="bindResource"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="unbindResource"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="notify"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="sendResponse"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="findResource"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="get"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="put"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="post"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="delete"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="observerStart"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="observerStop"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="getDeviceInfo"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="getPlatformInfo"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="subscribePresence"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="unsubscribePresence"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="startPresence"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="stopPresence"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="startCaching"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="stopCaching"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="startMonitoring"
-				privilege="http://tizen.org/privilege/internet"/>
-		<check send_destination="@DBUS_INTERFACE@"
-				send_interface="@DBUS_INTERFACE@" send_member="stopMonitoring"
-				privilege="http://tizen.org/privilege/internet"/>
 	</policy>
 </busconfig>
