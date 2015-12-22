@@ -24,25 +24,14 @@
 #include "icl-representation.h"
 #include "icl-state.h"
 
-void icl_state_inc_ref_count(iotcon_state_h val)
+iotcon_state_h icl_state_ref(iotcon_state_h state)
 {
-	RET_IF(NULL == val);
-	RETM_IF(val->ref_count < 0, "Invalid Count(%d)", val->ref_count);
+	RETV_IF(NULL == state, NULL);
+	RETV_IF(state->ref_count <= 0, NULL);
 
-	val->ref_count++;
-}
+	state->ref_count++;
 
-
-static bool _icl_state_dec_ref_count(iotcon_state_h val)
-{
-	RETV_IF(NULL == val, false);
-	RETVM_IF(val->ref_count <= 0, false, "Invalid Count(%d)", val->ref_count);
-
-	val->ref_count--;
-	if (0 == val->ref_count)
-		return true;
-
-	return false;
+	return state;
 }
 
 
@@ -61,7 +50,7 @@ API int iotcon_state_create(iotcon_state_h *ret_state)
 
 	state->hash_table = g_hash_table_new_full(g_str_hash, g_str_equal, free,
 			icl_value_destroy);
-	icl_state_inc_ref_count(state);
+	state->ref_count = 1;
 
 	*ret_state = state;
 
@@ -73,26 +62,13 @@ API void iotcon_state_destroy(iotcon_state_h state)
 {
 	RET_IF(NULL == state);
 
-	if (false == _icl_state_dec_ref_count(state))
+	state->ref_count--;
+
+	if (0 != state->ref_count)
 		return;
 
 	g_hash_table_destroy(state->hash_table);
 	free(state);
-}
-
-API int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone)
-{
-	int ret;
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == state_clone, IOTCON_ERROR_INVALID_PARAMETER);
-
-	ret = icl_state_clone(state, state_clone);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icl_state_clone() Fail(%d)", ret);
-		return ret;
-	}
-
-	return IOTCON_ERROR_NONE;
 }
 
 
@@ -387,7 +363,6 @@ API int iotcon_state_add_list(iotcon_state_h state, const char *key, iotcon_list
 		ERR("icl_value_create_list() Fail");
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
-	icl_list_inc_ref_count(list);
 
 	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
 
@@ -433,7 +408,6 @@ API int iotcon_state_add_state(iotcon_state_h state, const char *key, iotcon_sta
 		ERR("icl_value_create_state(%p) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
-	icl_state_inc_ref_count(val);
 
 	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
 
@@ -471,27 +445,128 @@ int icl_state_set_value(iotcon_state_h state, const char *key, iotcon_value_h va
 }
 
 
-int icl_state_clone(iotcon_state_h src, iotcon_state_h *dest)
+API int iotcon_state_get_keys_count(iotcon_state_h state, unsigned int *count)
+{
+	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == count, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == state->hash_table, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*count = g_hash_table_size(state->hash_table);
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone)
 {
 	int ret;
 
-	iotcon_state_h cloned_state = NULL;
+	iotcon_state_h temp = NULL;
 
-	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == state_clone, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (src->hash_table) {
-		ret = iotcon_state_create(&cloned_state);
+	if (state->hash_table) {
+		ret = iotcon_state_create(&temp);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_state_create() Fail(%d)", ret);
 			return ret;
 		}
 
-		g_hash_table_foreach(src->hash_table, (GHFunc)icl_state_clone_foreach,
-				cloned_state);
+		g_hash_table_foreach(state->hash_table, (GHFunc)icl_state_clone_foreach, temp);
 	}
 
-	*dest = cloned_state;
+	*state_clone = temp;
 
 	return IOTCON_ERROR_NONE;
 }
+
+
+void icl_state_clone_foreach(char *key, iotcon_value_h src_val, iotcon_state_h dest_state)
+{
+	FN_CALL;
+	int type, ret;
+	iotcon_value_h value, copied_val;
+	iotcon_list_h child_list, copied_list;
+	iotcon_state_h child_state;
+	iotcon_state_h copied_state = NULL;
+
+	type = src_val->type;
+	switch (type) {
+	case IOTCON_TYPE_INT:
+	case IOTCON_TYPE_BOOL:
+	case IOTCON_TYPE_DOUBLE:
+	case IOTCON_TYPE_STR:
+	case IOTCON_TYPE_NULL:
+		copied_val = icl_value_clone(src_val);
+		if (NULL == copied_val) {
+			ERR("icl_value_clone() Fail");
+			return;
+		}
+
+		icl_state_set_value(dest_state, key, copied_val);
+		break;
+	case IOTCON_TYPE_LIST:
+		ret = icl_value_get_list(src_val, &child_list);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_value_get_list() Fail(%d)", ret);
+			return;
+		}
+
+		copied_list = icl_list_clone(child_list);
+		if (NULL == copied_list) {
+			ERR("icl_list_clone() Fail");
+			return;
+		}
+
+		value = icl_value_create_list(copied_list);
+		if (NULL == value) {
+			ERR("icl_value_create_list() Fail");
+			iotcon_list_destroy(copied_list);
+			return;
+		}
+
+		icl_state_set_value(dest_state, key, value);
+		break;
+	case IOTCON_TYPE_STATE:
+		ret = icl_value_get_state(src_val, &child_state);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_value_get_state() Fail(%d)", ret);
+			return;
+		}
+
+		g_hash_table_foreach(child_state->hash_table, (GHFunc)icl_state_clone_foreach,
+				copied_state);
+
+		value = icl_value_create_state(copied_state);
+		if (NULL == value) {
+			ERR("icl_value_create_state(%p) Fail", copied_state);
+			return;
+		}
+
+		icl_state_set_value(dest_state, key, value);
+		break;
+	default:
+		ERR("Invalid type(%d)", type);
+		return;
+	}
+}
+
+
+API int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb, void *user_data)
+{
+	GHashTableIter iter;
+	gpointer key;
+
+	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+
+	g_hash_table_iter_init(&iter, state->hash_table);
+	while (g_hash_table_iter_next(&iter, &key, NULL)) {
+		if (IOTCON_FUNC_STOP == cb(state, key, user_data))
+			break;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+

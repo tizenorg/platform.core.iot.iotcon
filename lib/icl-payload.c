@@ -20,6 +20,7 @@
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-representation.h"
+#include "icl-state.h"
 #include "icl-list.h"
 #include "icl-value.h"
 #include "icl-resource-types.h"

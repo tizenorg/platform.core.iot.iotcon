@@ -23,6 +23,7 @@
 #include "icl.h"
 #include "icl-representation.h"
 #include "icl-list.h"
+#include "icl-state.h"
 #include "icl-value.h"
 
 static iotcon_value_h _icl_value_create(int type)
@@ -145,7 +146,7 @@ iotcon_value_h icl_value_create_list(iotcon_list_h val)
 		return NULL;
 	}
 
-	value->list = val;
+	value->list = icl_list_ref(val);
 
 	return (iotcon_value_h)value;
 }
@@ -160,7 +161,7 @@ iotcon_value_h icl_value_create_state(iotcon_state_h val)
 		return NULL;
 	}
 
-	value->state = val;
+	value->state = icl_state_ref(val);
 
 	return (iotcon_value_h)value;
 }

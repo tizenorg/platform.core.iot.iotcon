@@ -24,46 +24,19 @@
 #include "icl-value.h"
 #include "icl-list.h"
 
-void icl_list_inc_ref_count(iotcon_list_h val)
+iotcon_list_h icl_list_ref(iotcon_list_h list)
 {
-	RET_IF(NULL == val);
-	RETM_IF(val->ref_count < 0, "Invalid Count(%d)", val->ref_count);
+	RETV_IF(NULL == list, NULL);
+	RETV_IF(list->ref_count <= 0, NULL);
 
-	val->ref_count++;
+	list->ref_count++;
+
+	return list;
 }
 
-static bool _icl_list_dec_ref_count(iotcon_list_h val)
-{
-	RETV_IF(NULL == val, false);
-	RETVM_IF(val->ref_count <= 0, false, "Invalid Count(%d)", val->ref_count);
-
-	val->ref_count--;
-	if (0 == val->ref_count)
-		return true;
-
-	return false;
-}
-
-static int _icl_list_create(iotcon_type_e type, iotcon_list_h *ret_list)
-{
-	iotcon_list_h list;
-
-	list = calloc(1, sizeof(struct icl_list_s));
-	if (NULL == list) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
-	icl_list_inc_ref_count(list);
-	list->type = type;
-
-	*ret_list = list;
-
-	return IOTCON_ERROR_NONE;
-}
 
 API int iotcon_list_create(iotcon_type_e type, iotcon_list_h *ret_list)
 {
-	int ret;
 	iotcon_list_h list;
 
 	RETV_IF(NULL == ret_list, IOTCON_ERROR_INVALID_PARAMETER);
@@ -73,11 +46,14 @@ API int iotcon_list_create(iotcon_type_e type, iotcon_list_h *ret_list)
 		return IOTCON_ERROR_INVALID_TYPE;
 	}
 
-	ret = _icl_list_create(type, &list);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_icl_list_create() Fail");
-		return ret;
+	list = calloc(1, sizeof(struct icl_list_s));
+	if (NULL == list) {
+		ERR("calloc() Fail(%d)", errno);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
+
+	list->ref_count = 1;
+	list->type = type;
 
 	*ret_list = list;
 
@@ -173,8 +149,6 @@ API int iotcon_list_add_list(iotcon_list_h list, iotcon_list_h val, int pos)
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	icl_list_inc_ref_count(val);
-
 	return icl_list_insert(list, value, pos);
 }
 
@@ -193,7 +167,6 @@ API int iotcon_list_add_state(iotcon_list_h list, iotcon_state_h val, int pos)
 		ERR("icl_value_create_state(%p) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
-	icl_state_inc_ref_count(val);
 
 	return icl_list_insert(list, value, pos);
 }
@@ -421,9 +394,10 @@ API int iotcon_list_get_length(iotcon_list_h list, unsigned int *length)
 {
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == length, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == list->list, IOTCON_ERROR_INVALID_PARAMETER);
-
-	*length = g_list_length(list->list);
+	if (NULL == list->list)
+		*length = 0;
+	else
+		*length = g_list_length(list->list);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -610,12 +584,13 @@ static iotcon_value_h _icl_list_get_nth_value(iotcon_list_h list, int pos)
 
 API void iotcon_list_destroy(iotcon_list_h list)
 {
-	FN_CALL;
 	GList *cur = NULL;
 
 	RET_IF(NULL == list);
 
-	if (false == _icl_list_dec_ref_count(list))
+	list->ref_count--;
+
+	if (0 != list->ref_count)
 		return;
 
 	cur = list->list;

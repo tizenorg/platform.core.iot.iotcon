@@ -32,25 +32,14 @@
 #include "icl-state.h"
 #include "icl-representation.h"
 
-void icl_representation_inc_ref_count(iotcon_representation_h val)
+iotcon_representation_h icl_representation_ref(iotcon_representation_h repr)
 {
-	RET_IF(NULL == val);
-	RETM_IF(val->ref_count < 0, "Invalid Count(%d)", val->ref_count);
+	RETV_IF(NULL == repr, NULL);
+	RETV_IF(repr->ref_count <= 0, NULL);
 
-	val->ref_count++;
-}
+	repr->ref_count++;
 
-
-static bool _icl_representation_dec_ref_count(iotcon_representation_h val)
-{
-	RETV_IF(NULL == val, false);
-	RETVM_IF(val->ref_count <= 0, false, "Invalid Count(%d)", val->ref_count);
-
-	val->ref_count--;
-	if (0 == val->ref_count)
-		return true;
-
-	return false;
+	return repr;
 }
 
 
@@ -68,7 +57,7 @@ API int iotcon_representation_create(iotcon_representation_h *ret_repr)
 	}
 
 	repr->visibility = (ICL_VISIBILITY_REPR | ICL_VISIBILITY_PROP);
-	icl_representation_inc_ref_count(repr);
+	repr->ref_count = 1;
 
 	*ret_repr = repr;
 
@@ -80,7 +69,9 @@ API void iotcon_representation_destroy(iotcon_representation_h repr)
 {
 	RET_IF(NULL == repr);
 
-	if (false == _icl_representation_dec_ref_count(repr))
+	repr->ref_count--;
+
+	if (0 != repr->ref_count)
 		return;
 
 	free(repr->uri_path);
@@ -142,11 +133,13 @@ API int iotcon_representation_set_resource_types(iotcon_representation_h repr,
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	iotcon_resource_types_destroy(repr->res_types);
-	repr->res_types = NULL;
-
 	if (types)
-		repr->res_types = icl_resource_types_ref(types);
+		types = icl_resource_types_ref(types);
+
+	if (repr->res_types)
+		iotcon_resource_types_destroy(repr->res_types);
+
+	repr->res_types = types;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -180,16 +173,11 @@ API int iotcon_representation_set_state(iotcon_representation_h repr,
 {
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (state == repr->state)
-		return IOTCON_ERROR_NONE;
-
-	if (repr->state) {
-		iotcon_state_destroy(repr->state);
-		repr->state = NULL;
-	}
-
 	if (state)
-		icl_state_inc_ref_count(state);
+		state = icl_state_ref(state);
+
+	if (repr->state)
+		iotcon_state_destroy(repr->state);
 
 	repr->state = state;
 
@@ -211,11 +199,14 @@ API int iotcon_representation_get_state(iotcon_representation_h repr,
 API int iotcon_representation_add_child(iotcon_representation_h parent,
 		iotcon_representation_h child)
 {
+	iotcon_representation_h repr;
+
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
-	icl_representation_inc_ref_count(child);
-	parent->children = g_list_append(parent->children, child);
+	repr = icl_representation_ref(child);
+
+	parent->children = g_list_append(parent->children, repr);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -228,6 +219,8 @@ API int iotcon_representation_remove_child(iotcon_representation_h parent,
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
 	parent->children = g_list_remove(parent->children, child);
+
+	iotcon_representation_destroy(child);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -280,105 +273,6 @@ API int iotcon_representation_get_nth_child(iotcon_representation_h parent, int 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb, void *user_data)
-{
-	GHashTableIter iter;
-	gpointer key;
-
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
-
-	g_hash_table_iter_init(&iter, state->hash_table);
-	while (g_hash_table_iter_next(&iter, &key, NULL)) {
-		if (IOTCON_FUNC_STOP == cb(state, key, user_data))
-			break;
-	}
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-API int iotcon_state_get_keys_count(iotcon_state_h state, unsigned int *count)
-{
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == count, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == state->hash_table, IOTCON_ERROR_INVALID_PARAMETER);
-
-	*count = g_hash_table_size(state->hash_table);
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-void icl_state_clone_foreach(char *key, iotcon_value_h src_val, iotcon_state_h dest_state)
-{
-	FN_CALL;
-	int type, ret;
-	iotcon_value_h value, copied_val;
-	iotcon_list_h child_list, copied_list;
-	iotcon_state_h child_state;
-	iotcon_state_h copied_state = NULL;
-
-	type = src_val->type;
-	switch (type) {
-	case IOTCON_TYPE_INT:
-	case IOTCON_TYPE_BOOL:
-	case IOTCON_TYPE_DOUBLE:
-	case IOTCON_TYPE_STR:
-	case IOTCON_TYPE_NULL:
-		copied_val = icl_value_clone(src_val);
-		if (NULL == copied_val) {
-			ERR("icl_value_clone() Fail");
-			return;
-		}
-
-		icl_state_set_value(dest_state, key, copied_val);
-		break;
-	case IOTCON_TYPE_LIST:
-		ret = icl_value_get_list(src_val, &child_list);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_value_get_list() Fail(%d)", ret);
-			return;
-		}
-
-		copied_list = icl_list_clone(child_list);
-		if (NULL == copied_list) {
-			ERR("icl_list_clone() Fail");
-			return;
-		}
-
-		value = icl_value_create_list(copied_list);
-		if (NULL == value) {
-			ERR("icl_value_create_list() Fail");
-			iotcon_list_destroy(copied_list);
-			return;
-		}
-
-		icl_state_set_value(dest_state, key, value);
-		break;
-	case IOTCON_TYPE_STATE:
-		ret = icl_value_get_state(src_val, &child_state);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_value_get_state() Fail(%d)", ret);
-			return;
-		}
-
-		g_hash_table_foreach(child_state->hash_table, (GHFunc)icl_state_clone_foreach,
-				copied_state);
-
-		value = icl_value_create_state(copied_state);
-		if (NULL == value) {
-			ERR("icl_value_create_state(%p) Fail", copied_state);
-			return;
-		}
-
-		icl_state_set_value(dest_state, key, value);
-		break;
-	default:
-		ERR("Invalid type(%d)", type);
-		return;
-	}
-}
 
 API int iotcon_representation_clone(const iotcon_representation_h src,
 		iotcon_representation_h *dest)

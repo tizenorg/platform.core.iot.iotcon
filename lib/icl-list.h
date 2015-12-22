@@ -32,6 +32,6 @@ int icl_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
 
 iotcon_list_h icl_list_clone(iotcon_list_h list);
 
-void icl_list_inc_ref_count(iotcon_list_h val);
+iotcon_list_h icl_list_ref(iotcon_list_h list);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_LIST_H__ */

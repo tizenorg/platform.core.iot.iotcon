@@ -49,6 +49,11 @@ static inline int _icl_lite_resource_set_state(iotcon_state_h state,
 	gpointer key, value;
 	iotcon_value_h res_value, src_value;
 
+	if (NULL == res_state) {
+		DBG("resource_state is NULL");
+		return IOTCON_ERROR_NONE;
+	}
+
 	g_hash_table_iter_init(&iter, state->hash_table);
 	while (g_hash_table_iter_next(&iter, &key, &value)) {
 		res_value = g_hash_table_lookup(res_state->hash_table, key);
@@ -91,8 +96,8 @@ static int _icl_lite_resource_response_send(iotcon_representation_h repr,
 	response->result = response_result;
 	response->oic_request_h = oic_request_h;
 	response->oic_resource_h = oic_resource_h;
-	response->repr = repr;
-	icl_representation_inc_ref_count(response->repr);
+	if (repr)
+		response->repr = icl_representation_ref(repr);
 
 	ret = iotcon_response_send(response);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -261,7 +266,8 @@ static void _icl_lite_resource_conn_cleanup(iotcon_lite_resource_h resource)
 		return;
 	}
 
-	iotcon_state_destroy(resource->state);
+	if (resource->state)
+		iotcon_state_destroy(resource->state);
 	free(resource->uri_path);
 	free(resource);
 }
@@ -324,14 +330,8 @@ API int iotcon_lite_resource_create(const char *uri_path,
 
 	resource->properties = properties;
 	resource->uri_path = ic_utils_strdup(uri_path);
-
-	ret = icl_state_clone(state, &(resource->state));
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icl_state_clone() Fail(%d)", ret);
-		free(resource->uri_path);
-		free(resource);
-		return ret;
-	}
+	if (state)
+		resource->state = icl_state_ref(state);
 
 	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_REQUEST_HANDLER,
 			signal_number);
@@ -340,7 +340,8 @@ API int iotcon_lite_resource_create(const char *uri_path,
 			_icl_lite_resource_conn_cleanup, _icl_lite_resource_request_handler);
 	if (0 == sub_id) {
 		ERR("icl_dbus_subscribe_signal() Fail");
-		iotcon_state_destroy(resource->state);
+		if (resource->state)
+			iotcon_state_destroy(resource->state);
 		free(resource->uri_path);
 		free(resource);
 		return IOTCON_ERROR_DBUS;
@@ -396,19 +397,16 @@ API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 		iotcon_state_h state)
 {
 	int ret;
-	iotcon_state_h cloned_state = NULL;
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = icl_state_clone(state, &cloned_state);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icl_state_clone() Fail(%d)", ret);
-		return ret;
-	}
+	if (state)
+		state = icl_state_ref(state);
 
-	iotcon_state_destroy(resource->state);
+	if (resource->state)
+		iotcon_state_destroy(resource->state);
 
-	resource->state = cloned_state;
+	resource->state = state;
 
 	ret = _icl_lite_resource_notify(resource);
 	if (IOTCON_ERROR_NONE != ret)

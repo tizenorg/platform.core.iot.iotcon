@@ -19,12 +19,13 @@
 #include "icl-value.h"
 #include "icl-representation.h"
 
-void icl_state_inc_ref_count(iotcon_state_h val);
-
 int icl_state_del_value(iotcon_state_h state, const char *key);
 
 int icl_state_set_value(iotcon_state_h state, const char *key, iotcon_value_h value);
 
-int icl_state_clone(iotcon_state_h src, iotcon_state_h *dest);
+void icl_state_clone_foreach(char *key, iotcon_value_h src_val,
+		iotcon_state_h dest_state);
+
+iotcon_state_h icl_state_ref(iotcon_state_h state);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_STATE_H__ */

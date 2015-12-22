@@ -438,13 +438,13 @@ API int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
 {
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
+	if (options)
+		options = icl_options_ref(options);
+
 	if (resource->header_options)
 		iotcon_options_destroy(resource->header_options);
 
-	if (options)
-		resource->header_options = icl_options_ref(options);
-	else
-		resource->header_options = NULL;
+	resource->header_options = options;
 
 	return IOTCON_ERROR_NONE;
 }

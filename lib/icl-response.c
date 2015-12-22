@@ -118,12 +118,15 @@ API int iotcon_response_set_representation(iotcon_response_h resp,
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 
+	resp->iface = iface;
+
+	if (repr)
+		repr = icl_representation_ref(repr);
+
 	if (resp->repr)
 		iotcon_representation_destroy(resp->repr);
-	resp->iface = iface;
+
 	resp->repr = repr;
-	if (repr)
-		icl_representation_inc_ref_count(resp->repr);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -134,13 +137,13 @@ API int iotcon_response_set_options(iotcon_response_h resp,
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 
+	if (options)
+		options = icl_options_ref(options);
+
 	if (resp->header_options)
 		iotcon_options_destroy(resp->header_options);
 
-	if (options)
-		resp->header_options = icl_options_ref(options);
-	else
-		resp->header_options = NULL;
+	resp->header_options = options;
 
 	return IOTCON_ERROR_NONE;
 }

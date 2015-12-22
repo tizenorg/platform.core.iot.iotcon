@@ -36,8 +36,6 @@ struct icl_representation_s {
 	struct icl_state_s *state;
 };
 
-void icl_representation_inc_ref_count(iotcon_representation_h val);
-
-void icl_state_clone_foreach(char *key, iotcon_value_h src_val, iotcon_state_h dest_state);
+iotcon_representation_h icl_representation_ref(iotcon_representation_h repr);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__ */
