@@ -287,6 +287,7 @@ API int iotcon_lite_resource_create(const char *uri_path,
 	RETVM_IF(ICL_URI_PATH_LENGTH_MAX < strlen(uri_path),
 			IOTCON_ERROR_INVALID_PARAMETER, "Invalid uri_path(%s)", uri_path);
 	RETV_IF(NULL == res_types, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
 	resource = calloc(1, sizeof(struct icl_lite_resource));
 	if (NULL == resource) {
