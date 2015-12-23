@@ -92,7 +92,7 @@ int icd_dbus_client_list_get_resource_info(OCResourceHandle handle,
 			rsrc_handle = cur_hd->data;
 
 			if (rsrc_handle->handle == handle) {
-				DBG("signal_number(%u) for resource handle(%u) found",
+				DBG("signal_number(%x) for resource handle(%p) found",
 						rsrc_handle->signal_number, handle);
 				*signal_number = rsrc_handle->signal_number;
 				*bus_name = ic_utils_strdup(client->bus_name);

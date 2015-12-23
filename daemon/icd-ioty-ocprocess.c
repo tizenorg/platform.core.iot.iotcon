@@ -455,6 +455,7 @@ static int _worker_find_cb(void *context)
 	struct icd_find_context *ctx = context;
 
 	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == ctx->payload, IOTCON_ERROR_INVALID_PARAMETER);
 
 	for (i = 0; ctx->payload[i]; i++) {
 		value = g_variant_new("(vi)", ctx->payload[i], ctx->conn_type);

@@ -64,7 +64,7 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 
 	res_count = OCDiscoveryPayloadGetResourceCount(discovered);
 
-	value = calloc(res_count, sizeof(GVariant*));
+	value = calloc(res_count + 1, sizeof(GVariant*));
 	if (NULL == value) {
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;
