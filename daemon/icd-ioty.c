@@ -610,9 +610,9 @@ static gboolean _icd_ioty_crud(int type,
 	OCConnectivityType oic_conn_type;
 	OCDevAddr dev_addr = {0};
 
-	ret = icd_cynara_check_data(invocation);
+	ret = icd_cynara_check_network(invocation);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_cynara_check_data() Fail(%d)", ret);
+		ERR("icd_cynara_check_network() Fail(%d)", ret);
 		icd_ioty_complete_error(type, invocation, ret);
 		return TRUE;
 	}

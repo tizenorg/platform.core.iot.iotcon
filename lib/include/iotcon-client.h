@@ -72,9 +72,8 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
+ * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
@@ -117,9 +116,8 @@ int iotcon_add_presence_cb(const char *host_address,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
+ * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] presence_handle The presence handle to be unsubscribed
  *
@@ -330,9 +328,8 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
+ * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
@@ -393,10 +390,7 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
- * @privilege %http://tizen.org/privilege/systemsettings
  * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] host_address The host address of remote server
@@ -472,9 +466,7 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
  * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] host_address The host address of remote server

@@ -202,9 +202,8 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
+ * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resource The handle of the resource
  * @param[in] observe_policy The type to specify how client wants to observe.
@@ -237,9 +236,8 @@ int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resource,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
+ * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resource The handle of the resource
  *
@@ -290,9 +288,7 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
  * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resource The handle of the resource
@@ -323,9 +319,7 @@ int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
  * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resource The handle of the resource
@@ -360,9 +354,7 @@ int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
  * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resource The handle of the resource
@@ -397,9 +389,7 @@ int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
  * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resource The handle of the resource
@@ -449,9 +439,7 @@ typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
  * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resource The handle of the remote resource to be cached
@@ -479,9 +467,8 @@ int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
+ * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resource The handle of the remote resource
  *
@@ -523,9 +510,8 @@ typedef void (*iotcon_remote_resource_state_changed_cb)(iotcon_remote_resource_h
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
+ * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resource The handle of the remote resource
  * @param[in] cb The callback function to add into callback list
@@ -549,9 +535,8 @@ int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resource,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
+ * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resource The handle of the remote resource
  *

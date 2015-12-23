@@ -30,31 +30,9 @@
 
 static const char *_icd_privileges_network[] = {
 	/* network */
-	"http://tizen.org/privilege/bluetooth",
 	"http://tizen.org/privilege/network.get",
-	"http://tizen.org/privilege/wifidirect",
-	NULL,
-};
-
-static const char *_icd_privileges_data[] = {
-	/* network */
-	"http://tizen.org/privilege/bluetooth",
-	"http://tizen.org/privilege/network.get",
-	"http://tizen.org/privilege/wifidirect",
 	/* data */
 	"http://tizen.org/privilege/d2d.datasharing",
-	NULL,
-};
-
-static const char *_icd_privileges_device[] = {
-	/* network */
-	"http://tizen.org/privilege/bluetooth",
-	"http://tizen.org/privilege/network.get",
-	"http://tizen.org/privilege/wifidirect",
-	/* data */
-	"http://tizen.org/privilege/d2d.datasharing",
-	/* device */
-	"http://tizen.org/privilege/systemsettings",
 	NULL,
 };
 
@@ -182,29 +160,4 @@ int icd_cynara_check_network(GDBusMethodInvocation *invocation)
 
 	return ret;
 }
-
-
-int icd_cynara_check_data(GDBusMethodInvocation *invocation)
-{
-	int ret;
-
-	ret = _icd_cynara_check(invocation, _icd_privileges_data);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("_icd_cynara_check() Fail(%d)", ret);
-
-	return ret;
-}
-
-
-int icd_cynara_check_device(GDBusMethodInvocation *invocation)
-{
-	int ret;
-
-	ret = _icd_cynara_check(invocation, _icd_privileges_device);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("_icd_cynara_check() Fail(%d)", ret);
-
-	return ret;
-}
-
 

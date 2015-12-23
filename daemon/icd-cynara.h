@@ -21,7 +21,5 @@
 int icd_cynara_init();
 void icd_cynara_deinit();
 int icd_cynara_check_network(GDBusMethodInvocation *invocation);
-int icd_cynara_check_data(GDBusMethodInvocation *invocation);
-int icd_cynara_check_device(GDBusMethodInvocation *invocation);
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_CYNARA_H__*/

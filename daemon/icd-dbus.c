@@ -541,13 +541,6 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 	int64_t signal_number = 0;
 
 	if (true == is_lite) {
-		ret = icd_cynara_check_data(invocation);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icd_cynara_check_data() Fail(%d)", ret);
-			ic_dbus_complete_register_resource(object, invocation, signal_number, ret);
-			return TRUE;
-		}
-	} else {
 		ret = icd_cynara_check_network(invocation);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icd_cynara_check_network() Fail(%d)", ret);
@@ -818,9 +811,9 @@ static gboolean _dbus_handle_notify(icDbus *object,
 
 	/* iotcon_resource_notify()
 	 * iotcon_lite_resource_update_state() */
-	ret = icd_cynara_check_data(invocation);
+	ret = icd_cynara_check_network(invocation);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_cynara_check_data() Fail(%d)", ret);
+		ERR("icd_cynara_check_network() Fail(%d)", ret);
 		ic_dbus_complete_notify(object, invocation, ret);
 		return TRUE;
 	}
@@ -840,9 +833,9 @@ static gboolean _dbus_handle_send_response(icDbus *object,
 {
 	int ret;
 
-	ret = icd_cynara_check_data(invocation);
+	ret = icd_cynara_check_network(invocation);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_cynara_check_data() Fail(%d)", ret);
+		ERR("icd_cynara_check_network() Fail(%d)", ret);
 		ic_dbus_complete_send_response(object, invocation, ret);
 		return TRUE;
 	}
@@ -868,9 +861,9 @@ static gboolean _dbus_handle_get_device_info(icDbus *object,
 
 	signal_number = icd_dbus_generate_signal_number();
 
-	ret = icd_cynara_check_device(invocation);
+	ret = icd_cynara_check_network(invocation);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_cynara_check_device() Fail(%d)", ret);
+		ERR("icd_cynara_check_network() Fail(%d)", ret);
 		ic_dbus_complete_get_device_info(object, invocation, signal_number, ret);
 		return TRUE;
 	}
@@ -899,9 +892,9 @@ static gboolean _dbus_handle_get_platform_info(icDbus *object,
 
 	signal_number = icd_dbus_generate_signal_number();
 
-	ret = icd_cynara_check_data(invocation);
+	ret = icd_cynara_check_network(invocation);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_cynara_check_data() Fail(%d)", ret);
+		ERR("icd_cynara_check_network() Fail(%d)", ret);
 		ic_dbus_complete_get_platform_info(object, invocation, signal_number, ret);
 		return TRUE;
 	}
@@ -1121,9 +1114,9 @@ static gboolean _dbus_handle_start_caching(icDbus *object,
 	int ret;
 	int64_t signal_number = 0;
 
-	ret = icd_cynara_check_data(invocation);
+	ret = icd_cynara_check_network(invocation);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_cynara_check_data() Fail(%d)", ret);
+		ERR("icd_cynara_check_network() Fail(%d)", ret);
 		ic_dbus_complete_start_monitoring(object, invocation, signal_number, ret);
 		return TRUE;
 	}

@@ -138,9 +138,7 @@ static void _update_brightness(int brightness)
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
  * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @remarks @a uri_path length must be less than or equal 36.\n
@@ -176,9 +174,8 @@ int iotcon_lite_resource_create(const char *uri_path,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
+ * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @remarks When a normal variable is used, there are only dbus error and permission\n
  * denied error. If the errors of this API are not handled, then you must check\n
@@ -201,9 +198,7 @@ int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource);
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/bluetooth
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/wifidirect
  * @privilege %http://tizen.org/privilege/d2d.datasharing
  *
  * @param[in] resource The handle of the lite resource
