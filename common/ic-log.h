@@ -76,6 +76,12 @@
 #define SECURE_DBG(fmt, arg...) SECURE_SLOGD(fmt, ##arg)
 #define SECURE_ERR(fmt, arg...) SECURE_SLOGE(fmt, ##arg)
 
+#if __WORDSIZE == 64
+#define DBG_HANDLE(handle) _DBG("handle : %lld", #handle)
+#else
+#define DBG_HANDLE(handle) _DBG("handle : %d", #handle)
+#endif
+
 #else /* IC_DEBUGGING */
 
 #define FN_CALL
