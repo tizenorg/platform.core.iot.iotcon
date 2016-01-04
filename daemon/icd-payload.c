@@ -77,7 +77,7 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 		}
 
 		/* device id */
-		random_res = OCConvertUuidToString(resource->sid, device_id);
+		random_res = OCConvertUuidToString(discovered->sid, device_id);
 		if (RAND_UUID_OK != random_res) {
 			ERR("OCConvertUuidToString() Fail(%d)", random_res);
 			resource = resource->next;
@@ -366,7 +366,7 @@ static GVariant* _icd_payload_device_to_gvariant(OCDevicePayload *repr)
 		return NULL;
 	}
 
-	value = g_variant_new("(sssss)", repr->uri, repr->deviceName, repr->specVersion,
+	value = g_variant_new("(ssss)", repr->deviceName, repr->specVersion,
 			device_id, repr->dataModelVersion);
 
 	return value;

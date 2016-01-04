@@ -95,17 +95,14 @@ static void _icl_device_info_cb(GDBusConnection *connection,
 		GVariant *parameters,
 		gpointer user_data)
 {
-	char *uri_path;
 	struct icl_device_info info = {0};
 	icl_device_info_s *cb_container = user_data;
 	iotcon_device_info_cb cb = cb_container->cb;
 
 	cb_container->found = true;
 
-	g_variant_get(parameters, "(&s&s&s&s&s)", &uri_path, &info.device_name,
+	g_variant_get(parameters, "(&s&s&s&s)", &info.device_name,
 			&info.spec_ver, &info.device_id, &info.data_model_ver);
-
-	/* From iotivity, we can get uri_path. But, the value is always "/oic/d". */
 
 	if (cb)
 		cb(&info, IOTCON_ERROR_NONE, cb_container->user_data);
