@@ -92,7 +92,7 @@ int icd_dbus_client_list_get_resource_info(OCResourceHandle handle,
 			rsrc_handle = cur_hd->data;
 
 			if (rsrc_handle->handle == handle) {
-				DBG("signal_number(%x) for resource handle(%p) found",
+				DBG("signal_number(%llx) for resource handle(%lld) found",
 						rsrc_handle->signal_number, handle);
 				*signal_number = rsrc_handle->signal_number;
 				*bus_name = ic_utils_strdup(client->bus_name);
@@ -154,7 +154,7 @@ static void _icd_dbus_cleanup_resource_list(void *data)
 	RET_IF(NULL == resource_handle);
 	RET_IF(NULL == resource_handle->handle);
 
-	DBG("handle(%u, %u) deregistering", resource_handle->handle,
+	DBG("handle(%lld, %llx) deregistering", resource_handle->handle,
 			resource_handle->signal_number);
 
 	ret = icd_ioty_unregister_resource(resource_handle->handle);
@@ -173,7 +173,7 @@ static void _icd_dbus_cleanup_presence_list(void *data)
 	RET_IF(NULL == presence_handle);
 	RET_IF(NULL == presence_handle->handle);
 
-	DBG("handle(%u) deregistering", presence_handle->handle);
+	DBG("handle(%lld) deregistering", presence_handle->handle);
 
 	ret = icd_ioty_unsubscribe_presence(presence_handle->handle,
 			presence_handle->host_address);
@@ -189,7 +189,7 @@ static void _icd_dbus_cleanup_observe_list(OCDoHandle data)
 {
 	int ret;
 
-	DBG("handle(%u) deregistering", data);
+	DBG("handle(%lld) deregistering", data);
 
 	ret = icd_ioty_observer_stop(data, NULL);
 	if (IOTCON_ERROR_NONE != ret)
@@ -354,7 +354,7 @@ static int _icd_dbus_resource_list_add(const gchar *bus_name, OCResourceHandle h
 		return ret;
 	}
 
-	DBG("resource handle(%u) added in the client(%s)", handle, bus_name);
+	DBG("resource handle(%lld) added in the client(%s)", handle, bus_name);
 
 	client->resource_list = g_list_append(client->resource_list, resource_handle);
 
@@ -384,7 +384,7 @@ static void _icd_dbus_resource_list_remove(const gchar *bus_name, OCResourceHand
 		resource_handle = cur_hd->data;
 
 		if (resource_handle->handle == handle) {
-			DBG("resource handle(%u) removed from handle list", handle);
+			DBG("resource handle(%lld) removed from handle list", handle);
 			client->resource_list = g_list_delete_link(client->resource_list, cur_hd);
 			free(resource_handle);
 			g_mutex_unlock(&icd_dbus_client_list_mutex);
@@ -424,7 +424,7 @@ static int _icd_dbus_presence_list_add(const gchar *bus_name,
 		return ret;
 	}
 
-	DBG("presence handle(%u) added in the client(%s)", handle, bus_name);
+	DBG("presence handle(%lld) added in the client(%s)", handle, bus_name);
 
 	client->presence_list = g_list_append(client->presence_list, presence_handle);
 
@@ -455,7 +455,7 @@ static void _icd_dbus_presence_list_remove(const gchar *bus_name,
 		presence_handle = cur_hd->data;
 
 		if (presence_handle->handle == handle) {
-			DBG("presence handle(%u) removed from handle list", handle);
+			DBG("presence handle(%lld) removed from handle list", handle);
 			client->presence_list = g_list_delete_link(client->presence_list, cur_hd);
 			free(presence_handle->host_address);
 			free(presence_handle);
@@ -484,7 +484,7 @@ static int _icd_dbus_observe_list_add(const gchar *bus_name, OCDoHandle handle)
 		return ret;
 	}
 
-	DBG("observe handle(%u) added in the client(%s)", handle, bus_name);
+	DBG("observe handle(%lld) added in the client(%s)", handle, bus_name);
 
 	client->observe_list = g_list_append(client->observe_list, handle);
 
@@ -515,7 +515,7 @@ static void _icd_dbus_observe_list_remove(const gchar *bus_name,
 		observe_handle = cur_hd->data;
 
 		if (observe_handle == handle) {
-			DBG("presence handle(%u) removed from handle list", handle);
+			DBG("presence handle(%lld) removed from handle list", handle);
 			client->observe_list = g_list_delete_link(client->observe_list, cur_hd);
 			g_mutex_unlock(&icd_dbus_client_list_mutex);
 			return;
@@ -560,7 +560,7 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 
 			ret = icd_ioty_unregister_resource(handle);
 			if (IOTCON_ERROR_NONE != ret)
-				ERR("icd_ioty_unregister_resource(%u) Fail(%d)", handle, ret);
+				ERR("icd_ioty_unregister_resource(%lld) Fail(%d)", handle, ret);
 
 			handle = NULL;
 		}
