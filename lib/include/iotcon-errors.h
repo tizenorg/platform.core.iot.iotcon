@@ -18,8 +18,8 @@
 
 #include <tizen.h>
 
-#ifndef TIZEN_ERROR_IOTCON
-#define TIZEN_ERROR_IOTCON -0x09000000
+#ifndef TZ_VER_3
+#define TIZEN_ERROR_IOTCON -0x01C80000
 #endif
 
 /**

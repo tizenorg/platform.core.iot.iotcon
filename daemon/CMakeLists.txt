@@ -10,10 +10,9 @@ SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/common/ic-dbus.c
 SET(PKG_MODULES gio-2.0 dlog gio-unix-2.0 capi-system-info capi-system-system-settings
 	iotivity)
 
-IF(NEW_SECURE)
+IF(TZ_VER_3)
 	SET(PKG_MODULES ${PKG_MODULES} cynara-client cynara-session cynara-creds-gdbus)
-	ADD_DEFINITIONS("-DIOTCON_CYNARA")
-ENDIF(NEW_SECURE)
+ENDIF(TZ_VER_3)
 
 pkg_check_modules(daemon_pkgs REQUIRED ${PKG_MODULES})
 

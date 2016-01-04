@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <gio/gio.h>
-#ifdef IOTCON_CYNARA
+#ifdef TZ_VER_3
 #include <cynara-client.h>
 #include <cynara-session.h>
 #include <cynara-creds-gdbus.h>
@@ -36,13 +36,13 @@ static const char *_icd_privileges_network[] = {
 	NULL,
 };
 
-#ifdef IOTCON_CYNARA
+#ifdef TZ_VER_3
 static cynara *_cynara;
 #endif
 
 int icd_cynara_init()
 {
-#ifdef IOTCON_CYNARA
+#ifdef TZ_VER_3
 	int ret;
 	ret = cynara_initialize(&_cynara, NULL);
 
@@ -57,7 +57,7 @@ int icd_cynara_init()
 
 void icd_cynara_deinit()
 {
-#ifdef IOTCON_CYNARA
+#ifdef TZ_VER_3
 	if (_cynara)
 		cynara_finish(_cynara);
 
@@ -68,7 +68,7 @@ void icd_cynara_deinit()
 
 static int _icd_cynara_check(GDBusMethodInvocation *invocation, const char **privileges)
 {
-#ifdef IOTCON_CYNARA
+#ifdef TZ_VER_3
 	FN_CALL;
 	int i = 0;
 	int ret;

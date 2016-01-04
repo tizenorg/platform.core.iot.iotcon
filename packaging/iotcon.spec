@@ -66,14 +66,14 @@ cp %{SOURCE2001} .
 
 %build
 %if 0%{?tizen_version_major} < 3
-NEW_SECURE=0
+TZ_VER_3=0
 %else
-NEW_SECURE=1
+TZ_VER_3=1
 %endif
 
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %cmake . -DMAJORVER=${MAJORVER} -DFULLVER=%{version} -DBIN_INSTALL_DIR:PATH=%{_bindir} \
-		-DNEW_SECURE=${NEW_SECURE}
+		-DTZ_VER_3=${TZ_VER_3}
 
 
 %install
