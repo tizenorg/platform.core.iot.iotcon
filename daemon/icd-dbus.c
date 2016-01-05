@@ -39,6 +39,7 @@ typedef struct _icd_dbus_client_s {
 	GList *resource_list;
 	GList *presence_list;
 	GList *observe_list;
+	GList *encap_list;
 } icd_dbus_client_s;
 
 typedef struct _icd_resource_handle {
@@ -51,6 +52,11 @@ typedef struct _icd_presence_handle {
 	char *host_address;
 } icd_presence_handle_s;
 
+typedef struct _icd_encap_handle {
+	int type;
+	char *host_address;
+	char *uri_path;
+} icd_encap_handle_s;
 
 icDbus* icd_dbus_get_object()
 {
@@ -69,7 +75,6 @@ int64_t icd_dbus_generate_signal_number()
 int icd_dbus_client_list_get_resource_info(OCResourceHandle handle,
 		int64_t *signal_number, gchar **bus_name)
 {
-	FN_CALL;
 	icd_dbus_client_s *client;
 	GList *cur_client, *cur_hd;
 	icd_resource_handle_s *rsrc_handle;
@@ -199,8 +204,29 @@ static void _icd_dbus_cleanup_observe_list(OCDoHandle data)
 }
 
 
+static void _icd_dbus_cleanup_encap_list(void *data)
+{
+	int ret;
+	icd_encap_handle_s *encap_handle = data;
+
+	RET_IF(NULL == encap_handle);
+
+	DBG("Deregistering encapsulation");
+
+	ret = icd_ioty_stop_encap(encap_handle->type, encap_handle->uri_path,
+			encap_handle->host_address);
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("icd_ioty_stop_encap() Fail(%d)", ret);
+
+	free(encap_handle->uri_path);
+	free(encap_handle->host_address);
+	free(encap_handle);
+}
+
+
 static int _icd_dbus_client_list_cleanup_handle_list(GList *client_list)
 {
+	FN_CALL;
 	icd_dbus_client_s *client;
 
 	RETV_IF(NULL == client_list, IOTCON_ERROR_INVALID_PARAMETER);
@@ -213,6 +239,8 @@ static int _icd_dbus_client_list_cleanup_handle_list(GList *client_list)
 	g_list_free_full(client->presence_list, _icd_dbus_cleanup_presence_list);
 	/* observe list */
 	g_list_free_full(client->observe_list, _icd_dbus_cleanup_observe_list);
+	/* encapsulation list */
+	g_list_free_full(client->encap_list, _icd_dbus_cleanup_encap_list);
 
 	free(client->bus_name);
 	client->bus_name = NULL;
@@ -525,6 +553,82 @@ static void _icd_dbus_observe_list_remove(const gchar *bus_name,
 			DBG("Observe handle is removed");
 			DBG_HANDLE(handle);
 			client->observe_list = g_list_delete_link(client->observe_list, cur_hd);
+			g_mutex_unlock(&icd_dbus_client_list_mutex);
+			return;
+		}
+		cur_hd = cur_hd->next;
+	}
+	g_mutex_unlock(&icd_dbus_client_list_mutex);
+}
+
+
+static int _icd_dbus_encap_list_add(const gchar *bus_name, int type,
+		const char *host_address, const char *uri_path)
+{
+	int ret;
+	icd_dbus_client_s *client = NULL;
+	icd_encap_handle_s *encap_handle;
+
+	RETV_IF(NULL == bus_name, IOTCON_ERROR_INVALID_PARAMETER);
+
+	encap_handle = calloc(1, sizeof(icd_encap_handle_s));
+	if (NULL == encap_handle) {
+		ERR("calloc(handle) Fail(%d)", errno);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
+	encap_handle->type = type;
+	encap_handle->host_address = ic_utils_strdup(host_address);
+	encap_handle->uri_path = ic_utils_strdup(uri_path);
+
+	g_mutex_lock(&icd_dbus_client_list_mutex);
+	ret = _icd_dbus_client_list_get_client(bus_name, &client);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_icd_dbus_client_list_get_client() Fail(%d)", ret);
+		free(encap_handle->uri_path);
+		free(encap_handle->host_address);
+		free(encap_handle);
+		g_mutex_unlock(&icd_dbus_client_list_mutex);
+		return ret;
+	}
+
+	DBG("encap info added in the client(%s)", bus_name);
+
+	client->encap_list = g_list_append(client->encap_list, encap_handle);
+
+	g_mutex_unlock(&icd_dbus_client_list_mutex);
+	return IOTCON_ERROR_NONE;
+}
+
+
+static void _icd_dbus_encap_list_remove(const gchar *bus_name, int type,
+		const char *host_address, const char *uri_path)
+{
+	GList *cur_hd;
+	GList *client_list = NULL;
+	icd_dbus_client_s *client = NULL;
+	icd_encap_handle_s *encap_handle;
+
+	g_mutex_lock(&icd_dbus_client_list_mutex);
+	client_list = _icd_dbus_client_list_find_client(bus_name);
+	if (NULL == client_list) {
+		ERR("_icd_dbus_client_list_find_client() Fail");
+		g_mutex_unlock(&icd_dbus_client_list_mutex);
+		return;
+	}
+
+	client = client_list->data;
+	cur_hd = client->encap_list;
+	while (cur_hd) {
+		encap_handle = cur_hd->data;
+
+		if (type == encap_handle->type
+				&& IC_STR_EQUAL == g_strcmp0(encap_handle->host_address, host_address)
+				&& IC_STR_EQUAL == g_strcmp0(encap_handle->uri_path, uri_path)) {
+			DBG("encap info(%s, %s) removed", host_address, uri_path);
+			client->encap_list = g_list_delete_link(client->encap_list, cur_hd);
+			free(encap_handle->uri_path);
+			free(encap_handle->host_address);
+			free(encap_handle);
 			g_mutex_unlock(&icd_dbus_client_list_mutex);
 			return;
 		}
@@ -1069,6 +1173,7 @@ static gboolean _dbus_handle_start_monitoring(icDbus *object,
 		gint connectivity)
 {
 	int ret;
+	const gchar *sender;
 	int64_t signal_number = 0;
 
 	ret = icd_cynara_check_network(invocation);
@@ -1078,10 +1183,25 @@ static gboolean _dbus_handle_start_monitoring(icDbus *object,
 		return TRUE;
 	}
 
-	ret = icd_ioty_start_encap(ICD_ENCAP_MONITORING, uri_path, host_address,
-			connectivity, &signal_number);
-	if (IOTCON_ERROR_NONE != ret)
+	ret = icd_ioty_start_encap(ICD_ENCAP_MONITORING, uri_path, host_address, connectivity,
+			&signal_number);
+	if (IOTCON_ERROR_NONE == ret) {
+		sender = g_dbus_method_invocation_get_sender(invocation);
+
+		ret = _icd_dbus_encap_list_add(sender, ICD_ENCAP_MONITORING, host_address,
+				uri_path);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_icd_dbus_encap_list_add() Fail(%d)", ret);
+
+			ret = icd_ioty_stop_encap(ICD_ENCAP_MONITORING, uri_path, host_address);
+			if (IOTCON_ERROR_NONE != ret)
+				ERR("icd_ioty_stop_encap() Fail(%d)", ret);
+
+			signal_number = 0;
+		}
+	} else {
 		ERR("icd_ioty_start_encap() Fail(%d)", ret);
+	}
 
 	ic_dbus_complete_start_monitoring(object, invocation, signal_number, ret);
 
@@ -1095,6 +1215,7 @@ static gboolean _dbus_handle_stop_monitoring(icDbus *object,
 		const gchar *host_address)
 {
 	int ret;
+	const gchar *sender;
 
 	ret = icd_cynara_check_network(invocation);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -1104,8 +1225,12 @@ static gboolean _dbus_handle_stop_monitoring(icDbus *object,
 	}
 
 	ret = icd_ioty_stop_encap(ICD_ENCAP_MONITORING, uri_path, host_address);
-	if (IOTCON_ERROR_NONE != ret)
+	if (IOTCON_ERROR_NONE == ret) {
+		sender = g_dbus_method_invocation_get_sender(invocation);
+		_icd_dbus_encap_list_remove(sender, ICD_ENCAP_MONITORING, host_address, uri_path);
+	} else {
 		ERR("icd_ioty_stop_encap() Fail(%d)", ret);
+	}
 
 	ic_dbus_complete_stop_monitoring(object, invocation, ret);
 
@@ -1120,6 +1245,7 @@ static gboolean _dbus_handle_start_caching(icDbus *object,
 		gint connectivity)
 {
 	int ret;
+	const gchar *sender;
 	int64_t signal_number = 0;
 
 	ret = icd_cynara_check_network(invocation);
@@ -1129,12 +1255,26 @@ static gboolean _dbus_handle_start_caching(icDbus *object,
 		return TRUE;
 	}
 
-	ret = icd_ioty_start_encap(ICD_ENCAP_CACHING, uri_path, host_address,
-			connectivity, &signal_number);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icd_ioty_start_encap() Fail(%d)", ret);
+	ret = icd_ioty_start_encap(ICD_ENCAP_CACHING, uri_path, host_address, connectivity,
+			&signal_number);
+	if (IOTCON_ERROR_NONE == ret) {
+		sender = g_dbus_method_invocation_get_sender(invocation);
 
-	ic_dbus_complete_start_monitoring(object, invocation, signal_number, ret);
+		ret = _icd_dbus_encap_list_add(sender, ICD_ENCAP_CACHING, host_address, uri_path);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_icd_dbus_encap_list_add() Fail(%d)", ret);
+
+			ret = icd_ioty_stop_encap(ICD_ENCAP_CACHING, uri_path, host_address);
+			if (IOTCON_ERROR_NONE != ret)
+				ERR("icd_ioty_stop_encap() Fail(%d)", ret);
+
+			signal_number = 0;
+		}
+	} else {
+		ERR("icd_ioty_start_encap() Fail(%d)", ret);
+	}
+
+	ic_dbus_complete_start_caching(object, invocation, signal_number, ret);
 
 	return TRUE;
 }
@@ -1146,6 +1286,7 @@ static gboolean _dbus_handle_stop_caching(icDbus *object,
 		const gchar *host_address)
 {
 	int ret;
+	const gchar *sender;
 
 	ret = icd_cynara_check_network(invocation);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -1155,10 +1296,14 @@ static gboolean _dbus_handle_stop_caching(icDbus *object,
 	}
 
 	ret = icd_ioty_stop_encap(ICD_ENCAP_CACHING, uri_path, host_address);
-	if (IOTCON_ERROR_NONE != ret)
+	if (IOTCON_ERROR_NONE == ret) {
+		sender = g_dbus_method_invocation_get_sender(invocation);
+		_icd_dbus_encap_list_remove(sender, ICD_ENCAP_CACHING, host_address, uri_path);
+	} else {
 		ERR("icd_ioty_stop_encap() Fail(%d)", ret);
+	}
 
-	ic_dbus_complete_stop_monitoring(object, invocation, ret);
+	ic_dbus_complete_stop_caching(object, invocation, ret);
 
 	return TRUE;
 }
