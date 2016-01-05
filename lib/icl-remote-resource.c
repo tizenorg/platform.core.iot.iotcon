@@ -292,6 +292,7 @@ API int iotcon_remote_resource_clone(iotcon_remote_resource_h src,
 	iotcon_remote_resource_h resource = NULL;
 
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
 
 	resource = calloc(1, sizeof(struct icl_remote_resource));
 	if (NULL == resource) {

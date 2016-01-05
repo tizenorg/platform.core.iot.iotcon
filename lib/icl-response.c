@@ -69,6 +69,7 @@ API int iotcon_response_get_options(iotcon_response_h resp,
 		iotcon_options_h *options)
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resp->header_options, IOTCON_ERROR_NO_DATA);
 
 	*options = resp->header_options;
@@ -80,6 +81,7 @@ API int iotcon_response_get_representation(iotcon_response_h resp,
 		iotcon_representation_h *repr)
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resp->repr, IOTCON_ERROR_NO_DATA);
 
 	*repr = resp->repr;
@@ -92,6 +94,7 @@ API int iotcon_response_get_result(iotcon_response_h resp,
 		iotcon_response_result_e *result)
 {
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == result, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*result = resp->result;
 
