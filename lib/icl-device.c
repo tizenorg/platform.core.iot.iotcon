@@ -259,15 +259,13 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 		GVariant *parameters,
 		gpointer user_data)
 {
-	char *uri_path;
 	struct icl_platform_info info = {0};
 	icl_platform_info_s *cb_container = user_data;
 	iotcon_platform_info_cb cb = cb_container->cb;
 
 	cb_container->found = true;
 
-	g_variant_get(parameters, "(&s&s&s&s&s&s&s&s&s&s&s&s)",
-			&uri_path,
+	g_variant_get(parameters, "(&s&s&s&s&s&s&s&s&s&s&s)",
 			&info.platform_id,
 			&info.manuf_name,
 			&info.manuf_url,
@@ -289,8 +287,6 @@ static void _icl_platform_info_cb(GDBusConnection *connection,
 	info.firmware_ver = ic_utils_dbus_decode_str(info.firmware_ver);
 	info.support_url = ic_utils_dbus_decode_str(info.support_url);
 	info.system_time = ic_utils_dbus_decode_str(info.system_time);
-
-	/* From iotivity, we can get uri_path. But, the value is always "/oic/p". */
 
 	if (cb)
 		cb(&info, IOTCON_ERROR_NONE, cb_container->user_data);

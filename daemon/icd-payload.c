@@ -336,8 +336,7 @@ static GVariant* _icd_payload_platform_to_gvariant(OCPlatformPayload *repr)
 {
 	GVariant *value;
 
-	value = g_variant_new("(ssssssssssss)",
-			repr->uri,
+	value = g_variant_new("(sssssssssss)",
 			repr->info.platformID,
 			repr->info.manufacturerName,
 			ic_utils_dbus_encode_str(repr->info.manufacturerUrl),
