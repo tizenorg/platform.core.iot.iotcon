@@ -416,7 +416,7 @@ static int _request_handler_delete(iotcon_resource_h resource, iotcon_request_h 
 		return -1;
 	}
 
-	ret = _send_response(request, NULL, IOTCON_RESPONSE_RESULT_DELETED);
+	ret = _send_response(request, NULL, IOTCON_RESPONSE_RESOURCE_DELETED);
 	if (0 != ret) {
 		ERR("_send_response() Fail(%d)", ret);
 		return -1;

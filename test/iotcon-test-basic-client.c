@@ -99,7 +99,7 @@ static void _on_response_delete(iotcon_remote_resource_h resource,
 	}
 
 	if (IOTCON_RESPONSE_OK != response_result
-			&& IOTCON_RESPONSE_RESULT_DELETED != response_result) {
+			&& IOTCON_RESPONSE_RESOURCE_DELETED != response_result) {
 		ERR("_on_response_delete Response error(%d)", response_result);
 		return;
 	}

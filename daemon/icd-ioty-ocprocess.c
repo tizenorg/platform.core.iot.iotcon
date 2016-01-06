@@ -587,7 +587,7 @@ static int _ocprocess_parse_oic_result(OCStackResult result)
 		res = IOTCON_RESPONSE_RESOURCE_CREATED;
 		break;
 	case OC_STACK_RESOURCE_DELETED:
-		res = IOTCON_RESPONSE_RESULT_DELETED;
+		res = IOTCON_RESPONSE_RESOURCE_DELETED;
 		break;
 	case OC_STACK_UNAUTHORIZED_REQ:
 		res = IOTCON_RESPONSE_FORBIDDEN;
