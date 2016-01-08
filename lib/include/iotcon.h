@@ -102,7 +102,7 @@ int iotcon_get_timeout(int *timeout_seconds);
  *
  * @since_tizen 3.0
  *
- * @param[in] timeout_seconds Seconds for timeout (must be in range from 1 to 60)
+ * @param[in] timeout_seconds Seconds for timeout (must be in range from 1 to 3600)
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE Successful
