@@ -9,7 +9,7 @@ Source1:    %{name}.service
 Source1001: %{name}.manifest
 Source1002: %{name}-old.manifest
 Source1003: %{name}-test-old.manifest
-Source2001: %{name}.conf.in
+Source1004: %{name}.conf.in
 BuildRequires:  cmake
 BuildRequires:  boost-devel
 BuildRequires:  pkgconfig(glib-2.0)
@@ -28,6 +28,7 @@ BuildRequires:  python-xml
 %endif
 
 %define _unitdir /usr/lib/systemd/system
+%define _dbus_interface org.tizen.iotcon.dbus
 
 %description
 Tizen IoT Connectivity Service & Library(Client) based on Iotivity
@@ -60,7 +61,6 @@ cp %{SOURCE1003} ./%{name}-test.manifest
 %else
 cp %{SOURCE1001} ./%{name}.manifest
 cp %{SOURCE1001} ./%{name}-test.manifest
-cp %{SOURCE2001} .
 %endif
 
 
@@ -73,7 +73,7 @@ TZ_VER_3=1
 
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %cmake . -DMAJORVER=${MAJORVER} -DFULLVER=%{version} -DBIN_INSTALL_DIR:PATH=%{_bindir} \
-		-DTZ_VER_3=${TZ_VER_3}
+		-DTZ_VER_3=${TZ_VER_3} -DDBUS_INTERFACE=%{_dbus_interface}
 
 
 %install
@@ -88,6 +88,10 @@ ln -s ../%{name}.service %{buildroot}%{_unitdir}/multi-user.target.wants/%{name}
 mkdir -p %{buildroot}/%{_datadir}/license
 cp LICENSE.APLv2 %{buildroot}/%{_datadir}/license/%{name}
 cp LICENSE.APLv2 %{buildroot}/%{_datadir}/license/%{name}-test
+%else
+sed -i 's/@DBUS_INTERFACE@/%{_dbus_interface}/g' %{SOURCE1004}
+mkdir -p %{buildroot}/%{_sysconfdir}/dbus-1/system.d
+cp -af %{SOURCE1004} %{buildroot}%{_sysconfdir}/dbus-1/system.d/%{name}.conf
 %endif
 
 
