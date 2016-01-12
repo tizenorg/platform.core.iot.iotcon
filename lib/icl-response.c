@@ -166,6 +166,7 @@ static bool _icl_response_representation_child_cb(iotcon_representation_h child,
 	case IOTCON_INTERFACE_GROUP:
 		child->visibility = ICL_VISIBILITY_PROP;
 		break;
+	case IOTCON_INTERFACE_READONLY:
 	default:
 		WARN("Invalid interface type(%d)", iface);
 		child->visibility = ICL_VISIBILITY_PROP;
@@ -198,6 +199,7 @@ static int _icl_response_check_representation_visibility(iotcon_response_h resp)
 	case IOTCON_INTERFACE_BATCH:
 		first->visibility = ICL_VISIBILITY_NONE;
 		break;
+	case IOTCON_INTERFACE_READONLY:
 	default:
 		WARN("Invalid interface type(%d)", resp->iface);
 		first->visibility = ICL_VISIBILITY_REPR;

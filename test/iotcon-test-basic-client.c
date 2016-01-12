@@ -487,6 +487,8 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		DBG("[%s] resource interface : BATCH_INTERFACE", resource_uri_path);
 	if (IOTCON_INTERFACE_GROUP & resource_interfaces)
 		DBG("[%s] resource interface : GROUP_INTERFACE", resource_uri_path);
+	if (IOTCON_INTERFACE_READONLY & resource_interfaces)
+		DBG("[%s] resource interface : READONLY_INTERFACE", resource_uri_path);
 
 	/* get the resource types */
 	ret = iotcon_remote_resource_get_types(resource, &resource_types);

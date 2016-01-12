@@ -25,7 +25,7 @@
 #define IC_STR_NULL "(NULL)"
 
 #define IC_INTERFACE_MAX (IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_LINK | \
-		IOTCON_INTERFACE_BATCH | IOTCON_INTERFACE_GROUP)
+		IOTCON_INTERFACE_BATCH | IOTCON_INTERFACE_GROUP | IOTCON_INTERFACE_READONLY)
 
 char* ic_utils_strdup(const char *src);
 const char* ic_utils_dbus_encode_str(const char *src);

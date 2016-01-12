@@ -48,7 +48,7 @@ static GVariantBuilder* _icd_state_value_to_gvariant_builder(OCRepPayload *repr)
 GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 {
 	int port = 0;
-	int ifaces = 0;
+	int ifaces;
 	GVariant **value;
 	OCStringLL *node;
 	iotcon_interface_e iface;
@@ -69,18 +69,18 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;
 	}
-	for (i = 0; resource; i++) {
+	for (i = 0; resource; i++, resource = resource->next) {
 		/* uri path */
 		if (NULL == resource->uri) {
 			ERR("resource uri is NULL");
-			resource = resource->next;
+			continue;
 		}
 
 		/* device id */
 		random_res = OCConvertUuidToString(discovered->sid, device_id);
 		if (RAND_UUID_OK != random_res) {
 			ERR("OCConvertUuidToString() Fail(%d)", random_res);
-			resource = resource->next;
+			continue;
 		}
 
 		/* Resource Types */
@@ -88,7 +88,7 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 		node = resource->types;
 		if (NULL == node) {
 			ERR("resource types is NULL");
-			resource = resource->next;
+			continue;
 		}
 		while (node) {
 			g_variant_builder_add(&types, "s", node->value);
@@ -96,20 +96,19 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 		}
 
 		/* Resource Interfaces */
+		ifaces = 0;
 		node = resource->interfaces;
 		if (NULL == node) {
 			ERR("resource interfaces is NULL");
-			resource = resource->next;
+			continue;
 		}
-		while (node) {
+		for (; node; node = node->next) {
 			ret = ic_utils_convert_interface_string(node->value, &iface);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("ic_utils_convert_interface_string() Fail(%d)", ret);
-				resource = resource->next;
+				continue;
 			}
 			ifaces |= iface;
-
-			node = node->next;
 		}
 
 		/* Resource Properties */
@@ -123,8 +122,6 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 		value[i] = g_variant_new("(ssiasibsi)", resource->uri, device_id, ifaces, &types,
 				properties, resource->secure, dev_addr->addr, port);
 		DBG("found resource[%d] : %s", i, g_variant_print(value[i], FALSE));
-
-		resource = resource->next;
 	}
 
 	return value;

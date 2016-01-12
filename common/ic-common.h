@@ -40,5 +40,6 @@
 #define IC_INTERFACE_LINK "oic.if.ll"
 #define IC_INTERFACE_BATCH "oic.if.b"
 #define IC_INTERFACE_GROUP "oic.mi.grp"
+#define IC_INTERFACE_READONLY "oic.if.r"
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__ */

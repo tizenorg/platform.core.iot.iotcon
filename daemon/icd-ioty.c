@@ -151,6 +151,9 @@ OCResourceHandle icd_ioty_register_resource(const char *uri_path,
 	} else if (IOTCON_INTERFACE_GROUP & ifaces) {
 		res_iface = IC_INTERFACE_GROUP;
 		ifaces ^= IOTCON_INTERFACE_GROUP;
+	} else if (IOTCON_INTERFACE_READONLY & ifaces) {
+		res_iface = IC_INTERFACE_READONLY;
+		ifaces ^= IOTCON_INTERFACE_READONLY;
 	} else {
 		ERR("Invalid interface type(%d)", ifaces);
 		return NULL;
@@ -178,6 +181,8 @@ OCResourceHandle icd_ioty_register_resource(const char *uri_path,
 		icd_ioty_bind_interface(handle, IOTCON_INTERFACE_BATCH);
 	if (IOTCON_INTERFACE_GROUP & ifaces)
 		icd_ioty_bind_interface(handle, IOTCON_INTERFACE_GROUP);
+	if (IOTCON_INTERFACE_READONLY & ifaces)
+		icd_ioty_bind_interface(handle, IOTCON_INTERFACE_READONLY);
 
 	return handle;
 }

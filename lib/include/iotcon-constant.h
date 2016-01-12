@@ -78,9 +78,10 @@ typedef enum {
 typedef enum {
 	IOTCON_INTERFACE_NONE = 0, /**< Indicates interface not specified or uninitialized */
 	IOTCON_INTERFACE_DEFAULT = (1 << 0), /**< Indicates interface for default */
-	IOTCON_INTERFACE_LINK = (1 << 1), /**< Indicates interface which is used to retrieve (GET) a list of resources on a server */
-	IOTCON_INTERFACE_BATCH = (1 << 2), /**< Indicates interface which is used to to manipulate (GET, PUT, POST, DELETE) a collection of sub-resources at the same time */
-	IOTCON_INTERFACE_GROUP = (1 << 3), /**< Indicates interface which is used to to manipulate (GET, PUT, POST) a group of remote resources */
+	IOTCON_INTERFACE_LINK = (1 << 1), /**< Indicates interface which is used to list the references to other resources contained in a resource */
+	IOTCON_INTERFACE_BATCH = (1 << 2), /**< Indicates interface which is used to manipulate (GET, PUT, POST, DELETE) on other resources contained in a resource */
+	IOTCON_INTERFACE_GROUP = (1 << 3), /**< Indicates interface which is used to manipulate (GET, PUT, POST) a group of remote resources */
+	IOTCON_INTERFACE_READONLY = (1 << 4), /**< Indicates interface which is used to limit the methods that can be applied to a resource to GET only */
 } iotcon_interface_e;
 
 /**

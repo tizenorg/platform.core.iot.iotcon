@@ -72,6 +72,9 @@ int ic_utils_convert_interface_flag(iotcon_interface_e src, char **dest)
 	case IOTCON_INTERFACE_GROUP:
 		*dest = IC_INTERFACE_GROUP;
 		break;
+	case IOTCON_INTERFACE_READONLY:
+		*dest = IC_INTERFACE_READONLY;
+		break;
 	case IOTCON_INTERFACE_NONE:
 	default:
 		ERR("Invalid interface(%d)", src);
@@ -94,8 +97,10 @@ int ic_utils_convert_interface_string(const char *src, iotcon_interface_e *dest)
 		*dest = IOTCON_INTERFACE_BATCH;
 	} else if (IC_STR_EQUAL == strcmp(IC_INTERFACE_GROUP, src)) {
 		*dest = IOTCON_INTERFACE_GROUP;
+	} else if (IC_STR_EQUAL == strcmp(IC_INTERFACE_READONLY, src)) {
+		*dest = IOTCON_INTERFACE_READONLY;
 	} else {
-		ERR("Invalid Interface");
+		ERR("Invalid Interface(%s)", src);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
