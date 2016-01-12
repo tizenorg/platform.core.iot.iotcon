@@ -1,11 +1,12 @@
 SET(IC_DBUS "ic-dbus")
+STRING(REPLACE ".dbus" "." INTERFACE_PREFIX ${DBUS_INTERFACE})
 
 FIND_PROGRAM(GDBUS_CODEGEN NAMES gdbus-codegen)
 
 ADD_CUSTOM_COMMAND(
 	OUTPUT dbus
 	COMMAND ${GDBUS_CODEGEN} --generate-c-code ${IC_DBUS}
-			--interface-prefix org.tizen.iotcon.
+			--interface-prefix ${INTERFACE_PREFIX}
 			--c-namespace ic
 			${IC_DBUS}.xml
 	DEPENDS ${IC_DBUS}.xml)

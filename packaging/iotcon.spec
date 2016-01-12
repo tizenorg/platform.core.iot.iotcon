@@ -26,6 +26,8 @@ BuildRequires:  pkgconfig(cynara-creds-gdbus)
 %if "%{tizen}" == "2.3"
 BuildRequires:  python-xml
 %endif
+Requires(post): /sbin/ldconfig, /usr/bin/systemctl
+Requires(postun): /sbin/ldconfig, /usr/bin/systemctl
 
 %define _unitdir /usr/lib/systemd/system
 %define _dbus_interface org.tizen.iotcon.dbus
