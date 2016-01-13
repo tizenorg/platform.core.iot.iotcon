@@ -31,10 +31,10 @@ OCConnectivityType icd_ioty_conn_type_to_oic_conn_type(int conn_type)
 
 	switch (conn_type) {
 	case IOTCON_CONNECTIVITY_IPV4:
-		oic_conn_type = CT_IP_USE_V4;
+		oic_conn_type = CT_ADAPTER_IP | CT_IP_USE_V4;
 		break;
 	case IOTCON_CONNECTIVITY_IPV6:
-		oic_conn_type = CT_IP_USE_V6;
+		oic_conn_type = CT_ADAPTER_IP | CT_IP_USE_V6;
 		break;
 	case IOTCON_CONNECTIVITY_BT_EDR:
 		oic_conn_type = CT_ADAPTER_RFCOMM_BTEDR;
