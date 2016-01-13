@@ -43,6 +43,11 @@
 ...
 static iotcon_lite_resource_h _resource;
 
+static bool _state_changed_cb(iotcon_lite_resource_h resource, iotcon_state_h state, void *user_data)
+{
+	return true;
+}
+
 static void _create_light_resource()
 {
 	int ret;
@@ -81,7 +86,8 @@ static void _create_light_resource()
 	}
 
 	ret = iotcon_lite_resource_create("/light/1", resource_types,
-			IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE, state, &resource);
+			IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE, state,
+			_state_changed_cb, NULL, &resource);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_state_destroy(state);
 		iotcon_resource_types_destroy(resource_types);
@@ -129,6 +135,25 @@ static void _update_brightness(int brightness)
  */
 
 /**
+ * @brief Specifies the type of function passed to iotcon_lite_resource_create().
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] resource The handle of the lite resource
+ * @param[in] state The state of the lite resource
+ * @param[in] user_data The user data to pass to the function
+ *
+ * @pre The callback must be registered using iotcon_lite_resource_create()
+ *
+ * @return true to accept put request, otherwise false to reject it.
+ *
+ * @see iotcon_lite_resource_create()
+ */
+typedef bool (*iotcon_lite_resource_put_request_cb)(iotcon_lite_resource_h resource,
+		iotcon_state_h state, void *user_data);
+
+
+/**
  * @brief Creates a lite resource handle and registers the resource in server
  * @details Registers a resource specified by @a uri_path, @a res_types, @a state which have
  * @a properties in Iotcon server.\n
@@ -149,6 +174,8 @@ static void _update_brightness(int brightness)
  * @param[in] res_types The list of type of the resource
  * @param[in] properties The property of the resource\n Set of #iotcon_resource_property_e
  * @param[in] state The state handle to set
+ * @param[in] cb The callback function to add into callback list
+ * @param[in] user_data The user data to pass to the callback function
  * @param[out] resource_handle The handle of the resource
  *
  * @return 0 on success, otherwise a negative error value.
@@ -159,14 +186,14 @@ static void _update_brightness(int brightness)
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @post When the resource receive CRUD request, iotcon_request_handler_cb() will be called.
- *
  * @see iotcon_lite_resource_destroy()
  */
 int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int properties,
 		iotcon_state_h state,
+		iotcon_lite_resource_put_request_cb cb,
+		void *user_data,
 		iotcon_lite_resource_h *resource_handle);
 
 /**

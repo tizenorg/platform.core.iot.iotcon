@@ -119,6 +119,23 @@ static gboolean _door_state_changer(gpointer user_data)
 	return G_SOURCE_CONTINUE;
 }
 
+static bool _door_state_changed(iotcon_lite_resource_h resource,
+		iotcon_state_h state, void *user_data)
+{
+	FN_CALL;
+	bool opened;
+	int ret;
+
+	ret = iotcon_state_get_bool(state, "opened", &opened);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_state_get_bool() Fail(%d)", ret);
+		return false;
+	}
+	DBG("opened: %d", opened);
+
+	return true;
+}
+
 static iotcon_lite_resource_h _create_door_resource(char *uri_path, char *type,
 		int properties, void *user_data)
 {
@@ -157,7 +174,7 @@ static iotcon_lite_resource_h _create_door_resource(char *uri_path, char *type,
 
 	/* register door resource */
 	ret = iotcon_lite_resource_create(uri_path, resource_types, properties, state,
-			&handle);
+			_door_state_changed, NULL, &handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_create() Fail");
 		iotcon_state_destroy(state);

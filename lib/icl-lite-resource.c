@@ -39,6 +39,8 @@ struct icl_lite_resource {
 	int64_t handle;
 	unsigned int sub_id;
 	int properties;
+	iotcon_lite_resource_put_request_cb cb;
+	void *cb_data;
 };
 
 
@@ -206,6 +208,16 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 
 		icl_state_from_gvariant(recv_state, state_iter);
 
+		if (resource->cb) {
+			if (false == resource->cb(resource, recv_state, resource->cb_data)) {
+				_icl_lite_resource_response_send(repr, oic_request_h, oic_resource_h,
+						IOTCON_RESPONSE_ERROR);
+				iotcon_state_destroy(recv_state);
+				iotcon_representation_destroy(repr);
+				return;
+			}
+		}
+
 		ret = _icl_lite_resource_set_state(recv_state, resource->state);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_icl_lite_resource_set_state() Fail(%d)", ret);
@@ -252,7 +264,6 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 		if (IOTCON_ERROR_NONE != ret)
 			WARN("_icl_lite_resource_notify() Fail(%d)", ret);
 	}
-
 	iotcon_representation_destroy(repr);
 }
 
@@ -278,6 +289,8 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int properties,
 		iotcon_state_h state,
+		iotcon_lite_resource_put_request_cb cb,
+		void *user_data,
 		iotcon_lite_resource_h *resource_handle)
 {
 	int ret, iface;
@@ -332,6 +345,8 @@ API int iotcon_lite_resource_create(const char *uri_path,
 	resource->uri_path = ic_utils_strdup(uri_path);
 	if (state)
 		resource->state = icl_state_ref(state);
+	resource->cb = cb;
+	resource->cb_data = user_data;
 
 	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_REQUEST_HANDLER,
 			signal_number);
