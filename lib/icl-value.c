@@ -38,6 +38,9 @@ static iotcon_value_h _icl_value_create(int type)
 	case IOTCON_TYPE_NULL:
 		ret_val = calloc(1, sizeof(icl_basic_s));
 		break;
+	case IOTCON_TYPE_BYTE_STR:
+		ret_val = calloc(1, sizeof(icl_val_byte_str_s));
+		break;
 	case IOTCON_TYPE_LIST:
 		ret_val = calloc(1, sizeof(icl_val_list_s));
 		break;
@@ -136,6 +139,31 @@ iotcon_value_h icl_value_create_str(const char *val)
 }
 
 
+iotcon_value_h icl_value_create_byte_str(const unsigned char *val, int len)
+{
+	icl_val_byte_str_s *value;
+
+	RETV_IF(NULL == val, NULL);
+
+	value = (icl_val_byte_str_s*)_icl_value_create(IOTCON_TYPE_BYTE_STR);
+	if (NULL == value) {
+		ERR("_icl_value_create(BYTE STRING) Fail");
+		return NULL;
+	}
+
+	value->s = calloc(len, sizeof(unsigned char));
+	if (NULL == value->s) {
+		ERR("calloc() Fail(%d)", errno);
+		free(value);
+		return NULL;
+	}
+	memcpy(value->s, val, len);
+	value->len = len;
+
+	return (iotcon_value_h)value;
+}
+
+
 iotcon_value_h icl_value_create_list(iotcon_list_h val)
 {
 	icl_val_list_s *value;
@@ -219,6 +247,21 @@ int icl_value_get_str(iotcon_value_h value, char **val)
 }
 
 
+int icl_value_get_byte_str(iotcon_value_h value, unsigned char **val, int *len)
+{
+	icl_val_byte_str_s *real = (icl_val_byte_str_s*)value;
+
+	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(IOTCON_TYPE_BYTE_STR != real->type, IOTCON_ERROR_INVALID_PARAMETER,
+			"Invalid Type(%d)", real->type);
+
+	*val = real->s;
+	*len = real->len;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
 int icl_value_get_list(iotcon_value_h value, iotcon_list_h *list)
 {
 	icl_val_list_s *real = (icl_val_list_s*)value;
@@ -266,8 +309,10 @@ void icl_value_destroy(gpointer data)
 	case IOTCON_TYPE_DOUBLE:
 	case IOTCON_TYPE_NULL:
 		break;
+	case IOTCON_TYPE_BYTE_STR:
+		free(((icl_val_byte_str_s*)value)->s);
+		break;
 	case IOTCON_TYPE_LIST:
-		DBG("value is list");
 		ret = icl_value_get_list(value, &list);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_value_get_list() Fail(%d)", ret);
@@ -276,7 +321,6 @@ void icl_value_destroy(gpointer data)
 		iotcon_list_destroy(list);
 		break;
 	case IOTCON_TYPE_STATE:
-		DBG("value is Repr");
 		ret = icl_value_get_state(value, &state);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_value_get_state() Fail(%d)", ret);
@@ -310,10 +354,14 @@ iotcon_value_h icl_value_clone(iotcon_value_h src)
 		dest = icl_value_create_double(real->val.d);
 		break;
 	case IOTCON_TYPE_STR:
-		dest = icl_value_create_str(ic_utils_strdup(real->val.s));
+		dest = icl_value_create_str(real->val.s);
 		break;
 	case IOTCON_TYPE_NULL:
 		dest = icl_value_create_null();
+		break;
+	case IOTCON_TYPE_BYTE_STR:
+		dest = icl_value_create_byte_str(((icl_val_byte_str_s*)real)->s,
+				((icl_val_byte_str_s*)real)->len);
 		break;
 	default:
 		ERR("Invalid type(%d)", src->type);

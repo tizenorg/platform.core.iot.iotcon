@@ -72,7 +72,7 @@ API void iotcon_state_destroy(iotcon_state_h state)
 }
 
 
-int icl_state_del_value(iotcon_state_h state, const char *key)
+API int iotcon_state_remove(iotcon_state_h state, const char *key)
 {
 	gboolean ret = FALSE;
 	iotcon_value_h value = NULL;
@@ -94,6 +94,7 @@ int icl_state_del_value(iotcon_state_h state, const char *key)
 
 	return IOTCON_ERROR_NONE;
 }
+
 
 API int iotcon_state_get_int(iotcon_state_h state, const char *key, int *val)
 {
@@ -136,20 +137,6 @@ API int iotcon_state_add_int(iotcon_state_h state, const char *key, int val)
 	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
-}
-
-API int iotcon_state_remove(iotcon_state_h state, const char *key)
-{
-	int ret;
-
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
-
-	ret = icl_state_del_value(state, key);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("icl_state_del_value() Fail(%d)", ret);
-
-	return ret;
 }
 
 API int iotcon_state_get_bool(iotcon_state_h state, const char *key, bool *val)
@@ -277,6 +264,56 @@ API int iotcon_state_add_str(iotcon_state_h state, const char *key, char *val)
 	value = icl_value_create_str(val);
 	if (NULL == value) {
 		ERR("icl_value_create_str(%s) Fail", val);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
+
+	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
+
+	return IOTCON_ERROR_NONE;
+}
+
+API int iotcon_state_get_byte_str(iotcon_state_h state, const char *key,
+		unsigned char **val, int *len)
+{
+	iotcon_value_h value = NULL;
+	icl_val_byte_str_s *real = NULL;
+
+	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == len, IOTCON_ERROR_INVALID_PARAMETER);
+
+	value = g_hash_table_lookup(state->hash_table, key);
+	if (NULL == value) {
+		ERR("g_hash_table_lookup() Fail");
+		return IOTCON_ERROR_NO_DATA;
+	}
+
+	real = (icl_val_byte_str_s*)value;
+	if (IOTCON_TYPE_BYTE_STR != real->type) {
+		ERR("Invalid Type(%d)", real->type);
+		return IOTCON_ERROR_INVALID_TYPE;
+	}
+
+	*val = real->s;
+	*len = real->len;
+
+	return IOTCON_ERROR_NONE;
+}
+
+API int iotcon_state_add_byte_str(iotcon_state_h state, const char *key,
+		unsigned char *val, int len)
+{
+	iotcon_value_h value = NULL;
+
+	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(len <= 0, IOTCON_ERROR_INVALID_PARAMETER);
+
+	value = icl_value_create_byte_str(val, len);
+	if (NULL == value) {
+		ERR("icl_value_create_byte_str() Fail");
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -497,6 +534,7 @@ void icl_state_clone_foreach(char *key, iotcon_value_h src_val, iotcon_state_h d
 	case IOTCON_TYPE_BOOL:
 	case IOTCON_TYPE_DOUBLE:
 	case IOTCON_TYPE_STR:
+	case IOTCON_TYPE_BYTE_STR:
 	case IOTCON_TYPE_NULL:
 		copied_val = icl_value_clone(src_val);
 		if (NULL == copied_val) {

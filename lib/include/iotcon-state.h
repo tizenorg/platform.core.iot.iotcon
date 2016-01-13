@@ -181,7 +181,7 @@ void iotcon_state_destroy(iotcon_state_h state);
 int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone);
 
 /**
- * @brief Adds a new key and integer value into the representation.
+ * @brief Adds a new key and integer value into the state.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
@@ -198,7 +198,7 @@ int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone);
 int iotcon_state_add_int(iotcon_state_h state, const char *key, int val);
 
 /**
- * @brief Adds a new key and boolean value into the representation.
+ * @brief Adds a new key and boolean value into the state.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
@@ -215,7 +215,7 @@ int iotcon_state_add_int(iotcon_state_h state, const char *key, int val);
 int iotcon_state_add_bool(iotcon_state_h state, const char *key, bool val);
 
 /**
- * @brief Adds a new key and double value into the representation.
+ * @brief Adds a new key and double value into the state.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
@@ -232,7 +232,7 @@ int iotcon_state_add_bool(iotcon_state_h state, const char *key, bool val);
 int iotcon_state_add_double(iotcon_state_h state, const char *key, double val);
 
 /**
- * @brief Adds a new key and string value into the representation.
+ * @brief Adds a new key and string value into the state.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
@@ -249,7 +249,26 @@ int iotcon_state_add_double(iotcon_state_h state, const char *key, double val);
 int iotcon_state_add_str(iotcon_state_h state, const char *key, char *val);
 
 /**
- * @brief Adds a new key and list value into the representation.
+ * @brief Adds a new key and byte string value into the state.
+ * @details If @a key is already exists, current value will be replaced with new @a val.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] state The state handle
+ * @param[in] key The key
+ * @param[in] val The value
+ * @param[in] len The length of @a val
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ */
+int iotcon_state_add_byte_str(iotcon_state_h state, const char *key, unsigned char *val,
+		int len);
+
+/**
+ * @brief Adds a new key and list value into the state.
  * @details If @a key is already exists, current list will be replaced with new @a list.
  *
  * @since_tizen 3.0
@@ -266,7 +285,7 @@ int iotcon_state_add_str(iotcon_state_h state, const char *key, char *val);
 int iotcon_state_add_list(iotcon_state_h state, const char *key, iotcon_list_h list);
 
 /**
- * @brief Adds a new key and state value into the representation.
+ * @brief Adds a new key and state value into the state.
  * @details If @a key is already exists, current state will be replaced with new @a src.
  *
  * @since_tizen 3.0
@@ -283,7 +302,7 @@ int iotcon_state_add_list(iotcon_state_h state, const char *key, iotcon_list_h l
 int iotcon_state_add_state(iotcon_state_h dest, const char *key, iotcon_state_h src);
 
 /**
- * @brief Adds a new key with NULL value into the representation.
+ * @brief Adds a new key with NULL value into the state.
  * @details If @a key is already exists, current value will be replaced with NULL
  *
  * @since_tizen 3.0
@@ -367,6 +386,27 @@ int iotcon_state_get_double(iotcon_state_h state, const char *key, double *val);
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
 int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val);
+
+/**
+ * @brief Gets the byte string value from the given key.
+ *
+ * @since_tizen 3.0
+ *
+ * @remarks @a val must not be released using free().
+ *
+ * @param[in] state The state handle
+ * @param[in] key The key
+ * @param[out] val The byte string value
+ * @param[out] len The length of @a val
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA  No data available
+ * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
+ */
+int iotcon_state_get_byte_str(iotcon_state_h state, const char *key, unsigned char **val,
+		int *len);
 
 /**
  * @brief Gets the list value from the given key.

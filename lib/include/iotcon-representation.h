@@ -35,10 +35,11 @@
  * The Iotcon Representation API provides data type of resp_repr handling.\n
  * A resp_repr is a payload of a request or a response.\n
  * It has uri_path, interface, list of resource types and its attributes.\n
- * Attributes have capabilties to store and retrieve integer, boolean, double, string, list, null,
- * resp_repr.\n
+ * Attributes have capabilties to store and retrieve integer, boolean, double, string,
+ * byte string, list, null, resp_repr.\n
  * A list is a container that includes number of datas of same type.\n
- * It has capabilties to store and retrieve integer, boolean, double, string, list, null, resp_repr.
+ * It has capabilties to store and retrieve integer, boolean, double, string, byte string,
+ * list, null, resp_repr.
  *
  * Example :
  *@code

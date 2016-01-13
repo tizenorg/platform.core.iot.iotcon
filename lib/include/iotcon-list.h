@@ -32,7 +32,7 @@
  *  \#include <iotcon.h>
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE_OVERVIEW Overview
- * The iotcon list API provides list of bool, integer, double, string, list and state handle.
+ * The iotcon list API provides list of bool, integer, double, string, byte string, list and state handle.
  *
  * Example :
  * @code
@@ -266,6 +266,26 @@ int iotcon_list_add_double(iotcon_list_h list, double val, int pos);
 int iotcon_list_add_str(iotcon_list_h list, char *val, int pos);
 
 /**
+ * @brief Adds a new element byte string value into the list at the given position.
+ * @details If @a pos is negative, or is larger than the number of elements in the list,
+ * the new value is added on to the end of the list.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] list The list handle
+ * @param[in] val The new byte string value
+ * @param[in] len The length of @a val
+ * @param[in] pos The position to insert value
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
+ */
+int iotcon_list_add_byte_str(iotcon_list_h list, unsigned char *val, int len, int pos);
+
+/**
  * @brief Adds a new element list into the list at the given position.
  * @details If @a pos is negative, or is larger than the number of elements in the list,
  * the new value is added on to the end of the list.
@@ -376,6 +396,28 @@ int iotcon_list_get_nth_double(iotcon_list_h list, int pos, double *val);
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
  */
 int iotcon_list_get_nth_str(iotcon_list_h list, int pos, char **val);
+
+/**
+ * @brief Gets the string value at the given position.
+ * @details Iterates over the list until it reaches the @a pos-1 position.
+ *
+ * @since_tizen 3.0
+ *
+ * @remarks @a val must not be released using free().
+ *
+ * @param[in] list The list handle
+ * @param[in] pos The position
+ * @param[out] val The byte string value to get
+ * @param[out] len The length of the @a val
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA  No data available
+ * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
+ */
+int iotcon_list_get_nth_byte_str(iotcon_list_h list, int pos, unsigned char **val,
+		int *len);
 
 /**
  * @brief Gets the list value at the given position.
@@ -579,6 +621,48 @@ typedef bool (*iotcon_list_double_cb)(int pos, double value, void *user_data);
  * @see iotcon_list_double_cb()
  */
 int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_cb cb,
+		void *user_data);
+
+/**
+ * @brief Specifies the type of function passed to iotcon_list_foreach_byte_str()
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] pos The number of the string value (0 being the first)
+ * @param[in] value The byte string value
+ * @param[in] len The length of @a value
+ * @param[in] user_data The user data to pass to the function
+ *
+ * @return true to continue with the next iteration of the loop,
+ * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
+ * are more friendly values for the return.
+ *
+ * @pre iotcon_list_foreach_byte_str() will invoke this callback function.
+ *
+ * @see iotcon_list_foreach_byte_str()
+ */
+typedef bool (*iotcon_list_byte_str_cb)(int pos, const unsigned char *value, int len,
+		void *user_data);
+
+/**
+ * @brief Gets all string values of the given list by invoking the callback function.
+ * @details iotcon_list_byte_str_cb() will be called for each child.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] list The handle to the list
+ * @param[in] cb The callback function to get each string value
+ * @param[in] user_data The user data to be passed to the callback function
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ *
+ * @post iotcon_list_byte_str_cb() will be called for each item.
+ *
+ * @see iotcon_list_byte_str_cb()
+ */
+int iotcon_list_foreach_byte_str(iotcon_list_h list, iotcon_list_byte_str_cb cb,
 		void *user_data);
 
 /**

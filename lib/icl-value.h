@@ -36,6 +36,12 @@ typedef struct {
 
 typedef struct {
 	int type;
+	unsigned char *s;
+	int len;
+} icl_val_byte_str_s;
+
+typedef struct {
+	int type;
 	struct icl_list_s *list;
 } icl_val_list_s;
 
@@ -56,6 +62,7 @@ typedef struct {
  * #IOTCON_TYPE_DOUBLE\n
  * #IOTCON_TYPE_STR\n
  * #IOTCON_TYPE_NULL\n
+ * #IOTCON_TYPE_BYTE_STR\n
  * #IOTCON_TYPE_LIST\n
  * #IOTCON_TYPE_STATE
  *
@@ -68,6 +75,7 @@ iotcon_value_h icl_value_create_int(int val);
 iotcon_value_h icl_value_create_bool(bool val);
 iotcon_value_h icl_value_create_double(double val);
 iotcon_value_h icl_value_create_str(const char *val);
+iotcon_value_h icl_value_create_byte_str(const unsigned char *val, int len);
 iotcon_value_h icl_value_create_list(iotcon_list_h val);
 iotcon_value_h icl_value_create_state(iotcon_state_h val);
 
@@ -76,6 +84,7 @@ int icl_value_get_int(iotcon_value_h value, int *val);
 int icl_value_get_bool(iotcon_value_h value, bool *val);
 int icl_value_get_double(iotcon_value_h value, double *val);
 int icl_value_get_str(iotcon_value_h value, char **val);
+int icl_value_get_byte_str(iotcon_value_h value, unsigned char **val, int *len);
 int icl_value_get_list(iotcon_value_h value, iotcon_list_h *list);
 int icl_value_get_state(iotcon_value_h value, iotcon_state_h *state);
 

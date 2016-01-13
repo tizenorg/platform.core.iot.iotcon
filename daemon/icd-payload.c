@@ -154,13 +154,23 @@ static GVariant* _icd_state_array_attr_to_gvariant(OCRepPayloadValueArray *arr, 
 		for (i = 0; i < len; i++)
 			g_variant_builder_add(&builder, "s", arr->strArray[index + i]);
 		break;
+	case OCREP_PROP_BYTE_STRING:
+		for (i = 0; i < len; i++) {
+			var = g_variant_new_fixed_array(G_VARIANT_TYPE("y"),
+					arr->ocByteStrArray[index + i].bytes,
+					arr->ocByteStrArray[index + i].len,
+					sizeof(uint8_t));
+			g_variant_builder_add(&builder, "v", var);
+		}
+		break;
 	case OCREP_PROP_NULL:
 		for (i = 0; i < len; i++)
 			g_variant_builder_add(&builder, "s", IC_STR_NULL);
 		break;
 	case OCREP_PROP_OBJECT:
 		for (i = 0; i < len; i++) {
-			GVariantBuilder *state_var = _icd_state_value_to_gvariant_builder(arr->objArray[index + i]);
+			GVariantBuilder *state_var
+				= _icd_state_value_to_gvariant_builder(arr->objArray[index + i]);
 			var = g_variant_builder_end(state_var);
 			g_variant_builder_add(&builder, "v", var);
 		}
@@ -234,6 +244,10 @@ static GVariantBuilder* _icd_state_value_to_gvariant_builder(OCRepPayload *repr)
 		case OCREP_PROP_STRING:
 			var = g_variant_new_string(val->str);
 			break;
+		case OCREP_PROP_BYTE_STRING:
+			var = g_variant_new_fixed_array(G_VARIANT_TYPE("y"), val->ocByteStr.bytes,
+					val->ocByteStr.len, sizeof(uint8_t));
+			break;
 		case OCREP_PROP_NULL:
 			var = g_variant_new_string(IC_STR_NULL);
 			break;
@@ -245,7 +259,7 @@ static GVariantBuilder* _icd_state_value_to_gvariant_builder(OCRepPayload *repr)
 			var = _icd_state_value_to_gvariant(val->obj);
 			break;
 		default:
-			ERR("Invalid Type");
+			ERR("Invalid Type(%d)", val->type);
 		}
 		if (var) {
 			g_variant_builder_add(builder, "{sv}", val->name, var);
@@ -465,6 +479,28 @@ static void _icd_state_list_from_gvariant(GVariant *var,
 					value_list->list = g_list_append(value_list->list, repr);
 				} while (g_variant_iter_loop(&iter, "v", &value));
 
+			} else if (g_variant_is_of_type(value, G_VARIANT_TYPE("ay"))) {
+				OCByteString *byte_str;
+				value_list->type = OCREP_PROP_BYTE_STRING;
+				do {
+					byte_str = calloc(1, sizeof(OCByteString));
+					if (NULL == byte_str) {
+						ERR("calloc() Fail(%d)", errno);
+						return;
+					}
+
+					byte_str->len = g_variant_get_size(value);
+					byte_str->bytes = calloc(byte_str->len, sizeof(uint8_t));
+					if (NULL == byte_str->bytes) {
+						ERR("calloc() Fail(%d)", errno);
+						free(byte_str);
+						return;
+					}
+					memcpy(byte_str->bytes, g_variant_get_data(value), byte_str->len);
+
+					value_list->list = g_list_append(value_list->list, byte_str);
+				} while (g_variant_iter_loop(&iter, "v", &value));
+
 			} else if (g_variant_is_of_type(value, G_VARIANT_TYPE_ARRAY)) {
 				do {
 					_icd_state_list_from_gvariant(value, value_list, depth + 1);
@@ -492,6 +528,7 @@ static void _icd_state_array_from_list(OCRepPayload *repr,
 	double *d_arr;
 	char **str_arr;
 	int64_t *i_arr;
+	OCByteString *byte_arr;
 	union icd_state_value_u *value;
 	struct OCRepPayload **state_arr;
 
@@ -548,6 +585,21 @@ static void _icd_state_array_from_list(OCRepPayload *repr,
 		g_list_free_full(value_list->list, free);
 		OCRepPayloadSetStringArrayAsOwner(repr, key, str_arr, value_list->dimensions);
 		break;
+	case OCREP_PROP_BYTE_STRING:
+		byte_arr = calloc(len, sizeof(OCByteString));
+		if (NULL == byte_arr) {
+			ERR("calloc() Fail(%d)", errno);
+			return;
+		}
+		for (node = value_list->list, i = 0; node; node = node->next, i++) {
+			OCByteString *byte_str = node->data;
+			byte_arr[i].bytes = byte_str->bytes;
+			byte_arr[i].len = byte_str->len;
+		}
+		g_list_free(value_list->list);
+		OCRepPayloadSetByteStringArray(repr, key, byte_arr, value_list->dimensions);
+
+		break;
 	case OCREP_PROP_OBJECT:
 		state_arr = calloc(len, sizeof(struct OCRepPayload *));
 		if (NULL == state_arr) {
@@ -596,6 +648,12 @@ static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *ite
 				OCRepPayloadSetNull(repr, key);
 			else
 				OCRepPayloadSetPropString(repr, key, str_value);
+
+		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE("ay"))) {
+			OCByteString byte_value;
+			byte_value.bytes = (uint8_t*)g_variant_get_data(var);
+			byte_value.len = g_variant_get_size(var);
+			OCRepPayloadSetPropByteString(repr, key, byte_value);
 
 		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE("a{sv}"))) {
 			GVariantIter state_iter;
@@ -744,6 +802,13 @@ static int _representation_compare_array(OCRepPayloadValueArray arr1,
 				return 1;
 		}
 		break;
+	case OCREP_PROP_BYTE_STRING:
+		for (i = 0; i < len1; i++) {
+			if (IC_EQUAL != memcmp(arr1.ocByteStrArray[i].bytes,
+						arr2.ocByteStrArray[i].bytes, arr2.ocByteStrArray[i].len))
+				return 1;
+		}
+		break;
 	case OCREP_PROP_OBJECT:
 		for (i = 0; i < len1; i++) {
 			if (IC_EQUAL != icd_payload_representation_compare(arr1.objArray[i],
@@ -791,6 +856,10 @@ static int _representation_compare_value(OCRepPayloadValue *value1,
 		break;
 	case OCREP_PROP_STRING:
 		ret = (IC_STR_EQUAL == g_strcmp0(value1->str, value2->str)) ? IC_EQUAL : 1;
+		break;
+	case OCREP_PROP_BYTE_STRING:
+		ret = (IC_EQUAL == memcmp(value1->ocByteStr.bytes, value2->ocByteStr.bytes,
+					value2->ocByteStr.len));
 		break;
 	case OCREP_PROP_OBJECT:
 		ret = icd_payload_representation_compare(value1->obj, value2->obj);

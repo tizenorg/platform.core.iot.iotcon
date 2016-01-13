@@ -67,6 +67,16 @@ static GVariant* _icl_state_list_to_gvariant(iotcon_list_h list)
 			g_variant_builder_add(&builder, "s", ((icl_basic_s*)state_value)->val.s);
 		}
 		break;
+	case IOTCON_TYPE_BYTE_STR:
+		for (node = list->list; node; node = node->next) {
+			state_value = node->data;
+			var = g_variant_new_fixed_array(G_VARIANT_TYPE("y"),
+					((icl_val_byte_str_s*)state_value)->s,
+					((icl_val_byte_str_s*)state_value)->len,
+					sizeof(unsigned char));
+			g_variant_builder_add(&builder, "v", var);
+		}
+		break;
 	case IOTCON_TYPE_LIST:
 		for (node = list->list; node; node = node->next) {
 			state_value = node->data;
@@ -124,6 +134,12 @@ static GVariantBuilder* _icl_state_value_to_gvariant_builder(GHashTable *hash)
 			break;
 		case IOTCON_TYPE_NULL:
 			var = g_variant_new_string(IC_STR_NULL);
+			break;
+		case IOTCON_TYPE_BYTE_STR:
+			var = g_variant_new_fixed_array(G_VARIANT_TYPE("y"),
+					((icl_val_byte_str_s*)state_value)->s,
+					((icl_val_byte_str_s*)state_value)->len,
+					sizeof(unsigned char));
 			break;
 		case IOTCON_TYPE_LIST:
 			var = _icl_state_list_to_gvariant(((icl_val_list_s*)state_value)->list);
@@ -252,6 +268,9 @@ void icl_state_from_gvariant(iotcon_state_h state, GVariantIter *iter)
 			g_variant_iter_init(&state_iter, var);
 			icl_state_from_gvariant(state_value, &state_iter);
 			value = icl_value_create_state(state_value);
+		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE("ay"))) {
+			value = icl_value_create_byte_str(g_variant_get_data(var),
+					g_variant_get_size(var));
 		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_ARRAY)) {
 			list_value = _icl_state_list_from_gvariant(var);
 			value = icl_value_create_list(list_value);
@@ -335,6 +354,17 @@ static iotcon_list_h _icl_state_list_from_gvariant(GVariant *var)
 				g_variant_iter_init(&state_iter, variant);
 				icl_state_from_gvariant(state_value, &state_iter);
 				iotcon_list_add_state(list, state_value, -1);
+			} else if (g_variant_is_of_type(variant, G_VARIANT_TYPE("ay"))) {
+				unsigned char *byte_str;
+				if (NULL == list) {
+					ret = iotcon_list_create(IOTCON_TYPE_BYTE_STR, &list);
+					if (IOTCON_ERROR_NONE != ret) {
+						ERR("iotcon_list_create() Fail(%d)", ret);
+						return NULL;
+					}
+				}
+				byte_str = (unsigned char*)g_variant_get_data(variant);
+				iotcon_list_add_byte_str(list, byte_str, g_variant_get_size(variant), -1);
 			} else if (g_variant_is_of_type(variant, G_VARIANT_TYPE_ARRAY)) {
 				if (NULL == list) {
 					ret = iotcon_list_create(IOTCON_TYPE_LIST, &list);

@@ -19,8 +19,6 @@
 #include "icl-value.h"
 #include "icl-representation.h"
 
-int icl_state_del_value(iotcon_state_h state, const char *key);
-
 int icl_state_set_value(iotcon_state_h state, const char *key, iotcon_value_h value);
 
 void icl_state_clone_foreach(char *key, iotcon_value_h src_val,

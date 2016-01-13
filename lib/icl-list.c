@@ -134,6 +134,25 @@ API int iotcon_list_add_str(iotcon_list_h list, char *val, int pos)
 }
 
 
+API int iotcon_list_add_byte_str(iotcon_list_h list, unsigned char *val, int len, int pos)
+{
+	iotcon_value_h value;
+
+	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(IOTCON_TYPE_BYTE_STR != list->type, IOTCON_ERROR_INVALID_TYPE,
+			"Invalid Type(%d)", list->type);
+
+	value = icl_value_create_byte_str(val, len);
+	if (NULL == value) {
+		ERR("icl_value_create_str() Fail");
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
+
+	return icl_list_insert(list, value, pos);
+}
+
+
 API int iotcon_list_add_list(iotcon_list_h list, iotcon_list_h val, int pos)
 {
 	iotcon_value_h value;
@@ -283,6 +302,37 @@ API int iotcon_list_get_nth_str(iotcon_list_h list, int pos, char **val)
 }
 
 
+API int iotcon_list_get_nth_byte_str(iotcon_list_h list, int pos, unsigned char **val,
+		int *len)
+{
+	unsigned char *byte_val;
+	int ret, byte_len;
+	iotcon_value_h value;
+
+	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == list->list, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == len, IOTCON_ERROR_INVALID_PARAMETER);
+
+	value = g_list_nth_data(list->list, pos);
+	if (NULL == value) {
+		ERR("g_list_nth_data() Fail");
+		return IOTCON_ERROR_NO_DATA;
+	}
+
+	ret = icl_value_get_byte_str(value, &byte_val, &byte_len);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_value_get_byte_str() Fail(%d)", ret);
+		return IOTCON_ERROR_REPRESENTATION;
+	}
+
+	*val = byte_val;
+	*len = byte_len;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
 API int iotcon_list_get_nth_list(iotcon_list_h src, int pos, iotcon_list_h *dest)
 {
 	int ret;
@@ -339,7 +389,7 @@ API int iotcon_list_get_nth_state(iotcon_list_h list, int pos, iotcon_state_h *s
 }
 
 
-static int _icl_list_remove_nth_value(iotcon_list_h list, int pos)
+API int iotcon_list_remove_nth(iotcon_list_h list, int pos)
 {
 	iotcon_value_h value;
 
@@ -352,32 +402,13 @@ static int _icl_list_remove_nth_value(iotcon_list_h list, int pos)
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	if (IOTCON_TYPE_STR == value->type) {
-		icl_basic_s *real = (icl_basic_s*)value;
-		free(real->val.s);
-	} else if (IOTCON_TYPE_LIST == value->type) {
-		icl_val_list_s *real = (icl_val_list_s*)value;
-		iotcon_list_destroy(real->list);
-	} else if (IOTCON_TYPE_STATE == value->type) {
-		icl_val_state_s *real = (icl_val_state_s*)value;
-		iotcon_state_destroy(real->state);
-	}
+	list->list = g_list_remove(list->list, value);
 
-	icl_list_remove(list, value);
+	icl_value_destroy(value);
+
 	return IOTCON_ERROR_NONE;
 }
 
-
-API int iotcon_list_remove_nth(iotcon_list_h list, int pos)
-{
-	int ret;
-
-	ret = _icl_list_remove_nth_value(list, pos);
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("_icl_list_remove_nth_value() Fail(%d)", ret);
-
-	return ret;
-}
 
 API int iotcon_list_get_type(iotcon_list_h list, iotcon_type_e *type)
 {
@@ -398,16 +429,6 @@ API int iotcon_list_get_length(iotcon_list_h list, unsigned int *length)
 		*length = 0;
 	else
 		*length = g_list_length(list->list);
-
-	return IOTCON_ERROR_NONE;
-}
-
-
-int icl_list_remove(iotcon_list_h list, iotcon_value_h val)
-{
-	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
-
-	list->list = g_list_remove(list->list, val);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -514,6 +535,31 @@ API int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_cb cb,
 		GList *next = cur->next;
 		real = cur->data;
 		if (IOTCON_FUNC_STOP == cb(index, real->val.s, user_data))
+			break;
+		index++;
+		cur = next;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+API int iotcon_list_foreach_byte_str(iotcon_list_h list, iotcon_list_byte_str_cb cb,
+		void *user_data)
+{
+	GList *cur;
+	int index = 0;
+	icl_val_byte_str_s *real = NULL;
+
+	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(IOTCON_TYPE_BYTE_STR != list->type, IOTCON_ERROR_INVALID_TYPE,
+			"Invalid Type(%d)", list->type);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+
+	cur = list->list;
+	while (cur) {
+		GList *next = cur->next;
+		real = cur->data;
+		if (IOTCON_FUNC_STOP == cb(index, real->s, real->len, user_data))
 			break;
 		index++;
 		cur = next;
@@ -736,6 +782,7 @@ iotcon_list_h icl_list_clone(iotcon_list_h list)
 	case IOTCON_TYPE_DOUBLE:
 	case IOTCON_TYPE_STR:
 	case IOTCON_TYPE_NULL:
+	case IOTCON_TYPE_BYTE_STR:
 		ret = _icl_list_clone_value(list, ret_list);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_icl_list_clone_value() Fail(%d)", ret);
