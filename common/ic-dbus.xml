@@ -36,6 +36,7 @@
 			<arg type="x" name="resource" direction="in"/>
 			<arg type="av" name="notify_msg" direction="in"/>
 			<arg type="ai" name="observers" direction="in"/>
+			<arg type="i" name="qos" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="sendResponse">

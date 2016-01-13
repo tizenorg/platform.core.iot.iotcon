@@ -917,7 +917,8 @@ static gboolean _dbus_handle_notify(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		gint64 resource,
 		GVariant *notify_msg,
-		GVariant *observers)
+		GVariant *observers,
+		gint qos)
 {
 	int ret;
 
@@ -930,7 +931,7 @@ static gboolean _dbus_handle_notify(icDbus *object,
 		return TRUE;
 	}
 
-	ret = icd_ioty_notify(ICD_INT64_TO_POINTER(resource), notify_msg, observers);
+	ret = icd_ioty_notify(ICD_INT64_TO_POINTER(resource), notify_msg, observers, qos);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("icd_ioty_notify() Fail(%d)", ret);
 

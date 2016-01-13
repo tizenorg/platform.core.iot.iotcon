@@ -219,6 +219,17 @@ typedef enum {
 } iotcon_remote_resource_state_e;
 
 /**
+ * @brief Enumeration for quality of service.
+ *
+ * @since_tizen 3.0
+ */
+typedef enum {
+	IOTCON_QOS_LOW,
+	IOTCON_QOS_HIGH,
+} iotcon_qos_e;
+
+
+/**
  * @}
  */
 

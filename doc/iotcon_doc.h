@@ -332,7 +332,7 @@ static void _request_handler(iotcon_request_h request, void *user_data)
 		return;
 	}
 
-	ret = iotcon_resource_notify(_door_handle, resp_repr, _observers);
+	ret = iotcon_resource_notify(_door_handle, resp_repr, _observers, IOTCON_QOS_HIGH);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_representation_destroy(resp_repr);
 		return;

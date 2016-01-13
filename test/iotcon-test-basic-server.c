@@ -294,7 +294,7 @@ static int _request_handler_put(door_resource_s *door, iotcon_request_h request)
 	}
 
 	/* notify */
-	ret = iotcon_resource_notify(door->handle, resp_repr, door->observers);
+	ret = iotcon_resource_notify(door->handle, resp_repr, door->observers, IOTCON_QOS_HIGH);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("iotcon_resource_notify() Fail(%d)", ret);
 
@@ -329,7 +329,7 @@ static gboolean _door_state_changer(gpointer user_data)
 		return G_SOURCE_REMOVE;
 	}
 
-	ret = iotcon_resource_notify(door->handle, repr, door->observers);
+	ret = iotcon_resource_notify(door->handle, repr, door->observers, IOTCON_QOS_HIGH);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_notify() Fail(%d)", ret);
 		iotcon_representation_destroy(repr);

@@ -395,6 +395,7 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  * @param[in] resource The handle of the resource
  * @param[in] repr The handle of the representation
  * @param[in] observers The handle of the observers.
+ * @param[in] qos The quality of service for message transfer.
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -413,7 +414,7 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  * @see iotcon_observers_remove()
  */
 int iotcon_resource_notify(iotcon_resource_h resource, iotcon_representation_h repr,
-		iotcon_observers_h observers);
+		iotcon_observers_h observers, iotcon_qos_e qos);
 
 /**
  * @brief Gets the number of children resources of the resource

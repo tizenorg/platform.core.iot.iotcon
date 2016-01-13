@@ -92,7 +92,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 			return;
 		}
 		...
-		ret = iotcon_resource_notify(resource, repr, _observers);
+		ret = iotcon_resource_notify(resource, repr, _observers, IOTCON_QOS_HIGH);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_state_destroy(state);
 			iotcon_representation_destroy(repr);

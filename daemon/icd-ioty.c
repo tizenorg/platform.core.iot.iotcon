@@ -280,13 +280,28 @@ int icd_ioty_unbind_resource(OCResourceHandle parent, OCResourceHandle child)
 	return IOTCON_ERROR_NONE;
 }
 
-int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers)
+static OCQualityOfService _icd_ioty_convert_qos(gint qos)
+{
+	switch (qos) {
+	case IOTCON_QOS_HIGH:
+		return OC_HIGH_QOS;
+	case IOTCON_QOS_LOW:
+		return OC_LOW_QOS;
+	default:
+		ERR("Invalid value(%d)", qos);
+		return OC_NA_QOS;
+	}
+}
+
+
+int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers, gint qos)
 {
 	int i, obs_length, msg_length;
 	GVariant *repr_gvar;
 	GVariantIter obs_iter, msg_iter;
 	OCStackResult ret;
-	OCRepPayload *payload;
+	OCRepPayload *payload = NULL;
+	OCQualityOfService oc_qos;
 
 	g_variant_iter_init(&obs_iter, observers);
 	obs_length = g_variant_iter_n_children(&obs_iter);
@@ -305,12 +320,14 @@ int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers)
 		payload = icd_payload_representation_from_gvariant(repr_gvar);
 	}
 
+	oc_qos = _icd_ioty_convert_qos(qos);
+
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. */
 	if (msg_length)
-		ret = OCNotifyListOfObservers(handle, obs_ids, obs_length, payload, OC_LOW_QOS);
+		ret = OCNotifyListOfObservers(handle, obs_ids, obs_length, payload, oc_qos);
 	else
-		ret = OCNotifyAllObservers(handle, OC_LOW_QOS);
+		ret = OCNotifyAllObservers(handle, oc_qos);
 
 	icd_ioty_csdk_unlock();
 
@@ -697,7 +714,7 @@ static gboolean _icd_ioty_crud(int type,
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
 	result = OCDoResource(NULL, rest_type, uri, &dev_addr, payload, oic_conn_type,
-			OC_LOW_QOS, &cbdata, oic_options_ptr, options_size);
+			OC_HIGH_QOS, &cbdata, oic_options_ptr, options_size);
 	icd_ioty_csdk_unlock();
 
 	free(uri);
@@ -770,7 +787,7 @@ static OCDoHandle _icd_ioty_observe_register(const char *uri_path,
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
 	result = OCDoResource(&handle, method, uri_path, dev_addr, NULL, oic_conn_type,
-			OC_LOW_QOS, cbdata, oic_options_ptr, options_size);
+			OC_HIGH_QOS, cbdata, oic_options_ptr, options_size);
 	icd_ioty_csdk_unlock();
 
 	if (OC_STACK_OK != result) {
@@ -1437,7 +1454,7 @@ gboolean icd_ioty_encap_get(gpointer user_data)
 
 	icd_ioty_csdk_lock();
 	result = OCDoResource(NULL, OC_REST_GET, encap_info->uri_path, &encap_info->dev_addr,
-			NULL, encap_info->oic_conn_type, OC_LOW_QOS, &cbdata, NULL, 0);
+			NULL, encap_info->oic_conn_type, OC_HIGH_QOS, &cbdata, NULL, 0);
 	icd_ioty_csdk_unlock();
 
 	if (OC_STACK_OK != result)

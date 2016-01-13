@@ -124,7 +124,7 @@ static int _icl_lite_resource_notify(iotcon_lite_resource_h lite_resource)
 	resource.handle = lite_resource->handle;
 	resource.sub_id = lite_resource->sub_id;
 
-	ret = iotcon_resource_notify(&resource, NULL, NULL);
+	ret = iotcon_resource_notify(&resource, NULL, NULL, IOTCON_QOS_HIGH);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_notify() Fail(%d)", ret);
 		return ret;

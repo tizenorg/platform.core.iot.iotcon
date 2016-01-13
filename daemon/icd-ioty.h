@@ -98,7 +98,7 @@ int icd_ioty_bind_resource(OCResourceHandle parent, OCResourceHandle child);
 
 int icd_ioty_unbind_resource(OCResourceHandle parent, OCResourceHandle child);
 
-int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers);
+int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers, gint qos);
 
 int icd_ioty_send_response(GVariant *resp);
 
