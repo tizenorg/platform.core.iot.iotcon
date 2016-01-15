@@ -42,7 +42,7 @@ struct icd_state_list_s {
 };
 
 static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr, gboolean is_parent);
-static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *iter);
+static int _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *iter);
 static GVariantBuilder* _icd_state_value_to_gvariant_builder(OCRepPayload *repr);
 
 GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
@@ -100,12 +100,14 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 		node = resource->interfaces;
 		if (NULL == node) {
 			ERR("resource interfaces is NULL");
+			g_variant_builder_clear(&types);
 			continue;
 		}
 		for (; node; node = node->next) {
 			ret = ic_utils_convert_interface_string(node->value, &iface);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("ic_utils_convert_interface_string() Fail(%d)", ret);
+				g_variant_builder_clear(&types);
 				continue;
 			}
 			ifaces |= iface;
@@ -300,6 +302,7 @@ static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr,
 		ret = ic_utils_convert_interface_string(node->value, &iface);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("ic_utils_convert_interface_string() Fail(%d)", ret);
+			g_variant_builder_clear(&types_builder);
 			return NULL;
 		}
 		ifaces |= iface;
@@ -410,9 +413,10 @@ GVariant* icd_payload_to_gvariant(OCPayload *repr)
 }
 
 
-static void _icd_state_list_from_gvariant(GVariant *var,
+static int _icd_state_list_from_gvariant(GVariant *var,
 		struct icd_state_list_s *value_list, int depth)
 {
+	int ret;
 	GVariantIter iter;
 	const GVariantType *type;
 	union icd_state_value_u *value;
@@ -431,7 +435,7 @@ static void _icd_state_list_from_gvariant(GVariant *var,
 			value = calloc(1, sizeof(union icd_state_value_u));
 			if (NULL == value) {
 				ERR("calloc() Fail(%d)", errno);
-				return;
+				return IOTCON_ERROR_OUT_OF_MEMORY;
 			}
 			value->b = b;
 			value_list->list = g_list_append(value_list->list, value);
@@ -443,7 +447,7 @@ static void _icd_state_list_from_gvariant(GVariant *var,
 			value = calloc(1, sizeof(union icd_state_value_u));
 			if (NULL == value) {
 				ERR("calloc() Fail(%d)", errno);
-				return;
+				return IOTCON_ERROR_OUT_OF_MEMORY;
 			}
 			value->i = i;
 			value_list->list = g_list_append(value_list->list, value);
@@ -455,7 +459,7 @@ static void _icd_state_list_from_gvariant(GVariant *var,
 			value = calloc(1, sizeof(union icd_state_value_u));
 			if (NULL == value) {
 				ERR("calloc() Fail(%d)", errno);
-				return;
+				return IOTCON_ERROR_OUT_OF_MEMORY;
 			}
 			value->d = d;
 			value_list->list = g_list_append(value_list->list, value);
@@ -475,7 +479,12 @@ static void _icd_state_list_from_gvariant(GVariant *var,
 				do {
 					repr = OCRepPayloadCreate();
 					g_variant_iter_init(&state_iter, value);
-					_icd_state_value_from_gvariant(repr, &state_iter);
+					ret = _icd_state_value_from_gvariant(repr, &state_iter);
+					if (IOTCON_ERROR_NONE != ret) {
+						ERR("_icd_state_value_from_gvariant() Fail(%d)", ret);
+						OCRepPayloadDestroy(repr);
+						return ret;
+					}
 					value_list->list = g_list_append(value_list->list, repr);
 				} while (g_variant_iter_loop(&iter, "v", &value));
 
@@ -486,7 +495,7 @@ static void _icd_state_list_from_gvariant(GVariant *var,
 					byte_str = calloc(1, sizeof(OCByteString));
 					if (NULL == byte_str) {
 						ERR("calloc() Fail(%d)", errno);
-						return;
+						return IOTCON_ERROR_OUT_OF_MEMORY;
 					}
 
 					byte_str->len = g_variant_get_size(value);
@@ -494,7 +503,7 @@ static void _icd_state_list_from_gvariant(GVariant *var,
 					if (NULL == byte_str->bytes) {
 						ERR("calloc() Fail(%d)", errno);
 						free(byte_str);
-						return;
+						return IOTCON_ERROR_OUT_OF_MEMORY;
 					}
 					memcpy(byte_str->bytes, g_variant_get_data(value), byte_str->len);
 
@@ -503,23 +512,27 @@ static void _icd_state_list_from_gvariant(GVariant *var,
 
 			} else if (g_variant_is_of_type(value, G_VARIANT_TYPE_ARRAY)) {
 				do {
-					_icd_state_list_from_gvariant(value, value_list, depth + 1);
+					ret = _icd_state_list_from_gvariant(value, value_list, depth + 1);
+					if (IOTCON_ERROR_NONE != ret) {
+						ERR("_icd_state_list_from_gvariant() Fail(%d)", ret);
+						return ret;
+					}
 				} while (g_variant_iter_loop(&iter, "v", &value));
 			}
 		}
 	}
 
-	return;
+	return IOTCON_ERROR_NONE;
 }
 
 
-static void _icd_state_list_free(gpointer node)
+static void _icd_payload_object_destroy(gpointer node)
 {
 	OCRepPayloadDestroy(node);
 }
 
 
-static void _icd_state_array_from_list(OCRepPayload *repr,
+static int _icd_state_array_from_list(OCRepPayload *repr,
 		struct icd_state_list_s *value_list, const char *key)
 {
 	int i, len;
@@ -539,7 +552,7 @@ static void _icd_state_array_from_list(OCRepPayload *repr,
 		i_arr = calloc(len, sizeof(int64_t));
 		if (NULL == i_arr) {
 			ERR("calloc() Fail(%d)", errno);
-			return;
+			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
 		for (node = value_list->list, i = 0; node; node = node->next, i++) {
 			value = node->data;
@@ -552,7 +565,7 @@ static void _icd_state_array_from_list(OCRepPayload *repr,
 		b_arr = calloc(len, sizeof(bool));
 		if (NULL == b_arr) {
 			ERR("calloc() Fail(%d)", errno);
-			return;
+			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
 		for (node = value_list->list, i = 0; node; node = node->next, i++) {
 			value = node->data;
@@ -565,7 +578,7 @@ static void _icd_state_array_from_list(OCRepPayload *repr,
 		d_arr = calloc(len, sizeof(double));
 		if (NULL == d_arr) {
 			ERR("calloc() Fail(%d)", errno);
-			return;
+			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
 		for (node = value_list->list, i = 0; node; node = node->next, i++) {
 			value = node->data;
@@ -578,7 +591,7 @@ static void _icd_state_array_from_list(OCRepPayload *repr,
 		str_arr = calloc(len, sizeof(char *));
 		if (NULL == str_arr) {
 			ERR("calloc() Fail(%d)", errno);
-			return;
+			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
 		for (node = value_list->list, i = 0; node; node = node->next, i++)
 			str_arr[i] = strdup(node->data);
@@ -589,7 +602,7 @@ static void _icd_state_array_from_list(OCRepPayload *repr,
 		byte_arr = calloc(len, sizeof(OCByteString));
 		if (NULL == byte_arr) {
 			ERR("calloc() Fail(%d)", errno);
-			return;
+			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
 		for (node = value_list->list, i = 0; node; node = node->next, i++) {
 			OCByteString *byte_str = node->data;
@@ -604,23 +617,51 @@ static void _icd_state_array_from_list(OCRepPayload *repr,
 		state_arr = calloc(len, sizeof(struct OCRepPayload *));
 		if (NULL == state_arr) {
 			ERR("calloc() Fail(%d)", errno);
-			return;
+			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
 		for (node = value_list->list, i = 0; node; node = node->next, i++)
 			state_arr[i] = OCRepPayloadClone(node->data);
-		g_list_free_full(value_list->list, _icd_state_list_free);
+		g_list_free_full(value_list->list, _icd_payload_object_destroy);
 		OCRepPayloadSetPropObjectArrayAsOwner(repr, key, state_arr,
 				value_list->dimensions);
 		break;
 	case OCREP_PROP_ARRAY:
 	case OCREP_PROP_NULL:
 	default:
-		ERR("Invalid Type");
+		ERR("Invalid Type(%d)", value_list->type);
+		return IOTCON_ERROR_INVALID_TYPE;
 	}
+
+	return IOTCON_ERROR_NONE;
 }
 
-static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *iter)
+
+static void _icd_payload_state_list_destroy(struct icd_state_list_s *state_list)
 {
+	switch (state_list->type) {
+	case OCREP_PROP_BOOL:
+	case OCREP_PROP_INT:
+	case OCREP_PROP_DOUBLE:
+	case OCREP_PROP_STRING:
+		g_list_free_full(state_list->list, free);
+		break;
+	case OCREP_PROP_OBJECT:
+		g_list_free_full(state_list->list, _icd_payload_object_destroy);
+		break;
+	case OCREP_PROP_ARRAY:
+	case OCREP_PROP_NULL:
+	default:
+		ERR("Invalid Type(%d)", state_list->type);
+		break;
+	}
+
+	return;
+}
+
+
+static int _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *iter)
+{
+	int ret;
 	char *key;
 	GVariant *var;
 	const char *str_value;
@@ -642,7 +683,8 @@ static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *ite
 			str_value = g_variant_get_string(var, NULL);
 			if (NULL == str_value) {
 				ERR("g_variant_get_string() Fail");
-				return;
+				_icd_payload_state_list_destroy(&value_list);
+				return IOTCON_ERROR_OUT_OF_MEMORY;
 			}
 			if (IC_STR_EQUAL == strcmp(IC_STR_NULL, str_value))
 				OCRepPayloadSetNull(repr, key);
@@ -659,20 +701,38 @@ static void _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *ite
 			GVariantIter state_iter;
 			repr_value = OCRepPayloadCreate();
 			g_variant_iter_init(&state_iter, var);
-			_icd_state_value_from_gvariant(repr_value, &state_iter);
+
+			ret = _icd_state_value_from_gvariant(repr_value, &state_iter);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("_icd_state_value_from_gvariant() Fail(%d)", ret);
+				_icd_payload_state_list_destroy(&value_list);
+				OCRepPayloadDestroy(repr_value);
+				return ret;
+			}
 			OCRepPayloadSetPropObjectAsOwner(repr, key, repr_value);
 
 		} else if (g_variant_is_of_type(var, G_VARIANT_TYPE_ARRAY)) {
 			memset(&value_list, 0, sizeof(struct icd_state_list_s));
-			_icd_state_list_from_gvariant(var, &value_list, 0);
-			_icd_state_array_from_list(repr, &value_list, key);
+			ret = _icd_state_list_from_gvariant(var, &value_list, 0);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("_icd_state_list_from_gvariant() Fail(%d)", ret);
+				_icd_payload_state_list_destroy(&value_list);
+				return ret;
+			}
+			ret = _icd_state_array_from_list(repr, &value_list, key);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("_icd_state_array_from_list() Fail(%d)", ret);
+				_icd_payload_state_list_destroy(&value_list);
+				return ret;
+			}
 
 		} else {
 			ERR("Invalid type(%s)", g_variant_get_type_string(var));
+			return IOTCON_ERROR_INVALID_TYPE;
 		}
 	}
 
-	return;
+	return IOTCON_ERROR_NONE;
 }
 
 OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var)
@@ -694,6 +754,7 @@ OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var)
 	for (i = 1; i <= IC_INTERFACE_MAX; i = i << 1) {
 		if (IOTCON_INTERFACE_NONE == (ifaces & i)) /* this interface not exist */
 			continue;
+
 		ret = ic_utils_convert_interface_flag((ifaces & i), &iface_str);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("ic_utils_convert_interface_flag(%d) Fail(%d)", i, ret);
@@ -705,7 +766,12 @@ OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var)
 	while (g_variant_iter_loop(resource_types, "s", &resource_type))
 		OCRepPayloadAddResourceType(repr, resource_type);
 
-	_icd_state_value_from_gvariant(repr, repr_gvar);
+	ret = _icd_state_value_from_gvariant(repr, repr_gvar);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_icd_state_value_from_gvariant() Fail(%d)", ret);
+		OCRepPayloadDestroy(repr);
+		return NULL;
+	}
 
 	cur = repr;
 	while (g_variant_iter_loop(children, "v", &child)) {
