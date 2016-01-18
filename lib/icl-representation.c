@@ -250,9 +250,10 @@ API int iotcon_representation_get_children_count(iotcon_representation_h parent,
 {
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == count, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == parent->children, IOTCON_ERROR_INVALID_PARAMETER);
-
-	*count = g_list_length(parent->children);
+	if (NULL == parent->children)
+		*count = 0;
+	else
+		*count = g_list_length(parent->children);
 
 	return IOTCON_ERROR_NONE;
 }
