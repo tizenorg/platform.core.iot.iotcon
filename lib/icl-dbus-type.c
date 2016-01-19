@@ -107,8 +107,6 @@ GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response)
 			response->oic_request_h,
 			response->oic_resource_h);
 
-	DBG("response : %s", g_variant_print(value, FALSE));
-
 	return value;
 }
 

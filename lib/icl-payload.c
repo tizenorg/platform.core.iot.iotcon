@@ -409,8 +409,6 @@ iotcon_representation_h icl_representation_from_gvariant(GVariant *var)
 		return NULL;
 	}
 
-	DBG("repr : %s", g_variant_print(var, FALSE));
-
 	g_variant_get(var, "(&siasa{sv}av)", &uri_path, &repr->interfaces,
 			&resource_types, &repr_gvar, &children);
 
