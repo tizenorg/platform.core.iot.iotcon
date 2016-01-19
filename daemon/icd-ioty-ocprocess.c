@@ -818,6 +818,7 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx,
 	observe_ctx->res = res;
 	observe_ctx->bus_name = ic_utils_strdup(sig_context->bus_name);
 	observe_ctx->options = options;
+	observe_ctx->seqnum = resp->sequenceNumber;
 
 	ret = _ocprocess_worker_start(_worker_observe_cb, observe_ctx,
 			_icd_observe_context_free);
