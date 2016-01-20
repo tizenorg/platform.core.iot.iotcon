@@ -18,11 +18,13 @@
 #include <glib.h>
 
 #include "iotcon-types.h"
+#include "ic-utils.h"
 #include "icl.h"
 #include "icl-observation.h"
 
 API int iotcon_observers_create(iotcon_observers_h *ret_observers)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == ret_observers, IOTCON_ERROR_INVALID_PARAMETER);
 
 	iotcon_observers_h observers = calloc(1, sizeof(struct icl_observers));
@@ -48,6 +50,7 @@ API void iotcon_observers_destroy(iotcon_observers_h observers)
 
 API int iotcon_observers_add(iotcon_observers_h observers, int obs_id)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
 
 	observers->observers_list = g_list_append(observers->observers_list,
@@ -59,6 +62,7 @@ API int iotcon_observers_add(iotcon_observers_h observers, int obs_id)
 
 API int iotcon_observers_remove(iotcon_observers_h observers, int obs_id)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
 
 	observers->observers_list = g_list_remove(observers->observers_list,
