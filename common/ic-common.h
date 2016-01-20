@@ -42,4 +42,6 @@
 #define IC_INTERFACE_GROUP "oic.mi.grp"
 #define IC_INTERFACE_READONLY "oic.if.r"
 
+#define IC_FEATURE_OIC "http://tizen.org/feature/iot.oic"
+
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__ */

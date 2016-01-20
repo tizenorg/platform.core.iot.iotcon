@@ -33,5 +33,6 @@ char* ic_utils_dbus_decode_str(char *src);
 int ic_utils_convert_interface_flag(iotcon_interface_e src, char **dest);
 int ic_utils_convert_interface_string(const char *src, iotcon_interface_e *dest);
 void ic_utils_gvariant_array_free(GVariant **value);
+bool ic_utils_check_oic_feature_supported();
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__ */
