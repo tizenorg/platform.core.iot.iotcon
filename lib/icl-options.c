@@ -69,6 +69,7 @@ API int iotcon_options_create(iotcon_options_h *ret_options)
 {
 	iotcon_options_h options;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == ret_options, IOTCON_ERROR_INVALID_PARAMETER);
 
 	options = calloc(1, sizeof(struct icl_options));
@@ -105,6 +106,7 @@ API void iotcon_options_destroy(iotcon_options_h options)
 API int iotcon_options_add(iotcon_options_h options, unsigned short id,
 		const char *data)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(1 < options->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
@@ -128,6 +130,7 @@ API int iotcon_options_remove(iotcon_options_h options, unsigned short id)
 {
 	gboolean is_removed;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(1 < options->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
@@ -145,6 +148,7 @@ API int iotcon_options_lookup(iotcon_options_h options, unsigned short id, char 
 {
 	char *value;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == data, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -166,6 +170,7 @@ API int iotcon_options_foreach(iotcon_options_h options, iotcon_options_foreach_
 	GHashTableIter iter;
 	gpointer key, value;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 

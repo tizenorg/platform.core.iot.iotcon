@@ -87,6 +87,18 @@ static void _find_light_resource()
 
  * @endcode
  *
+ * @section CAPI_IOT_CONNECTIVITY_CLIENT_REMOTE_RESOURCE_MODULE_FEATURE Related Features
+ * This API is related with the following features:\n
+ *  - http://tizen.org/feature/network.telephony\n
+ *
+ * It is recommended to design feature related codes in your application for reliability.\n
+ *
+ * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
+ *
+ * To ensure your application is only running on the device with specific features, please define the features in your manifest file using the manifest editor in the SDK.\n
+ *
+ * More details on featuring your application can be found from <a href="https://developer.tizen.org/development/tools/native-tools/manifest-text-editor#feature"><b>Feature Element</b>.</a>
+ *
  * @{
  */
 
@@ -121,6 +133,7 @@ static void _find_light_resource()
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
@@ -163,6 +176,7 @@ void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_create()
@@ -213,6 +227,7 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
@@ -243,6 +258,7 @@ int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
@@ -298,6 +314,7 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
@@ -330,6 +347,7 @@ int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
@@ -365,6 +383,7 @@ int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
@@ -398,6 +417,7 @@ int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
@@ -448,6 +468,7 @@ typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
@@ -474,6 +495,7 @@ int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
@@ -519,6 +541,7 @@ typedef void (*iotcon_remote_resource_state_changed_cb)(iotcon_remote_resource_h
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_ALREADY  Already done
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
@@ -542,6 +565,7 @@ int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
@@ -564,6 +588,7 @@ int iotcon_remote_resource_stop_monitoring(iotcon_remote_resource_h resource);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_host_address()
@@ -587,6 +612,7 @@ int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
 
  * @see iotcon_remote_resource_get_uri_path()
@@ -613,6 +639,7 @@ int iotcon_remote_resource_get_connectivity_type(iotcon_remote_resource_h resour
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_connectivity_type()
@@ -638,6 +665,7 @@ int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
@@ -663,6 +691,7 @@ int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
@@ -688,6 +717,7 @@ int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
@@ -712,6 +742,7 @@ int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource, int
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
@@ -738,6 +769,7 @@ int iotcon_remote_resource_get_properties(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
@@ -762,6 +794,7 @@ int iotcon_remote_resource_get_options(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_remote_resource_get_uri_path()
@@ -788,6 +821,7 @@ int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data
  */

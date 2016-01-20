@@ -120,6 +120,18 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 }
  * @endcode
  *
+ * @section CAPI_IOT_CONNECTIVITY_SERVER_REQUEST_MODULE_FEATURE Related Features
+ * This API is related with the following features:\n
+ *  - http://tizen.org/feature/network.telephony\n
+ *
+ * It is recommended to design feature related codes in your application for reliability.\n
+ *
+ * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
+ *
+ * To ensure your application is only running on the device with specific features, please define the features in your manifest file using the manifest editor in the SDK.\n
+ *
+ * More details on featuring your application can be found from <a href="https://developer.tizen.org/development/tools/native-tools/manifest-text-editor#feature"><b>Feature Element</b>.</a>
+ *
  * @{
  */
 
@@ -135,6 +147,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_connectivity_type()
@@ -158,6 +171,7 @@ int iotcon_request_get_host_address(iotcon_request_h request,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
@@ -183,6 +197,7 @@ int iotcon_request_get_connectivity_type(iotcon_request_h request,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
@@ -207,6 +222,7 @@ int iotcon_request_get_representation(iotcon_request_h request,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
@@ -231,6 +247,7 @@ int iotcon_request_get_request_type(iotcon_request_h request, iotcon_request_typ
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
@@ -255,6 +272,7 @@ int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *optio
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
@@ -278,6 +296,7 @@ int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()
@@ -301,6 +320,7 @@ int iotcon_request_get_observe_type(iotcon_request_h request,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_request_get_host_address()

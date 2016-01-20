@@ -184,6 +184,19 @@
 	iotcon_representation_destroy(resp_repr);
 }
  * @endcode
+ *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE_FEATURE Related Features
+ * This API is related with the following features:\n
+ *  - http://tizen.org/feature/network.telephony\n
+ *
+ * It is recommended to design feature related codes in your application for reliability.\n
+ *
+ * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
+ *
+ * To ensure your application is only running on the device with specific features, please define the features in your manifest file using the manifest editor in the SDK.\n
+ *
+ * More details on featuring your application can be found from <a href="https://developer.tizen.org/development/tools/native-tools/manifest-text-editor#feature"><b>Feature Element</b>.</a>
+ *
  * @{
  */
 
@@ -199,6 +212,7 @@
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
@@ -251,6 +265,7 @@ int iotcon_representation_clone(const iotcon_representation_h src,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
@@ -269,6 +284,7 @@ int iotcon_representation_set_uri_path(iotcon_representation_h repr,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_representation_get_uri_path(iotcon_representation_h repr, char **uri_path);
@@ -284,6 +300,7 @@ int iotcon_representation_get_uri_path(iotcon_representation_h repr, char **uri_
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_representation_set_resource_types(iotcon_representation_h repr,
@@ -301,6 +318,7 @@ int iotcon_representation_set_resource_types(iotcon_representation_h repr,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_representation_get_resource_types(iotcon_representation_h repr,
@@ -319,6 +337,7 @@ int iotcon_representation_get_resource_types(iotcon_representation_h repr,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_representation_set_resource_interfaces(iotcon_representation_h repr,
@@ -351,6 +370,7 @@ int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
@@ -366,6 +386,7 @@ int iotcon_representation_set_state(iotcon_representation_h repr, iotcon_state_h
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_representation_get_state(iotcon_representation_h repr, iotcon_state_h *state);
@@ -381,6 +402,7 @@ int iotcon_representation_get_state(iotcon_representation_h repr, iotcon_state_h
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_representation_add_child(iotcon_representation_h parent,
@@ -396,6 +418,7 @@ int iotcon_representation_add_child(iotcon_representation_h parent,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_representation_remove_child(iotcon_representation_h parent,
@@ -432,6 +455,7 @@ typedef bool (*iotcon_children_cb)(iotcon_representation_h child, void *user_dat
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @post iotcon_children_cb() will be called for each child.
@@ -451,6 +475,7 @@ int iotcon_representation_foreach_children(iotcon_representation_h parent,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_representation_get_children_count(iotcon_representation_h parent,
@@ -470,6 +495,7 @@ int iotcon_representation_get_children_count(iotcon_representation_h parent,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */

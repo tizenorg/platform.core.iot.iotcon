@@ -93,6 +93,7 @@ API int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
 	icl_caching_s *cb_container;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -154,6 +155,7 @@ API int iotcon_remote_resource_stop_caching(iotcon_remote_resource_h resource)
 	int ret;
 	GError *error = NULL;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -192,6 +194,7 @@ API int iotcon_remote_resource_get_cached_representation(
 		iotcon_remote_resource_h resource,
 		iotcon_representation_h *representation)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == representation, IOTCON_ERROR_INVALID_PARAMETER);
 

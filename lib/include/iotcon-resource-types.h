@@ -72,6 +72,18 @@ static void _create_light_resource()
 }
  * @endcode
  *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE_FEATURE Related Features
+ * This API is related with the following features:\n
+ *  - http://tizen.org/feature/network.telephony\n
+ *
+ * It is recommended to design feature related codes in your application for reliability.\n
+ *
+ * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
+ *
+ * To ensure your application is only running on the device with specific features, please define the features in your manifest file using the manifest editor in the SDK.\n
+ *
+ * More details on featuring your application can be found from <a href="https://developer.tizen.org/development/tools/native-tools/manifest-text-editor#feature"><b>Feature Element</b>.</a>
+ *
  * @{
  */
 
@@ -87,6 +99,7 @@ static void _create_light_resource()
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
@@ -127,6 +140,7 @@ void iotcon_resource_types_destroy(iotcon_resource_types_h types);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_resource_types_create()
@@ -146,6 +160,7 @@ int iotcon_resource_types_add(iotcon_resource_types_h types, const char *type);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  *
@@ -187,6 +202,7 @@ typedef bool (*iotcon_resource_types_foreach_cb)(const char *type, void *user_da
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @post iotcon_resource_types_foreach() will be called for each type.
@@ -210,6 +226,7 @@ int iotcon_resource_types_foreach(iotcon_resource_types_h types,
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_resource_types_create()

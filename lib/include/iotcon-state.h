@@ -123,6 +123,18 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 }
  * @endcode
  *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE_FEATURE Related Features
+ * This API is related with the following features:\n
+ *  - http://tizen.org/feature/network.telephony\n
+ *
+ * It is recommended to design feature related codes in your application for reliability.\n
+ *
+ * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
+ *
+ * To ensure your application is only running on the device with specific features, please define the features in your manifest file using the manifest editor in the SDK.\n
+ *
+ * More details on featuring your application can be found from <a href="https://developer.tizen.org/development/tools/native-tools/manifest-text-editor#feature"><b>Feature Element</b>.</a>
+ *
  * @{
  */
 
@@ -138,6 +150,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
@@ -172,6 +185,7 @@ void iotcon_state_destroy(iotcon_state_h state);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
@@ -192,6 +206,7 @@ int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
@@ -209,6 +224,7 @@ int iotcon_state_add_int(iotcon_state_h state, const char *key, int val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
@@ -226,6 +242,7 @@ int iotcon_state_add_bool(iotcon_state_h state, const char *key, bool val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
@@ -243,6 +260,7 @@ int iotcon_state_add_double(iotcon_state_h state, const char *key, double val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
@@ -261,6 +279,7 @@ int iotcon_state_add_str(iotcon_state_h state, const char *key, char *val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
@@ -279,6 +298,7 @@ int iotcon_state_add_byte_str(iotcon_state_h state, const char *key, unsigned ch
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
@@ -296,6 +316,7 @@ int iotcon_state_add_list(iotcon_state_h state, const char *key, iotcon_list_h l
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
@@ -312,6 +333,7 @@ int iotcon_state_add_state(iotcon_state_h dest, const char *key, iotcon_state_h 
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
@@ -328,6 +350,7 @@ int iotcon_state_add_null(iotcon_state_h state, const char *key);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -345,6 +368,7 @@ int iotcon_state_get_int(iotcon_state_h state, const char *key, int *val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -362,6 +386,7 @@ int iotcon_state_get_bool(iotcon_state_h state, const char *key, bool *val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -381,6 +406,7 @@ int iotcon_state_get_double(iotcon_state_h state, const char *key, double *val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -401,6 +427,7 @@ int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -421,6 +448,7 @@ int iotcon_state_get_byte_str(iotcon_state_h state, const char *key, unsigned ch
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -440,6 +468,7 @@ int iotcon_state_get_list(iotcon_state_h state, const char *key, iotcon_list_h *
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -457,6 +486,7 @@ int iotcon_state_get_state(iotcon_state_h src, const char *key, iotcon_state_h *
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null);
@@ -471,6 +501,7 @@ int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
@@ -489,6 +520,7 @@ int iotcon_state_remove(iotcon_state_h state, const char *key);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
@@ -526,6 +558,7 @@ typedef bool (*iotcon_state_cb)(iotcon_state_h state, const char *key, void *use
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @post iotcon_state_cb() will be called for each child.
@@ -544,6 +577,7 @@ int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb, void *user_da
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_state_get_keys_count(iotcon_state_h state, unsigned int *count);
