@@ -33,6 +33,18 @@ extern "C" {
  *
  * @addtogroup CAPI_IOT_CONNECTIVITY_MODULE
  *
+ * @section CAPI_IOT_CONNECTIVITY_MODULE_FEATURE Related Features
+ * This API is related with the following features:\n
+ * - http://tizen.org/feature/iot.oic\n
+ *
+ * It is recommended to design feature related codes in your application for reliability.\n
+ *
+ * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
+ *
+ * To ensure your application is only running on the device with specific features, please define the features in your manifest file using the manifest editor in the SDK.\n
+ *
+ * More details on featuring your application can be found from <a href="https://developer.tizen.org/development/tools/native-tools/manifest-text-editor#feature"><b>Feature Element</b>.</a>
+ *
  * @{
  */
 
@@ -84,6 +96,7 @@ void iotcon_disconnect(void);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
  *
  * @pre iotcon_connect() should be called to connect a connection to the iotcon.
@@ -106,6 +119,7 @@ int iotcon_get_timeout(int *timeout_seconds);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
  * @retval #IOTCON_ERROR_DBUS Dbus error
  *
@@ -148,6 +162,7 @@ typedef void (*iotcon_connection_changed_cb)(bool is_connected, void *user_data)
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_ALREADY  Already done
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
@@ -173,6 +188,7 @@ int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *user
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @pre iotcon_connect() should be called to connect a connection to the iotcon.

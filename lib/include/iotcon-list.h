@@ -154,6 +154,17 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 }
  * @endcode
  *
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE_FEATURE Related Features
+ * This API is related with the following features:\n
+ *  - http://tizen.org/feature/iot.oic\n
+ *
+ * It is recommended to design feature related codes in your application for reliability.\n
+ *
+ * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
+ *
+ * To ensure your application is only running on the device with specific features, please define the features in your manifest file using the manifest editor in the SDK.\n
+ *
+ * More details on featuring your application can be found from <a href="https://developer.tizen.org/development/tools/native-tools/manifest-text-editor#feature"><b>Feature Element</b>.</a>
  *
  * @{
  */
@@ -171,6 +182,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -202,6 +214,7 @@ void iotcon_list_destroy(iotcon_list_h list);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -221,6 +234,7 @@ int iotcon_list_add_int(iotcon_list_h list, int val, int pos);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -240,6 +254,7 @@ int iotcon_list_add_bool(iotcon_list_h list, bool val, int pos);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -259,6 +274,7 @@ int iotcon_list_add_double(iotcon_list_h list, double val, int pos);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -279,6 +295,7 @@ int iotcon_list_add_str(iotcon_list_h list, char *val, int pos);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -298,6 +315,7 @@ int iotcon_list_add_byte_str(iotcon_list_h list, unsigned char *val, int len, in
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -317,6 +335,7 @@ int iotcon_list_add_list(iotcon_list_h list, iotcon_list_h val, int pos);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
@@ -335,6 +354,7 @@ int iotcon_list_add_state(iotcon_list_h list, iotcon_state_h val, int pos);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
@@ -353,6 +373,7 @@ int iotcon_list_get_nth_int(iotcon_list_h list, int pos, int *val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
@@ -371,6 +392,7 @@ int iotcon_list_get_nth_bool(iotcon_list_h list, int pos, bool *val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
@@ -391,6 +413,7 @@ int iotcon_list_get_nth_double(iotcon_list_h list, int pos, double *val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
@@ -412,6 +435,7 @@ int iotcon_list_get_nth_str(iotcon_list_h list, int pos, char **val);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
@@ -433,6 +457,7 @@ int iotcon_list_get_nth_byte_str(iotcon_list_h list, int pos, unsigned char **va
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
@@ -453,6 +478,7 @@ int iotcon_list_get_nth_list(iotcon_list_h src, int pos, iotcon_list_h *dest);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
@@ -470,6 +496,7 @@ int iotcon_list_get_nth_state(iotcon_list_h list, int pos, iotcon_state_h *state
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
@@ -487,6 +514,7 @@ int iotcon_list_remove_nth(iotcon_list_h list, int pos);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_list_get_type(iotcon_list_h list, iotcon_type_e *type);
@@ -501,6 +529,7 @@ int iotcon_list_get_type(iotcon_list_h list, iotcon_type_e *type);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_list_get_length(iotcon_list_h list, unsigned int *length);
@@ -536,6 +565,7 @@ typedef bool (*iotcon_list_int_cb)(int pos, int value, void *user_data);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @post iotcon_list_int_cb() will be called for each item.
@@ -575,6 +605,7 @@ typedef bool (*iotcon_list_bool_cb)(int pos, bool value, void *user_data);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @post iotcon_list_bool_cb() will be called for each item.
@@ -614,6 +645,7 @@ typedef bool (*iotcon_list_double_cb)(int pos, double value, void *user_data);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @post iotcon_list_double_cb() will be called for each item.
@@ -656,6 +688,7 @@ typedef bool (*iotcon_list_byte_str_cb)(int pos, const unsigned char *value, int
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @post iotcon_list_byte_str_cb() will be called for each item.
@@ -696,6 +729,7 @@ typedef bool (*iotcon_list_str_cb)(int pos, const char *value, void *user_data);
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @post iotcon_list_str_cb() will be called for each item.
@@ -735,6 +769,7 @@ typedef bool (*iotcon_list_list_cb)(int pos, iotcon_list_h value, void *user_dat
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @post iotcon_list_list_cb() will be called for each item.
@@ -774,6 +809,7 @@ typedef bool (*iotcon_list_state_cb)(int pos, iotcon_state_h value, void *user_d
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @post iotcon_list_state_cb() will be called for each item.
