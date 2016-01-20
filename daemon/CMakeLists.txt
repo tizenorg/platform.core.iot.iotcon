@@ -7,7 +7,7 @@ SET(DAEMON_SRCS ${DAEMON_SRCS} ${CMAKE_SOURCE_DIR}/common/ic-dbus.c)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/common/ic-dbus.c
 	PROPERTIES GENERATED TRUE)
 
-SET(PKG_MODULES gio-2.0 dlog gio-unix-2.0 capi-system-info capi-system-system-settings
+SET(PKG_MODULES gio-2.0 dlog gio-unix-2.0 capi-system-system-settings capi-system-info
 	iotivity)
 
 IF(TZ_VER_3)

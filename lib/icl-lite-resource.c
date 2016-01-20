@@ -301,6 +301,7 @@ API int iotcon_lite_resource_create(const char *uri_path,
 	int64_t signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH];
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(ICL_URI_PATH_LENGTH_MAX < strlen(uri_path),
@@ -375,6 +376,7 @@ API int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource)
 	int ret;
 	GError *error = NULL;
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (0 == resource->handle) { /* disconnected iotcon dbus */
@@ -413,6 +415,7 @@ API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 {
 	int ret;
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (state)
@@ -434,6 +437,7 @@ API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 API int iotcon_lite_resource_get_state(iotcon_lite_resource_h resource,
 		iotcon_state_h *state)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 

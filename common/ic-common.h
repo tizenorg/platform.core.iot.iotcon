@@ -17,6 +17,7 @@
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__
 
 #include "iotcon-errors.h"
+#include "ic-utils.h"
 
 #ifndef IOTCON_DBUS_INTERFACE
 #define IOTCON_DBUS_INTERFACE "org.tizen.iotcon.dbus"
@@ -41,5 +42,7 @@
 #define IC_INTERFACE_BATCH "oic.if.b"
 #define IC_INTERFACE_GROUP "oic.mi.grp"
 #define IC_INTERFACE_READONLY "oic.if.r"
+
+#define IC_FEATURE_OIC "http://tizen.org/feature/iot.oic"
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__ */
