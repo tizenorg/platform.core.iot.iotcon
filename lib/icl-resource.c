@@ -166,6 +166,7 @@ API int iotcon_resource_create(const char *uri_path,
 	int64_t signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH];
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(ICL_URI_PATH_LENGTH_MAX < strlen(uri_path),
@@ -240,6 +241,7 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 	int ret;
 	GError *error = NULL;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (0 == resource->handle) { /* iotcon dbus disconnected */
@@ -281,6 +283,7 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource,
 	int ret;
 	GError *error = NULL;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	if (0 == resource->sub_id) {
@@ -319,6 +322,7 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resour
 	GError *error = NULL;
 	iotcon_resource_types_h resource_types;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
@@ -365,6 +369,7 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resour
 API int iotcon_resource_set_request_handler(iotcon_resource_h resource,
 		iotcon_request_handler_cb cb, void *user_data)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -382,6 +387,7 @@ API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 	GError *error = NULL;
 	int i, ret;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
@@ -436,6 +442,7 @@ API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 	GError *error = NULL;
 	int i, ret;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
@@ -476,6 +483,7 @@ API int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *
 {
 	int i;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == number, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -492,6 +500,7 @@ API int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *
 API int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 		iotcon_resource_h *child)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 	if ((index < 0) || (ICL_CONTAINED_RESOURCES_MAX <= index)) {
@@ -508,6 +517,7 @@ API int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 /* The content of the resource should not be freed by user. */
 API int iotcon_resource_get_uri_path(iotcon_resource_h resource, char **uri_path)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -521,6 +531,7 @@ API int iotcon_resource_get_uri_path(iotcon_resource_h resource, char **uri_path
 API int iotcon_resource_get_types(iotcon_resource_h resource,
 		iotcon_resource_types_h *types)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -532,6 +543,7 @@ API int iotcon_resource_get_types(iotcon_resource_h resource,
 
 API int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -543,6 +555,7 @@ API int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces)
 
 API int iotcon_resource_get_properties(iotcon_resource_h resource, int *properties)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == properties, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -559,6 +572,7 @@ API int iotcon_resource_notify(iotcon_resource_h resource,
 	GVariant *obs;
 	GVariant *repr_gvar;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 

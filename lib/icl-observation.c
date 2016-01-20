@@ -23,6 +23,7 @@
 
 API int iotcon_observers_create(iotcon_observers_h *ret_observers)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == ret_observers, IOTCON_ERROR_INVALID_PARAMETER);
 
 	iotcon_observers_h observers = calloc(1, sizeof(struct icl_observers));
@@ -48,6 +49,7 @@ API void iotcon_observers_destroy(iotcon_observers_h observers)
 
 API int iotcon_observers_add(iotcon_observers_h observers, int obs_id)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
 
 	observers->observers_list = g_list_append(observers->observers_list,
@@ -59,6 +61,7 @@ API int iotcon_observers_add(iotcon_observers_h observers, int obs_id)
 
 API int iotcon_observers_remove(iotcon_observers_h observers, int obs_id)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
 
 	observers->observers_list = g_list_remove(observers->observers_list,

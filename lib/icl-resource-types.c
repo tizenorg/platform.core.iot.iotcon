@@ -38,6 +38,7 @@ API int iotcon_resource_types_create(iotcon_resource_types_h *ret_types)
 {
 	iotcon_resource_types_h types;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == ret_types, IOTCON_ERROR_INVALID_PARAMETER);
 
 	types = calloc(1, sizeof(struct icl_resource_types));
@@ -95,6 +96,7 @@ API int iotcon_resource_types_add(iotcon_resource_types_h types, const char *typ
 {
 	char *resource_type;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(1 < types->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
@@ -127,6 +129,7 @@ API int iotcon_resource_types_remove(iotcon_resource_types_h types, const char *
 {
 	GList *found_node;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(1 < types->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
@@ -150,6 +153,7 @@ API int iotcon_resource_types_foreach(iotcon_resource_types_h types,
 {
 	GList *node;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -169,6 +173,7 @@ API int iotcon_resource_types_clone(iotcon_resource_types_h src,
 	char *resource_type;
 	iotcon_resource_types_h resource_types;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
 

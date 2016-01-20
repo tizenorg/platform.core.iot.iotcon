@@ -17,11 +17,15 @@
 #include <string.h>
 #include <errno.h>
 #include <glib.h>
+#include <system_info.h>
 
 #include "iotcon-types.h"
 #include "ic-common.h"
 #include "ic-log.h"
 #include "ic-utils.h"
+
+
+static int _ic_oic_feature_supported = -1;
 
 char* ic_utils_strdup(const char *src)
 {
@@ -118,4 +122,13 @@ void ic_utils_gvariant_array_free(GVariant **value)
 	free(value);
 }
 
+bool ic_utils_check_oic_feature_supported()
+{
+	if (_ic_oic_feature_supported < 0) {
+		bool feature_supported = false;
+		system_info_get_platform_bool(IC_FEATURE_OIC, &feature_supported);
+		_ic_oic_feature_supported = feature_supported? 1: 0;
+	}
+	return _ic_oic_feature_supported;
+}
 
