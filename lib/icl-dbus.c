@@ -117,8 +117,8 @@ API int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *
 	unsigned int id;
 	icl_cb_container_s *cb_container;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
-
 
 	if (_dbus_find_conn_changed_cb(cb, user_data)) {
 		ERR("This callback is already registered.");
@@ -154,6 +154,7 @@ API int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
 {
 	icl_cb_container_s *cb_container;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	cb_container = _dbus_find_conn_changed_cb(cb, user_data);

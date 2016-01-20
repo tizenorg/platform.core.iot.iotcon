@@ -141,4 +141,6 @@
 		} \
 	} while (0)
 
+
+
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_LOG_H__ */

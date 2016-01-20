@@ -23,6 +23,8 @@ API int iotcon_connect(void)
 {
 	int ret;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
+
 #if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
 #endif
@@ -42,6 +44,7 @@ API void iotcon_disconnect(void)
 
 API int iotcon_get_timeout(int *timeout_seconds)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == timeout_seconds, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*timeout_seconds = icl_dbus_get_timeout();
@@ -54,6 +57,7 @@ API int iotcon_set_timeout(int timeout_seconds)
 {
 	int ret;
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	if (ICL_DBUS_TIMEOUT_MAX < timeout_seconds || timeout_seconds <= 0) {
 		ERR("timeout_seconds(%d) must be in range from 1 to 3600", timeout_seconds);
 		return IOTCON_ERROR_INVALID_PARAMETER;

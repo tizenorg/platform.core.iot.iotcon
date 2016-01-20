@@ -63,6 +63,7 @@ typedef struct {
 API int iotcon_device_info_get_property(iotcon_device_info_h device_info,
 		iotcon_device_info_e property, char **value)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == device_info, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -149,6 +150,7 @@ API int iotcon_get_device_info(const char *host_address,
 	int64_t signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -205,6 +207,7 @@ API int iotcon_get_device_info(const char *host_address,
 API int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
 		iotcon_platform_info_e property, char **value)
 {
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == platform_info, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -335,6 +338,7 @@ API int iotcon_get_platform_info(const char *host_address,
 	int64_t signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
+	IC_CHECK_OIC_FEATURE_SUPPORTED();
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
