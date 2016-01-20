@@ -16,12 +16,15 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include "ic-utils.h"
 #include "icl.h"
 #include "icl-dbus.h"
 
 API int iotcon_connect(void)
 {
 	int ret;
+
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 
 #if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
@@ -42,6 +45,7 @@ API void iotcon_disconnect(void)
 
 API int iotcon_get_timeout(int *timeout_seconds)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == timeout_seconds, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*timeout_seconds = icl_dbus_get_timeout();
@@ -54,6 +58,7 @@ API int iotcon_set_timeout(int timeout_seconds)
 {
 	int ret;
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	if (ICL_DBUS_TIMEOUT_MAX < timeout_seconds || timeout_seconds <= 0) {
 		ERR("timeout_seconds(%d) must be in range from 1 to 3600", timeout_seconds);
 		return IOTCON_ERROR_INVALID_PARAMETER;

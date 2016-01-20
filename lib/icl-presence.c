@@ -55,6 +55,7 @@ API int iotcon_start_presence(unsigned int time_to_live)
 	int ret;
 	GError *error = NULL;
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(ICL_PRESENCE_TTL_SECONDS_MAX < time_to_live, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -82,6 +83,7 @@ API int iotcon_stop_presence(void)
 	int ret;
 	GError *error = NULL;
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 
 	ic_dbus_call_stop_presence_sync(icl_dbus_get_object(), &ret, NULL, &error);
@@ -172,6 +174,7 @@ API int iotcon_add_presence_cb(const char *host_address,
 	icl_presence_s *presence;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == presence_handle, IOTCON_ERROR_INVALID_PARAMETER);
@@ -251,6 +254,7 @@ API int iotcon_remove_presence_cb(iotcon_presence_h presence)
 	int ret;
 	GError *error = NULL;
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (0 == presence->sub_id) { /* disconnected iotcon dbus */
@@ -290,6 +294,7 @@ API int iotcon_remove_presence_cb(iotcon_presence_h presence)
 
 API int iotcon_presence_get_host_address(iotcon_presence_h presence, char **host_address)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -302,6 +307,7 @@ API int iotcon_presence_get_host_address(iotcon_presence_h presence, char **host
 API int iotcon_presence_get_connectivity_type(iotcon_presence_h presence,
 		iotcon_connectivity_type_e *connectivity_type)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == connectivity_type, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -314,6 +320,7 @@ API int iotcon_presence_get_connectivity_type(iotcon_presence_h presence,
 API int iotcon_presence_get_resource_type(iotcon_presence_h presence,
 		char **resource_type)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -326,6 +333,7 @@ API int iotcon_presence_get_resource_type(iotcon_presence_h presence,
 API int iotcon_presence_response_get_host_address(iotcon_presence_response_h response,
 		char **host_address)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -338,6 +346,7 @@ API int iotcon_presence_response_get_host_address(iotcon_presence_response_h res
 API int iotcon_presence_response_get_connectivity_type(
 		iotcon_presence_response_h response, iotcon_connectivity_type_e *connectivity_type)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == connectivity_type, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -350,6 +359,7 @@ API int iotcon_presence_response_get_connectivity_type(
 API int iotcon_presence_response_get_resource_type(iotcon_presence_response_h response,
 		char **resource_type)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -362,6 +372,7 @@ API int iotcon_presence_response_get_resource_type(iotcon_presence_response_h re
 API int iotcon_presence_response_get_result(iotcon_presence_response_h response,
 		iotcon_presence_result_e *result)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == result, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -374,6 +385,7 @@ API int iotcon_presence_response_get_result(iotcon_presence_response_h response,
 API int iotcon_presence_response_get_trigger(iotcon_presence_response_h response,
 		iotcon_presence_trigger_e *trigger)
 {
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == trigger, IOTCON_ERROR_INVALID_PARAMETER);
 

@@ -21,6 +21,7 @@
 
 #include "iotcon.h"
 #include "ic-common.h"
+#include "ic-utils.h"
 #include "ic-dbus.h"
 #include "icl.h"
 #include "icl-dbus.h"
@@ -117,8 +118,8 @@ API int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *
 	unsigned int id;
 	icl_cb_container_s *cb_container;
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
-
 
 	if (_dbus_find_conn_changed_cb(cb, user_data)) {
 		ERR("This callback is already registered.");
@@ -154,6 +155,7 @@ API int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
 {
 	icl_cb_container_s *cb_container;
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	cb_container = _dbus_find_conn_changed_cb(cb, user_data);

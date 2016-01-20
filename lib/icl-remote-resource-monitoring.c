@@ -22,6 +22,7 @@
 #include "iotcon-internal.h"
 #include "icl.h"
 #include "icl-dbus.h"
+#include "ic-utils.h"
 #include "icl-remote-resource.h"
 
 typedef struct {
@@ -68,6 +69,7 @@ API int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resourc
 	icl_monitoring_s *cb_container;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
@@ -130,6 +132,7 @@ API int iotcon_remote_resource_stop_monitoring(iotcon_remote_resource_h resource
 	int ret;
 	GError *error = NULL;
 
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
