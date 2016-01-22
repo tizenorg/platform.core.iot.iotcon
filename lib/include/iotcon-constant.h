@@ -225,8 +225,8 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_QOS_LOW,
-	IOTCON_QOS_HIGH,
+	IOTCON_QOS_LOW, /**< Indicates low quality of service */
+	IOTCON_QOS_HIGH, /**< Indicates high quality of service  */
 } iotcon_qos_e;
 
 
