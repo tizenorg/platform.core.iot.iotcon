@@ -25,4 +25,6 @@
 #endif
 #define API __attribute__((visibility("default")))
 
+iotcon_service_mode_e icl_get_service_mode();
+
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__ */
