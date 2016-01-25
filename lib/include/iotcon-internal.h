@@ -25,6 +25,37 @@ extern "C" {
  */
 
 /**
+ * @brief Enumeration for mode of iotcon service.
+ *
+ * @since_tizen 3.0
+ */
+typedef enum {
+	IOTCON_SERVICE_WIFI, /**< Wifi only */
+	IOTCON_SERVICE_BT, /**< Bluetooth only */
+} iotcon_service_mode_e;
+
+/**
+ * @brief Connects to the iotcon service.
+ * @details Call this function to start Iotcon.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] mode Service mode of iotcon
+ *
+ * @remarks You must free all resources of the Iotcon by calling iotcon_disconnect()
+ * if Iotcon API is no longer needed.
+ *
+ * @return	0 on success, otherwise a negative error value.
+ * @retval	#IOTCON_ERROR_NONE Successful
+ * @retval	#IOTCON_ERROR_DBUS Dbus error
+ *
+ * @see iotcon_disconnect()
+ * @see iotcon_add_connection_changed_cb()
+ * @see iotcon_remove_connection_changed_cb()
+ */
+int iotcon_connect_for_service_mode(iotcon_service_mode_e mode);
+
+/**
  * @brief Starts presence of a server.
  * @details Use this function to send server's announcements to clients.\n
  * Server can call this function when online for the first time or come back from offline to online.
@@ -117,6 +148,7 @@ int iotcon_remote_resource_get_time_interval(int *time_interval);
  * @see iotcon_remote_resource_start_caching()
  */
 int iotcon_remote_resource_set_time_interval(int time_interval);
+
 
 #ifdef __cplusplus
 }

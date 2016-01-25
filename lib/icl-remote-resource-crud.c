@@ -21,6 +21,7 @@
 #include <gio/gio.h>
 
 #include "iotcon.h"
+#include "iotcon-internal.h"
 #include "ic-utils.h"
 #include "ic-dbus.h"
 #include "icl.h"
@@ -31,6 +32,8 @@
 #include "icl-response.h"
 #include "icl-remote-resource.h"
 #include "icl-payload.h"
+
+#include "icl-ioty.h"
 
 typedef struct {
 	iotcon_remote_resource_response_cb cb;
@@ -220,32 +223,49 @@ static void _icl_on_post_cb(GObject *object, GAsyncResult *g_async_res,
 API int iotcon_remote_resource_get(iotcon_remote_resource_h resource,
 		iotcon_query_h query, iotcon_remote_resource_response_cb cb, void *user_data)
 {
+	int ret;
 	GVariant *arg_query;
 	GVariant *arg_remote_resource;
 	icl_on_response_s *cb_container;
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	cb_container = calloc(1, sizeof(icl_on_response_s));
-	if (NULL == cb_container) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
+	mode = icl_get_service_mode();
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_remote_resource_get(resource, query, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_get() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		cb_container = calloc(1, sizeof(icl_on_response_s));
+		if (NULL == cb_container) {
+			ERR("calloc() Fail(%d)", errno);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+
+		cb_container->resource = resource;
+		cb_container->cb = cb;
+		cb_container->user_data = user_data;
+
+		arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
+		arg_query = icl_dbus_query_to_gvariant(query);
+
+		ic_dbus_call_get(icl_dbus_get_object(), arg_remote_resource, arg_query, NULL,
+				_icl_on_get_cb, cb_container);
+
+		icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
-
-	cb_container->resource = resource;
-	cb_container->cb = cb;
-	cb_container->user_data = user_data;
-
-	arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
-	arg_query = icl_dbus_query_to_gvariant(query);
-
-	ic_dbus_call_get(icl_dbus_get_object(), arg_remote_resource, arg_query, NULL,
-			_icl_on_get_cb, cb_container);
-
-	icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -257,42 +277,59 @@ API int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
 		iotcon_remote_resource_response_cb cb,
 		void *user_data)
 {
+	int ret;
 	GVariant *arg_repr;
 	GVariant *arg_remote_resource;
 	GVariant *arg_query;
 	icl_on_response_s *cb_container;
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	cb_container = calloc(1, sizeof(icl_on_response_s));
-	if (NULL == cb_container) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
+	mode = icl_get_service_mode();
+
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_remote_resource_put(resource, repr, query, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_put() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		cb_container = calloc(1, sizeof(icl_on_response_s));
+		if (NULL == cb_container) {
+			ERR("calloc() Fail(%d)", errno);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+
+		cb_container->resource = resource;
+		cb_container->cb = cb;
+		cb_container->user_data = user_data;
+
+		arg_repr = icl_representation_to_gvariant(repr);
+		if (NULL == arg_repr) {
+			ERR("icl_representation_to_gvariant() Fail");
+			free(cb_container);
+			return IOTCON_ERROR_REPRESENTATION;
+		}
+
+		arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
+		arg_query = icl_dbus_query_to_gvariant(query);
+
+		ic_dbus_call_put(icl_dbus_get_object(), arg_remote_resource, arg_repr, arg_query,
+				NULL, _icl_on_put_cb, cb_container);
+
+		icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
-
-	cb_container->resource = resource;
-	cb_container->cb = cb;
-	cb_container->user_data = user_data;
-
-	arg_repr = icl_representation_to_gvariant(repr);
-	if (NULL == arg_repr) {
-		ERR("icl_representation_to_gvariant() Fail");
-		free(cb_container);
-		return IOTCON_ERROR_REPRESENTATION;
-	}
-
-	arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
-	arg_query = icl_dbus_query_to_gvariant(query);
-
-	ic_dbus_call_put(icl_dbus_get_object(), arg_remote_resource, arg_repr, arg_query,
-			NULL, _icl_on_put_cb, cb_container);
-
-	icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
-
 	return IOTCON_ERROR_NONE;
 }
 
@@ -303,41 +340,60 @@ API int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
 		iotcon_remote_resource_response_cb cb,
 		void *user_data)
 {
+
+	int ret;
 	GVariant *arg_repr;
 	GVariant *arg_query;
 	GVariant *arg_remote_resource;
 	icl_on_response_s *cb_container;
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	cb_container = calloc(1, sizeof(icl_on_response_s));
-	if (NULL == cb_container) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
+	mode = icl_get_service_mode();
+
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_remote_resource_post(resource, repr, query, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_post() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		cb_container = calloc(1, sizeof(icl_on_response_s));
+		if (NULL == cb_container) {
+			ERR("calloc() Fail(%d)", errno);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+
+		cb_container->resource = resource;
+		cb_container->cb = cb;
+		cb_container->user_data = user_data;
+
+		arg_repr = icl_representation_to_gvariant(repr);
+		if (NULL == arg_repr) {
+			ERR("icl_representation_to_gvariant() Fail");
+			free(cb_container);
+			return IOTCON_ERROR_REPRESENTATION;
+		}
+
+		arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
+		arg_query = icl_dbus_query_to_gvariant(query);
+
+		ic_dbus_call_post(icl_dbus_get_object(), arg_remote_resource, arg_repr, arg_query,
+				NULL, _icl_on_post_cb, cb_container);
+
+		icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
-
-	cb_container->resource = resource;
-	cb_container->cb = cb;
-	cb_container->user_data = user_data;
-
-	arg_repr = icl_representation_to_gvariant(repr);
-	if (NULL == arg_repr) {
-		ERR("icl_representation_to_gvariant() Fail");
-		free(cb_container);
-		return IOTCON_ERROR_REPRESENTATION;
-	}
-
-	arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
-	arg_query = icl_dbus_query_to_gvariant(query);
-
-	ic_dbus_call_post(icl_dbus_get_object(), arg_remote_resource, arg_repr, arg_query,
-			NULL, _icl_on_post_cb, cb_container);
-
-	icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -353,31 +409,48 @@ static void _icl_on_delete_cb(GObject *object, GAsyncResult *g_async_res,
 API int iotcon_remote_resource_delete(iotcon_remote_resource_h resource,
 		iotcon_remote_resource_response_cb cb, void *user_data)
 {
+	int ret;
 	GVariant *arg_remote_resource;
 	icl_on_response_s *cb_container;
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	cb_container = calloc(1, sizeof(icl_on_response_s));
-	if (NULL == cb_container) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
+	mode = icl_get_service_mode();
+
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_remote_resource_delete(resource, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_delete() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		cb_container = calloc(1, sizeof(icl_on_response_s));
+		if (NULL == cb_container) {
+			ERR("calloc() Fail(%d)", errno);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+
+		cb_container->resource = resource;
+		cb_container->cb = cb;
+		cb_container->user_data = user_data;
+
+		arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
+
+		ic_dbus_call_delete(icl_dbus_get_object(), arg_remote_resource, NULL,
+				_icl_on_delete_cb, cb_container);
+
+		icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
-
-	cb_container->resource = resource;
-	cb_container->cb = cb;
-	cb_container->user_data = user_data;
-
-	arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
-
-	ic_dbus_call_delete(icl_dbus_get_object(), arg_remote_resource, NULL,
-			_icl_on_delete_cb, cb_container);
-
-	icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
-
 	return IOTCON_ERROR_NONE;
 }
 
@@ -472,59 +545,77 @@ API int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resourc
 	icl_on_observe_s *cb_container;
 	GVariant *arg_query, *arg_remote_resource;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(resource->observe_handle || resource->observe_sub_id, IOTCON_ERROR_ALREADY);
 
-	arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
-	arg_query = icl_dbus_query_to_gvariant(query);
+	mode = icl_get_service_mode();
 
-	cb_container = calloc(1, sizeof(icl_on_observe_s));
-	if (NULL == cb_container) {
-		ERR("calloc() Fail(%d)", errno);
-		g_variant_unref(arg_query);
-		g_variant_unref(arg_remote_resource);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_remote_resource_observe_register(resource, observe_policy, query, cb,
+				user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_observe_register() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
+		arg_query = icl_dbus_query_to_gvariant(query);
+
+		cb_container = calloc(1, sizeof(icl_on_observe_s));
+		if (NULL == cb_container) {
+			ERR("calloc() Fail(%d)", errno);
+			g_variant_unref(arg_query);
+			g_variant_unref(arg_remote_resource);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+
+		cb_container->resource = resource;
+		cb_container->cb = cb;
+		cb_container->user_data = user_data;
+
+		ic_dbus_call_observer_start_sync(icl_dbus_get_object(), arg_remote_resource,
+				observe_policy, arg_query, &signal_number, &observe_handle, NULL, &error);
+		if (error) {
+			ERR("ic_dbus_call_observer_start_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			g_variant_unref(arg_query);
+			g_variant_unref(arg_remote_resource);
+			free(cb_container);
+			return ret;
+		}
+		if (0 == observe_handle) {
+			ERR("iotcon-daemon Fail");
+			free(cb_container);
+			return IOTCON_ERROR_IOTIVITY;
+		}
+
+		snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_OBSERVE,
+				signal_number);
+
+		sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
+				_icl_observe_conn_cleanup, _icl_on_observe_cb);
+		if (0 == sub_id) {
+			ERR("icl_dbus_subscribe_signal() Fail");
+			free(cb_container);
+			return IOTCON_ERROR_DBUS;
+		}
+
+		resource->observe_sub_id = sub_id;
+		resource->observe_handle = observe_handle;
+		icl_remote_resource_ref(resource);
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
-
-	cb_container->resource = resource;
-	cb_container->cb = cb;
-	cb_container->user_data = user_data;
-
-	ic_dbus_call_observer_start_sync(icl_dbus_get_object(), arg_remote_resource,
-			observe_policy, arg_query, &signal_number, &observe_handle, NULL, &error);
-	if (error) {
-		ERR("ic_dbus_call_observer_start_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		g_variant_unref(arg_query);
-		g_variant_unref(arg_remote_resource);
-		free(cb_container);
-		return ret;
-	}
-	if (0 == observe_handle) {
-		ERR("iotcon-daemon Fail");
-		free(cb_container);
-		return IOTCON_ERROR_IOTIVITY;
-	}
-
-	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_OBSERVE,
-			signal_number);
-
-	sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
-			_icl_observe_conn_cleanup, _icl_on_observe_cb);
-	if (0 == sub_id) {
-		ERR("icl_dbus_subscribe_signal() Fail");
-		free(cb_container);
-		return IOTCON_ERROR_DBUS;
-	}
-
-	resource->observe_sub_id = sub_id;
-	resource->observe_handle = observe_handle;
-	icl_remote_resource_ref(resource);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -535,34 +626,49 @@ API int iotcon_remote_resource_observe_deregister(iotcon_remote_resource_h resou
 	int ret;
 	GError *error = NULL;
 	GVariant *arg_options;
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	if (0 == resource->observe_handle) {
 		ERR("It doesn't have a observe_handle");
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	arg_options = icl_dbus_options_to_gvariant(resource->header_options);
+	mode = icl_get_service_mode();
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_remote_resource_observe_deregister(resource);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_observe_deregister() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		arg_options = icl_dbus_options_to_gvariant(resource->header_options);
 
-	ic_dbus_call_observer_stop_sync(icl_dbus_get_object(), resource->observe_handle,
-			arg_options, &ret, NULL, &error);
-	if (error) {
-		ERR("ic_dbus_call_observer_stop_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return ret;
+		ic_dbus_call_observer_stop_sync(icl_dbus_get_object(), resource->observe_handle,
+				arg_options, &ret, NULL, &error);
+		if (error) {
+			ERR("ic_dbus_call_observer_stop_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			return ret;
+		}
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon-daemon Fail(%d)", ret);
+			return icl_dbus_convert_daemon_error(ret);
+		}
+		resource->observe_handle = 0;
+
+		icl_dbus_unsubscribe_signal(resource->observe_sub_id);
+		resource->observe_sub_id = 0;
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
-	}
-	resource->observe_handle = 0;
-
-	icl_dbus_unsubscribe_signal(resource->observe_sub_id);
-	resource->observe_sub_id = 0;
-
 
 	return IOTCON_ERROR_NONE;
 }

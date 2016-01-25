@@ -37,14 +37,14 @@ static const char *_icd_privileges_network[] = {
 };
 
 #ifdef TZ_VER_3
-static cynara *_cynara;
+static cynara *icd_cynara;
 #endif
 
 int icd_cynara_init()
 {
 #ifdef TZ_VER_3
 	int ret;
-	ret = cynara_initialize(&_cynara, NULL);
+	ret = cynara_initialize(&icd_cynara, NULL);
 
 	if (CYNARA_API_SUCCESS != ret) {
 		ERR("cynara_initialize() Fail(%d)", ret);
@@ -58,10 +58,10 @@ int icd_cynara_init()
 void icd_cynara_deinit()
 {
 #ifdef TZ_VER_3
-	if (_cynara)
-		cynara_finish(_cynara);
+	if (icd_cynara)
+		cynara_finish(icd_cynara);
 
-	_cynara = NULL;
+	icd_cynara = NULL;
 #endif
 }
 
@@ -79,7 +79,7 @@ static int _icd_cynara_check(GDBusMethodInvocation *invocation, const char **pri
 	const char *sender = NULL;
 	GDBusConnection *conn = NULL;
 
-	RETV_IF(NULL == _cynara, IOTCON_ERROR_SYSTEM);
+	RETV_IF(NULL == icd_cynara, IOTCON_ERROR_SYSTEM);
 	RETV_IF(NULL == invocation, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == privileges, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -126,7 +126,7 @@ static int _icd_cynara_check(GDBusMethodInvocation *invocation, const char **pri
 
 	while (privileges[i]) {
 		SECURE_DBG("privileges[%d]: %s, user: %s, client: %s", i, privileges[i], user, client);
-		ret = cynara_check(_cynara, client, session, user, privileges[i]);
+		ret = cynara_check(icd_cynara, client, session, user, privileges[i]);
 		if (CYNARA_API_ACCESS_DENIED == ret) {
 			ERR("Denied (%s)", privileges[i]);
 			free(session);

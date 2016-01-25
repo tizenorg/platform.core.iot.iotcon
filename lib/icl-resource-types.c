@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <glib.h>
 
+#include "iotcon-internal.h"
 #include "iotcon-types.h"
 #include "ic-utils.h"
 #include "icl.h"

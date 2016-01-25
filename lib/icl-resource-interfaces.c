@@ -19,6 +19,7 @@
 #include <glib.h>
 
 #include "iotcon-types.h"
+#include "iotcon-internal.h"
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-resource-interfaces.h"
