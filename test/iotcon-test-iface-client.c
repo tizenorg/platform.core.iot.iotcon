@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <iotcon.h>
+#include <iotcon-internal.h>
+
 #include "test.h"
 
 static char *room_resource_device_id;
@@ -389,18 +391,32 @@ int main(int argc, char **argv)
 	FN_CALL;
 	int ret;
 	GMainLoop *loop;
+	iotcon_service_mode_e mode;
 
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* connect iotcon */
-	ret = iotcon_connect();
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_connect() Fail(%d)", ret);
-		return -1;
+	if (argc < 2) {
+		ret = iotcon_connect();
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_connect() Fail(%d)", ret);
+			return -1;
+		}
+	} else {
+		if (IOTCON_SERVICE_BT == atoi(argv[1]))
+			mode = IOTCON_SERVICE_BT;
+		else
+			mode = IOTCON_SERVICE_WIFI;
+		ret = iotcon_connect_for_service_mode(mode);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_connect_for_service_mode() Fail(%d)", ret);
+			return -1;
+		}
+		INFO("mode: %d", mode);
 	}
 
 	/* find room typed resources */
-	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_ALL,
 			ROOM_RESOURCE_TYPE, false, _found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
