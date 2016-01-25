@@ -30,6 +30,7 @@ static unsigned int icl_dbus_count;
 static icDbus *icl_dbus_object;
 static GList *icl_dbus_sub_ids;
 static GList *icl_dbus_conn_changed_cbs;
+static int icl_timeout_seconds = ICL_DBUS_TIMEOUT_DEFAULT;
 
 typedef struct {
 	void *cb;
@@ -120,6 +121,8 @@ API int iotcon_add_connection_changed_cb(iotcon_connection_changed_cb cb, void *
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+	if (IOTCON_SERVICE_WIFI == icl_get_service_mode())
+		return IOTCON_ERROR_NONE;
 
 	if (_dbus_find_conn_changed_cb(cb, user_data)) {
 		ERR("This callback is already registered.");
@@ -157,6 +160,8 @@ API int iotcon_remove_connection_changed_cb(iotcon_connection_changed_cb cb,
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+	if (IOTCON_SERVICE_WIFI == icl_get_service_mode())
+		return IOTCON_ERROR_NONE;
 
 	cb_container = _dbus_find_conn_changed_cb(cb, user_data);
 	if (NULL == cb_container) {
@@ -229,11 +234,12 @@ inline int icl_dbus_convert_dbus_error(int error)
 	return ret;
 }
 
+
 int icl_dbus_set_timeout(int timeout_seconds)
 {
-	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
-
-	g_dbus_proxy_set_default_timeout(G_DBUS_PROXY(icl_dbus_object), timeout_seconds * 1000);
+	if (icl_dbus_object)
+		g_dbus_proxy_set_default_timeout(G_DBUS_PROXY(icl_dbus_object), timeout_seconds * 1000);
+	icl_timeout_seconds = timeout_seconds;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -242,14 +248,16 @@ int icl_dbus_get_timeout()
 {
 	gint timeout;
 
-	RETV_IF(NULL == icl_dbus_object, ICL_DBUS_TIMEOUT_DEFAULT);
-
-	timeout = g_dbus_proxy_get_default_timeout(G_DBUS_PROXY(icl_dbus_object));
-	if (timeout <= 0) {
-		ERR("Invalid timeout (%d)", timeout);
-		return ICL_DBUS_TIMEOUT_DEFAULT;
+	if (icl_dbus_object) {
+		timeout = g_dbus_proxy_get_default_timeout(G_DBUS_PROXY(icl_dbus_object));
+		if (timeout <= 0) {
+			ERR("Invalid timeout (%d)", timeout);
+			return ICL_DBUS_TIMEOUT_DEFAULT;
+		}
+		return timeout/1000;
+	} else {
+		return icl_timeout_seconds;
 	}
-	return timeout/1000;
 }
 
 int icl_dbus_start()

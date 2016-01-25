@@ -50,6 +50,17 @@
 #define IOTCON_FUNC_CONTINUE true
 
 /**
+ * @brief Enumeration for mode of iotcon service.
+ *
+ * @since_tizen 3.0
+ */
+
+typedef enum {
+	IOTCON_SERVICE_WIFI, /**< Wifi only */
+	IOTCON_SERVICE_BT, /**< Bluetooth only */
+} iotcon_service_mode_e;
+
+/**
  * @brief Enumeration for type of observation.
  *
  * @since_tizen 3.0
