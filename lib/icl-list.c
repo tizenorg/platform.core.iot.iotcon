@@ -150,6 +150,9 @@ API int iotcon_list_add_byte_str(iotcon_list_h list, unsigned char *val, int len
 	RETVM_IF(IOTCON_TYPE_BYTE_STR != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
 
+	ERR("iotcon_list_add_byte_str() API is not supported yet!!");
+	return IOTCON_ERROR_NONE;
+
 	value = icl_value_create_byte_str(val, len);
 	if (NULL == value) {
 		ERR("icl_value_create_str() Fail");
@@ -189,6 +192,9 @@ API int iotcon_list_add_state(iotcon_list_h list, iotcon_state_h val, int pos)
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_STATE != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
+
+	ERR("iotcon_list_add_state() API is not supported yet!!");
+	return IOTCON_ERROR_NONE;
 
 	value = icl_value_create_state(val);
 	if (NULL == value) {

@@ -323,6 +323,9 @@ API int iotcon_state_add_byte_str(iotcon_state_h state, const char *key,
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(len <= 0, IOTCON_ERROR_INVALID_PARAMETER);
 
+	ERR("iotcon_state_add_byte_str() API is not supported yet!!");
+	return IOTCON_ERROR_NONE;
+
 	value = icl_value_create_byte_str(val, len);
 	if (NULL == value) {
 		ERR("icl_value_create_byte_str() Fail");

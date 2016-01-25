@@ -194,14 +194,28 @@ int main(int argc, char **argv)
 	int ret;
 	GMainLoop *loop;
 	door_resource_s my_door = {0};
+	iotcon_service_mode_e mode;
 
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* connect iotcon */
-	ret = iotcon_connect();
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_connect() Fail(%d)", ret);
-		return -1;
+	if (argc < 2) {
+		ret = iotcon_connect();
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_connect() Fail(%d)", ret);
+			return -1;
+		}
+	} else {
+		if (IOTCON_SERVICE_BT == atoi(argv[1]))
+			mode = IOTCON_SERVICE_BT;
+		else
+			mode = IOTCON_SERVICE_WIFI;
+		ret = iotcon_connect_for_service_mode(mode);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_connect_for_service_mode() Fail(%d)", ret);
+			return -1;
+		}
+		INFO("mode: %d", mode);
 	}
 
 	/* start presence */
