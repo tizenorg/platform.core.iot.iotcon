@@ -32,17 +32,7 @@
 #include "icl-payload.h"
 #include "icl-resource.h"
 #include "icl-response.h"
-
-struct icl_lite_resource {
-	char *uri_path;
-	iotcon_state_h state;
-	int64_t handle;
-	unsigned int sub_id;
-	int properties;
-	iotcon_lite_resource_put_request_cb cb;
-	void *cb_data;
-};
-
+#include "icl-lite-resource.h"
 
 static inline int _icl_lite_resource_set_state(iotcon_state_h state,
 		iotcon_state_h res_state)

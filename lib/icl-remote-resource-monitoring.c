@@ -21,6 +21,7 @@
 #include "iotcon.h"
 #include "iotcon-internal.h"
 #include "icl.h"
+#include "icl-types.h"
 #include "icl-dbus.h"
 #include "ic-utils.h"
 #include "icl-remote-resource.h"
@@ -165,3 +166,27 @@ API int iotcon_remote_resource_stop_monitoring(iotcon_remote_resource_h resource
 
 	return IOTCON_ERROR_NONE;
 }
+
+static GHashTable *icl_monitoring_table;
+
+void icl_remote_resource_monitoring_table_insert(iotcon_remote_resource_h resource,
+		icl_monitoring_container_s *cb_container)
+{
+	RET_IF(NULL == resource);
+	RET_IF(NULL == cb_container);
+
+	if (NULL == icl_monitoring_table) {
+		icl_monitoring_table = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL,
+				icl_destroy_monitoring_container);
+	}
+	g_hash_table_insert(icl_monitoring_table, resource, cb_container);
+}
+
+void icl_remote_resource_monitoring_table_remove(iotcon_remote_resource_h resource)
+{
+	RET_IF(NULL == resource);
+	if (NULL == icl_monitoring_table)
+		return;
+	g_hash_table_remove(icl_monitoring_table, resource);
+}
+
