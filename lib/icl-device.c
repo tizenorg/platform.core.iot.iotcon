@@ -21,12 +21,14 @@
 #include <glib.h>
 
 #include "iotcon.h"
+#include "iotcon-internal.h"
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-representation.h"
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
 #include "icl-device.h"
+#include "icl-ioty.h"
 
 /**
  * @brief The maximum length which can be held in a manufacturer name.
@@ -138,7 +140,7 @@ static void _icl_device_info_conn_cleanup(icl_device_info_s *cb_container)
 	free(cb_container);
 }
 
-API int iotcon_get_device_info(const char *host_address,
+static int _icl_get_device_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_device_info_cb cb,
 		void *user_data)
@@ -150,9 +152,7 @@ API int iotcon_get_device_info(const char *host_address,
 	int64_t signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	timeout = icl_dbus_get_timeout();
 
@@ -201,7 +201,42 @@ API int iotcon_get_device_info(const char *host_address,
 	cb_container->timeout_id = g_timeout_add_seconds(timeout,
 			_icl_timeout_get_device_info, cb_container);
 
-	return ret;
+	return IOTCON_ERROR_NONE;
+}
+
+API int iotcon_get_device_info(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		iotcon_device_info_cb cb,
+		void *user_data)
+{
+	int ret;
+	iotcon_service_mode_e mode;
+
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+
+	mode = icl_get_service_mode();
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_get_device_info(host_address, connectivity_type, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_get_device_info() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		ret = _icl_get_device_info(host_address, connectivity_type, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_icl_get_device_info() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+	}
+
+	return IOTCON_ERROR_NONE;
 }
 
 API int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
@@ -326,7 +361,7 @@ static void _icl_platform_info_conn_cleanup(icl_platform_info_s *cb_container)
 	free(cb_container);
 }
 
-API int iotcon_get_platform_info(const char *host_address,
+static int _icl_get_platform_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_platform_info_cb cb,
 		void *user_data)
@@ -338,9 +373,7 @@ API int iotcon_get_platform_info(const char *host_address,
 	int64_t signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	timeout = icl_dbus_get_timeout();
 
@@ -388,5 +421,40 @@ API int iotcon_get_platform_info(const char *host_address,
 	cb_container->timeout_id = g_timeout_add_seconds(timeout,
 			_icl_timeout_get_platform_info, cb_container);
 
-	return ret;
+	return IOTCON_ERROR_NONE;
+}
+
+API int iotcon_get_platform_info(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		iotcon_platform_info_cb cb,
+		void *user_data)
+{
+	int ret;
+	iotcon_service_mode_e mode;
+
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+
+	mode = icl_get_service_mode();
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_get_platform_info(host_address, connectivity_type, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_get_platform_info() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		ret = _icl_get_platform_info(host_address, connectivity_type, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_icl_get_platform_info() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+	}
+
+	return IOTCON_ERROR_NONE;
 }
