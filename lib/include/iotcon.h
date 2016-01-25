@@ -54,6 +54,27 @@ extern "C" {
  *
  * @since_tizen 3.0
  *
+ * @param[in] mode Service mode of iotcon
+ *
+ * @remarks You must free all resources of the Iotcon by calling iotcon_disconnect()
+ * if Iotcon API is no longer needed.
+ *
+ * @return	0 on success, otherwise a negative error value.
+ * @retval	#IOTCON_ERROR_NONE Successful
+ * @retval	#IOTCON_ERROR_DBUS Dbus error
+ *
+ * @see iotcon_disconnect()
+ * @see iotcon_add_connection_changed_cb()
+ * @see iotcon_remove_connection_changed_cb()
+ */
+int iotcon_connect2(iotcon_service_mode_e mode);
+
+/**
+ * @brief Connects to the iotcon service.
+ * @details Call this function to start Iotcon.
+ *
+ * @since_tizen 3.0
+ *
  * @remarks You must free all resources of the Iotcon by calling iotcon_disconnect()
  * if Iotcon API is no longer needed.
  *

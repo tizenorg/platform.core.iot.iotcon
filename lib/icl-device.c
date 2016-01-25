@@ -28,6 +28,8 @@
 #include "icl-dbus-type.h"
 #include "icl-device.h"
 
+#include "icl-ioty.h"
+
 /**
  * @brief The maximum length which can be held in a manufacturer name.
  *
@@ -149,59 +151,77 @@ API int iotcon_get_device_info(const char *host_address,
 	icl_device_info_s *cb_container;
 	int64_t signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	timeout = icl_dbus_get_timeout();
+	mode = icl_get_service_mode();
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_get_device_info(host_address, connectivity_type, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_get_device_info() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 
-	ic_dbus_call_get_device_info_sync(icl_dbus_get_object(),
-			ic_utils_dbus_encode_str(host_address),
-			connectivity_type,
-			timeout,
-			&signal_number,
-			&ret,
-			NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_get_device_info_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return ret;
+		timeout = icl_dbus_get_timeout();
+
+		ic_dbus_call_get_device_info_sync(icl_dbus_get_object(),
+				ic_utils_dbus_encode_str(host_address),
+				connectivity_type,
+				timeout,
+				&signal_number,
+				&ret,
+				NULL,
+				&error);
+		if (error) {
+			ERR("ic_dbus_call_get_device_info_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			return ret;
+		}
+
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon-daemon Fail(%d)", ret);
+			return icl_dbus_convert_daemon_error(ret);
+		}
+
+		snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_DEVICE,
+				signal_number);
+
+		cb_container = calloc(1, sizeof(icl_device_info_s));
+		if (NULL == cb_container) {
+			ERR("calloc() Fail(%d)", errno);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+
+		cb_container->cb = cb;
+		cb_container->user_data = user_data;
+
+		sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
+				_icl_device_info_conn_cleanup, _icl_device_info_cb);
+		if (0 == sub_id) {
+			ERR("icl_dbus_subscribe_signal() Fail");
+			free(cb_container);
+			return IOTCON_ERROR_DBUS;
+		}
+
+		cb_container->id = sub_id;
+
+		cb_container->timeout_id = g_timeout_add_seconds(timeout,
+				_icl_timeout_get_device_info, cb_container);
+
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
-	}
-
-	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_DEVICE,
-			signal_number);
-
-	cb_container = calloc(1, sizeof(icl_device_info_s));
-	if (NULL == cb_container) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
-
-	cb_container->cb = cb;
-	cb_container->user_data = user_data;
-
-	sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
-			_icl_device_info_conn_cleanup, _icl_device_info_cb);
-	if (0 == sub_id) {
-		ERR("icl_dbus_subscribe_signal() Fail");
-		free(cb_container);
-		return IOTCON_ERROR_DBUS;
-	}
-
-	cb_container->id = sub_id;
-
-	cb_container->timeout_id = g_timeout_add_seconds(timeout,
-			_icl_timeout_get_device_info, cb_container);
-
-	return ret;
+	return IOTCON_ERROR_NONE;
 }
 
 API int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
@@ -331,62 +351,80 @@ API int iotcon_get_platform_info(const char *host_address,
 		iotcon_platform_info_cb cb,
 		void *user_data)
 {
+
 	int ret, timeout;
 	unsigned int sub_id;
 	GError *error = NULL;
 	icl_platform_info_s *cb_container;
 	int64_t signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	timeout = icl_dbus_get_timeout();
+	mode = icl_get_service_mode();
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_get_platform_info(host_address, connectivity_type, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_get_platform_info() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 
-	ic_dbus_call_get_platform_info_sync(icl_dbus_get_object(),
-			ic_utils_dbus_encode_str(host_address),
-			connectivity_type,
-			timeout,
-			&signal_number,
-			&ret,
-			NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_get_platform_info_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return ret;
+		timeout = icl_dbus_get_timeout();
+
+		ic_dbus_call_get_platform_info_sync(icl_dbus_get_object(),
+				ic_utils_dbus_encode_str(host_address),
+				connectivity_type,
+				timeout,
+				&signal_number,
+				&ret,
+				NULL,
+				&error);
+		if (error) {
+			ERR("ic_dbus_call_get_platform_info_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			return ret;
+		}
+
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon-daemon Fail(%d)", ret);
+			return icl_dbus_convert_daemon_error(ret);
+		}
+
+		snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_PLATFORM,
+				signal_number);
+
+		cb_container = calloc(1, sizeof(icl_platform_info_s));
+		if (NULL == cb_container) {
+			ERR("calloc() Fail(%d)", errno);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+
+		cb_container->cb = cb;
+		cb_container->user_data = user_data;
+
+		sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
+				_icl_platform_info_conn_cleanup, _icl_platform_info_cb);
+		if (0 == sub_id) {
+			ERR("icl_dbus_subscribe_signal() Fail");
+			free(cb_container);
+			return IOTCON_ERROR_DBUS;
+		}
+
+		cb_container->id = sub_id;
+		cb_container->timeout_id = g_timeout_add_seconds(timeout,
+				_icl_timeout_get_platform_info, cb_container);
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
-	}
-
-	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_PLATFORM,
-			signal_number);
-
-	cb_container = calloc(1, sizeof(icl_platform_info_s));
-	if (NULL == cb_container) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
-
-	cb_container->cb = cb;
-	cb_container->user_data = user_data;
-
-	sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
-			_icl_platform_info_conn_cleanup, _icl_platform_info_cb);
-	if (0 == sub_id) {
-		ERR("icl_dbus_subscribe_signal() Fail");
-		free(cb_container);
-		return IOTCON_ERROR_DBUS;
-	}
-
-	cb_container->id = sub_id;
-	cb_container->timeout_id = g_timeout_add_seconds(timeout,
-			_icl_timeout_get_platform_info, cb_container);
-
-	return ret;
+	return IOTCON_ERROR_NONE;
 }
