@@ -1,10 +1,31 @@
 <manifest>
 	<define>
 		<domain name="iotcon-test" />
+		<permit>
+			<smack permit="system::use_internet" type="w" />
+			<smack permit="dbus" type="rwx" />
+			<smack permit="system::debugging_network" type="w" />
+		</permit>
 		<request>
 			<smack request="iotcon" type="rw" />
+			<smack request="system::use_internet" type="w" />
+			<smack request="dbus" type="rwx" />
 			<smack request="device::app_logging" type="w" />
 			<smack request="device::sys_logging" type="w" />
+			<smack request="system::homedir" type="x" />
+			<smack request="tizen::vconf::setting::admin" type="rl" />
+			<smack request="tizen::vconf::public::r::platform::rw" type="rl" />
+
+			<!-- http://tizen.org/privilege/network.get -->
+			<smack request="connman" type="rw" />
+			<smack request="connman::get" type="rw" />
+			<smack request="net-config" type="rw" />
+			<smack request="privilege::tizen::network.get" type="rw" />
+			<smack request="telephony_framework::api_ps_public" type="rw" />
+			<smack request="telephony_framework::properties" type="rw" />
+			<smack request="tizen::vconf::network" type="r" />
+
+			<smack request="system::debugging_network" type="w" />
 		</request>
 	</define>
 	<assign>
