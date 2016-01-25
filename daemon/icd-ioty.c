@@ -28,12 +28,12 @@
 #include "iotcon.h"
 #include "ic-dbus.h"
 #include "ic-utils.h"
+#include "ic-ioty-utils.h"
 #include "icd.h"
 #include "icd-cynara.h"
 #include "icd-payload.h"
 #include "icd-dbus.h"
 #include "icd-ioty.h"
-#include "icd-ioty-type.h"
 #include "icd-ioty-ocprocess.h"
 
 #define ICD_UUID_LENGTH 37
@@ -198,7 +198,7 @@ int icd_ioty_unregister_resource(OCResourceHandle handle)
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCDeleteResource() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -223,7 +223,7 @@ int icd_ioty_bind_interface(OCResourceHandle handle, iotcon_interface_e iface)
 
 	if (OC_STACK_OK != result) {
 		ERR("OCBindResourceInterfaceToResource() Fail(%d)", result);
-		return icd_ioty_convert_error(result);
+		return ic_ioty_utils_parse_oic_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -240,7 +240,7 @@ int icd_ioty_bind_type(OCResourceHandle handle, const char *resource_type)
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCBindResourceTypeToResource() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -257,7 +257,7 @@ int icd_ioty_bind_resource(OCResourceHandle parent, OCResourceHandle child)
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCBindResource() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -274,7 +274,7 @@ int icd_ioty_unbind_resource(OCResourceHandle parent, OCResourceHandle child)
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCUnBindResource() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -336,7 +336,7 @@ int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers,
 		return IOTCON_ERROR_NONE;
 	} else if (OC_STACK_OK != ret) {
 		ERR("OCNotifyListOfObservers() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -385,8 +385,8 @@ int icd_ioty_send_response(GVariant *resp)
 			&request_handle,
 			&resource_handle);
 
-	response.requestHandle = ICD_INT64_TO_POINTER(request_handle);
-	response.resourceHandle = ICD_INT64_TO_POINTER(resource_handle);
+	response.requestHandle = IC_INT64_TO_POINTER(request_handle);
+	response.resourceHandle = IC_INT64_TO_POINTER(resource_handle);
 	response.ehResult = (OCEntityHandlerResult)result;
 
 	options_size = g_variant_iter_n_children(options);
@@ -415,7 +415,7 @@ int icd_ioty_send_response(GVariant *resp)
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCDoResponse() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -464,7 +464,7 @@ int icd_ioty_find_resource(const char *host_address,
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
 
-	coap_str = is_secure ? ICD_IOTY_COAPS : ICD_IOTY_COAP;
+	coap_str = is_secure ? IC_IOTY_COAPS : IC_IOTY_COAP;
 
 	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, host_address)) {
 		len = snprintf(uri, sizeof(uri), "%s", OC_RSRVD_WELL_KNOWN_URI);
@@ -493,7 +493,7 @@ int icd_ioty_find_resource(const char *host_address,
 	cbdata.cb = icd_ioty_ocprocess_find_cb;
 	cbdata.cd = _ioty_free_signal_context;
 
-	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
+	oic_conn_type = ic_ioty_utils_convert_conn_type(conn_type);
 
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. */
@@ -505,14 +505,13 @@ int icd_ioty_find_resource(const char *host_address,
 		ERR("OCDoResource() Fail(%d)", result);
 		free(context->bus_name);
 		free(context);
-		return icd_ioty_convert_error(result);
+		return ic_ioty_utils_parse_oic_error(result);
 	}
 
 	g_timeout_add_seconds(timeout, _icd_ioty_discovery_timeout, handle);
 
 	return IOTCON_ERROR_NONE;
 }
-
 
 /*
  * returned string SHOULD be released by you
@@ -701,11 +700,11 @@ static gboolean _icd_ioty_crud(int type,
 	if (repr)
 		payload = (OCPayload*)icd_payload_representation_from_gvariant(repr);
 
-	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
+	oic_conn_type = ic_ioty_utils_convert_conn_type(conn_type);
 
-	ret = icd_ioty_get_dev_addr(host, conn_type, &dev_addr);
+	ret = ic_ioty_utils_convert_dev_address(host, conn_type, &dev_addr);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_ioty_get_dev_addr() Fail(%d)", ret);
+		ERR("ic_ioty_utils_convert_dev_address() Fail(%d)", ret);
 		icd_ioty_complete_error(type, invocation, IOTCON_ERROR_IOTIVITY);
 		free(uri);
 		return TRUE;
@@ -721,7 +720,7 @@ static gboolean _icd_ioty_crud(int type,
 
 	if (OC_STACK_OK != result) {
 		ERR("OCDoResource() Fail(%d)", result);
-		icd_ioty_complete_error(type, invocation, icd_ioty_convert_error(result));
+		icd_ioty_complete_error(type, invocation, ic_ioty_utils_parse_oic_error(result));
 		return TRUE;
 	}
 
@@ -834,11 +833,11 @@ OCDoHandle icd_ioty_observer_start(GVariant *resource, int observe_policy,
 		method = OC_REST_OBSERVE_ALL;
 	}
 
-	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
+	oic_conn_type = ic_ioty_utils_convert_conn_type(conn_type);
 
-	ret = icd_ioty_get_dev_addr(host, conn_type, &dev_addr);
+	ret = ic_ioty_utils_convert_dev_address(host, conn_type, &dev_addr);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_ioty_get_dev_addr() Fail(%d)", ret);
+		ERR("ic_ioty_utils_convert_dev_address() Fail(%d)", ret);
 		free(uri);
 		g_variant_iter_free(options);
 		return NULL;
@@ -899,7 +898,7 @@ int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options)
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCCancel() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -940,7 +939,7 @@ int icd_ioty_get_info(int type, const char *host_address, int conn_type, int tim
 	cbdata.cb = icd_ioty_ocprocess_info_cb;
 	cbdata.cd = _ioty_free_signal_context;
 
-	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
+	oic_conn_type = ic_ioty_utils_convert_conn_type(conn_type);
 
 	icd_ioty_csdk_lock();
 	/* TODO : QoS is come from lib. And user can set QoS to client structure.  */
@@ -952,7 +951,7 @@ int icd_ioty_get_info(int type, const char *host_address, int conn_type, int tim
 		ERR("OCDoResource() Fail(%d)", result);
 		free(context->bus_name);
 		free(context);
-		return icd_ioty_convert_error(result);
+		return ic_ioty_utils_parse_oic_error(result);
 	}
 
 	g_timeout_add_seconds(timeout, _icd_ioty_discovery_timeout, handle);
@@ -981,7 +980,7 @@ static int _ioty_set_device_info()
 	if (OC_STACK_OK != ret) {
 		ERR("OCSetDeviceInfo() Fail(%d)", ret);
 		free(device_name);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -1093,7 +1092,7 @@ int icd_ioty_set_platform_info()
 	if (OC_STACK_OK != ret) {
 		ERR("OCSetPlatformInfo() Fail(%d)", ret);
 		_ioty_free_platform_info(platform_info);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 	_ioty_free_platform_info(platform_info);
 
@@ -1218,7 +1217,7 @@ OCDoHandle icd_ioty_subscribe_presence(int type, const char *host_address, int c
 	_icd_ioty_presence_table_create();
 
 	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, host_address) || '\0' == host_address[0])
-		address = ICD_MULTICAST_ADDRESS;
+		address = IC_IOTY_MULTICAST_ADDRESS;
 	else
 		address = host_address;
 
@@ -1248,7 +1247,7 @@ OCDoHandle icd_ioty_subscribe_presence(int type, const char *host_address, int c
 		cbdata.cb = icd_ioty_ocprocess_presence_cb;
 	}
 
-	oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
+	oic_conn_type = ic_ioty_utils_convert_conn_type(conn_type);
 
 	icd_ioty_csdk_lock();
 	result = OCDoResource(&handle, OC_REST_PRESENCE, uri, NULL, NULL, oic_conn_type,
@@ -1274,7 +1273,7 @@ int icd_ioty_unsubscribe_presence(OCDoHandle handle, const char *host_address)
 	const char *address;
 
 	if (IC_STR_EQUAL == strcmp(IC_STR_NULL, host_address) || '\0' == host_address[0])
-		address = ICD_MULTICAST_ADDRESS;
+		address = IC_IOTY_MULTICAST_ADDRESS;
 	else
 		address = host_address;
 
@@ -1287,7 +1286,7 @@ int icd_ioty_unsubscribe_presence(OCDoHandle handle, const char *host_address)
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCCancel() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -1303,7 +1302,7 @@ int icd_ioty_start_presence(unsigned int time_to_live)
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCStartPresence() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -1319,7 +1318,7 @@ int icd_ioty_stop_presence()
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
 		ERR("OCStopPresence() Fail(%d)", ret);
-		return icd_ioty_convert_error(ret);
+		return ic_ioty_utils_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -1379,9 +1378,9 @@ static icd_encap_info_s* _icd_ioty_encap_table_add(const char *uri_path,
 		return NULL;
 	}
 
-	ret = icd_ioty_get_dev_addr(host_address, conn_type, &encap_info->dev_addr);
+	ret = ic_ioty_utils_convert_dev_address(host_address, conn_type, &encap_info->dev_addr);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_ioty_get_dev_addr() Fail(%d)", ret);
+		ERR("ic_ioty_utils_convert_dev_address() Fail(%d)", ret);
 		free(encap_info);
 		return NULL;
 	}
@@ -1397,7 +1396,7 @@ static icd_encap_info_s* _icd_ioty_encap_table_add(const char *uri_path,
 	encap_info->worker_ctx->is_valid = true;
 
 	encap_info->uri_path = ic_utils_strdup(uri_path);
-	encap_info->oic_conn_type = icd_ioty_conn_type_to_oic_conn_type(conn_type);
+	encap_info->oic_conn_type = ic_ioty_utils_convert_conn_type(conn_type);
 	snprintf(key_str, sizeof(key_str), "%s%s", uri_path, host_address);
 	encap_info->signal_number = icd_dbus_generate_signal_number();
 
