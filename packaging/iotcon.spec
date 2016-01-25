@@ -18,6 +18,8 @@ BuildRequires:  pkgconfig(capi-base-common)
 BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(capi-system-system-settings)
 BuildRequires:  pkgconfig(iotivity)
+BuildRequires:  pkgconfig(capi-network-bluetooth)
+BuildRequires:  pkgconfig(uuid)
 %if 0%{?tizen_version_major} >= 3
 BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
