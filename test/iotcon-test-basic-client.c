@@ -573,18 +573,30 @@ int main(int argc, char **argv)
 	FN_CALL;
 	int ret;
 	GMainLoop *loop;
+	iotcon_service_mode_e mode;
 
 	loop = g_main_loop_new(NULL, FALSE);
 
+	if (argc < 2)
+		mode = IOTCON_SERVICE_WIFI;
+	else {
+		if (IOTCON_SERVICE_BT == atoi(argv[1]))
+			mode = IOTCON_SERVICE_BT;
+		else
+			mode = IOTCON_SERVICE_WIFI;
+	}
+
+	INFO("mode: %d", mode);
+
 	/* connect iotcon */
-	ret = iotcon_connect();
+	ret = iotcon_connect2(mode);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_connect() Fail(%d)", ret);
+		ERR("iotcon_connect2() Fail(%d)", ret);
 		return -1;
 	}
 
 	/* find door typed resources */
-	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_ALL,
 			DOOR_RESOURCE_TYPE, false, _found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
