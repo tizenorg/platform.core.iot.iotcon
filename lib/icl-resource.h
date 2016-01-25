@@ -50,6 +50,7 @@ struct icl_resource {
 	void *user_data;
 	unsigned int sub_id;
 	int64_t handle;
+	int64_t handle_lib;
 	iotcon_resource_h children[ICL_CONTAINED_RESOURCES_MAX];
 	iotcon_observers_h observers;
 };

@@ -229,11 +229,13 @@ inline int icl_dbus_convert_dbus_error(int error)
 	return ret;
 }
 
+static int _timeout = ICL_DBUS_TIMEOUT_DEFAULT;
+
 int icl_dbus_set_timeout(int timeout_seconds)
 {
-	RETV_IF(NULL == icl_dbus_object, IOTCON_ERROR_DBUS);
-
-	g_dbus_proxy_set_default_timeout(G_DBUS_PROXY(icl_dbus_object), timeout_seconds * 1000);
+	if (icl_dbus_object)
+		g_dbus_proxy_set_default_timeout(G_DBUS_PROXY(icl_dbus_object), timeout_seconds * 1000);
+	_timeout = timeout_seconds;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -242,14 +244,16 @@ int icl_dbus_get_timeout()
 {
 	gint timeout;
 
-	RETV_IF(NULL == icl_dbus_object, ICL_DBUS_TIMEOUT_DEFAULT);
-
-	timeout = g_dbus_proxy_get_default_timeout(G_DBUS_PROXY(icl_dbus_object));
-	if (timeout <= 0) {
-		ERR("Invalid timeout (%d)", timeout);
-		return ICL_DBUS_TIMEOUT_DEFAULT;
+	if (icl_dbus_object) {
+		timeout = g_dbus_proxy_get_default_timeout(G_DBUS_PROXY(icl_dbus_object));
+		if (timeout <= 0) {
+			ERR("Invalid timeout (%d)", timeout);
+			return ICL_DBUS_TIMEOUT_DEFAULT;
+		}
+		return timeout/1000;
+	} else {
+		return _timeout;
 	}
-	return timeout/1000;
 }
 
 int icl_dbus_start()

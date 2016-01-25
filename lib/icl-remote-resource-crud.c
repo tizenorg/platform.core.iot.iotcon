@@ -32,6 +32,8 @@
 #include "icl-remote-resource.h"
 #include "icl-payload.h"
 
+#include "icl-ioty.h"
+
 typedef struct {
 	iotcon_remote_resource_response_cb cb;
 	void *user_data;
@@ -220,6 +222,9 @@ static void _icl_on_post_cb(GObject *object, GAsyncResult *g_async_res,
 API int iotcon_remote_resource_get(iotcon_remote_resource_h resource,
 		iotcon_query_h query, iotcon_remote_resource_response_cb cb, void *user_data)
 {
+	/* TEST */
+	return icl_ioty_remote_resource_get(resource, query, cb, user_data);
+
 	GVariant *arg_query;
 	GVariant *arg_remote_resource;
 	icl_on_response_s *cb_container;
@@ -257,6 +262,9 @@ API int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
 		iotcon_remote_resource_response_cb cb,
 		void *user_data)
 {
+	/* TEST */
+	return icl_ioty_remote_resource_put(resource, repr, query, cb, user_data);
+
 	GVariant *arg_repr;
 	GVariant *arg_remote_resource;
 	GVariant *arg_query;
@@ -303,6 +311,9 @@ API int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
 		iotcon_remote_resource_response_cb cb,
 		void *user_data)
 {
+	/* TEST */
+	return icl_ioty_remote_resource_post(resource, repr, query, cb, user_data);
+
 	GVariant *arg_repr;
 	GVariant *arg_query;
 	GVariant *arg_remote_resource;
@@ -353,6 +364,9 @@ static void _icl_on_delete_cb(GObject *object, GAsyncResult *g_async_res,
 API int iotcon_remote_resource_delete(iotcon_remote_resource_h resource,
 		iotcon_remote_resource_response_cb cb, void *user_data)
 {
+	/* TEST */
+	return icl_ioty_remote_resource_delete(resource, cb, user_data);
+
 	GVariant *arg_remote_resource;
 	icl_on_response_s *cb_container;
 
@@ -464,6 +478,9 @@ API int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resourc
 		iotcon_remote_resource_observe_cb cb,
 		void *user_data)
 {
+	/* TEST */
+	return icl_ioty_remote_resource_observe_register(resource, observe_policy, query, cb, user_data);
+
 	int ret;
 	unsigned int sub_id;
 	GError *error = NULL;
@@ -532,6 +549,9 @@ API int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resourc
 
 API int iotcon_remote_resource_observe_deregister(iotcon_remote_resource_h resource)
 {
+	/* TEST */
+	return icl_ioty_remote_resource_observe_deregister(resource);
+
 	int ret;
 	GError *error = NULL;
 	GVariant *arg_options;

@@ -1,0 +1,139 @@
+/*
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_H__
+#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_H__
+
+#include <glib.h>
+#include <octypes.h>
+
+#include "iotcon-client.h"
+#include "iotcon-types.h"
+
+typedef enum {
+	ICL_FIND_RESOURCE,
+	ICL_GET_DEVICE_INFO,
+	ICL_GET_PLATFORM_INFO,
+	ICL_ADD_PRESENCE,
+} icl_operation_e;
+
+typedef struct {
+	icl_operation_e op;
+	void *cb;
+	void *user_data;
+	bool found;
+	int timeout;
+	OCDoHandle handle;
+} icl_cb_s;
+
+void icl_ioty_csdk_lock();
+void icl_ioty_csdk_unlock();
+
+void icl_ioty_deinit(GThread *thread);
+GThread* icl_ioty_init();
+
+/* client APIs */
+int icl_ioty_find_resource(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		const char *resource_type,
+		bool is_secure,
+		iotcon_found_resource_cb cb,
+		void *user_data);
+int icl_ioty_get_device_info(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		iotcon_device_info_cb cb,
+		void *user_data);
+int icl_ioty_get_platform_info(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		iotcon_platform_info_cb cb,
+		void *user_data);
+
+int icl_ioty_add_presence_cb(const char *host_address,
+		iotcon_connectivity_type_e connectivity_type,
+		const char *resource_type,
+		iotcon_presence_cb cb,
+		void *user_data,
+		iotcon_presence_h *presence_handle);
+int icl_ioty_remove_presence_cb(iotcon_presence_h presence);
+
+int icl_ioty_remote_resource_observe_register(
+		iotcon_remote_resource_h resource,
+		iotcon_observe_policy_e observe_policy,
+		iotcon_query_h query,
+		iotcon_remote_resource_observe_cb cb,
+		void *user_data);
+int icl_ioty_remote_resource_observe_deregister(iotcon_remote_resource_h resource);
+int icl_ioty_remote_resource_get(iotcon_remote_resource_h resource,
+		iotcon_query_h query, iotcon_remote_resource_response_cb cb, void *user_data);
+int icl_ioty_remote_resource_put(iotcon_remote_resource_h resource,
+		iotcon_representation_h repr,
+		iotcon_query_h query,
+		iotcon_remote_resource_response_cb cb,
+		void *user_data);
+int icl_ioty_remote_resource_post(iotcon_remote_resource_h resource,
+		iotcon_representation_h repr,
+		iotcon_query_h query,
+		iotcon_remote_resource_response_cb cb,
+		void *user_data);
+int icl_ioty_remote_resource_delete(iotcon_remote_resource_h resource,
+		iotcon_remote_resource_response_cb cb,
+		void *user_data);
+int icl_ioty_remote_resource_observe_cancel(iotcon_remote_resource_h resource,
+		int64_t handle);
+int icl_ioty_remote_resource_start_monitoring(iotcon_remote_resource_h resource,
+		iotcon_remote_resource_state_changed_cb cb, void *user_data);
+int icl_ioty_remote_resource_stop_monitoring(iotcon_remote_resource_h resource);
+int icl_ioty_remote_resource_start_caching(iotcon_remote_resource_h resource,
+		iotcon_remote_resource_cached_representation_changed_cb cb, void *user_data);
+int icl_ioty_remote_resource_stop_caching(iotcon_remote_resource_h resource);
+
+/* server */
+int icl_ioty_start_presence(unsigned int time_to_live);
+int icl_ioty_stop_presence();
+int icl_ioty_resource_create(const char *uri_path,
+		iotcon_resource_types_h res_types,
+		int ifaces,
+		int properties,
+		iotcon_request_handler_cb cb,
+		void *user_data,
+		iotcon_resource_h *resource_handle);
+int icl_ioty_resource_bind_type(iotcon_resource_h resource,
+		const char *resource_type);
+int icl_ioty_resource_bind_interface(iotcon_resource_h resource,
+		iotcon_interface_e iface);
+int icl_ioty_resource_bind_child_resource(iotcon_resource_h parent,
+		iotcon_resource_h child);
+int icl_ioty_resource_unbind_child_resource(iotcon_resource_h parent,
+		iotcon_resource_h child);
+int icl_ioty_resource_notify(iotcon_resource_h resource,
+		iotcon_representation_h repr, iotcon_observers_h observers, iotcon_qos_e qos);
+int icl_ioty_resource_destroy(iotcon_resource_h resource);
+
+int icl_ioty_lite_resource_create(const char *uri_path,
+		iotcon_resource_types_h res_types,
+		int properties,
+		iotcon_state_h state,
+		iotcon_lite_resource_post_request_cb cb,
+		void *user_data,
+		iotcon_lite_resource_h *resource_handle);
+int icl_ioty_lite_resource_destroy(iotcon_lite_resource_h resource);
+int icl_ioty_lite_resource_update_state(iotcon_lite_resource_h resource,
+		iotcon_state_h state);
+int icl_ioty_lite_resource_notify(iotcon_lite_resource_h resource);
+
+int icl_ioty_response_send(iotcon_response_h response);
+
+#endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_H__*/
+

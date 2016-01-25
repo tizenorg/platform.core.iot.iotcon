@@ -32,17 +32,8 @@
 #include "icl-payload.h"
 #include "icl-resource.h"
 #include "icl-response.h"
-
-struct icl_lite_resource {
-	char *uri_path;
-	iotcon_state_h state;
-	int64_t handle;
-	unsigned int sub_id;
-	int properties;
-	iotcon_lite_resource_post_request_cb cb;
-	void *cb_data;
-};
-
+#include "icl-lite-resource.h"
+#include "icl-ioty.h"
 
 static inline int _icl_lite_resource_set_state(iotcon_state_h state,
 		iotcon_state_h res_state)
@@ -293,6 +284,9 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		void *user_data,
 		iotcon_lite_resource_h *resource_handle)
 {
+	/* TEST */
+	return icl_ioty_lite_resource_create(uri_path, res_types, properties, state, cb, user_data, resource_handle);
+
 	int ret, iface;
 	unsigned int sub_id;
 	const gchar **types;
@@ -373,6 +367,9 @@ API int iotcon_lite_resource_create(const char *uri_path,
 
 API int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource)
 {
+	/* TEST */
+	return icl_ioty_lite_resource_destroy(resource);
+
 	int ret;
 	GError *error = NULL;
 
@@ -413,6 +410,9 @@ API int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource)
 API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 		iotcon_state_h state)
 {
+	/* TEST */
+	return icl_ioty_lite_resource_update_state(resource, state);
+
 	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);

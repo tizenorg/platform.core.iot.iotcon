@@ -30,6 +30,8 @@
 #include "icl-resource-types.h"
 #include "icl-payload.h"
 
+#include "icl-ioty.h"
+
 #define ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL 3600 /* 60 min */
 
 typedef struct {
@@ -112,6 +114,9 @@ API int iotcon_find_resource(const char *host_address,
 		iotcon_found_resource_cb cb,
 		void *user_data)
 {
+	/* TEST */
+	return icl_ioty_find_resource(host_address, connectivity_type, resource_type, is_secure, cb, user_data);
+
 	int ret, timeout;
 	unsigned int sub_id;
 	GError *error = NULL;
