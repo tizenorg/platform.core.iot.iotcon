@@ -13,20 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__
-#define __IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_REMOTE_RESOURCE_CACHING_H__
+#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REMOTE_RESOURCE_CACHING_H__
 
-#include <stdint.h>
-#include <glib.h>
-#include "ic-dbus.h"
+#include "iotcon-types.h"
+#include "icl-struct.h"
 
-icDbus* icd_dbus_get_object();
-int64_t icd_dbus_generate_signal_number();
-int icd_dbus_client_list_get_resource_info(void *handle, int64_t *signal_number,
-		gchar **bus_name);
-int icd_dbus_emit_signal(const char *dest, const char *signal_name,
-		GVariant *value);
-unsigned int icd_dbus_init();
-void icd_dbus_deinit(unsigned int id);
+void icl_remote_resource_caching_table_insert(iotcon_remote_resource_h resource,
+		icl_caching_container_s *cb_container);
+void icl_remote_resource_caching_table_remove(iotcon_remote_resource_h resource);
 
-#endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_DBUS_H__*/
+#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REMOTE_RESOURCE_CACHING_H__ */

@@ -26,27 +26,8 @@
 #include "icl.h"
 #include "icl-resource-types.h"
 #include "icl-dbus.h"
+#include "icl-presence.h"
 
-#define ICL_PRESENCE_TTL_SECONDS_MAX (60 * 60 * 24) /* 60 sec/min * 60 min/hr * 24 hr/day */
-
-typedef struct icl_presence {
-	char *host_address;
-	iotcon_connectivity_type_e connectivity_type;
-	char *resource_type;
-	iotcon_presence_cb cb;
-	void *user_data;
-	unsigned int sub_id;
-	int64_t handle;
-} icl_presence_s;
-
-
-typedef struct icl_presence_response {
-	char *host_address;
-	iotcon_connectivity_type_e connectivity_type;
-	char *resource_type;
-	iotcon_presence_result_e result;
-	iotcon_presence_trigger_e trigger;
-} icl_presence_response_s;
 
 
 API int iotcon_start_presence(unsigned int time_to_live)
@@ -57,7 +38,7 @@ API int iotcon_start_presence(unsigned int time_to_live)
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(ICL_PRESENCE_TTL_SECONDS_MAX < time_to_live, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(IC_PRESENCE_TTL_SECONDS_MAX < time_to_live, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ic_dbus_call_start_presence_sync(icl_dbus_get_object(), time_to_live, &ret, NULL,
 			&error);

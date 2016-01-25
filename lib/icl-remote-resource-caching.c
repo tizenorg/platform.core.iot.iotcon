@@ -26,6 +26,7 @@
 #include "icl.h"
 #include "icl-dbus.h"
 #include "icl-dbus-type.h"
+#include "icl-struct.h"
 #include "icl-representation.h"
 #include "icl-list.h"
 #include "icl-value.h"
@@ -206,5 +207,28 @@ API int iotcon_remote_resource_get_cached_representation(
 	*representation = resource->cached_repr;
 
 	return IOTCON_ERROR_NONE;
+}
+
+static GHashTable *icl_caching_table;
+
+void icl_remote_resource_caching_table_insert(iotcon_remote_resource_h resource,
+		icl_caching_container_s *cb_container)
+{
+	RET_IF(NULL == resource);
+	RET_IF(NULL == cb_container);
+
+	if (NULL == icl_caching_table) {
+		icl_caching_table = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL,
+				icl_destroy_caching_container);
+	}
+	g_hash_table_insert(icl_caching_table, resource, cb_container);
+}
+
+void icl_remote_resource_caching_table_remove(iotcon_remote_resource_h resource)
+{
+	RET_IF(NULL == resource);
+	if (NULL == icl_caching_table)
+		return;
+	g_hash_table_remove(icl_caching_table, resource);
 }
 
