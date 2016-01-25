@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_LITE_RESOURCE_H__
+#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_LITE_RESOURCE_H__
 
-#include "iotcon.h"
-#include "ic-common.h"
-#include "ic-log.h"
+#include <stdint.h>
+#include "iotcon-lite-resource.h"
+#include "iotcon-types.h"
 
-#ifdef API
-#undef API
-#endif
-#define API __attribute__((visibility("default")))
+struct icl_lite_resource {
+	char *uri_path;
+	iotcon_state_h state;
+	int64_t handle;
+	unsigned int sub_id;
+	int properties;
+	iotcon_lite_resource_post_request_cb cb;
+	void *cb_data;
+};
 
-iotcon_service_mode_e icl_get_service_mode();
+#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_LITE_RESOURCE_H__ */
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__ */
