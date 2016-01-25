@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_REMOTE_RESOURCE_MONITORING_H__
+#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REMOTE_RESOURCE_MONITORING_H__
 
-#include "iotcon.h"
-#include "ic-common.h"
-#include "ic-log.h"
+#include "iotcon-types.h"
+#include "icl-types.h"
 
-#ifdef API
-#undef API
-#endif
-#define API __attribute__((visibility("default")))
+void icl_remote_resource_monitoring_table_insert(iotcon_remote_resource_h resource,
+		icl_monitoring_container_s *cb_container);
+int icl_remote_resource_monitoring_table_remove(iotcon_remote_resource_h resource);
 
-iotcon_service_mode_e icl_get_service_mode();
+#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REMOTE_RESOURCE_MONITORING_H__ */
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__ */
