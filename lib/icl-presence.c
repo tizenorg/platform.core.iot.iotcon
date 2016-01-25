@@ -26,27 +26,9 @@
 #include "icl.h"
 #include "icl-resource-types.h"
 #include "icl-dbus.h"
+#include "icl-presence.h"
 
 #define ICL_PRESENCE_TTL_SECONDS_MAX (60 * 60 * 24) /* 60 sec/min * 60 min/hr * 24 hr/day */
-
-typedef struct icl_presence {
-	char *host_address;
-	iotcon_connectivity_type_e connectivity_type;
-	char *resource_type;
-	iotcon_presence_cb cb;
-	void *user_data;
-	unsigned int sub_id;
-	int64_t handle;
-} icl_presence_s;
-
-
-typedef struct icl_presence_response {
-	char *host_address;
-	iotcon_connectivity_type_e connectivity_type;
-	char *resource_type;
-	iotcon_presence_result_e result;
-	iotcon_presence_trigger_e trigger;
-} icl_presence_response_s;
 
 
 API int iotcon_start_presence(unsigned int time_to_live)

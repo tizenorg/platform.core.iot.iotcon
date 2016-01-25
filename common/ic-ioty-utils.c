@@ -21,11 +21,12 @@
 #include <octypes.h>
 
 #include "iotcon-types.h"
+#include "ic-common.h"
+#include "ic-log.h"
 #include "ic-utils.h"
-#include "icd.h"
-#include "icd-ioty-type.h"
+#include "ic-ioty-utils.h"
 
-OCConnectivityType icd_ioty_conn_type_to_oic_conn_type(int conn_type)
+OCConnectivityType ic_ioty_utils_convert_conn_type(int conn_type)
 {
 	OCConnectivityType oic_conn_type = CT_DEFAULT;
 
@@ -50,8 +51,7 @@ OCConnectivityType icd_ioty_conn_type_to_oic_conn_type(int conn_type)
 	return oic_conn_type;
 }
 
-
-int icd_ioty_transport_flag_to_conn_type(OCTransportAdapter adapter,
+int ic_ioty_utils_parse_oic_transport(OCTransportAdapter adapter,
 		OCTransportFlags flag)
 {
 	int conn_type = IOTCON_CONNECTIVITY_ALL;
@@ -106,7 +106,7 @@ static void _icd_ioty_conn_type_to_oic_transport_type(int conn_type,
 }
 
 
-int icd_ioty_get_dev_addr(const char *host_address, int conn_type, OCDevAddr *dev_addr)
+int ic_ioty_utils_convert_dev_address(const char *host_address, int conn_type, OCDevAddr *dev_addr)
 {
 	char host[PATH_MAX] = {0};
 	char *dev_host, *ptr = NULL;
@@ -140,12 +140,12 @@ int icd_ioty_get_dev_addr(const char *host_address, int conn_type, OCDevAddr *de
 }
 
 
-int icd_ioty_get_host_address(OCDevAddr *dev_addr, char **host_address, int *conn_type)
+int ic_ioty_utils_parse_oic_dev_address(OCDevAddr *dev_addr, char **host_address, int *conn_type)
 {
 	int connectivity_type;
 	char host_addr[PATH_MAX] = {0};
 
-	connectivity_type = icd_ioty_transport_flag_to_conn_type(dev_addr->adapter,
+	connectivity_type = ic_ioty_utils_parse_oic_transport(dev_addr->adapter,
 			dev_addr->flags);
 
 	switch (connectivity_type) {
@@ -174,7 +174,7 @@ int icd_ioty_get_host_address(OCDevAddr *dev_addr, char **host_address, int *con
 }
 
 
-int icd_ioty_oic_properties_to_properties(int oic_properties)
+int ic_ioty_utils_parse_oic_properties(int oic_properties)
 {
 	int prop = IOTCON_RESOURCE_NO_PROPERTY;
 
@@ -198,3 +198,65 @@ int icd_ioty_oic_properties_to_properties(int oic_properties)
 
 	return prop;
 }
+
+int ic_ioty_utils_parse_oic_error(int ret)
+{
+	switch (ret) {
+	case OC_STACK_NO_MEMORY:
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	case OC_STACK_NO_RESOURCE:
+		return IOTCON_ERROR_NO_DATA;
+	default:
+		break;
+	}
+	return IOTCON_ERROR_IOTIVITY;
+}
+
+int ic_ioty_utils_convert_trigger(OCPresenceTrigger src, iotcon_presence_trigger_e *dest)
+{
+	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
+
+	switch (src) {
+	case OC_PRESENCE_TRIGGER_CREATE:
+		*dest = IOTCON_PRESENCE_RESOURCE_CREATED;
+		break;
+	case OC_PRESENCE_TRIGGER_CHANGE:
+		*dest = IOTCON_PRESENCE_RESOURCE_UPDATED;
+		break;
+	case OC_PRESENCE_TRIGGER_DELETE:
+		*dest = IOTCON_PRESENCE_RESOURCE_DESTROYED;
+		break;
+	default:
+		ERR("Invalid trigger(%d)", src);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
+int ic_ioty_utils_parse_oic_result(OCStackResult result)
+{
+	int res;
+
+	switch (result) {
+	case OC_STACK_OK:
+		res = IOTCON_RESPONSE_OK;
+		break;
+	case OC_STACK_RESOURCE_CREATED:
+		res = IOTCON_RESPONSE_RESOURCE_CREATED;
+		break;
+	case OC_STACK_RESOURCE_DELETED:
+		res = IOTCON_RESPONSE_RESOURCE_DELETED;
+		break;
+	case OC_STACK_UNAUTHORIZED_REQ:
+		res = IOTCON_RESPONSE_FORBIDDEN;
+		break;
+	default:
+		WARN("response error(%d)", result);
+		res = IOTCON_RESPONSE_ERROR;
+		break;
+	}
+
+	return res;
+}
+

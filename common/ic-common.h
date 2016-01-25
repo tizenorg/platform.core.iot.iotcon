@@ -23,6 +23,9 @@
 #warning "IOTCON_DBUS_INTERFACE is redefined"
 #endif
 
+#define IC_INT64_TO_POINTER(i) ((void*)(intptr_t)(i))
+#define IC_POINTER_TO_INT64(p) ((int64_t)(intptr_t)(p))
+
 #define IOTCON_DBUS_OBJPATH "/org/tizen/iotcon/dbus"
 
 #define IC_DBUS_SIGNAL_LENGTH 30
@@ -43,5 +46,9 @@
 #define IC_INTERFACE_READONLY "oic.if.r"
 
 #define IC_FEATURE_OIC "http://tizen.org/feature/iot.oic"
+
+#define IC_IOTY_COAP "coap://"
+#define IC_IOTY_COAPS "coaps://"
+#define IC_IOTY_MULTICAST_ADDRESS "224.0.1.187:5683"
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__ */
