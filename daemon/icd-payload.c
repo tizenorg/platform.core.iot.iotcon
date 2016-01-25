@@ -24,9 +24,9 @@
 
 #include "iotcon.h"
 #include "ic-utils.h"
+#include "ic-ioty-types.h"
 #include "icd.h"
 #include "icd-ioty.h"
-#include "icd-ioty-type.h"
 #include "icd-payload.h"
 
 union icd_state_value_u {
@@ -56,7 +56,7 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 	OCRandomUuidResult random_res;
 	OCDiscoveryPayload *discovered;
 	struct OCResourcePayload *resource;
-	int i, properties, ret, res_count;
+	int i, properties, res_count;
 	char device_id[UUID_STRING_SIZE] = {0};
 
 	discovered = (OCDiscoveryPayload*)payload;
@@ -104,17 +104,12 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 			continue;
 		}
 		for (; node; node = node->next) {
-			ret = ic_utils_convert_interface_string(node->value, &iface);
-			if (IOTCON_ERROR_NONE != ret) {
-				ERR("ic_utils_convert_interface_string() Fail(%d)", ret);
-				g_variant_builder_clear(&types);
-				continue;
-			}
+			iface = ic_ioty_parse_oc_interface(node->value);
 			ifaces |= iface;
 		}
 
 		/* Resource Properties */
-		properties = icd_ioty_oic_properties_to_properties(resource->bitmap);
+		properties = ic_ioty_parse_oc_properties(resource->bitmap);
 
 		/* port */
 		port = (resource->port) ? resource->port : dev_addr->port;
@@ -278,7 +273,7 @@ static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr,
 		gboolean is_parent)
 {
 	OCStringLL *node;
-	int ret, ifaces = 0;
+	int ifaces = 0;
 	GVariant *child, *value;
 	OCRepPayload *child_node;
 	iotcon_interface_e iface;
@@ -299,12 +294,7 @@ static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr,
 	/* Resource Interfaces */
 	node = repr->interfaces;
 	while (node) {
-		ret = ic_utils_convert_interface_string(node->value, &iface);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("ic_utils_convert_interface_string() Fail(%d)", ret);
-			g_variant_builder_clear(&types_builder);
-			return NULL;
-		}
+		iface = ic_ioty_parse_oc_interface(node->value);
 		ifaces |= iface;
 
 		node = node->next;
@@ -740,7 +730,7 @@ OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var)
 	GVariant *child;
 	int ret, i, ifaces = 0;
 	OCRepPayload *repr, *cur;
-	char *uri_path, *iface_str, *resource_type;
+	char *uri_path, *resource_type;
 	GVariantIter *resource_types, *repr_gvar, *children;
 
 	repr = OCRepPayloadCreate();
@@ -752,15 +742,11 @@ OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var)
 		OCRepPayloadSetUri(repr, uri_path);
 
 	for (i = 1; i <= IC_INTERFACE_MAX; i = i << 1) {
+		const char *iface_str;
 		if (IOTCON_INTERFACE_NONE == (ifaces & i)) /* this interface not exist */
 			continue;
 
-		ret = ic_utils_convert_interface_flag((ifaces & i), &iface_str);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("ic_utils_convert_interface_flag(%d) Fail(%d)", i, ret);
-			OCRepPayloadDestroy(repr);
-			return NULL;
-		}
+		iface_str = ic_ioty_convert_interface((ifaces & i));
 		OCRepPayloadAddInterface(repr, iface_str);
 	}
 	while (g_variant_iter_loop(resource_types, "s", &resource_type))

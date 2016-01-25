@@ -28,6 +28,8 @@
 #include "icl-dbus-type.h"
 #include "icl-device.h"
 
+#include "icl-ioty.h"
+
 /**
  * @brief The maximum length which can be held in a manufacturer name.
  *
@@ -143,6 +145,11 @@ API int iotcon_get_device_info(const char *host_address,
 		iotcon_device_info_cb cb,
 		void *user_data)
 {
+
+	/* TEST */
+	return icl_ioty_get_device_info(host_address, connectivity_type, cb, user_data);
+
+
 	int ret, timeout;
 	unsigned int sub_id;
 	GError *error = NULL;
@@ -331,6 +338,9 @@ API int iotcon_get_platform_info(const char *host_address,
 		iotcon_platform_info_cb cb,
 		void *user_data)
 {
+	/* TEST */
+	return icl_ioty_get_platform_info(host_address, connectivity_type, cb, user_data);
+
 	int ret, timeout;
 	unsigned int sub_id;
 	GError *error = NULL;

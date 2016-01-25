@@ -32,6 +32,8 @@
 #include "icl-resource.h"
 #include "icl-payload.h"
 
+#include "icl-ioty.h"
+
 static void _icl_request_handler(GDBusConnection *connection,
 		const gchar *sender_name,
 		const gchar *object_path,
@@ -158,6 +160,9 @@ API int iotcon_resource_create(const char *uri_path,
 		void *user_data,
 		iotcon_resource_h *resource_handle)
 {
+	/* TEST */
+	return icl_ioty_resource_create(uri_path, res_types, ifaces, properties, cb, user_data, resource_handle);
+
 	int ret;
 	unsigned int sub_id;
 	const gchar **types;
@@ -237,6 +242,9 @@ API int iotcon_resource_create(const char *uri_path,
 
 API int iotcon_resource_destroy(iotcon_resource_h resource)
 {
+	/* TEST */
+	return icl_ioty_resource_destroy(resource);
+
 	FN_CALL;
 	int ret;
 	GError *error = NULL;
@@ -279,6 +287,9 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 API int iotcon_resource_bind_interface(iotcon_resource_h resource,
 		iotcon_interface_e iface)
 {
+	/* TEST */
+	return icl_ioty_resource_bind_interface(resource, iface);
+
 	FN_CALL;
 	int ret;
 	GError *error = NULL;
@@ -317,6 +328,9 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource,
 
 API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resource_type)
 {
+	/* TEST */
+	return icl_ioty_resource_bind_type(resource, resource_type);
+
 	FN_CALL;
 	int ret;
 	GError *error = NULL;
@@ -384,6 +398,9 @@ API int iotcon_resource_set_request_handler(iotcon_resource_h resource,
 API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
+	/* TEST */
+	return icl_ioty_resource_bind_child_resource(parent, child);
+
 	GError *error = NULL;
 	int i, ret;
 
@@ -439,6 +456,9 @@ API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
+	/* TEST */
+	return icl_ioty_resource_unbind_child_resource(parent, child);
+
 	GError *error = NULL;
 	int i, ret;
 
@@ -567,6 +587,9 @@ API int iotcon_resource_get_properties(iotcon_resource_h resource, int *properti
 API int iotcon_resource_notify(iotcon_resource_h resource,
 		iotcon_representation_h repr, iotcon_observers_h observers, iotcon_qos_e qos)
 {
+	/* TEST */
+	return icl_ioty_resource_notify(resource, repr, observers, qos);
+
 	int ret;
 	GError *error = NULL;
 	GVariant *obs;

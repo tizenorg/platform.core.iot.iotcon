@@ -28,6 +28,8 @@
 #include "icl-request.h"
 #include "icl-response.h"
 
+#include "icl-ioty.h"
+
 /* the last index of iotcon_response_result_e */
 #define ICL_RESPONSE_RESULT_MAX (IOTCON_RESPONSE_FORBIDDEN + 1)
 
@@ -226,6 +228,8 @@ static int _icl_response_check_representation_visibility(iotcon_response_h resp)
 
 API int iotcon_response_send(iotcon_response_h resp)
 {
+	return icl_ioty_response_send(resp);
+
 	FN_CALL;
 	int ret;
 	GError *error = NULL;

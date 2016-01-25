@@ -20,11 +20,20 @@
 #include "icl.h"
 #include "icl-dbus.h"
 
+#include "icl-ioty.h"
+
+GThread *_thread;
+
 API int iotcon_connect(void)
 {
+	/* TEST */
+	_thread = icl_ioty_init();
+	return IOTCON_ERROR_NONE;
+
 	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+
 
 #if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
@@ -40,6 +49,11 @@ API int iotcon_connect(void)
 
 API void iotcon_disconnect(void)
 {
+	/* TEST */
+	icl_ioty_deinit(_thread);
+	_thread = 0;
+	return;
+
 	icl_dbus_stop();
 }
 
