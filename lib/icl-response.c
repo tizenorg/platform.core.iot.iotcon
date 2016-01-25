@@ -18,6 +18,7 @@
 #include <glib.h>
 
 #include "iotcon.h"
+#include "iotcon-internal.h"
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-dbus.h"
@@ -27,6 +28,8 @@
 #include "icl-options.h"
 #include "icl-request.h"
 #include "icl-response.h"
+
+#include "icl-ioty.h"
 
 /* the last index of iotcon_response_result_e */
 #define ICL_RESPONSE_RESULT_MAX (IOTCON_RESPONSE_FORBIDDEN + 1)
@@ -211,31 +214,48 @@ API int iotcon_response_send(iotcon_response_h resp)
 	int ret;
 	GError *error = NULL;
 	GVariant *arg_response;
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = _icl_response_check_representation_visibility(resp);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_icl_response_check_representation_visibility() Fail(%d)", ret);
-		return ret;
-	}
+	mode = icl_get_service_mode();
 
-	arg_response = icl_dbus_response_to_gvariant(resp);
-	ic_dbus_call_send_response_sync(icl_dbus_get_object(), arg_response, &ret, NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_send_response_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		g_variant_unref(arg_response);
-		return ret;
-	}
+	switch (mode) {
+	case IOTCON_SERVICE_IP:
+		ret = icl_ioty_response_send(resp);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_response_send() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		ret = _icl_response_check_representation_visibility(resp);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_icl_response_check_representation_visibility() Fail(%d)", ret);
+			return ret;
+		}
 
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
+		arg_response = icl_dbus_response_to_gvariant(resp);
+		ic_dbus_call_send_response_sync(icl_dbus_get_object(), arg_response, &ret, NULL,
+				&error);
+		if (error) {
+			ERR("ic_dbus_call_send_response_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			g_variant_unref(arg_response);
+			return ret;
+		}
+
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon-daemon Fail(%d)", ret);
+			return icl_dbus_convert_daemon_error(ret);
+		}
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 
 	return IOTCON_ERROR_NONE;
