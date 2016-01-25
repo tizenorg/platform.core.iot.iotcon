@@ -541,15 +541,28 @@ int main(int argc, char **argv)
 	int ret;
 	GMainLoop *loop;
 	door_resource_s my_door = {0};
+	iotcon_service_mode_e mode;
 
 	loop = g_main_loop_new(NULL, FALSE);
 
+	if (argc < 2)
+		mode = IOTCON_SERVICE_WIFI;
+	else {
+		if (IOTCON_SERVICE_BT == atoi(argv[1]))
+			mode = IOTCON_SERVICE_BT;
+		else
+			mode = IOTCON_SERVICE_WIFI;
+	}
+
+	INFO("mode: %d", mode);
+
 	/* connect iotcon */
-	ret = iotcon_connect();
+	ret = iotcon_connect_for_service_mode(mode);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_connect() Fail(%d)", ret);
+		ERR("iotcon_connect_for_service_mode() Fail(%d)", ret);
 		return -1;
 	}
+
 
 	/* set local door resource */
 	ret = _set_door_resource(&my_door);
