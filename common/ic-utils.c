@@ -86,3 +86,4 @@ bool ic_utils_check_oic_feature_supported()
 #endif
 }
 
+
