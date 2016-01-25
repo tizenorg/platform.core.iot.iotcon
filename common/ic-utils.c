@@ -62,57 +62,6 @@ char* ic_utils_dbus_decode_str(char *src)
 }
 
 
-int ic_utils_convert_interface_flag(iotcon_interface_e src, char **dest)
-{
-	switch (src) {
-	case IOTCON_INTERFACE_DEFAULT:
-		*dest = IC_INTERFACE_DEFAULT;
-		break;
-	case IOTCON_INTERFACE_LINK:
-		*dest = IC_INTERFACE_LINK;
-		break;
-	case IOTCON_INTERFACE_BATCH:
-		*dest = IC_INTERFACE_BATCH;
-		break;
-	case IOTCON_INTERFACE_GROUP:
-		*dest = IC_INTERFACE_GROUP;
-		break;
-	case IOTCON_INTERFACE_READONLY:
-		*dest = IC_INTERFACE_READONLY;
-		break;
-	case IOTCON_INTERFACE_NONE:
-	default:
-		ERR("Invalid interface(%d)", src);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-	return IOTCON_ERROR_NONE;
-}
-
-
-int ic_utils_convert_interface_string(const char *src, iotcon_interface_e *dest)
-{
-	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
-
-	if (IC_STR_EQUAL == strcmp(IC_INTERFACE_DEFAULT, src)) {
-		*dest = IOTCON_INTERFACE_DEFAULT;
-	} else if (IC_STR_EQUAL == strcmp(IC_INTERFACE_LINK, src)) {
-		*dest = IOTCON_INTERFACE_LINK;
-	} else if (IC_STR_EQUAL == strcmp(IC_INTERFACE_BATCH, src)) {
-		*dest = IOTCON_INTERFACE_BATCH;
-	} else if (IC_STR_EQUAL == strcmp(IC_INTERFACE_GROUP, src)) {
-		*dest = IOTCON_INTERFACE_GROUP;
-	} else if (IC_STR_EQUAL == strcmp(IC_INTERFACE_READONLY, src)) {
-		*dest = IOTCON_INTERFACE_READONLY;
-	} else {
-		ERR("Invalid Interface(%s)", src);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-
-	return IOTCON_ERROR_NONE;
-}
-
-
 void ic_utils_gvariant_array_free(GVariant **value)
 {
 	int i;
@@ -136,4 +85,5 @@ bool ic_utils_check_oic_feature_supported()
 	return true;
 #endif
 }
+
 
