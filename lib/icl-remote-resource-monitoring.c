@@ -21,9 +21,14 @@
 #include "iotcon.h"
 #include "iotcon-internal.h"
 #include "icl.h"
+#include "icl-types.h"
 #include "icl-dbus.h"
 #include "ic-utils.h"
 #include "icl-remote-resource.h"
+
+#include "icl-ioty.h"
+
+static GHashTable *icl_monitoring_table;
 
 typedef struct {
 	iotcon_remote_resource_state_changed_cb cb;
@@ -68,60 +73,75 @@ API int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resourc
 	int64_t signal_number;
 	icl_monitoring_s *cb_container;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (0 != resource->monitoring_sub_id) {
-		ERR("Already Start Monitoring");
-		return IOTCON_ERROR_ALREADY;
+	mode = icl_get_service_mode();
+
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_remote_resource_start_monitoring(resource, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_start_monitoring() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		if (0 != resource->monitoring_sub_id) {
+			ERR("Already Start Monitoring");
+			return IOTCON_ERROR_ALREADY;
+		}
+
+		ic_dbus_call_start_monitoring_sync(icl_dbus_get_object(),
+				resource->uri_path,
+				resource->host_address,
+				resource->connectivity_type,
+				&signal_number,
+				&ret,
+				NULL,
+				&error);
+		if (error) {
+			ERR("ic_dbus_call_start_monitoring_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			return IOTCON_ERROR_DBUS;
+		}
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon-daemon Fail(%d)", ret);
+			return icl_dbus_convert_daemon_error(ret);
+		}
+
+		snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_MONITORING,
+				signal_number);
+
+		cb_container = calloc(1, sizeof(icl_monitoring_s));
+		if (NULL == cb_container) {
+			ERR("calloc() Fail(%d)", errno);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+
+		cb_container->cb = cb;
+		cb_container->user_data = user_data;
+
+		sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
+				_icl_monitoring_conn_cleanup, _icl_monitoring_cb);
+		if (0 == sub_id) {
+			ERR("icl_dbus_subscribe_signal() Fail");
+			free(cb_container);
+			return IOTCON_ERROR_DBUS;
+		}
+		resource->monitoring_sub_id = sub_id;
+		cb_container->resource = resource;
+		icl_remote_resource_ref(resource);
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
-
-	INFO("Start Monitoring");
-
-	ic_dbus_call_start_monitoring_sync(icl_dbus_get_object(),
-			resource->uri_path,
-			resource->host_address,
-			resource->connectivity_type,
-			&signal_number,
-			&ret,
-			NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_start_monitoring_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
-	}
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
-	}
-
-	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_MONITORING,
-			signal_number);
-
-	cb_container = calloc(1, sizeof(icl_monitoring_s));
-	if (NULL == cb_container) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
-
-	cb_container->cb = cb;
-	cb_container->user_data = user_data;
-
-	sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
-			_icl_monitoring_conn_cleanup, _icl_monitoring_cb);
-	if (0 == sub_id) {
-		ERR("icl_dbus_subscribe_signal() Fail");
-		free(cb_container);
-		return IOTCON_ERROR_DBUS;
-	}
-	resource->monitoring_sub_id = sub_id;
-	cb_container->resource = resource;
-	icl_remote_resource_ref(resource);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -131,37 +151,80 @@ API int iotcon_remote_resource_stop_monitoring(iotcon_remote_resource_h resource
 {
 	int ret;
 	GError *error = NULL;
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (0 == resource->monitoring_sub_id) {
-		ERR("Not Monitoring");
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
+	mode = icl_get_service_mode();
+	switch (mode) {
+	case IOTCON_SERVICE_WIFI:
+		ret = icl_ioty_remote_resource_stop_monitoring(resource);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_stop_monitoring() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_SERVICE_BT:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		if (0 == resource->monitoring_sub_id) {
+			ERR("Not Monitoring");
+			return IOTCON_ERROR_INVALID_PARAMETER;
+		}
 
-	INFO("Stop Monitoring");
+		ic_dbus_call_stop_monitoring_sync(icl_dbus_get_object(),
+				resource->uri_path,
+				resource->host_address,
+				&ret,
+				NULL,
+				&error);
+		if (error) {
+			ERR("ic_dbus_call_stop_monitoring_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			return ret;
+		}
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon-daemon Fail(%d)", ret);
+			return icl_dbus_convert_daemon_error(ret);
+		}
 
-	ic_dbus_call_stop_monitoring_sync(icl_dbus_get_object(),
-			resource->uri_path,
-			resource->host_address,
-			&ret,
-			NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_stop_monitoring_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return ret;
+		icl_dbus_unsubscribe_signal(resource->monitoring_sub_id);
+		resource->monitoring_sub_id = 0;
+		break;
+	default:
+		ERR("Invalid mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
-	}
-
-	icl_dbus_unsubscribe_signal(resource->monitoring_sub_id);
-	resource->monitoring_sub_id = 0;
 
 	return IOTCON_ERROR_NONE;
 }
+
+void icl_remote_resource_monitoring_table_insert(iotcon_remote_resource_h resource,
+		icl_monitoring_container_s *cb_container)
+{
+	RET_IF(NULL == resource);
+	RET_IF(NULL == cb_container);
+
+	if (NULL == icl_monitoring_table) {
+		icl_monitoring_table = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL,
+				icl_destroy_monitoring_container);
+	}
+	g_hash_table_insert(icl_monitoring_table, resource, cb_container);
+}
+
+int icl_remote_resource_monitoring_table_remove(iotcon_remote_resource_h resource)
+{
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (NULL == icl_monitoring_table)
+		return IOTCON_ERROR_NO_DATA;
+
+	if (NULL == g_hash_table_lookup(icl_monitoring_table, resource))
+		return IOTCON_ERROR_NO_DATA;
+
+	g_hash_table_remove(icl_monitoring_table, resource);
+
+	return IOTCON_ERROR_NONE;
+}
+
