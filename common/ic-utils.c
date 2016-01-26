@@ -24,9 +24,6 @@
 #include "ic-log.h"
 #include "ic-utils.h"
 
-
-static int _ic_oic_feature_supported = -1;
-
 char* ic_utils_strdup(const char *src)
 {
 	char *dest = NULL;
