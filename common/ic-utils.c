@@ -24,8 +24,9 @@
 #include "ic-log.h"
 #include "ic-utils.h"
 
-
+#ifdef TZ_VER_3
 static int _ic_oic_feature_supported = -1;
+#endif
 
 char* ic_utils_strdup(const char *src)
 {

@@ -157,11 +157,11 @@ static void _update_brightness(int brightness)
  *
  * @pre The callback must be registered using iotcon_lite_resource_create()
  *
- * @return true to accept put request, otherwise false to reject it.
+ * @return true to accept post request, otherwise false to reject it.
  *
  * @see iotcon_lite_resource_create()
  */
-typedef bool (*iotcon_lite_resource_put_request_cb)(iotcon_lite_resource_h resource,
+typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h resource,
 		iotcon_state_h state, void *user_data);
 
 
@@ -205,7 +205,7 @@ int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int properties,
 		iotcon_state_h state,
-		iotcon_lite_resource_put_request_cb cb,
+		iotcon_lite_resource_post_request_cb cb,
 		void *user_data,
 		iotcon_lite_resource_h *resource_handle);
 
