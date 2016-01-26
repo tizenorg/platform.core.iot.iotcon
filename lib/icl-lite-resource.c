@@ -39,7 +39,7 @@ struct icl_lite_resource {
 	int64_t handle;
 	unsigned int sub_id;
 	int properties;
-	iotcon_lite_resource_put_request_cb cb;
+	iotcon_lite_resource_post_request_cb cb;
 	void *cb_data;
 };
 
@@ -185,7 +185,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 	switch (request_type) {
 	case IOTCON_REQUEST_GET:
 		break;
-	case IOTCON_REQUEST_PUT:
+	case IOTCON_REQUEST_POST:
 		if (FALSE == g_variant_iter_loop(repr_iter, "v", &repr_gvar)) {
 			ERR("Received representation is empty.");
 			_icl_lite_resource_response_send(repr, oic_request_h, oic_resource_h,
@@ -230,10 +230,10 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 
 		iotcon_state_destroy(recv_state);
 		break;
-	case IOTCON_REQUEST_POST:
+	case IOTCON_REQUEST_PUT:
 	case IOTCON_REQUEST_DELETE:
 	default:
-		WARN("Not supported request (only GET / PUT / OBSERVE)");
+		WARN("Not supported request (only GET / POST / OBSERVE)");
 		ret = _icl_lite_resource_response_send(repr, oic_request_h, oic_resource_h,
 				IOTCON_RESPONSE_FORBIDDEN);
 		if (IOTCON_ERROR_NONE != ret)
@@ -259,7 +259,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 		return;
 	}
 
-	if (IOTCON_REQUEST_PUT == request_type) {
+	if (IOTCON_REQUEST_POST == request_type) {
 		ret = _icl_lite_resource_notify(resource);
 		if (IOTCON_ERROR_NONE != ret)
 			WARN("_icl_lite_resource_notify() Fail(%d)", ret);
@@ -289,7 +289,7 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int properties,
 		iotcon_state_h state,
-		iotcon_lite_resource_put_request_cb cb,
+		iotcon_lite_resource_post_request_cb cb,
 		void *user_data,
 		iotcon_lite_resource_h *resource_handle)
 {
