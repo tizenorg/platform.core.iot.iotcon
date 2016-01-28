@@ -182,7 +182,7 @@ API int iotcon_query_add(iotcon_query_h query, const char *key, const char *valu
 	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
 
 	/* first query : ?key=value
-	 * Rest of query : &key=value */
+	 * Rest of query : ;key=value */
 	query_len = strlen(key) + strlen(value) + 2;
 	if (ICL_QUERY_LENGTH_MAX < (query->len + query_len)) {
 		ERR("Length of query is invalid.");

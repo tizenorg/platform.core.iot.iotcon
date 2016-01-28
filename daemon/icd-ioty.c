@@ -544,7 +544,7 @@ static char* _icd_ioty_resource_generate_uri(char *uri_path, GVariant *query)
 			query_len = snprintf(uri_buf + len, sizeof(uri_buf) - len, "?%s=%s", key, value);
 			loop_first = false;
 		} else {
-			query_len = snprintf(uri_buf + len, sizeof(uri_buf) - len, "&%s=%s", key, value);
+			query_len = snprintf(uri_buf + len, sizeof(uri_buf) - len, ";%s=%s", key, value);
 		}
 
 		len += query_len;
