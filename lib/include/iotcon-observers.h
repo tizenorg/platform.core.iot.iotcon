@@ -41,42 +41,17 @@ static iotcon_observers_h _observers;
 static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
 		void *user_data)
 {
-	int ret;
-	int types;
+	int ret, observe_id;
+	iotcon_request_type_e types;
+	iotcon_observe_type_e observe_type;
+	iotcon_representation_h repr = NULL;
 
+	...
 	ret = iotcon_request_get_types(request, &types);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
+	...
 
-	if (IOTCON_REQUEST_OBSERVE & types) {
-		int observe_id;
-		iotcon_observe_action_e action;
-
-		ret = iotcon_request_get_observe_action(request, &action);
-		if (IOTCON_ERROR_NONE != ret)
-			return;
-
-		ret = iotcon_request_get_observe_id(request, &observe_id);
-		if (IOTCON_ERROR_NONE != ret)
-			return;
-
-		if (IOTCON_OBSERVE_REGISTER & action) {
-			if (NULL == _observers) {
-				ret = iotcon_observers_create(&_observers);
-				if (IOTCON_ERROR_NONE != ret)
-					return;
-			}
-			ret = iotcon_observers_add(_observers, observe_id);
-			if (IOTCON_ERROR_NONE != ret)
-				return;
-		} else if (IOTCON_OBSERVE_DEREGISTER & action) {
-			if (NULL == _observers)
-				return;
-			ret = iotcon_observers_remove(_observers, observe_id);
-			if (IOTCON_ERROR_NONE != ret)
-				return;
-		}
-	}
 	if (IOTCON_REQUEST_PUT & types) {
 		iotcon_state_h state = NULL;
 		iotcon_representation_h repr = NULL;
@@ -101,6 +76,38 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 		iotcon_state_destroy(state);
 		iotcon_representation_destroy(repr);
+	}
+
+	ret = iotcon_request_get_observe_type(request, &observe_type);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
+
+	if (IOTCON_OBSERVE_REGISTER == observe_type) {
+		ret = iotcon_request_get_observe_id(request, &observe_id);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		if (NULL == _observers) {
+			ret = iotcon_observers_create(&_observers);
+			if (IOTCON_ERROR_NONE != ret)
+				return;
+		}
+		ret = iotcon_observers_add(_observers, observe_id);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+		...
+	} else if (IOTCON_OBSERVE_DEREGISTER == observe_type) {
+		ret = iotcon_request_get_observe_id(request, &observe_id);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+
+		if (NULL == _observers)
+			return;
+
+		ret = iotcon_observers_remove(_observers, observe_id);
+		if (IOTCON_ERROR_NONE != ret)
+			return;
+		...
 	}
 	...
 }

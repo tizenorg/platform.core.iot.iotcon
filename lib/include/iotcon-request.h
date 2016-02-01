@@ -40,8 +40,9 @@
 static void _request_handler(iotcon_resource_h resource, iotcon_request_h request,
 		void *user_data)
 {
-	int ret;
-	int types;
+	int ret, observe_id;
+	iotcon_request_type_e types;
+	iotcon_observe_type_e observe_type;
 	iotcon_options_h options = NULL;
 	iotcon_query_h query = NULL;
 	iotcon_representation_h repr = NULL;
@@ -87,36 +88,25 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 			return;
 		...
 	}
-	if (IOTCON_REQUEST_OBSERVE & types) {
-		int observe_id;
-		iotcon_observe_action_e action;
-		char *host_address;
-		iotcon_connectivity_type_e conn_type;
 
-		ret = iotcon_request_get_observe_action(request, &action);
-		if (IOTCON_ERROR_NONE != ret)
-			return;
+	ret = iotcon_request_get_observe_type(request, &observe_type);
+	if (IOTCON_ERROR_NONE != ret)
+		return;
 
+	if (IOTCON_OBSERVE_REGISTER == observe_type) {
 		ret = iotcon_request_get_observe_id(request, &observe_id);
 		if (IOTCON_ERROR_NONE != ret)
 			return;
-
-		ret = iotcon_request_get_host_address(request, &host_address);
+		// handle register observe
+		...
+	} else if (IOTCON_OBSERVE_DEREGISTER == observe_type) {
+		ret = iotcon_request_get_observe_id(request, &observe_id);
 		if (IOTCON_ERROR_NONE != ret)
 			return;
-
-		ret = iotcon_request_get_connectivity_type(request, &conn_type);
-		if (IOTCON_ERROR_NONE != ret)
-			return;
-
-		if (IOTCON_OBSERVE_REGISTER == action) {
-			// handle register observe
-			...
-		} else if (IOTCON_OBSERVE_DEREGISTER == action) {
-			// handle deregister observe
-			...
-		}
+		// handle deregister observe
+		...
 	}
+	...
 }
  * @endcode
  *
