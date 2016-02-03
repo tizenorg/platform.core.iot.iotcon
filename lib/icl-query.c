@@ -54,37 +54,22 @@ API void iotcon_query_destroy(iotcon_query_h query)
 }
 
 
-API int iotcon_query_get_resource_types(iotcon_query_h query,
-		iotcon_resource_types_h *types)
+API int iotcon_query_get_resource_type(iotcon_query_h query,
+		char **resource_type)
 {
-	int ret;
-	char *resource_type = NULL;
-	iotcon_resource_types_h types_temp = NULL;
+	char *type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
 
-	iotcon_query_lookup(query, ICL_QUERY_KEY_RESOURCE_TYPE, &resource_type);
-	if (NULL == resource_type) {
+	iotcon_query_lookup(query, ICL_QUERY_KEY_RESOURCE_TYPE, &type);
+	if (NULL == type) {
 		ERR("resource_type is NULL");
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	ret = iotcon_resource_types_create(&types_temp);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_types_create() Fail(%d)", ret);
-		return ret;
-	}
-
-	ret = iotcon_resource_types_add(types_temp, resource_type);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_types_add() Fail(%d)", ret);
-		iotcon_resource_types_destroy(types_temp);
-		return ret;
-	}
-
-	*types = types_temp;
+	*resource_type = type;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -108,12 +93,11 @@ API int iotcon_query_get_interface(iotcon_query_h query, iotcon_interface_e *ifa
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_query_set_resource_types(iotcon_query_h query, iotcon_resource_types_h types)
+API int iotcon_query_set_resource_type(iotcon_query_h query, const char *resource_type)
 {
 	int length_old = 0;
 	int length_new = 0;
 	char *value = NULL;
-	char *resource_type = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
@@ -122,10 +106,8 @@ API int iotcon_query_set_resource_types(iotcon_query_h query, iotcon_resource_ty
 	if (value)
 		length_old = (sizeof(ICL_QUERY_KEY_RESOURCE_TYPE) - 1) + strlen(value) + 2;
 
-	if (types && types->type_list) {
-		resource_type = types->type_list->data;
+	if (resource_type && *resource_type)
 		length_new = (sizeof(ICL_QUERY_KEY_RESOURCE_TYPE) - 1) + strlen(resource_type) + 2;
-	}
 
 	if (ICL_QUERY_LENGTH_MAX < query->len - length_old + length_new) {
 		ERR("Length of query is invalid.");

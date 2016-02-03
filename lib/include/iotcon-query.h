@@ -147,14 +147,14 @@ int iotcon_query_create(iotcon_query_h *query);
 void iotcon_query_destroy(iotcon_query_h query);
 
 /**
- * @brief Gets resource types from the query.
+ * @brief Gets resource type from the query.
  *
  * @since_tizen 3.0
  *
- * @remarks @a types must not be released using iotcon_resource_types_destroy().
+ * @remarks @a type must not be released using free().
  *
  * @param[in] query The handle of the query
- * @param[out] types Found resource types from query
+ * @param[out] resource_type Found resource type from query
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -167,12 +167,12 @@ void iotcon_query_destroy(iotcon_query_h query);
  * @see iotcon_query_destroy()
  * @see iotcon_query_add()
  * @see iotcon_query_remove()
- * @see iotcon_query_set_resource_types()
+ * @see iotcon_query_set_resource_type()
  */
-int iotcon_query_get_resource_types(iotcon_query_h query, iotcon_resource_types_h *types);
+int iotcon_query_get_resource_type(iotcon_query_h query, char **resource_type);
 
 /**
- * @brief Gets resource types from the query.
+ * @brief Gets resource interface from the query.
  * @details @a iface could be one of #iotcon_interface_e.
  *
  * @since_tizen 3.0
@@ -195,12 +195,12 @@ int iotcon_query_get_resource_types(iotcon_query_h query, iotcon_resource_types_
 int iotcon_query_get_interface(iotcon_query_h query, iotcon_interface_e *iface);
 
 /**
- * @brief Sets the resource types into the query.
+ * @brief Sets the resource type into the query.
  *
  * @since_tizen 3.0
  *
  * @param[in] query The handle of the query
- * @param[in] types The resoure types to set into the query
+ * @param[in] resource_type The resoure type to set into the query
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -213,9 +213,9 @@ int iotcon_query_get_interface(iotcon_query_h query, iotcon_interface_e *iface);
  * @see iotcon_query_add()
  * @see iotcon_query_remove()
  * @see iotcon_query_lookup()
- * @see iotcon_query_get_resource_types()
+ * @see iotcon_query_get_resource_type()
  */
-int iotcon_query_set_resource_types(iotcon_query_h query, iotcon_resource_types_h types);
+int iotcon_query_set_resource_type(iotcon_query_h query, const char *resource_type);
 
 /**
  * @brief Sets the interface into the query.
