@@ -167,9 +167,9 @@ void iotcon_query_destroy(iotcon_query_h query);
  * @see iotcon_query_destroy()
  * @see iotcon_query_add()
  * @see iotcon_query_remove()
- * @see iotcon_query_set_resource_types()
+ * @see iotcon_query_set_resource_type()
  */
-int iotcon_query_get_resource_types(iotcon_query_h query, iotcon_resource_types_h *types);
+int iotcon_query_get_resource_type(iotcon_query_h query, char **resource_type);
 
 /**
  * @brief Gets resource types from the query.
@@ -213,9 +213,9 @@ int iotcon_query_get_interface(iotcon_query_h query, iotcon_interface_e *iface);
  * @see iotcon_query_add()
  * @see iotcon_query_remove()
  * @see iotcon_query_lookup()
- * @see iotcon_query_get_resource_types()
+ * @see iotcon_query_get_resource_type()
  */
-int iotcon_query_set_resource_types(iotcon_query_h query, iotcon_resource_types_h types);
+int iotcon_query_set_resource_type(iotcon_query_h query, const char *resource_type);
 
 /**
  * @brief Sets the interface into the query.
