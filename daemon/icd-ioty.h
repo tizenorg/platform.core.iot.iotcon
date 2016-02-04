@@ -86,11 +86,11 @@ GThread* icd_ioty_init(const char *addr, unsigned short port);
 void icd_ioty_deinit(GThread *thread);
 
 OCResourceHandle icd_ioty_register_resource(const char *uri_path,
-		const char* const* res_types, int ifaces, int properties);
+		const char* const *res_types, const char* const *res_ifaces, int properties);
 
 int icd_ioty_unregister_resource(OCResourceHandle handle);
 
-int icd_ioty_bind_interface(OCResourceHandle handle, iotcon_interface_e iface);
+int icd_ioty_bind_interface(OCResourceHandle handle, const char *resource_interface);
 
 int icd_ioty_bind_type(OCResourceHandle handle, const char *resource_type);
 

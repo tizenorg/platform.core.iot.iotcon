@@ -23,6 +23,7 @@
 #include "icl.h"
 #include "icl-resource.h"
 #include "icl-resource-types.h"
+#include "icl-resource-interfaces.h"
 #include "icl-options.h"
 #include "icl-query.h"
 #include "icl-request.h"
@@ -34,11 +35,41 @@
 #include "icl-observation.h"
 #include "icl-dbus-type.h"
 
+const char** icl_dbus_resource_interfaces_to_array(iotcon_resource_interfaces_h ifaces)
+{
+	int i = 0;
+	GList *node = ifaces->iface_list;
+	int len = g_list_length(node);
+
+	if (0 == len) {
+		ERR("Empty Resource Interface List");
+		return NULL;
+	}
+
+	const char **array = calloc(len + 1, sizeof(char*));
+	if (NULL == array) {
+		ERR("calloc() Fail(%d)", errno);
+		return NULL;
+	}
+
+	for (node = ifaces->iface_list; node; node = node->next, i++)
+		array[i] = node->data;
+	array[i] = NULL;
+
+	return array;
+}
+
+
 const char** icl_dbus_resource_types_to_array(iotcon_resource_types_h types)
 {
 	int i = 0;
 	GList *node = types->type_list;
 	int len = g_list_length(node);
+
+	if (0 == len) {
+		ERR("Empty Resource Type List");
+		return NULL;
+	}
 
 	const char **array = calloc(len + 1, sizeof(char*));
 	if (NULL == array) {
