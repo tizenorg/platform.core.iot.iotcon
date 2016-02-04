@@ -94,7 +94,7 @@ static int _icl_lite_resource_response_send(iotcon_representation_h repr,
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
-	response->iface = IOTCON_INTERFACE_DEFAULT;
+	response->iface = strdup(IOTCON_INTERFACE_DEFAULT);
 	response->result = response_result;
 	response->oic_request_h = oic_request_h;
 	response->oic_resource_h = oic_resource_h;
@@ -194,7 +194,7 @@ static void _icl_lite_resource_request_handler(GDBusConnection *connection,
 			return;
 		}
 
-		g_variant_get(repr_gvar, "(siasa{sv}av)", NULL, NULL, NULL, &state_iter,
+		g_variant_get(repr_gvar, "(sasasa{sv}av)", NULL, NULL, NULL, &state_iter,
 				NULL);
 
 		ret = iotcon_state_create(&recv_state);
@@ -293,9 +293,9 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		void *user_data,
 		iotcon_lite_resource_h *resource_handle)
 {
-	int ret, iface;
+	int ret;
 	unsigned int sub_id;
-	const gchar **types;
+	const gchar **types, **ifaces;
 	GError *error = NULL;
 	iotcon_lite_resource_h resource;
 	int64_t signal_number;
@@ -315,26 +315,37 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	iface = IOTCON_INTERFACE_DEFAULT;
+	ifaces = calloc(2, sizeof(char*));
+	if (NULL == ifaces) {
+		ERR("calloc() Fail(%d)", errno);
+		free(resource);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
+
+	ifaces[0] = IOTCON_INTERFACE_DEFAULT;
+	ifaces[1] = NULL;
 
 	types = icl_dbus_resource_types_to_array(res_types);
 	if (NULL == types) {
 		ERR("icl_dbus_resource_types_to_array() Fail");
+		free(ifaces);
 		free(resource);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	ic_dbus_call_register_resource_sync(icl_dbus_get_object(), uri_path, types, iface,
+	ic_dbus_call_register_resource_sync(icl_dbus_get_object(), uri_path, types, ifaces,
 			properties, true, &signal_number, &(resource->handle), NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_register_resource_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
 		free(types);
+		free(ifaces);
 		free(resource);
 		return ret;
 	}
 	free(types);
+	free(ifaces);
 
 	if (0 == resource->handle) {
 		ERR("iotcon-daemon Fail");

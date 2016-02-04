@@ -246,7 +246,16 @@ static void _on_response_1st(iotcon_remote_resource_h resource,
 	iotcon_query_destroy(query_params);
 }
 
-static bool _get_res_type_fn(const char *string, void *user_data)
+static bool _get_res_iface_cb(const char *string, void *user_data)
+{
+	char *resource_uri_path = user_data;
+
+	DBG("[%s] resource interface : %s", resource_uri_path, string);
+
+	return IOTCON_FUNC_CONTINUE;
+}
+
+static bool _get_res_type_cb(const char *string, void *user_data)
 {
 	char *resource_uri_path = user_data;
 
@@ -263,11 +272,12 @@ static int _device_id_compare(const void *a, const void *b)
 static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e result,
 		void *user_data)
 {
+	int ret;
 	GList *node;
 	char *resource_host;
 	char *resource_uri_path;
 	char *resource_device_id;
-	int ret, resource_interfaces;
+	iotcon_resource_interfaces_h resource_interfaces;
 	iotcon_resource_types_h resource_types;
 	iotcon_remote_resource_h cloned_resource;
 
@@ -327,16 +337,15 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		free(room_resource_device_id);
 		return;
 	}
-	if (IOTCON_INTERFACE_DEFAULT & resource_interfaces)
-		DBG("[%s] resource interface : DEFAULT_INTERFACE", resource_uri_path);
-	if (IOTCON_INTERFACE_LINK & resource_interfaces)
-		DBG("[%s] resource interface : LINK_INTERFACE", resource_uri_path);
-	if (IOTCON_INTERFACE_BATCH & resource_interfaces)
-		DBG("[%s] resource interface : BATCH_INTERFACE", resource_uri_path);
-	if (IOTCON_INTERFACE_GROUP & resource_interfaces)
-		DBG("[%s] resource interface : GROUP_INTERFACE", resource_uri_path);
-	if (IOTCON_INTERFACE_READONLY & resource_interfaces)
-		DBG("[%s] resource interface : READONLY_INTERFACE", resource_uri_path);
+
+	ret = iotcon_resource_interfaces_foreach(resource_interfaces, _get_res_iface_cb,
+			resource_uri_path);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_interfaces_foreach() Fail(%d)", ret);
+		device_id_list = g_list_remove(device_id_list, room_resource_device_id);
+		free(room_resource_device_id);
+		return;
+	}
 
 	/* get the resource types */
 	ret = iotcon_remote_resource_get_types(resource, &resource_types);
@@ -346,7 +355,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		free(room_resource_device_id);
 		return;
 	}
-	ret = iotcon_resource_types_foreach(resource_types, _get_res_type_fn,
+	ret = iotcon_resource_types_foreach(resource_types, _get_res_type_cb,
 			resource_uri_path);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_types_foreach() Fail(%d)", ret);

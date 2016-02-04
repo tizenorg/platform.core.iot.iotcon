@@ -63,6 +63,8 @@ API void iotcon_response_destroy(iotcon_response_h resp)
 		iotcon_representation_destroy(resp->repr);
 	if (resp->header_options)
 		iotcon_options_destroy(resp->header_options);
+	if (resp->iface)
+		free(resp->iface);
 	free(resp);
 }
 
@@ -121,13 +123,15 @@ API int iotcon_response_set_result(iotcon_response_h resp,
 }
 
 
-API int iotcon_response_set_representation(iotcon_response_h resp,
-		iotcon_interface_e iface, iotcon_representation_h repr)
+API int iotcon_response_set_representation(iotcon_response_h resp, const char *iface,
+		iotcon_representation_h repr)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
 
-	resp->iface = iface;
+	free(resp->iface);
+	resp->iface = strdup(iface);
 
 	if (repr)
 		repr = icl_representation_ref(repr);
@@ -161,24 +165,12 @@ API int iotcon_response_set_options(iotcon_response_h resp,
 static bool _icl_response_representation_child_cb(iotcon_representation_h child,
 		void *user_data)
 {
-	int iface = GPOINTER_TO_INT(user_data);
+	char *iface = user_data;
 
-	switch (iface) {
-	case IOTCON_INTERFACE_BATCH:
+	if (IC_STR_EQUAL == strcmp(IOTCON_INTERFACE_BATCH, iface))
 		child->visibility = ICL_VISIBILITY_REPR;
-		break;
-	case IOTCON_INTERFACE_NONE:
-	case IOTCON_INTERFACE_DEFAULT:
-	case IOTCON_INTERFACE_LINK:
-	case IOTCON_INTERFACE_GROUP:
+	else
 		child->visibility = ICL_VISIBILITY_PROP;
-		break;
-	case IOTCON_INTERFACE_READONLY:
-	default:
-		WARN("Invalid interface type(%d)", iface);
-		child->visibility = ICL_VISIBILITY_PROP;
-		break;
-	}
 
 	return IOTCON_FUNC_CONTINUE;
 }
@@ -194,27 +186,16 @@ static int _icl_response_check_representation_visibility(iotcon_response_h resp)
 
 	iotcon_representation_h first = resp->repr;
 
-	DBG("interface type of response : %d", resp->iface);
+	DBG("interface type of response : %s", resp->iface);
 
-	switch (resp->iface) {
-	case IOTCON_INTERFACE_NONE:
-	case IOTCON_INTERFACE_DEFAULT:
-	case IOTCON_INTERFACE_GROUP:
-		first->visibility = ICL_VISIBILITY_REPR;
-		break;
-	case IOTCON_INTERFACE_LINK:
-	case IOTCON_INTERFACE_BATCH:
+	if (IC_STR_EQUAL == strcmp(IOTCON_INTERFACE_LINK, resp->iface)
+			|| IC_STR_EQUAL == strcmp(IOTCON_INTERFACE_BATCH, resp->iface))
 		first->visibility = ICL_VISIBILITY_NONE;
-		break;
-	case IOTCON_INTERFACE_READONLY:
-	default:
-		WARN("Invalid interface type(%d)", resp->iface);
+	else
 		first->visibility = ICL_VISIBILITY_REPR;
-		break;
-	}
 
 	ret = iotcon_representation_foreach_children(first,
-			_icl_response_representation_child_cb, GINT_TO_POINTER(resp->iface));
+			_icl_response_representation_child_cb, resp->iface);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_foreach_children() Fail(%d)", ret);
 		return ret;

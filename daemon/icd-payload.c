@@ -48,15 +48,14 @@ static GVariantBuilder* _icd_state_value_to_gvariant_builder(OCRepPayload *repr)
 GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 {
 	int port = 0;
-	int ifaces;
 	GVariant **value;
 	OCStringLL *node;
-	iotcon_interface_e iface;
 	GVariantBuilder types;
+	GVariantBuilder ifaces;
 	OCRandomUuidResult random_res;
 	OCDiscoveryPayload *discovered;
 	struct OCResourcePayload *resource;
-	int i, properties, ret, res_count;
+	int i, properties, res_count;
 	char device_id[UUID_STRING_SIZE] = {0};
 
 	discovered = (OCDiscoveryPayload*)payload;
@@ -96,21 +95,16 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 		}
 
 		/* Resource Interfaces */
-		ifaces = 0;
+		g_variant_builder_init(&ifaces, G_VARIANT_TYPE("as"));
 		node = resource->interfaces;
 		if (NULL == node) {
 			ERR("resource interfaces is NULL");
 			g_variant_builder_clear(&types);
 			continue;
 		}
-		for (; node; node = node->next) {
-			ret = ic_utils_convert_interface_string(node->value, &iface);
-			if (IOTCON_ERROR_NONE != ret) {
-				ERR("ic_utils_convert_interface_string() Fail(%d)", ret);
-				g_variant_builder_clear(&types);
-				continue;
-			}
-			ifaces |= iface;
+		while (node) {
+			g_variant_builder_add(&ifaces, "s", node->value);
+			node = node->next;
 		}
 
 		/* Resource Properties */
@@ -121,7 +115,7 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 
 		/* TODO
 		 * Check "resource->secure" and "resource->bitmap" */
-		value[i] = g_variant_new("(ssiasibsi)", resource->uri, device_id, ifaces, &types,
+		value[i] = g_variant_new("(ssasasibsi)", resource->uri, device_id, &ifaces, &types,
 				properties, resource->secure, dev_addr->addr, port);
 		DBG("found resource[%d] : %s", i, g_variant_print(value[i], FALSE));
 	}
@@ -278,12 +272,10 @@ static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr,
 		gboolean is_parent)
 {
 	OCStringLL *node;
-	int ret, ifaces = 0;
 	GVariant *child, *value;
 	OCRepPayload *child_node;
-	iotcon_interface_e iface;
 	GVariantBuilder *repr_gvar;
-	GVariantBuilder children, types_builder;
+	GVariantBuilder children, types_builder, ifaces_builder;
 
 	RETV_IF(NULL == repr, NULL);
 
@@ -297,16 +289,11 @@ static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr,
 	}
 
 	/* Resource Interfaces */
+	g_variant_builder_init(&ifaces_builder, G_VARIANT_TYPE("as"));
+
 	node = repr->interfaces;
 	while (node) {
-		ret = ic_utils_convert_interface_string(node->value, &iface);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("ic_utils_convert_interface_string() Fail(%d)", ret);
-			g_variant_builder_clear(&types_builder);
-			return NULL;
-		}
-		ifaces |= iface;
-
+		g_variant_builder_add(&ifaces_builder, "s", node->value);
 		node = node->next;
 	}
 
@@ -324,8 +311,8 @@ static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr,
 		child_node = child_node->next;
 	}
 
-	value = g_variant_new("(siasa{sv}av)", ic_utils_dbus_encode_str(repr->uri), ifaces,
-			&types_builder, repr_gvar, &children);
+	value = g_variant_new("(sasasa{sv}av)", ic_utils_dbus_encode_str(repr->uri),
+			&ifaces_builder, &types_builder, repr_gvar, &children);
 
 	return value;
 }
@@ -334,13 +321,14 @@ static GVariant* _icd_payload_representation_to_gvariant(OCRepPayload *repr,
 GVariant* icd_payload_representation_empty_gvariant(void)
 {
 	GVariant *value;
-	GVariantBuilder types, repr, children;
+	GVariantBuilder ifaces, types, repr, children;
 
+	g_variant_builder_init(&ifaces, G_VARIANT_TYPE("as"));
 	g_variant_builder_init(&types, G_VARIANT_TYPE("as"));
 	g_variant_builder_init(&repr, G_VARIANT_TYPE("a{sv}"));
 	g_variant_builder_init(&children, G_VARIANT_TYPE("av"));
 
-	value = g_variant_new("(siasa{sv}av)", IC_STR_NULL, 0, &types, &repr, &children);
+	value = g_variant_new("(sasasa{sv}av)", IC_STR_NULL, &ifaces, &types, &repr, &children);
 
 	return value;
 }
@@ -737,32 +725,23 @@ static int _icd_state_value_from_gvariant(OCRepPayload *repr, GVariantIter *iter
 
 OCRepPayload* icd_payload_representation_from_gvariant(GVariant *var)
 {
+	int ret;
 	GVariant *child;
-	int ret, i, ifaces = 0;
 	OCRepPayload *repr, *cur;
-	char *uri_path, *iface_str, *resource_type;
-	GVariantIter *resource_types, *repr_gvar, *children;
+	char *uri_path, *resource_iface, *resource_type;
+	GVariantIter *resource_types, *resource_ifaces, *repr_gvar, *children;
 
 	repr = OCRepPayloadCreate();
 
-	g_variant_get(var, "(&siasa{sv}av)", &uri_path, &ifaces, &resource_types, &repr_gvar,
-			&children);
+	g_variant_get(var, "(&sasasa{sv}av)", &uri_path, &resource_ifaces, &resource_types,
+			&repr_gvar, &children);
 
 	if (IC_STR_EQUAL != strcmp(IC_STR_NULL, uri_path))
 		OCRepPayloadSetUri(repr, uri_path);
 
-	for (i = 1; i <= IC_INTERFACE_MAX; i = i << 1) {
-		if (IOTCON_INTERFACE_NONE == (ifaces & i)) /* this interface not exist */
-			continue;
+	while (g_variant_iter_loop(resource_ifaces, "s", &resource_iface))
+		OCRepPayloadAddInterface(repr, resource_iface);
 
-		ret = ic_utils_convert_interface_flag((ifaces & i), &iface_str);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("ic_utils_convert_interface_flag(%d) Fail(%d)", i, ret);
-			OCRepPayloadDestroy(repr);
-			return NULL;
-		}
-		OCRepPayloadAddInterface(repr, iface_str);
-	}
 	while (g_variant_iter_loop(resource_types, "s", &resource_type))
 		OCRepPayloadAddResourceType(repr, resource_type);
 
