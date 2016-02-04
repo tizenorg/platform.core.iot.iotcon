@@ -172,19 +172,21 @@ void iotcon_query_destroy(iotcon_query_h query);
 int iotcon_query_get_resource_types(iotcon_query_h query, iotcon_resource_types_h *types);
 
 /**
- * @brief Gets resource types from the query.
- * @details @a iface could be one of #iotcon_interface_e.
+ * @brief Gets resource interface from the query.
  *
  * @since_tizen 3.0
  *
+ * @remarks @a resource_iface must not be released using free().
+ *
  * @param[in] query The handle of the query
- * @param[out] iface Found interface from query
+ * @param[out] resource_iface Found resource interface from query
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
  * @see iotcon_query_create()
  * @see iotcon_query_destroy()
@@ -192,7 +194,7 @@ int iotcon_query_get_resource_types(iotcon_query_h query, iotcon_resource_types_
  * @see iotcon_query_remove()
  * @see iotcon_query_set_interface()
  */
-int iotcon_query_get_interface(iotcon_query_h query, iotcon_interface_e *iface);
+int iotcon_query_get_interface(iotcon_query_h query, char **resource_iface);
 
 /**
  * @brief Sets the resource types into the query.
@@ -218,12 +220,12 @@ int iotcon_query_get_interface(iotcon_query_h query, iotcon_interface_e *iface);
 int iotcon_query_set_resource_types(iotcon_query_h query, iotcon_resource_types_h types);
 
 /**
- * @brief Sets the interface into the query.
+ * @brief Sets the resource interface into the query.
  *
  * @since_tizen 3.0
  *
  * @param[in] query The handle of the query
- * @param[in] iface The interface to add into the query
+ * @param[in] resource_iface The resource interface to add into the query
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -238,7 +240,7 @@ int iotcon_query_set_resource_types(iotcon_query_h query, iotcon_resource_types_
  * @see iotcon_query_lookup()
  * @see iotcon_query_get_interface()
  */
-int iotcon_query_set_interface(iotcon_query_h query, iotcon_interface_e iface);
+int iotcon_query_set_interface(iotcon_query_h query, const char *resource_iface);
 
 /**
  * @brief Adds a new key and correspoding value into the query.

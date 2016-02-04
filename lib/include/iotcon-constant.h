@@ -50,6 +50,17 @@
 #define IOTCON_FUNC_CONTINUE true
 
 /**
+ * @brief The type of resource interfaces which is predefined in IoTivity.
+ *
+ * @since_tizen 3.0
+ */
+#define IOTCON_INTERFACE_DEFAULT "oic.if.baseline" /**< Indicates interface for default */
+#define IOTCON_INTERFACE_LINK "oic.if.ll" /**< Indicates interface which is used to list the references to other resources contained in a resource */
+#define IOTCON_INTERFACE_BATCH "oic.if.b" /**< Indicates interface which is used to manipulate (GET, PUT, POSE, DELETE) on other resource contained in a resource */
+#define IOTCON_INTERFACE_GROUP "oic.mi.grp" /**< Indicates interface which is used to manipulate (GET, PUT, POST) a group of remote resources */
+#define IOTCON_INTERFACE_READONLY "oic.if.r" /**< Indicates interface which is used to limit the methods that can be applied to a resource to GET only */
+
+/**
  * @brief Enumeration for type of observation.
  *
  * @since_tizen 3.0
@@ -69,20 +80,6 @@ typedef enum {
 	IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER = 0, /**< Indicates observation request for most up-to-date notifications only */
 	IOTCON_OBSERVE_ACCEPT_OUT_OF_ORDER = 1 /**< Indicates observation request for all notifications including stale notifications */
 } iotcon_observe_policy_e;
-
-/**
- * @brief Enumeration for type of interfaces which can be held in a resource.
- *
- * @since_tizen 3.0
- */
-typedef enum {
-	IOTCON_INTERFACE_NONE = 0, /**< Indicates interface not specified or uninitialized */
-	IOTCON_INTERFACE_DEFAULT = (1 << 0), /**< Indicates interface for default */
-	IOTCON_INTERFACE_LINK = (1 << 1), /**< Indicates interface which is used to list the references to other resources contained in a resource */
-	IOTCON_INTERFACE_BATCH = (1 << 2), /**< Indicates interface which is used to manipulate (GET, PUT, POST, DELETE) on other resources contained in a resource */
-	IOTCON_INTERFACE_GROUP = (1 << 3), /**< Indicates interface which is used to manipulate (GET, PUT, POST) a group of remote resources */
-	IOTCON_INTERFACE_READONLY = (1 << 4), /**< Indicates interface which is used to limit the methods that can be applied to a resource to GET only */
-} iotcon_interface_e;
 
 /**
  * @brief Enumeration for of connectivities which can be held in a resource.
