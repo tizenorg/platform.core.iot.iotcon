@@ -34,7 +34,7 @@
  * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE_OVERVIEW Overview
  * The Iotcon Representation API provides data type of resp_repr handling.\n
  * A resp_repr is a payload of a request or a response.\n
- * It has uri_path, interface, list of resource types and its attributes.\n
+ * It has uri_path, list of resource interfaces, list of resource types and its attributes.\n
  * Attributes have capabilties to store and retrieve integer, boolean, double, string,
  * byte string, list, null, resp_repr.\n
  * A list is a container that includes number of datas of same type.\n
@@ -325,15 +325,15 @@ int iotcon_representation_get_resource_types(iotcon_representation_h repr,
 		iotcon_resource_types_h *types);
 
 /**
- * @brief Sets interfaces to the representation.
- * @details If you set new interfaces, current interfaces value will be replaced with @a ifaces.\n
- * @a ifaces can be consist of multiple interface like
- * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.
+ * @brief Sets list of resource interfaces to the representation.
  *
  * @since_tizen 3.0
  *
+ * @remarks Stored list is replaced with @a ifaces. If @a ifaces is NULL, stored list is set
+ * by NULL.
+ *
  * @param[in] repr The representation handle
- * @param[in] ifaces The interfaces to set\n Set of #iotcon_interface_e
+ * @param[in] ifaces The list of resource interfaces
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -341,24 +341,25 @@ int iotcon_representation_get_resource_types(iotcon_representation_h repr,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_representation_set_resource_interfaces(iotcon_representation_h repr,
-		int ifaces);
+		iotcon_resource_interfaces_h ifaces);
 
 /**
- * @brief Gets resource interfaces from the representation.
- * @details @a ifaces can contain multiple interfaces like
- * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.
+ * @brief Gets list of resource interfaces from the representation.
  *
  * @since_tizen 3.0
  *
- * @param[in] repr The representation handle
- * @param[out] ifaces The interfaces to get\n Set of #iotcon_interface_e
+ * @remarks @a ifaces must not be released using iotcon_resource_interfaces_destroy().
  *
- * @return Interfaces to get. Interfaces may contain multiple interfaces.
- * @retval #IOTCON_INTERFACE_NONE  Not set
- * @retval Bitwise OR value which consists of iotcon_interface_e items
+ * @param[in] repr The representation handle
+ * @param[out] ifaces The list of resource interfaces to get
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
 int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr,
-		int *ifaces);
+		iotcon_resource_interfaces_h *ifaces);
 
 /**
  * @brief Sets a new state handle into the representation.
