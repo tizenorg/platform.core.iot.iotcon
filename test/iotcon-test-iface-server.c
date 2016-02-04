@@ -32,7 +32,7 @@ typedef struct _light_resource_s {
 	int brightness;
 	char *uri_path;
 	char *type;
-	int ifaces;
+	iotcon_resource_ifaces_h ifaces;
 	int properties;
 	iotcon_resource_h handle;
 } light_resource_s;
@@ -42,7 +42,7 @@ typedef struct _fan_resource_s {
 	bool state;
 	char *uri_path;
 	char *type;
-	int ifaces;
+	iotcon_resource_ifaces_h ifaces;
 	int properties;
 	iotcon_resource_h handle;
 } fan_resource_s;
@@ -53,7 +53,7 @@ typedef struct _room_resource_s {
 	int today_temp[5];
 	char *uri_path;
 	char *type;
-	int ifaces;
+	iotcon_resource_ifaces_h ifaces;
 	int properties;
 	iotcon_resource_h handle;
 	light_resource_s *child_light;
@@ -62,6 +62,8 @@ typedef struct _room_resource_s {
 
 static int _set_room_resource(room_resource_s *room)
 {
+	int ret;
+
 	room->name = strdup("Michael's Room");
 	if (NULL == room->name) {
 		ERR("strdup() Fail");
@@ -89,7 +91,35 @@ static int _set_room_resource(room_resource_s *room)
 		return -1;
 	}
 
-	room->ifaces = IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_BATCH;
+	ret = iotcon_resource_ifaces_create(&room->ifaces);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_create() Fail(%d)", ret);
+		free(room->type);
+		free(room->uri_path);
+		free(room->name);
+		return -1;
+	}
+
+	ret = iotcon_resource_ifaces_add(room->ifaces, IOTCON_INTERFACE_DEFAULT);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_add() Fail(%d)", ret);
+		iotcon_resource_ifaces_destroy(room->ifaces);
+		free(room->type);
+		free(room->uri_path);
+		free(room->name);
+		return -1;
+	}
+
+	ret = iotcon_resource_ifaces_add(room->ifaces, IOTCON_INTERFACE_BATCH);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_add() Fail(%d)", ret);
+		iotcon_resource_ifaces_destroy(room->ifaces);
+		free(room->type);
+		free(room->uri_path);
+		free(room->name);
+		return -1;
+	}
+
 	room->properties = IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE;
 
 	return 0;
@@ -97,6 +127,7 @@ static int _set_room_resource(room_resource_s *room)
 
 static void _free_room_resource(room_resource_s *room)
 {
+	iotcon_resource_ifaces_destroy(room->ifaces);
 	free(room->type);
 	free(room->uri_path);
 	free(room->name);
@@ -104,6 +135,8 @@ static void _free_room_resource(room_resource_s *room)
 
 static int _set_light_resource(light_resource_s *light)
 {
+	int ret;
+
 	light->brightness = 50;
 
 	light->uri_path = strdup(LIGHT_RESOURCE_URI);
@@ -119,7 +152,23 @@ static int _set_light_resource(light_resource_s *light)
 		return -1;
 	}
 
-	light->ifaces = IOTCON_INTERFACE_DEFAULT;
+	ret = iotcon_resource_ifaces_create(&light->ifaces);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_create() Fail(%d)", ret);
+		free(light->type);
+		free(light->uri_path);
+		return -1;
+	}
+
+	ret = iotcon_resource_ifaces_add(light->ifaces, IOTCON_INTERFACE_DEFAULT);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_add() Fail(%d)", ret);
+		iotcon_resource_ifaces_destroy(light->ifaces);
+		free(light->type);
+		free(light->uri_path);
+		return -1;
+	}
+
 	light->properties = IOTCON_RESOURCE_NO_PROPERTY;
 
 	return 0;
@@ -127,12 +176,15 @@ static int _set_light_resource(light_resource_s *light)
 
 static void _free_light_resource(light_resource_s *light)
 {
+	iotcon_resource_ifaces_destroy(light->ifaces);
 	free(light->type);
 	free(light->uri_path);
 }
 
 static int _set_fan_resource(fan_resource_s *fan)
 {
+	int ret;
+
 	fan->state = false;
 
 	fan->uri_path = strdup(FAN_RESOURCE_URI);
@@ -148,7 +200,23 @@ static int _set_fan_resource(fan_resource_s *fan)
 		return -1;
 	}
 
-	fan->ifaces = IOTCON_INTERFACE_DEFAULT;
+	ret = iotcon_resource_ifaces_create(&fan->ifaces);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_create() Fail(%d)", ret);
+		free(fan->type);
+		free(fan->uri_path);
+		return -1;
+	}
+
+	ret = iotcon_resource_ifaces_add(fan->ifaces, IOTCON_INTERFACE_DEFAULT);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_add() Fail(%d)", ret);
+		iotcon_resource_ifaces_destroy(fan->ifaces);
+		free(fan->type);
+		free(fan->uri_path);
+		return -1;
+	}
+
 	fan->properties = IOTCON_RESOURCE_NO_PROPERTY;
 
 	return 0;
@@ -156,12 +224,17 @@ static int _set_fan_resource(fan_resource_s *fan)
 
 static void _free_fan_resource(fan_resource_s *fan)
 {
+	iotcon_resource_ifaces_destroy(fan->ifaces);
 	free(fan->type);
 	free(fan->uri_path);
 }
 
-static iotcon_resource_h _create_resource(char *uri_path, char *type, int ifaces,
-		int properties, iotcon_request_handler_cb cb, void *user_data)
+static iotcon_resource_h _create_resource(char *uri_path,
+		char *type,
+		iotcon_resource_ifaces_h ifaces,
+		int properties,
+		iotcon_request_handler_cb cb,
+		void *user_data)
 {
 	int ret;
 	iotcon_resource_h handle;
@@ -194,7 +267,7 @@ static iotcon_resource_h _create_resource(char *uri_path, char *type, int ifaces
 }
 
 static int _send_response(iotcon_request_h request, iotcon_representation_h repr,
-		iotcon_interface_e iface, iotcon_response_result_e result)
+		const char *iface, iotcon_response_result_e result)
 {
 	int ret;
 	iotcon_response_h response;
@@ -295,8 +368,7 @@ static int _light_request_handler_get(light_resource_s *light, iotcon_request_h 
 		return -1;
 	}
 
-	ret = _send_response(request, repr, IOTCON_INTERFACE_DEFAULT,
-			IOTCON_RESPONSE_OK);
+	ret = _send_response(request, repr, IOTCON_INTERFACE_DEFAULT, IOTCON_RESPONSE_OK);
 	if (0 != ret) {
 		ERR("_send_response() Fail(%d)", ret);
 		iotcon_representation_destroy(repr);
@@ -548,7 +620,7 @@ static int _room_request_handler_get(room_resource_s *room, iotcon_request_h req
 	int ret;
 	iotcon_query_h query;
 	iotcon_representation_h repr;
-	iotcon_interface_e iface = IOTCON_INTERFACE_DEFAULT;
+	char *iface = IOTCON_INTERFACE_DEFAULT;
 
 	INFO("GET request - Room");
 
@@ -594,7 +666,7 @@ static void _light_request_handler(iotcon_resource_h resource, iotcon_request_h 
 	int ret;
 	iotcon_request_type_e type;
 	light_resource_s *light = user_data;
-	int iface = IOTCON_INTERFACE_DEFAULT;
+	char *iface = IOTCON_INTERFACE_DEFAULT;
 
 	RET_IF(NULL == request);
 
@@ -620,7 +692,7 @@ static void _fan_request_handler(iotcon_resource_h resource, iotcon_request_h re
 	int ret;
 	iotcon_request_type_e type;
 	fan_resource_s *fan = user_data;
-	int iface = IOTCON_INTERFACE_DEFAULT;
+	char *iface = IOTCON_INTERFACE_DEFAULT;
 
 	RET_IF(NULL == request);
 
@@ -648,7 +720,7 @@ static void _room_request_handler(iotcon_resource_h resource, iotcon_request_h r
 	iotcon_request_type_e type;
 	char *host_address;
 	room_resource_s *room = user_data;
-	int iface = IOTCON_INTERFACE_DEFAULT;
+	char *iface = IOTCON_INTERFACE_DEFAULT;
 
 	RET_IF(NULL == request);
 

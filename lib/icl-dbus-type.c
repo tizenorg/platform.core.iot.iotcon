@@ -23,6 +23,7 @@
 #include "icl.h"
 #include "icl-resource.h"
 #include "icl-resource-types.h"
+#include "icl-resource-interfaces.h"
 #include "icl-options.h"
 #include "icl-query.h"
 #include "icl-request.h"
@@ -33,6 +34,26 @@
 #include "icl-payload.h"
 #include "icl-observation.h"
 #include "icl-dbus-type.h"
+
+const char** icl_dbus_resource_ifaces_to_array(iotcon_resource_ifaces_h ifaces)
+{
+	int i = 0;
+	GList *node = ifaces->iface_list;
+	int len = g_list_length(node);
+
+	const char **array = calloc(len + 1, sizeof(char*));
+	if (NULL == array) {
+		ERR("calloc() Fail(%d)", errno);
+		return NULL;
+	}
+
+	for (node = ifaces->iface_list; node; node = node->next, i++)
+		array[i] = node->data;
+	array[i] = NULL;
+
+	return array;
+}
+
 
 const char** icl_dbus_resource_types_to_array(iotcon_resource_types_h types)
 {

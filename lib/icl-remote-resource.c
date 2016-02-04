@@ -28,6 +28,7 @@
 #include "icl-representation.h"
 #include "icl-remote-resource.h"
 #include "icl-resource-types.h"
+#include "icl-resource-interfaces.h"
 #include "icl-payload.h"
 
 #define ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL 3600 /* 60 min */
@@ -184,7 +185,7 @@ API int iotcon_remote_resource_create(const char *host_address,
 		const char *uri_path,
 		int properties,
 		iotcon_resource_types_h resource_types,
-		int resource_ifs,
+		iotcon_resource_ifaces_h resource_ifaces,
 		iotcon_remote_resource_h *resource_handle)
 {
 	FN_CALL;
@@ -194,6 +195,7 @@ API int iotcon_remote_resource_create(const char *host_address,
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_types, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resource_ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
 	resource = calloc(1, sizeof(struct icl_remote_resource));
@@ -207,7 +209,7 @@ API int iotcon_remote_resource_create(const char *host_address,
 	resource->uri_path = ic_utils_strdup(uri_path);
 	resource->properties = properties;
 	resource->types = icl_resource_types_ref(resource_types);
-	resource->ifaces = resource_ifs;
+	resource->ifaces = icl_resource_ifaces_ref(resource_ifaces);
 	resource->ref_count = 1;
 
 	*resource_handle = resource;
@@ -223,6 +225,7 @@ static void _icl_remote_resource_destroy(iotcon_remote_resource_h resource)
 	free(resource->uri_path);
 	free(resource->host_address);
 	free(resource->device_id);
+	iotcon_resource_ifaces_destroy(resource->ifaces);
 	iotcon_resource_types_destroy(resource->types);
 
 	/* null COULD be allowed */
@@ -320,16 +323,20 @@ API int iotcon_remote_resource_clone(iotcon_remote_resource_h src,
 		}
 	}
 
-	if (src->types) {
-		ret = iotcon_resource_types_clone(src->types, &resource->types);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_resource_types_clone() Fail(%d)", ret);
-			iotcon_remote_resource_destroy(resource);
-			return ret;
-		}
+	ret = iotcon_resource_types_clone(src->types, &resource->types);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_types_clone() Fail(%d)", ret);
+		iotcon_remote_resource_destroy(resource);
+		return ret;
 	}
 
-	resource->ifaces = src->ifaces;
+	ret = iotcon_resource_ifaces_clone(src->ifaces, &resource->ifaces);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_clone() Fail(%d)", ret);
+		iotcon_remote_resource_destroy(resource);
+		return ret;
+	}
+
 	resource->connectivity_type = src->connectivity_type;
 
 	*dest = resource;
@@ -407,8 +414,9 @@ API int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
 }
 
 
+/* The content of the resource should not be freed by user. */
 API int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource,
-		int *ifaces)
+		iotcon_resource_ifaces_h *ifaces)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
@@ -468,14 +476,15 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 {
 	int ret;
 	iotcon_remote_resource_h resource;
-	GVariantIter *types_iter;
+	GVariantIter *types_iter, *ifaces_iter;
 	char host_addr[PATH_MAX] = {0};
 	iotcon_resource_types_h res_types;
-	char *uri_path, *device_id, *res_type, *addr;
-	int ifaces, properties, is_secure, port;
+	iotcon_resource_ifaces_h ifaces;
+	char *uri_path, *device_id, *res_type, *iface, *addr;
+	int properties, is_secure, port;
 
-	g_variant_get(payload, "(&s&siasib&si)", &uri_path, &device_id, &ifaces, &types_iter,
-			&properties, &is_secure, &addr, &port);
+	g_variant_get(payload, "(&s&sasasib&si)", &uri_path, &device_id, &ifaces_iter,
+			&types_iter, &properties, &is_secure, &addr, &port);
 
 	switch (connectivity_type) {
 	case IOTCON_CONNECTIVITY_IPV6:
@@ -498,10 +507,21 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 	while (g_variant_iter_loop(types_iter, "s", &res_type))
 		iotcon_resource_types_add(res_types, res_type);
 
+	ret = iotcon_resource_ifaces_create(&ifaces);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_create() Fail(%d)", ret);
+		iotcon_resource_types_destroy(res_types);
+		return NULL;
+	}
+
+	while (g_variant_iter_loop(ifaces_iter, "s", &iface))
+		iotcon_resource_ifaces_add(ifaces, iface);
+
 	ret = iotcon_remote_resource_create(host_addr, connectivity_type, uri_path,
 			properties, res_types, ifaces, &resource);
-	if (res_types)
-		iotcon_resource_types_destroy(res_types);
+
+	iotcon_resource_ifaces_destroy(ifaces);
+	iotcon_resource_types_destroy(res_types);
 
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_remote_resource_create() Fail");

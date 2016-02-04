@@ -24,6 +24,7 @@
 #include "icl-list.h"
 #include "icl-value.h"
 #include "icl-resource-types.h"
+#include "icl-resource-interfaces.h"
 #include "icl-response.h"
 #include "icl-payload.h"
 
@@ -176,13 +177,14 @@ static GVariant* _icl_state_value_to_gvariant(GHashTable *hash)
 static GVariant* _icl_representation_empty_gvariant(void)
 {
 	GVariant *value;
-	GVariantBuilder types, repr, children;
+	GVariantBuilder types, ifaces, repr, children;
 
+	g_variant_builder_init(&ifaces, G_VARIANT_TYPE("as"));
 	g_variant_builder_init(&types, G_VARIANT_TYPE("as"));
 	g_variant_builder_init(&repr, G_VARIANT_TYPE("a{sv}"));
 	g_variant_builder_init(&children, G_VARIANT_TYPE("av"));
 
-	value = g_variant_new("(siasa{sv}av)", IC_STR_NULL, 0, &types, &repr, &children);
+	value = g_variant_new("(sasasa{sv}av)", IC_STR_NULL, &ifaces, &types, &repr, &children);
 
 	return value;
 }
@@ -191,12 +193,11 @@ static GVariant* _icl_representation_empty_gvariant(void)
 GVariant* icl_representation_to_gvariant(iotcon_representation_h repr)
 {
 	GList *node;
-	int ifaces = 0;
 	const char *uri_path;
 	GVariant *value, *child;
 	iotcon_state_h state;
 	GVariantBuilder *repr_gvar = NULL;
-	GVariantBuilder children, resource_types;
+	GVariantBuilder children, resource_types, resource_ifaces;
 
 	if (NULL == repr)
 		return _icl_representation_empty_gvariant();
@@ -206,6 +207,7 @@ GVariant* icl_representation_to_gvariant(iotcon_representation_h repr)
 
 	/* Resource Types & Interfaces */
 	g_variant_builder_init(&resource_types, G_VARIANT_TYPE("as"));
+	g_variant_builder_init(&resource_ifaces, G_VARIANT_TYPE("as"));
 
 	if (ICL_VISIBILITY_PROP & repr->visibility) {
 		if (repr->res_types) {
@@ -213,7 +215,10 @@ GVariant* icl_representation_to_gvariant(iotcon_representation_h repr)
 				g_variant_builder_add(&resource_types, "s", node->data);
 		}
 
-		ifaces = repr->interfaces;
+		if (repr->interfaces) {
+			for (node = repr->interfaces->iface_list; node; node = node->next)
+				g_variant_builder_add(&resource_ifaces, "s", node->data);
+		}
 	}
 
 	/* Representation */
@@ -230,7 +235,7 @@ GVariant* icl_representation_to_gvariant(iotcon_representation_h repr)
 		g_variant_builder_add(&children, "v", child);
 	}
 
-	value = g_variant_new("(siasa{sv}av)", uri_path, ifaces, &resource_types,
+	value = g_variant_new("(sasasa{sv}av)", uri_path, &resource_ifaces, &resource_types,
 			repr_gvar, &children);
 
 	return value;
@@ -393,8 +398,8 @@ iotcon_representation_h icl_representation_from_gvariant(GVariant *var)
 	GVariant *child;
 	iotcon_representation_h repr;
 	iotcon_state_h state;
-	char *uri_path, *resource_type;
-	GVariantIter *children, *repr_gvar, *resource_types;
+	char *uri_path, *resource_type, *resource_iface;
+	GVariantIter *children, *repr_gvar, *resource_types, *resource_ifaces;
 
 	ret = iotcon_representation_create(&repr);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -409,8 +414,8 @@ iotcon_representation_h icl_representation_from_gvariant(GVariant *var)
 		return NULL;
 	}
 
-	g_variant_get(var, "(&siasa{sv}av)", &uri_path, &repr->interfaces,
-			&resource_types, &repr_gvar, &children);
+	g_variant_get(var, "(&sasasa{sv}av)", &uri_path, &resource_ifaces, &resource_types,
+			&repr_gvar, &children);
 
 	/* uri path */
 	if (IC_STR_EQUAL != strcmp(IC_STR_NULL, uri_path))
@@ -421,6 +426,7 @@ iotcon_representation_h icl_representation_from_gvariant(GVariant *var)
 		ret = iotcon_resource_types_create(&repr->res_types);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_resource_types_create() Fail(%d)", ret);
+			g_variant_iter_free(resource_ifaces);
 			g_variant_iter_free(resource_types);
 			g_variant_iter_free(children);
 			iotcon_state_destroy(state);
@@ -432,6 +438,23 @@ iotcon_representation_h icl_representation_from_gvariant(GVariant *var)
 			iotcon_resource_types_add(repr->res_types, resource_type);
 	}
 	g_variant_iter_free(resource_types);
+
+	/* resource ifaces */
+	if (g_variant_iter_n_children(resource_ifaces)) {
+		ret = iotcon_resource_ifaces_create(&repr->interfaces);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_resource_ifaces_create() Fail(%d)", ret);
+			g_variant_iter_free(resource_ifaces);
+			g_variant_iter_free(children);
+			iotcon_state_destroy(state);
+			iotcon_representation_destroy(repr);
+			return NULL;
+		}
+
+		while (g_variant_iter_loop(resource_ifaces, "s", &resource_iface))
+			iotcon_resource_ifaces_add(repr->interfaces, resource_iface);
+	}
+	g_variant_iter_free(resource_ifaces);
 
 	/* attribute */
 	icl_state_from_gvariant(state, repr_gvar);

@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_STRUCT_RESOURCE_TYPES_H__
-#define __IOT_CONNECTIVITY_MANAGER_STRUCT_RESOURCE_TYPES_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_STRUCT_RESOURCE_INTERFACES_H__
+#define __IOT_CONNECTIVITY_MANAGER_STRUCT_RESOURCE_INTERFACES_H__
 
 #include <iotcon-types.h>
 
 /**
- * @file iotcon-resource-types.h
+ * @file iotcon-resource-interfaces.h
  */
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE
- * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE Resource Types
+ * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_INTERFACES_MODULE Resource Interfaces
  *
- * @brief Iotcon Resource Types provides API to manage resource types.
+ * @brief Iotcon Resource Interfaces provides API to manage resource interfaces.
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE_HEADER Required Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_INTERFACES_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE_OVERVIEW Overview
- * The iotcon resource types API provides methods for managing handle and add, remove resource types.
- * A resource type indicates a class or category of resources.
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_INTERFACES_MODULE_OVERVIEW Overview
+ * The iotcon resource interfaces API provides methods for managing handle and add, remove resource interfaces.
+ * A resource interface indicates a class or category of resources.
  *
  * Example :
  * @code
@@ -87,7 +87,7 @@ static void _create_light_resource()
 }
  * @endcode
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE_FEATURE Related Features
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_INTERFACES_MODULE_FEATURE Related Features
  * This API is related with the following features:\n
  *  - http://tizen.org/feature/iot.oic\n
  *
@@ -103,14 +103,14 @@ static void _create_light_resource()
  */
 
 /**
- * @brief Creates a new resource types handle.
+ * @brief Creates a new resource interfaces handle.
  *
  * @since_tizen 3.0
  *
- * @remarks You must destroy @a types by calling iotcon_resource_types_destroy()
- * if @a types is no longer needed.
+ * @remarks You must destroy @a ifaces by calling iotcon_resource_ifaces_destroy()
+ * if @a ifaces is no longer needed.
  *
- * @param[out] types A newly allocated list of resource types handle
+ * @param[out] ifaces A newly allocated list of resource ifaces handle
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -118,60 +118,56 @@ static void _create_light_resource()
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_resource_types_destroy()
- * @see iotcon_resource_types_add()
- * @see iotcon_resource_types_remove()
- * @see iotcon_resource_types_clone()
+ * @see iotcon_resource_ifaces_destroy()
+ * @see iotcon_resource_ifaces_add()
+ * @see iotcon_resource_ifaces_remove()
+ * @see iotcon_resource_ifaces_clone()
  */
-int iotcon_resource_types_create(iotcon_resource_types_h *types);
+int iotcon_resource_ifaces_create(iotcon_resource_ifaces_h *ifaces);
 
 /**
- * @brief Destroys a resource types handle.
+ * @brief Destroys a resource ifaces handle.
  *
  * @since_tizen 3.0
  *
- * @param[in] types The handle of the resource types
+ * @param[in] ifaces The handle of the resource ifaces
  *
  * @return void
  *
- * @see iotcon_resource_types_create()
- * @see iotcon_resource_types_add()
- * @see iotcon_resource_types_remove()
- * @see iotcon_resource_types_clone()
+ * @see iotcon_resource_ifaces_create()
+ * @see iotcon_resource_ifaces_add()
+ * @see iotcon_resource_ifaces_remove()
+ * @see iotcon_resource_ifaces_clone()
  */
-void iotcon_resource_types_destroy(iotcon_resource_types_h types);
+void iotcon_resource_ifaces_destroy(iotcon_resource_ifaces_h ifaces);
 
 /**
- * @brief Inserts a resource type into the list.
+ * @brief Inserts a resource iface into the list.
  *
  * @since_tizen 3.0
- * @remarks The length of @a type should be less than or equal to 61.\n
- * The @a type must start with a lowercase alphabetic character, followed by a sequence
- * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.\n
- * Duplicate strings are not allowed.
  *
- * @param[in] types The handle of the resource types
- * @param[in] type The string data to insert into the resource types (e.g. "org.tizen.light")
+ * @param[in] ifaces The handle of the resource ifaces
+ * @param[in] iface The string data to insert into the resource ifaces
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_resource_types_create()
- * @see iotcon_resource_types_destroy()
- * @see iotcon_resource_types_remove()
- * @see iotcon_resource_types_clone()
+ * @see iotcon_resource_ifaces_create()
+ * @see iotcon_resource_ifaces_destroy()
+ * @see iotcon_resource_ifaces_remove()
+ * @see iotcon_resource_ifaces_clone()
  */
-int iotcon_resource_types_add(iotcon_resource_types_h types, const char *type);
+int iotcon_resource_ifaces_add(iotcon_resource_ifaces_h ifaces, const char *iface);
 
 /**
- * @brief Delete a resource type form the list.
+ * @brief Delete a resource iface form the list.
  *
  * @since_tizen 3.0
  *
- * @param[in] types The handle of the resource types
- * @param[in] type The string data to delete from the resource types
+ * @param[in] ifaces The handle of the resource ifaces
+ * @param[in] iface The string data to delete from the resource ifaces
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -179,39 +175,39 @@ int iotcon_resource_types_add(iotcon_resource_types_h types, const char *type);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  *
- * @see iotcon_resource_types_create()
- * @see iotcon_resource_types_destroy()
- * @see iotcon_resource_types_add()
- * @see iotcon_resource_types_clone()
+ * @see iotcon_resource_ifaces_create()
+ * @see iotcon_resource_ifaces_destroy()
+ * @see iotcon_resource_ifaces_add()
+ * @see iotcon_resource_ifaces_clone()
  */
-int iotcon_resource_types_remove(iotcon_resource_types_h types, const char *type);
+int iotcon_resource_ifaces_remove(iotcon_resource_ifaces_h ifaces, const char *iface);
 
 /**
- * @brief Specifies the type of function passed to iotcon_resource_types_foreach()
+ * @brief Specifies the iface of function passed to iotcon_resource_ifaces_foreach()
  *
  * @since_tizen 3.0
  *
- * @param[in] type The value of the resource types
+ * @param[in] iface The value of the resource ifaces
  * @param[in] user_data The user data to pass to the function
  *
  * @return true to continue with the next iteration of the loop,
  * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
  * are more friendly values for the return.
  *
- * @pre iotcon_resource_types_foreach() will invoke this callback function.
+ * @pre iotcon_resource_ifaces_foreach() will invoke this callback function.
  *
- * @see iotcon_resource_types_foreach()
+ * @see iotcon_resource_ifaces_foreach()
  */
-typedef bool (*iotcon_resource_types_foreach_cb)(const char *type, void *user_data);
+typedef bool (*iotcon_resource_ifaces_foreach_cb)(const char *iface, void *user_data);
 
 /**
- * @brief Gets all of the resource types of the list by invoking the callback function.
- * @details iotcon_resource_types_foreach_cb() will be called for each type.\n
- * If iotcon_resource_types_foreach_cb() returns false, iteration will be stop.
+ * @brief Gets all of the resource ifaces of the list by invoking the callback function.
+ * @details iotcon_resource_ifaces_foreach_cb() will be called for each iface.\n
+ * If iotcon_resource_ifaces_foreach_cb() returns false, iteration will be stop.
  *
  * @since_tizen 3.0
  *
- * @param[in] types The handle of resource types
+ * @param[in] ifaces The handle of resource ifaces
  * @param[in] cb The callback function to get data
  * @param[in] user_data The user data to pass to the function
  *
@@ -220,40 +216,40 @@ typedef bool (*iotcon_resource_types_foreach_cb)(const char *type, void *user_da
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @post iotcon_resource_types_foreach() will be called for each type.
+ * @post iotcon_resource_ifaces_foreach() will be called for each iface.
  *
- * @see iotcon_resource_types_foreach_cb()
+ * @see iotcon_resource_ifaces_foreach_cb()
  */
-int iotcon_resource_types_foreach(iotcon_resource_types_h types,
-		iotcon_resource_types_foreach_cb cb, void *user_data);
+int iotcon_resource_ifaces_foreach(iotcon_resource_ifaces_h ifaces,
+		iotcon_resource_ifaces_foreach_cb cb, void *user_data);
 
 /**
- * @brief Clones the resource types handle.
- * @details Makes a deep copy of a source list of resource types.
+ * @brief Clones the resource ifaces handle.
+ * @details Makes a deep copy of a source list of resource ifaces.
  *
  * @since_tizen 3.0
  *
- * @remarks You must @a destroy dest by calling iotcon_resource_types_destroy()
+ * @remarks You must @a destroy dest by calling iotcon_resource_ifaces_destroy()
  * if @a dest is no longer needed.
  *
- * @param[in] src The origin handle of the resource types
- * @param[out] dest Clone of a source list of resource types
+ * @param[in] src The origin handle of the resource ifaces
+ * @param[out] dest Clone of a source list of resource ifaces
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_resource_types_create()
- * @see iotcon_resource_types_destroy()
- * @see iotcon_resource_types_add()
- * @see iotcon_resource_types_remove()
+ * @see iotcon_resource_ifaces_create()
+ * @see iotcon_resource_ifaces_destroy()
+ * @see iotcon_resource_ifaces_add()
+ * @see iotcon_resource_ifaces_remove()
  */
-int iotcon_resource_types_clone(iotcon_resource_types_h src,
-		iotcon_resource_types_h *dest);
+int iotcon_resource_ifaces_clone(iotcon_resource_ifaces_h src,
+		iotcon_resource_ifaces_h *dest);
 
 /**
  * @}
  */
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_STRUCT_RESOURCE_TYPES_H__ */
+#endif /* __IOT_CONNECTIVITY_MANAGER_STRUCT_RESOURCE_INTERFACES_H__ */

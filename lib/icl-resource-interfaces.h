@@ -13,29 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_INTERFACES_H__
+#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_INTERFACES_H__
 
 #include <glib.h>
-
 #include "iotcon-types.h"
-#include "icl-value.h"
 
-struct icl_state_s {
+/**
+ * @brief The maximum length which can be held in a resource interface.
+ *
+ * @since_tizen 3.0
+ */
+
+struct icl_resource_ifaces {
 	int ref_count;
-	GHashTable *hash_table;
+	GList *iface_list;
 };
 
-struct icl_representation_s {
-	char *uri_path;
-	int ref_count;
-	int visibility;
-	GList *children;
-	iotcon_resource_types_h res_types;
-	iotcon_resource_ifaces_h interfaces;
-	struct icl_state_s *state;
-};
+iotcon_resource_ifaces_h icl_resource_ifaces_ref(iotcon_resource_ifaces_h res_ifaces);
+const char* icl_resource_ifaces_get_nth_data(iotcon_resource_ifaces_h res_ifaces, int index);
+unsigned int icl_resource_ifaces_get_length(iotcon_resource_ifaces_h res_ifaces);
 
-iotcon_representation_h icl_representation_ref(iotcon_representation_h repr);
-
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__ */
+#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_INTERFACES_H__ */

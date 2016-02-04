@@ -113,12 +113,13 @@ static void _on_response_delete(iotcon_remote_resource_h resource,
 static void _on_response_post(iotcon_remote_resource_h resource,
 		iotcon_response_h response, void *user_data)
 {
+	int ret;
 	iotcon_state_h recv_state;
 	char *host, *created_uri_path;
-	int ret, ifaces = 0;
 	iotcon_connectivity_type_e connectivity_type;
 	iotcon_response_result_e response_result;
 	iotcon_resource_types_h types = NULL;
+	iotcon_resource_ifaces_h ifaces = NULL;
 	iotcon_remote_resource_h new_door_resource;
 	iotcon_representation_h recv_repr = NULL;
 
@@ -310,6 +311,15 @@ static void _on_response_get(iotcon_remote_resource_h resource,
 	iotcon_representation_destroy(send_repr);
 }
 
+static bool _get_res_iface_cb(const char *string, void *user_data)
+{
+	char *resource_uri_path = user_data;
+
+	DBG("[%s] resource interface : %s", resource_uri_path, string);
+
+	return IOTCON_FUNC_CONTINUE;
+}
+
 static bool _get_res_type_cb(const char *string, void *user_data)
 {
 	char *resource_uri_path = user_data;
@@ -404,13 +414,14 @@ static void _on_response(iotcon_remote_resource_h resource, iotcon_error_e err,
 static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e result,
 		void *user_data)
 {
+	int ret;
 	GList *node;
 	char *resource_host;
 	char *resource_uri_path;
 	char *resource_device_id;
 	iotcon_presence_h presence_handle;
 	iotcon_resource_types_h resource_types;
-	int ret, resource_interfaces;
+	iotcon_resource_ifaces_h resource_interfaces;
 	iotcon_connectivity_type_e connectivity_type;
 	iotcon_remote_resource_h resource_clone = NULL;
 
@@ -479,16 +490,15 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		free(door_resource_device_id);
 		return;
 	}
-	if (IOTCON_INTERFACE_DEFAULT & resource_interfaces)
-		DBG("[%s] resource interface : DEFAULT_INTERFACE", resource_uri_path);
-	if (IOTCON_INTERFACE_LINK & resource_interfaces)
-		DBG("[%s] resource interface : LINK_INTERFACE", resource_uri_path);
-	if (IOTCON_INTERFACE_BATCH & resource_interfaces)
-		DBG("[%s] resource interface : BATCH_INTERFACE", resource_uri_path);
-	if (IOTCON_INTERFACE_GROUP & resource_interfaces)
-		DBG("[%s] resource interface : GROUP_INTERFACE", resource_uri_path);
-	if (IOTCON_INTERFACE_READONLY & resource_interfaces)
-		DBG("[%s] resource interface : READONLY_INTERFACE", resource_uri_path);
+
+	ret = iotcon_resource_ifaces_foreach(resource_interfaces, _get_res_iface_cb,
+			resource_uri_path);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_foreach() Fail(%d)", ret);
+		device_id_list = g_list_remove(device_id_list, door_resource_device_id);
+		free(door_resource_device_id);
+		return;
+	}
 
 	/* get the resource types */
 	ret = iotcon_remote_resource_get_types(resource, &resource_types);

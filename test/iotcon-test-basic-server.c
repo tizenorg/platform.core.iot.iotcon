@@ -30,7 +30,7 @@ typedef struct _door_resource_s {
 	bool state;
 	char *uri_path;
 	char *type;
-	int ifaces;
+	iotcon_resource_ifaces_h ifaces;
 	int properties;
 	iotcon_resource_h handle;
 	iotcon_observers_h observers;
@@ -61,12 +61,29 @@ static int _set_door_resource(door_resource_s *door)
 		return -1;
 	}
 
-	door->ifaces = IOTCON_INTERFACE_DEFAULT;
+	ret = iotcon_resource_ifaces_create(&door->ifaces);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_create() Fail(%d)", ret);
+		free(door->type);
+		free(door->uri_path);
+		return -1;
+	}
+
+	ret = iotcon_resource_ifaces_add(door->ifaces, IOTCON_INTERFACE_DEFAULT);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_add() Fail(%d)", ret);
+		iotcon_resource_ifaces_destroy(door->ifaces);
+		free(door->type);
+		free(door->uri_path);
+		return -1;
+	}
+
 	door->properties = IOTCON_RESOURCE_DISCOVERABLE;
 
 	ret = iotcon_observers_create(&door->observers);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_observers_create() Fail");
+		iotcon_resource_ifaces_destroy(door->ifaces);
 		free(door->type);
 		free(door->uri_path);
 		return -1;
@@ -78,6 +95,7 @@ static int _set_door_resource(door_resource_s *door)
 static void _free_door_resource(door_resource_s *door)
 {
 	iotcon_observers_destroy(door->observers);
+	iotcon_resource_ifaces_destroy(door->ifaces);
 	free(door->type);
 	free(door->uri_path);
 }
@@ -90,8 +108,8 @@ static void _check_door_state(door_resource_s door)
 		INFO("[Door] opened.");
 }
 
-static iotcon_resource_h _create_door_resource(char *uri_path, char *type, int ifaces,
-		int properties, void *user_data)
+static iotcon_resource_h _create_door_resource(char *uri_path, char *type,
+		iotcon_resource_ifaces_h ifaces, int properties, void *user_data)
 {
 	int ret;
 	iotcon_resource_h handle;
@@ -354,7 +372,7 @@ static int _request_handler_post(door_resource_s *door, iotcon_request_h request
 	}
 
 	new_door_handle = _create_door_resource(DOOR_RESOURCE_URI2, door->type,
-			IOTCON_INTERFACE_DEFAULT, IOTCON_RESOURCE_NO_PROPERTY, door);
+			door->ifaces, IOTCON_RESOURCE_NO_PROPERTY, door);
 	if (NULL == new_door_handle) {
 		ERR("_create_door_resource() Fail");
 		return -1;
@@ -560,7 +578,13 @@ int main(int argc, char **argv)
 	}
 
 	/* add resource options */
-	my_door.ifaces |= IOTCON_INTERFACE_BATCH;
+	ret = iotcon_resource_ifaces_add(my_door.ifaces, IOTCON_INTERFACE_BATCH);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_ifaces_add() Fail(%d)", ret);
+		_free_door_resource(&my_door);
+		iotcon_disconnect();
+		return -1;
+	}
 	my_door.properties |= IOTCON_RESOURCE_OBSERVABLE;
 
 	/* add presence */
