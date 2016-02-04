@@ -37,7 +37,7 @@
 #define ICL_URI_PATH_LENGTH_MAX 36
 
 struct icl_notify_msg {
-	iotcon_interface_e iface;
+	char *iface;
 	iotcon_representation_h repr;
 };
 
@@ -45,7 +45,7 @@ struct icl_resource {
 	char *uri_path;
 	int properties;
 	iotcon_resource_types_h types;
-	int ifaces;
+	iotcon_resource_interfaces_h ifaces;
 	iotcon_request_handler_cb cb;
 	void *user_data;
 	unsigned int sub_id;

@@ -148,6 +148,15 @@ typedef struct icl_device_info* iotcon_device_info_h;
 typedef struct icl_platform_info* iotcon_platform_info_h;
 
 /**
+ * @brief The handle of resource interface
+ * @details @a iotcon_resource_interfaces_h is an opaque data structure to have list
+ * of resource interfaces. A resource interface is datatype of string.
+ *
+ * @since_tizen 3.0
+ */
+typedef struct icl_resource_ifaces* iotcon_resource_interfaces_h;
+
+/**
  * @brief The handle of resource types
  * @details @a iotcon_resource_types_h is an opaque data structure to have list
  * of resource types. A resource type is datatype of string.
@@ -219,5 +228,6 @@ typedef struct icl_state_s* iotcon_state_h;
 #include <iotcon-options.h>
 #include <iotcon-representation.h>
 #include <iotcon-resource-types.h>
+#include <iotcon-resource-interfaces.h>
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_TYPES_H__ */
