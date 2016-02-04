@@ -55,13 +55,12 @@ static void _door_request_handler(iotcon_resource_h resource, iotcon_request_h r
 static void _create_resource()
 {
 	int ret;
-	int ifaces;
 	int properties;
-	iotcon_resource_types_h resource_types = NULL;
+	iotcon_resource_interfaces_h resource_ifaces = NULL;
+	iotcon_resource_interfaces_h resource_types = NULL;
 	iotcon_resource_h resource_door = NULL;
 
 	// 1. create room resource
-	ifaces = IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH;
 	properties = IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE;
 
 	ret = iotcon_resource_types_create(&resource_types);
@@ -74,16 +73,43 @@ static void _create_resource()
 		return;
 	}
 
-	ret = iotcon_resource_create("/room/1", resource_types, ifaces,
-			properties, _room_request_handler, NULL, &_resource_room);
+	ret = iotcon_resource_interfaces_create(&resource_ifaces);
+	if (IOTCON_ERROR_NONE != ret)
+		iotcon_resource_types_destroy(resource_types);
+		return;
+
+	ret = iotcon_resource_interfaces_add(resource_ifaces, IOTCON_INTERFACE_DEFAULT);
 	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_interfaces_destroy(resource_ifaces);
 		iotcon_resource_types_destroy(resource_types);
 		return;
 	}
+
+	ret = iotcon_resource_interfaces_add(resource_ifaces, IOTCON_INTERFACE_LINK);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_interfaces_destroy(resource_ifaces);
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+
+	ret = iotcon_resource_interfaces_add(resource_ifaces, IOTCON_INTERFACE_BATCH);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_interfaces_destroy(resource_ifaces);
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+
+	ret = iotcon_resource_create("/room/1", resource_types, resource_ifaces,
+			properties, _room_request_handler, NULL, &_resource_room);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_interfaces_destroy(resource_ifaces);
+		iotcon_resource_types_destroy(resource_types);
+		return;
+	}
+	iotcon_resource_interfaces_destroy(resource_ifaces);
 	iotcon_resource_types_destroy(resource_types);
 
 	// 2. create door resource
-	ifaces = IOTCON_INTERFACE_DEFAULT;
 	properties = IOTCON_RESOURCE_OBSERVABLE;
 
 	ret = iotcon_resource_types_create(&resource_types);
@@ -101,14 +127,30 @@ static void _create_resource()
 		return;
 	}
 
-	ret = iotcon_resource_create("/door/1", resource_types, ifaces,
+	ret = iotcon_resource_interfaces_create(&resource_ifaces);
+	if (IOTCON_ERROR_NONE != ret)
+		iotcon_resource_types_destroy(resource_types);
+		iotcon_resource_destroy(_resource_room);
+		return;
+
+	ret = iotcon_resource_interfaces_add(resource_ifaces, IOTCON_INTERFACE_DEFAULT);
+	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_interfaces_destroy(resource_ifaces);
+		iotcon_resource_types_destroy(resource_types);
+		iotcon_resource_destroy(_resource_room);
+		return;
+	}
+
+	ret = iotcon_resource_create("/door/1", resource_types, resource_ifaces,
 			properties, _door_request_handler, NULL, &resource_door);
 	if (IOTCON_ERROR_NONE != ret) {
+		iotcon_resource_interfaces_destroy(resource_ifaces);
 		iotcon_resource_types_destroy(resource_types);
 		iotcon_resource_destroy(_resource_room);
 		_resource_room = NULL;
 		return;
 	}
+	iotcon_resource_interfaces_destroy(resource_ifaces);
 	iotcon_resource_types_destroy(resource_types);
 
 	// 3. bind door resouce to room resource
@@ -164,8 +206,8 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @a uri_path format would be relative URI path like '/a/light'\n
  * @a res_types is a list of resource types. Create a iotcon_resource_types_h handle and
  * add types string to it.\n
- * @a ifaces can contain multiple interfaces like
- * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.\n
+ * @a ifaces is a list of resource interfaces. Create a iotcon_resource_interfaces_h handle and
+ * add interfaces string to it.\n
  * @a properties also can contain multiple properties like
  * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.\n
  * iotcon_request_handler_cb() will be called when receive CRUD request to the registered
@@ -182,7 +224,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  *
  * @param[in] uri_path The URI path of the resource
  * @param[in] res_types The list of type of the resource
- * @param[in] ifaces The interfaces of the resource\n Set of #iotcon_interface_e
+ * @param[in] ifaces The list of interface of the resource
  * @param[in] properties The properties of the resource\n Set of #iotcon_resource_property_e
  * @param[in] cb The request handler callback function
  * @param[in] user_data The user data to pass to the callback function
@@ -209,7 +251,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  */
 int iotcon_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
-		int ifaces,
+		iotcon_resource_interfaces_h ifaces,
 		int properties,
 		iotcon_request_handler_cb cb,
 		void *user_data,
@@ -248,14 +290,12 @@ int iotcon_resource_destroy(iotcon_resource_h resource_handle);
 
 /**
  * @brief Binds an interface to the resource
+ * @details @a iface could be a value such as #IOTCON_INTERFACE_DEFAULT.
  *
- * @details The @a iface could be one of #iotcon_interface_e.
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/d2d.datasharing
- *
- * @remarks Sets only one interface to @a iface. If not, @a iface will be ignored.
  *
  * @param[in] resource The handle of the resource
  * @param[in] iface The interface to be bound to the resource
@@ -276,7 +316,7 @@ int iotcon_resource_destroy(iotcon_resource_h resource_handle);
  * @see iotcon_resource_unbind_child_resource()
  * @see iotcon_request_handler_cb()
  */
-int iotcon_resource_bind_interface(iotcon_resource_h resource, iotcon_interface_e iface);
+int iotcon_resource_bind_interface(iotcon_resource_h resource, const char *iface);
 
 /**
  * @brief Binds a type to the resource
@@ -530,13 +570,13 @@ int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_
 
 /**
  * @brief Gets the interfaces of the resource
- * @a ifaces can contain multiple interfaces like
- * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.
  *
  * @since_tizen 3.0
  *
+ * @remarks @a ifaces must not be released using iotcon_resource_interfaces_destroy().
+ *
  * @param[in] resource The handle of the resource
- * @param[out] ifaces The interfaces of the resource\n Set of #iotcon_interface_e
+ * @param[out] ifaces The interfaces of the resource
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -549,7 +589,8 @@ int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_properties()
  */
-int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces);
+int iotcon_resource_get_interfaces(iotcon_resource_h resource,
+		iotcon_resource_interfaces_h *ifaces);
 
 /**
  * @brief Gets the properties in the resource

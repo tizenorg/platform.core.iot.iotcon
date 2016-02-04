@@ -26,6 +26,7 @@
 #include "icl.h"
 #include "icl-resource.h"
 #include "icl-resource-types.h"
+#include "icl-resource-interfaces.h"
 #include "icl-response.h"
 #include "icl-list.h"
 #include "icl-value.h"
@@ -150,7 +151,7 @@ API int iotcon_representation_set_resource_types(iotcon_representation_h repr,
 }
 
 API int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr,
-		int *ifaces)
+		iotcon_resource_interfaces_h *ifaces)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
@@ -162,13 +163,16 @@ API int iotcon_representation_get_resource_interfaces(iotcon_representation_h re
 }
 
 API int iotcon_representation_set_resource_interfaces(iotcon_representation_h repr,
-		int ifaces)
+		iotcon_resource_interfaces_h ifaces)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	RETV_IF(ifaces <= IOTCON_INTERFACE_NONE || IC_INTERFACE_MAX < ifaces,
-			IOTCON_ERROR_INVALID_PARAMETER);
+	if (ifaces)
+		ifaces = icl_resource_interfaces_ref(ifaces);
+
+	if (repr->interfaces)
+		iotcon_resource_interfaces_destroy(repr->interfaces);
 
 	repr->interfaces = ifaces;
 
@@ -295,7 +299,8 @@ API int iotcon_representation_clone(const iotcon_representation_h src,
 	FN_CALL;
 	int ret;
 	GList *node;
-	iotcon_resource_types_h list;
+	iotcon_resource_types_h types;
+	iotcon_resource_interfaces_h ifaces;
 	iotcon_representation_h cloned_repr, copied_repr;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
@@ -317,17 +322,24 @@ API int iotcon_representation_clone(const iotcon_representation_h src,
 		}
 	}
 
-	if (src->interfaces)
-		cloned_repr->interfaces = src->interfaces;
+	if (src->interfaces) {
+		ret = iotcon_resource_interfaces_clone(src->interfaces, &ifaces);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon_resource_interfaces_clone() Fail(%d)");
+			iotcon_representation_destroy(cloned_repr);
+			return ret;
+		}
+		cloned_repr->interfaces = ifaces;
+	}
 
 	if (src->res_types) {
-		ret = iotcon_resource_types_clone(src->res_types, &list);
+		ret = iotcon_resource_types_clone(src->res_types, &types);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_resource_types_clone() Fail");
 			iotcon_representation_destroy(cloned_repr);
 			return ret;
 		}
-		cloned_repr->res_types = list;
+		cloned_repr->res_types = types;
 	}
 
 	if (src->children) {
