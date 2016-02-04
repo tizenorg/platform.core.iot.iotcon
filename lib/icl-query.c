@@ -74,21 +74,21 @@ API int iotcon_query_get_resource_type(iotcon_query_h query,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_query_get_interface(iotcon_query_h query, iotcon_interface_e *iface)
+API int iotcon_query_get_interface(iotcon_query_h query, char **resource_iface)
 {
-	char *iface_str = NULL;
+	char *iface;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
 
-	iotcon_query_lookup(query, ICL_QUERY_KEY_INTERFACE, &iface_str);
-	if (NULL == iface_str) {
-		ERR("iface_str is NULL");
+	iotcon_query_lookup(query, ICL_QUERY_KEY_INTERFACE, &iface);
+	if (NULL == iface) {
+		ERR("iface is NULL");
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	*iface = atoi(iface_str);
+	*resource_iface = iface;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -123,12 +123,11 @@ API int iotcon_query_set_resource_type(iotcon_query_h query, const char *resourc
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_query_set_interface(iotcon_query_h query, iotcon_interface_e iface)
+API int iotcon_query_set_interface(iotcon_query_h query, const char *resource_iface)
 {
 	int length_old = 0;
 	int length_new = 0;
 	char *value = NULL;
-	char iface_str[ICL_QUERY_LENGTH_MAX] = {0};
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
@@ -137,8 +136,8 @@ API int iotcon_query_set_interface(iotcon_query_h query, iotcon_interface_e ifac
 	if (value)
 		length_old = (sizeof(ICL_QUERY_KEY_INTERFACE) - 1) + strlen(value) + 2;
 
-	snprintf(iface_str, sizeof(iface_str), "%d", iface);
-	length_new = (sizeof(ICL_QUERY_KEY_INTERFACE) - 1) + strlen(iface_str) + 2;
+	if (resource_iface && *resource_iface)
+		length_new = (sizeof(ICL_QUERY_KEY_INTERFACE) - 1) + strlen(resource_iface) + 2;
 
 	if (ICL_QUERY_LENGTH_MAX < query->len - length_old + length_new) {
 		ERR("Length of query is invalid.");
@@ -148,7 +147,7 @@ API int iotcon_query_set_interface(iotcon_query_h query, iotcon_interface_e ifac
 	if (value)
 		iotcon_query_remove(query, ICL_QUERY_KEY_INTERFACE);
 
-	iotcon_query_add(query, ICL_QUERY_KEY_INTERFACE, iface_str);
+	iotcon_query_add(query, ICL_QUERY_KEY_INTERFACE, resource_iface);
 
 	return IOTCON_ERROR_NONE;
 }

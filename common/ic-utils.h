@@ -24,14 +24,9 @@
 #define IC_STR_EQUAL 0
 #define IC_STR_NULL "(NULL)"
 
-#define IC_INTERFACE_MAX (IOTCON_INTERFACE_DEFAULT | IOTCON_INTERFACE_LINK | \
-		IOTCON_INTERFACE_BATCH | IOTCON_INTERFACE_GROUP | IOTCON_INTERFACE_READONLY)
-
 char* ic_utils_strdup(const char *src);
 const char* ic_utils_dbus_encode_str(const char *src);
 char* ic_utils_dbus_decode_str(char *src);
-int ic_utils_convert_interface_flag(iotcon_interface_e src, char **dest);
-int ic_utils_convert_interface_string(const char *src, iotcon_interface_e *dest);
 void ic_utils_gvariant_array_free(GVariant **value);
 bool ic_utils_check_oic_feature_supported();
 

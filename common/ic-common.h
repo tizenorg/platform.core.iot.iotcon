@@ -36,12 +36,6 @@
 #define IC_DBUS_SIGNAL_MONITORING "MONITORING"
 #define IC_DBUS_SIGNAL_CACHING "CACHING"
 
-#define IC_INTERFACE_DEFAULT "oic.if.baseline"
-#define IC_INTERFACE_LINK "oic.if.ll"
-#define IC_INTERFACE_BATCH "oic.if.b"
-#define IC_INTERFACE_GROUP "oic.mi.grp"
-#define IC_INTERFACE_READONLY "oic.if.r"
-
 #define IC_FEATURE_OIC "http://tizen.org/feature/iot.oic"
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_H__ */

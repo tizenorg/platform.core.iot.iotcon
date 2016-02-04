@@ -131,38 +131,17 @@ static int _ioty_properties_to_oic_properties(int properties)
 }
 
 OCResourceHandle icd_ioty_register_resource(const char *uri_path,
-		const char * const *res_types, int ifaces, int properties)
+		const char* const *res_types, const char* const *res_ifaces, int properties)
 {
 	FN_CALL;
 	int i;
 	OCStackResult ret;
 	OCResourceHandle handle;
-	const char *res_iface = NULL;
-
-	if (IOTCON_INTERFACE_DEFAULT & ifaces) {
-		res_iface = IC_INTERFACE_DEFAULT;
-		ifaces ^= IOTCON_INTERFACE_DEFAULT;
-	} else if (IOTCON_INTERFACE_LINK & ifaces) {
-		res_iface = IC_INTERFACE_LINK;
-		ifaces ^= IOTCON_INTERFACE_LINK;
-	} else if (IOTCON_INTERFACE_BATCH & ifaces) {
-		res_iface = IC_INTERFACE_BATCH;
-		ifaces ^= IOTCON_INTERFACE_BATCH;
-	} else if (IOTCON_INTERFACE_GROUP & ifaces) {
-		res_iface = IC_INTERFACE_GROUP;
-		ifaces ^= IOTCON_INTERFACE_GROUP;
-	} else if (IOTCON_INTERFACE_READONLY & ifaces) {
-		res_iface = IC_INTERFACE_READONLY;
-		ifaces ^= IOTCON_INTERFACE_READONLY;
-	} else {
-		ERR("Invalid interface type(%d)", ifaces);
-		return NULL;
-	}
 
 	properties = _ioty_properties_to_oic_properties(properties);
 
 	icd_ioty_csdk_lock();
-	ret = OCCreateResource(&handle, res_types[0], res_iface, uri_path,
+	ret = OCCreateResource(&handle, res_types[0], res_ifaces[0], uri_path,
 			icd_ioty_ocprocess_req_handler, NULL, properties);
 	icd_ioty_csdk_unlock();
 	if (OC_STACK_OK != ret) {
@@ -173,16 +152,8 @@ OCResourceHandle icd_ioty_register_resource(const char *uri_path,
 	for (i = 1; res_types[i]; i++)
 		icd_ioty_bind_type(handle, res_types[i]);
 
-	if (IOTCON_INTERFACE_DEFAULT & ifaces)
-		icd_ioty_bind_interface(handle, IOTCON_INTERFACE_DEFAULT);
-	if (IOTCON_INTERFACE_LINK & ifaces)
-		icd_ioty_bind_interface(handle, IOTCON_INTERFACE_LINK);
-	if (IOTCON_INTERFACE_BATCH & ifaces)
-		icd_ioty_bind_interface(handle, IOTCON_INTERFACE_BATCH);
-	if (IOTCON_INTERFACE_GROUP & ifaces)
-		icd_ioty_bind_interface(handle, IOTCON_INTERFACE_GROUP);
-	if (IOTCON_INTERFACE_READONLY & ifaces)
-		icd_ioty_bind_interface(handle, IOTCON_INTERFACE_READONLY);
+	for (i = 1; res_ifaces[i]; i++)
+		icd_ioty_bind_interface(handle, res_ifaces[i]);
 
 	return handle;
 }
@@ -205,25 +176,17 @@ int icd_ioty_unregister_resource(OCResourceHandle handle)
 }
 
 
-int icd_ioty_bind_interface(OCResourceHandle handle, iotcon_interface_e iface)
+int icd_ioty_bind_interface(OCResourceHandle handle, const char *resource_interface)
 {
-	int ret;
-	OCStackResult result;
-	char *resource_interface;
-
-	ret = ic_utils_convert_interface_flag(iface, &resource_interface);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("ic_utils_convert_interface_flag(%d) Fail(%d)", iface, ret);
-		return ret;
-	}
+	OCStackResult ret;
 
 	icd_ioty_csdk_lock();
-	result = OCBindResourceInterfaceToResource(handle, resource_interface);
+	ret = OCBindResourceInterfaceToResource(handle, resource_interface);
 	icd_ioty_csdk_unlock();
 
-	if (OC_STACK_OK != result) {
-		ERR("OCBindResourceInterfaceToResource() Fail(%d)", result);
-		return icd_ioty_convert_error(result);
+	if (OC_STACK_OK != ret) {
+		ERR("OCBindResourceInterfaceToResource() Fail(%d)", ret);
+		return icd_ioty_convert_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;

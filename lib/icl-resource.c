@@ -29,6 +29,7 @@
 #include "icl-request.h"
 #include "icl-dbus-type.h"
 #include "icl-resource-types.h"
+#include "icl-resource-interfaces.h"
 #include "icl-resource.h"
 #include "icl-payload.h"
 
@@ -141,6 +142,7 @@ static void _icl_resource_conn_cleanup(iotcon_resource_h resource)
 		return;
 	}
 
+	iotcon_resource_interfaces_destroy(resource->ifaces);
 	iotcon_resource_types_destroy(resource->types);
 	if (resource->observers)
 		iotcon_observers_destroy(resource->observers);
@@ -152,7 +154,7 @@ static void _icl_resource_conn_cleanup(iotcon_resource_h resource)
 /* The length of uri_path should be less than or equal to 36. */
 API int iotcon_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
-		int ifaces,
+		iotcon_resource_interfaces_h ifaces,
 		int properties,
 		iotcon_request_handler_cb cb,
 		void *user_data,
@@ -160,7 +162,7 @@ API int iotcon_resource_create(const char *uri_path,
 {
 	int ret;
 	unsigned int sub_id;
-	const gchar **types;
+	const gchar **type_array, **iface_array;
 	GError *error = NULL;
 	iotcon_resource_h resource;
 	int64_t signal_number;
@@ -172,6 +174,7 @@ API int iotcon_resource_create(const char *uri_path,
 	RETVM_IF(ICL_URI_PATH_LENGTH_MAX < strlen(uri_path),
 			IOTCON_ERROR_INVALID_PARAMETER, "Invalid uri_path(%s)", uri_path);
 	RETV_IF(NULL == res_types, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -181,24 +184,34 @@ API int iotcon_resource_create(const char *uri_path,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	types = icl_dbus_resource_types_to_array(res_types);
-	if (NULL == types) {
+	type_array = icl_dbus_resource_types_to_array(res_types);
+	if (NULL == type_array) {
 		ERR("icl_dbus_resource_types_to_array() Fail");
 		free(resource);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	ic_dbus_call_register_resource_sync(icl_dbus_get_object(), uri_path, types, ifaces,
+	iface_array = icl_dbus_resource_interfaces_to_array(ifaces);
+	if (NULL == iface_array) {
+		ERR("icl_dbus_resource_interfaces_to_array() Fail");
+		free(type_array);
+		free(resource);
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
+
+	ic_dbus_call_register_resource_sync(icl_dbus_get_object(), uri_path, type_array, iface_array,
 			properties, false, &signal_number, &(resource->handle), NULL, &error);
 	if (error) {
 		ERR("ic_dbus_call_register_resource_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
-		free(types);
+		free(iface_array);
+		free(type_array);
 		free(resource);
 		return ret;
 	}
-	free(types);
+	free(iface_array);
+	free(type_array);
 
 	if (0 == resource->handle) {
 		ERR("iotcon-daemon Fail");
@@ -209,9 +222,9 @@ API int iotcon_resource_create(const char *uri_path,
 	resource->cb = cb;
 	resource->user_data = user_data;
 
-	resource->types = icl_resource_types_ref(res_types);
 	resource->uri_path = ic_utils_strdup(uri_path);
-	resource->ifaces = ifaces;
+	resource->types = icl_resource_types_ref(res_types);
+	resource->ifaces = icl_resource_interfaces_ref(ifaces);
 	resource->properties = properties;
 
 	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_REQUEST_HANDLER,
@@ -221,7 +234,8 @@ API int iotcon_resource_create(const char *uri_path,
 			_icl_request_handler);
 	if (0 == sub_id) {
 		ERR("icl_dbus_subscribe_signal() Fail");
-		iotcon_resource_types_destroy(res_types);
+		iotcon_resource_interfaces_destroy(resource->ifaces);
+		iotcon_resource_types_destroy(resource->types);
 		free(resource->uri_path);
 		free(resource);
 		return IOTCON_ERROR_DBUS;
@@ -246,6 +260,7 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 
 	if (0 == resource->handle) { /* iotcon dbus disconnected */
 		WARN("Invalid Resource handle");
+		iotcon_resource_interfaces_destroy(resource->ifaces);
 		iotcon_resource_types_destroy(resource->types);
 		if (resource->observers)
 			iotcon_observers_destroy(resource->observers);
@@ -276,24 +291,33 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 }
 
 
-API int iotcon_resource_bind_interface(iotcon_resource_h resource,
-		iotcon_interface_e iface)
+API int iotcon_resource_bind_interface(iotcon_resource_h resource, const char *iface)
 {
 	FN_CALL;
 	int ret;
 	GError *error = NULL;
+	iotcon_resource_interfaces_h resource_ifaces;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
 	if (0 == resource->sub_id) {
 		ERR("Invalid Resource handle");
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	if (resource->ifaces & iface) {
-		ERR("iface(%d) is already contained.", iface);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+	ret = iotcon_resource_interfaces_clone(resource->ifaces, &resource_ifaces);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_interfaces_clone() Fail(%d)", ret);
+		return ret;
+	}
+
+	ret = iotcon_resource_interfaces_add(resource_ifaces, iface);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_resource_interfaces_add() Fail(%d)", ret);
+		iotcon_resource_interfaces_destroy(resource_ifaces);
+		return ret;
 	}
 
 	ic_dbus_call_bind_interface_sync(icl_dbus_get_object(), resource->handle,
@@ -302,14 +326,18 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource,
 		ERR("ic_dbus_call_bind_interface_sync() Fail(%s)", error->message);
 		ret = icl_dbus_convert_dbus_error(error->code);
 		g_error_free(error);
+		iotcon_resource_interfaces_destroy(resource_ifaces);
 		return ret;
 	}
 
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon-daemon Fail(%d)", ret);
+		iotcon_resource_interfaces_destroy(resource_ifaces);
 		return icl_dbus_convert_daemon_error(ret);
 	}
-	resource->ifaces |= iface;
+
+	iotcon_resource_interfaces_destroy(resource->ifaces);
+	resource->ifaces = resource_ifaces;
 
 	return ret;
 }
@@ -541,7 +569,8 @@ API int iotcon_resource_get_types(iotcon_resource_h resource,
 }
 
 
-API int iotcon_resource_get_interfaces(iotcon_resource_h resource, int *ifaces)
+API int iotcon_resource_get_interfaces(iotcon_resource_h resource,
+		iotcon_resource_interfaces_h *ifaces)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
