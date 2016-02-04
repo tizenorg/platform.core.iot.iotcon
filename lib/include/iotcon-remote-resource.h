@@ -114,8 +114,6 @@ static void _find_light_resource()
  * If not, you should discover the resource object manually.\n
  * The @a properties can contain multiple properties like
  * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.\n
- * The @a ifaces can contain multiple interfaces like
- * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.
  *
  * @since_tizen 3.0
  *
@@ -126,9 +124,8 @@ static void _find_light_resource()
  * @param[in] connectivity_type The connectivity type
  * @param[in] uri_path The URI path of the resource
  * @param[in] properties The properties of the resource\n Set of #iotcon_resource_property_e
- * @param[in] resource_types The resource type of the resource. For example, "core.light"
- * @param[in] resource_ifaces The resource interfaces (whether it is collection etc)\n
- * Set of #iotcon_interface_e
+ * @param[in] resource_types The resource types of the resource. For example, "core.light"
+ * @param[in] resource_ifaces The resource interfaces of the resource.
  * @param[out] remote_resource Generated resource handle
  *
  * @return 0 on success, otherwise a negative error value.
@@ -147,7 +144,7 @@ int iotcon_remote_resource_create(const char *host_address,
 		const char *uri_path,
 		int properties,
 		iotcon_resource_types_h resource_types,
-		int resource_ifaces,
+		iotcon_resource_interfaces_h resource_ifaces,
 		iotcon_remote_resource_h *remote_resource);
 
 /**
@@ -698,13 +695,13 @@ int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
 
 /**
  * @brief Gets resource interfaces of the remote resource
- * @details @a ifaces can contain multiple interfaces like
- * IOTCON_INTERFACE_LINK | IOTCON_INTERFACE_BATCH.
  *
  * @since_tizen 3.0
  *
+ * @remarks @a ifaces must not be released using iotcon_resource_interfaces_destroy().
+ *
  * @param[in] resource The handle of the remote resource
- * @param[out] ifaces The resource interfaces of the remote resource\n Set of #iotcon_interface_e
+ * @param[out] ifaces The resource interfaces of the remote resource
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -719,7 +716,8 @@ int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_properties()
  * @see iotcon_remote_resource_set_options()
  */
-int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource, int *ifaces);
+int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource,
+		iotcon_resource_interfaces_h *ifaces);
 
 /**
  * @brief Checks whether the remote resource is observable or not.

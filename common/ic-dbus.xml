@@ -3,7 +3,7 @@
 		<method name="registerResource">
 			<arg type="s" name="uri_path" direction="in"/>
 			<arg type="as" name="resource_types" direction="in"/>
-			<arg type="i" name="ifaces" direction="in"/>
+			<arg type="as" name="ifaces" direction="in"/>
 			<arg type="i" name="properties" direction="in"/>
 			<arg type="b" name="is_lite" direction="in"/>
 			<arg type="x" name="signal_number" direction="out"/>
@@ -14,7 +14,7 @@
 		</method>
 		<method name="bindInterface">
 			<arg type="x" name="resource" direction="in"/>
-			<arg type="i" name="iface" direction="in"/>
+			<arg type="s" name="iface" direction="in"/>
 			<arg type="i" name="ret" direction="out"/>
 		</method>
 		<method name="bindType">
@@ -59,13 +59,13 @@
 		</method>
 		<method name="put">
 			<arg type="(ssba(qs)i)" name="remote_resource" direction="in"/>
-			<arg type="(siasa{sv}av)" name="repr" direction="in"/>
+			<arg type="(sasasa{sv}av)" name="repr" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
 			<arg type="(a(qs)vi)" name="ret" direction="out"/>
 		</method>
 		<method name="post">
 			<arg type="(ssba(qs)i)" name="remote_resource" direction="in"/>
-			<arg type="(siasa{sv}av)" name="repr" direction="in"/>
+			<arg type="(sasasa{sv}av)" name="repr" direction="in"/>
 			<arg type="a(ss)" name="query" direction="in"/>
 			<arg type="(a(qs)vi)" name="ret" direction="out"/>
 		</method>

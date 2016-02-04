@@ -141,8 +141,8 @@ API int iotcon_resource_types_remove(iotcon_resource_types_h types, const char *
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	free(found_node->data);
 	types->type_list = g_list_delete_link(types->type_list, found_node);
+	free(found_node->data);
 
 	return IOTCON_ERROR_NONE;
 }

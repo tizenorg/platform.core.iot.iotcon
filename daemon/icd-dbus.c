@@ -642,7 +642,7 @@ static gboolean _dbus_handle_register_resource(icDbus *object,
 		GDBusMethodInvocation *invocation,
 		const gchar *uri_path,
 		const gchar* const *resource_types,
-		gint ifaces,
+		const gchar* const *ifaces,
 		gint properties,
 		gboolean is_lite)
 {
@@ -714,7 +714,7 @@ static gboolean _dbus_handle_unregister_resource(icDbus *object,
 
 
 static gboolean _dbus_handle_bind_interface(icDbus *object,
-		GDBusMethodInvocation *invocation, gint64 resource, gint iface)
+		GDBusMethodInvocation *invocation, gint64 resource, const gchar *iface)
 {
 	int ret;
 
