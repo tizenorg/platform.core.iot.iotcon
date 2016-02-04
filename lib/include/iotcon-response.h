@@ -106,7 +106,6 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 {
 	int ret;
 	int types;
-	iotcon_interface_e iface = IOTCON_INTERFACE_DEFAULT;
 	iotcon_query_h query = NULL;
 
 	ret = iotcon_request_get_types(request, &types);
@@ -155,7 +154,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 			return;
 		}
 
-		ret = iotcon_response_set_representation(response, iface, repr);
+		ret = iotcon_response_set_representation(response, IOTCON_INTERFACE_DEFAULT, repr);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_representation_destroy(repr);
 			iotcon_response_destroy(response);
@@ -313,6 +312,8 @@ int iotcon_response_set_result(iotcon_response_h resp, iotcon_response_result_e 
  *
  * @since_tizen 3.0
  *
+ * @remarks @a iface could be a value such as #IOTCON_INTERFACE_DEFAULT.
+ *
  * @param[in] resp The handle of the response
  * @param[in] iface The interface of the representation
  * @param[in] repr The representation of the response
@@ -326,8 +327,8 @@ int iotcon_response_set_result(iotcon_response_h resp, iotcon_response_result_e 
  * @see iotcon_response_create()
  * @see iotcon_response_destroy()
  */
-int iotcon_response_set_representation(iotcon_response_h resp,
-		iotcon_interface_e iface, iotcon_representation_h repr);
+int iotcon_response_set_representation(iotcon_response_h resp, const char *iface,
+		iotcon_representation_h repr);
 
 /**
  * @brief Sets header options into the response

@@ -173,12 +173,14 @@ int iotcon_query_get_resource_type(iotcon_query_h query, char **resource_type);
 
 /**
  * @brief Gets resource interface from the query.
- * @details @a iface could be one of #iotcon_interface_e.
  *
  * @since_tizen 3.0
  *
+ * @remarks @a resource_iface could be a value such as #IOTCON_INTERFACE_DEFAULT.
+ * @remarks @a resource_iface must not be released using free().
+ *
  * @param[in] query The handle of the query
- * @param[out] iface Found interface from query
+ * @param[out] resource_iface Found resource interface from query
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -192,7 +194,7 @@ int iotcon_query_get_resource_type(iotcon_query_h query, char **resource_type);
  * @see iotcon_query_remove()
  * @see iotcon_query_set_interface()
  */
-int iotcon_query_get_interface(iotcon_query_h query, iotcon_interface_e *iface);
+int iotcon_query_get_interface(iotcon_query_h query, char **resource_iface);
 
 /**
  * @brief Sets the resource type into the query.
@@ -218,12 +220,14 @@ int iotcon_query_get_interface(iotcon_query_h query, iotcon_interface_e *iface);
 int iotcon_query_set_resource_type(iotcon_query_h query, const char *resource_type);
 
 /**
- * @brief Sets the interface into the query.
+ * @brief Sets the resource interface into the query.
  *
  * @since_tizen 3.0
  *
+ * @remarks @a resource_iface could be a value such as #IOTCON_INTERFACE_DEFAULT.
+ *
  * @param[in] query The handle of the query
- * @param[in] iface The interface to add into the query
+ * @param[in] resource_iface The resource interface to add into the query
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -238,7 +242,7 @@ int iotcon_query_set_resource_type(iotcon_query_h query, const char *resource_ty
  * @see iotcon_query_lookup()
  * @see iotcon_query_get_interface()
  */
-int iotcon_query_set_interface(iotcon_query_h query, iotcon_interface_e iface);
+int iotcon_query_set_interface(iotcon_query_h query, const char *resource_iface);
 
 /**
  * @brief Adds a new key and correspoding value into the query.

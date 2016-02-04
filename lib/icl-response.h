@@ -28,7 +28,7 @@ typedef enum {
 
 struct icl_resource_response {
 	iotcon_options_h header_options;
-	iotcon_interface_e iface;
+	char *iface;
 	int result;
 	iotcon_representation_h repr;
 	int64_t oic_request_h;
