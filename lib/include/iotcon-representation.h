@@ -381,6 +381,8 @@ int iotcon_representation_set_state(iotcon_representation_h repr, iotcon_state_h
  *
  * @since_tizen 3.0
  *
+ * @remarks @a state must not be released using iotcon_state_destroy().
+ *
  * @param[in] repr The representation handle
  * @param[in] state The state handle to get
  *

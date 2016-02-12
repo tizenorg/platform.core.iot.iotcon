@@ -185,12 +185,8 @@ void iotcon_remote_resource_destroy(iotcon_remote_resource_h resource);
 int iotcon_remote_resource_clone(iotcon_remote_resource_h src, iotcon_remote_resource_h *dest);
 
 /**
- * @brief Specifies the type of response function.
- * @details The function passed to iotcon_remote_resource_observe_register(),
- * iotcon_remote_resource_get(), iotcon_remote_resource_put(), iotcon_remote_resource_post(),
- * iotcon_remote_resource_delete().
+ * @brief Specifies the type of observe callback passed to iotcon_remote_resource_observe_register().
  * The @a err could be one of #iotcon_error_e.
- * The @a request_type could be one of #iotcon_request_type_e.
  *
  * @since_tizen 3.0
  *
@@ -200,18 +196,18 @@ int iotcon_remote_resource_clone(iotcon_remote_resource_h src, iotcon_remote_res
  * @param[in] response The handle of the response
  * @param[in] user_data The user data passed from the callback registration function
  *
- * @pre The callback must be registered using iotcon_remote_resource_observe_register(),
- * iotcon_remote_resource_get(), iotcon_remote_resource_put(), iotcon_remote_resource_post(),
- * iotcon_remote_resource_delete()
+ * @pre The callback must be registered using iotcon_remote_resource_observe_register()
  *
  * @see iotcon_remote_resource_observe_register()
+ * @see iotcon_remote_resource_observe_deregister()
+ * @see iotcon_resource_notify()
  */
 typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resource,
 		iotcon_error_e err, int sequence_number, iotcon_response_h response, void *user_data);
 
 /**
  * @brief Registers observe callback on the resource
- * @details When server sends notification message, iotcon_remote_resource_response_cb() will be called.
+ * @details When server sends notification message, iotcon_remote_resource_observe_cb() will be called.
  * The @a observe_policy could be one of #iotcon_observe_policy_e.
  *
  * @since_tizen 3.0
@@ -234,9 +230,9 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @post When the @a resource receive notification message, iotcon_remote_resource_response_cb() will be called.
+ * @post When the @a resource receive notification message, iotcon_remote_resource_observe_cb() will be called.
  *
- * @see iotcon_remote_resource_response_cb()
+ * @see iotcon_remote_resource_observe_cb()
  * @see iotcon_remote_resource_observe_deregister()
  * @see iotcon_resource_notify()
  */
@@ -264,7 +260,7 @@ int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @see iotcon_remote_resource_response_cb()
+ * @see iotcon_remote_resource_observe_cb()
  * @see iotcon_remote_resource_observe_register()
  * @see iotcon_resource_notify()
  */
@@ -272,9 +268,8 @@ int iotcon_remote_resource_observe_deregister(iotcon_remote_resource_h resource)
 
 /**
  * @brief Specifies the type of response function.
- * @details The function passed to iotcon_remote_resource_observe_register(),
- * iotcon_remote_resource_get(), iotcon_remote_resource_put(), iotcon_remote_resource_post(),
- * iotcon_remote_resource_delete().
+ * @details The function passed to iotcon_remote_resource_get(), iotcon_remote_resource_put(),
+ * iotcon_remote_resource_post(), iotcon_remote_resource_delete().
  * The @a err could be one of #iotcon_error_e.
  * The @a request_type could be one of #iotcon_request_type_e.
  *
@@ -286,11 +281,13 @@ int iotcon_remote_resource_observe_deregister(iotcon_remote_resource_h resource)
  * @param[in] response The handle of the response
  * @param[in] user_data The user data passed from the callback registration function
  *
- * @pre The callback must be registered using iotcon_remote_resource_observe_register(),
- * iotcon_remote_resource_get(), iotcon_remote_resource_put(), iotcon_remote_resource_post(),
- * iotcon_remote_resource_delete()
+ * @pre The callback must be registered using iotcon_remote_resource_get(),
+ * iotcon_remote_resource_put(), iotcon_remote_resource_post(), iotcon_remote_resource_delete()
  *
- * @see iotcon_remote_resource_observe_register()
+ * @see iotcon_remote_resource_get()
+ * @see iotcon_remote_resource_put()
+ * @see iotcon_remote_resource_post()
+ * @see iotcon_remote_resource_delete()
  */
 typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h resource,
 		iotcon_error_e err,
@@ -323,8 +320,6 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
  * @post When the client receive get response, iotcon_remote_resource_response_cb() will be called.
  *
  * @see iotcon_remote_resource_response_cb()
- * @see iotcon_remote_resource_put()
- * @see iotcon_remote_resource_post()
  * @see iotcon_set_timeout()
  */
 int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h query,
@@ -356,8 +351,6 @@ int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h
  * @post When the client receive put response, iotcon_remote_resource_response_cb() will be called.
  *
  * @see iotcon_remote_resource_response_cb()
- * @see iotcon_remote_resource_get()
- * @see iotcon_remote_resource_post()
  * @see iotcon_set_timeout()
  */
 int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
@@ -392,8 +385,6 @@ int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
  * @post When the client receive post response, iotcon_remote_resource_response_cb() will be called.
  *
  * @see iotcon_remote_resource_response_cb()
- * @see iotcon_remote_resource_get()
- * @see iotcon_remote_resource_put()
  * @see iotcon_set_timeout()
  */
 int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
@@ -440,7 +431,7 @@ int iotcon_remote_resource_delete(iotcon_remote_resource_h resource,
  * @param[in] representation The handle of the representation
  * @param[in] user_data The user data to pass to the function
  *
- * @pre The callback must be registered using iotcon_remote_resource_start_caching()\n
+ * @pre The callback must be registered using iotcon_remote_resource_start_caching()
  *
  * @see iotcon_remote_resource_start_caching()
  * @see iotcon_remote_resource_stop_caching()
