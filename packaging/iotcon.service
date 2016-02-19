@@ -5,6 +5,7 @@ Description=Tizen IoT Connectivity
 Type=simple
 ExecStart=/usr/bin/iotcon-daemon
 Restart=always
+User=iotcon
 
 [Install]
 WantedBy=multi-user.target

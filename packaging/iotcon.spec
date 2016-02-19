@@ -26,6 +26,7 @@ BuildRequires:  pkgconfig(cynara-creds-gdbus)
 %if "%{tizen}" == "2.3"
 BuildRequires:  python-xml
 %endif
+Requires(post): /usr/bin/getent, /usr/bin/useradd, /usr/bin/groupadd
 Requires(post): /sbin/ldconfig, /usr/bin/systemctl
 Requires(postun): /sbin/ldconfig, /usr/bin/systemctl
 
@@ -98,6 +99,10 @@ cp -af %{SOURCE1004} %{buildroot}%{_sysconfdir}/dbus-1/system.d/%{name}.conf
 
 
 %post
+
+getent group iotcon > /dev/null || groupadd -r iotcon
+getent passwd iotcon > /dev/null || useradd -r -g iotcon -d '/var/lib/empty' -s /sbin/nologin -c "iotcon daemon" iotcon
+
 systemctl daemon-reload
 if [ $1 == 1 ]; then
     systemctl restart %{name}.service
