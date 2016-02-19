@@ -98,6 +98,10 @@ cp -af %{SOURCE1004} %{buildroot}%{_sysconfdir}/dbus-1/system.d/%{name}.conf
 
 
 %post
+
+getent group iotcon > /dev/null || groupadd -r iotcon
+getent passwd iotcon > /dev/null || useradd -r -g iotcon iotcon
+
 systemctl daemon-reload
 if [ $1 == 1 ]; then
     systemctl restart %{name}.service
