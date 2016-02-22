@@ -1,0 +1,13 @@
+[Unit]
+Description=Tizen IoT Connectivity
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/iotcon-daemon
+Restart=always
+User=system
+Group=system
+SmackProcessLabel=iotcon
+
+[Install]
+WantedBy=multi-user.target
