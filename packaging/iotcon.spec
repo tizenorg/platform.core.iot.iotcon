@@ -74,6 +74,7 @@ TZ_VER_3=0
 TZ_VER_3=1
 %endif
 
+export LDFLAGS+="-Wl,--as-needed"
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %cmake . -DMAJORVER=${MAJORVER} -DFULLVER=%{version} -DBIN_INSTALL_DIR:PATH=%{_bindir} \
 		-DTZ_VER_3=${TZ_VER_3} -DDBUS_INTERFACE=%{_dbus_interface}
