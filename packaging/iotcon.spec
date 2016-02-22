@@ -6,6 +6,7 @@ Group:      Network & Connectivity/Service
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    %{name}.service
+Source2:    %{name}-old.service
 Source1001: %{name}.manifest
 Source1002: %{name}-old.manifest
 Source1003: %{name}-test-old.manifest
@@ -26,7 +27,9 @@ BuildRequires:  pkgconfig(cynara-creds-gdbus)
 %if "%{tizen}" == "2.3"
 BuildRequires:  python-xml
 %endif
+%if 0%{?tizen_version_major} >= 3
 Requires(post): /usr/bin/getent, /usr/bin/useradd, /usr/bin/groupadd
+%endif
 Requires(post): /sbin/ldconfig, /usr/bin/systemctl
 Requires(postun): /sbin/ldconfig, /usr/bin/systemctl
 
@@ -59,9 +62,11 @@ Tizen IoT Connectivity Test Programs
 %setup -q
 chmod g-w %_sourcedir/*
 %if 0%{?tizen_version_major} < 3
+cp %{SOURCE2} ./%{name}.service
 cp %{SOURCE1002} ./%{name}.manifest
 cp %{SOURCE1003} ./%{name}-test.manifest
 %else
+cp %{SOURCE1} ./%{name}.service
 cp %{SOURCE1001} ./%{name}.manifest
 cp %{SOURCE1001} ./%{name}-test.manifest
 %endif
@@ -85,7 +90,7 @@ rm -rf %{buildroot}
 %make_install
 
 mkdir -p %{buildroot}%{_unitdir}/multi-user.target.wants
-cp -af %{SOURCE1} %{buildroot}%{_unitdir}/
+cp -af %{name}.service %{buildroot}%{_unitdir}/
 ln -s ../%{name}.service %{buildroot}%{_unitdir}/multi-user.target.wants/%{name}.service
 
 %if 0%{?tizen_version_major} < 3
@@ -100,9 +105,10 @@ cp -af %{SOURCE1004} %{buildroot}%{_sysconfdir}/dbus-1/system.d/%{name}.conf
 
 
 %post
-
+%if 0%{?tizen_version_major} >= 3
 getent group iotcon > /dev/null || groupadd -r iotcon
 getent passwd iotcon > /dev/null || useradd -r -g iotcon -d '/var/lib/empty' -s /sbin/nologin -c "iotcon daemon" iotcon
+%endif
 
 systemctl daemon-reload
 if [ $1 == 1 ]; then
