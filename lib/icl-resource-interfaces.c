@@ -197,16 +197,3 @@ API int iotcon_resource_interfaces_clone(iotcon_resource_interfaces_h src,
 	return IOTCON_ERROR_NONE;
 }
 
-
-/* counting from 0 */
-const char* icl_resource_interfaces_get_nth_data(iotcon_resource_interfaces_h ifaces,
-		int index)
-{
-	return g_list_nth_data(ifaces->iface_list, index);
-}
-
-
-unsigned int icl_resource_interfaces_get_length(iotcon_resource_interfaces_h ifaces)
-{
-	return g_list_length(ifaces->iface_list);
-}

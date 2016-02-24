@@ -201,15 +201,3 @@ API int iotcon_resource_types_clone(iotcon_resource_types_h src,
 	return IOTCON_ERROR_NONE;
 }
 
-
-/* counting from 0 */
-const char* icl_resource_types_get_nth_data(iotcon_resource_types_h types, int index)
-{
-	return g_list_nth_data(types->type_list, index);
-}
-
-
-unsigned int icl_resource_types_get_length(iotcon_resource_types_h types)
-{
-	return g_list_length(types->type_list);
-}

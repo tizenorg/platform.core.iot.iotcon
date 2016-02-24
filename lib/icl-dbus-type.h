@@ -26,8 +26,6 @@ const char** icl_dbus_resource_types_to_array(iotcon_resource_types_h types);
 GVariant* icl_dbus_representation_to_gvariant(struct icl_representation_s *repr);
 GVariant* icl_dbus_response_to_gvariant(struct icl_resource_response *response);
 GVariant* icl_dbus_remote_resource_to_gvariant(struct icl_remote_resource *resource);
-GVariant* icl_dbus_device_info_to_gvariant(struct icl_device_info *device_info);
-GVariant* icl_dbus_platform_info_to_gvariant(struct icl_platform_info *platform_info);
 GVariant* icl_dbus_query_to_gvariant(iotcon_query_h query);
 GVariant* icl_dbus_options_to_gvariant(iotcon_options_h options);
 GVariant* icl_dbus_observers_to_gvariant(iotcon_observers_h observers);

@@ -26,8 +26,5 @@ struct icl_resource_ifaces {
 
 iotcon_resource_interfaces_h icl_resource_interfaces_ref(
 		iotcon_resource_interfaces_h res_ifaces);
-const char* icl_resource_interfaces_get_nth_data(iotcon_resource_interfaces_h res_ifaces,
-		int index);
-unsigned int icl_resource_interfaces_get_length(iotcon_resource_interfaces_h res_ifaces);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_INTERFACES_H__ */

@@ -168,37 +168,6 @@ GVariant* icl_dbus_remote_resource_to_gvariant(struct icl_remote_resource *resou
 }
 
 
-GVariant* icl_dbus_device_info_to_gvariant(iotcon_device_info_h device_info)
-{
-	GVariant *value;
-
-	value = g_variant_new("(s)", device_info->device_name);
-
-	return value;
-}
-
-
-GVariant* icl_dbus_platform_info_to_gvariant(iotcon_platform_info_h platform_info)
-{
-	GVariant *value;
-
-	value = g_variant_new("(sssssssssss)",
-			platform_info->platform_id,
-			platform_info->manuf_name,
-			platform_info->manuf_url,
-			platform_info->model_number,
-			platform_info->date_of_manuf,
-			platform_info->platform_ver,
-			platform_info->os_ver,
-			platform_info->hardware_ver,
-			platform_info->firmware_ver,
-			platform_info->support_url,
-			platform_info->system_time);
-
-	return value;
-}
-
-
 GVariant* icl_dbus_query_to_gvariant(iotcon_query_h query)
 {
 	FN_CALL;
