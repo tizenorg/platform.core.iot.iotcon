@@ -128,6 +128,7 @@ API int iotcon_resource_types_add(iotcon_resource_types_h types, const char *typ
 API int iotcon_resource_types_remove(iotcon_resource_types_h types, const char *type)
 {
 	GList *found_node;
+	char *node_data;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
@@ -141,8 +142,9 @@ API int iotcon_resource_types_remove(iotcon_resource_types_h types, const char *
 		return IOTCON_ERROR_NO_DATA;
 	}
 
+	node_data = found_node->data;
 	types->type_list = g_list_delete_link(types->type_list, found_node);
-	free(found_node->data);
+	free(node_data);
 
 	return IOTCON_ERROR_NONE;
 }
