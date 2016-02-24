@@ -124,6 +124,7 @@ API int iotcon_resource_interfaces_remove(iotcon_resource_interfaces_h ifaces,
 		const char *iface)
 {
 	GList *node;
+	char *node_data;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
@@ -137,8 +138,9 @@ API int iotcon_resource_interfaces_remove(iotcon_resource_interfaces_h ifaces,
 		return IOTCON_ERROR_NO_DATA;
 	}
 
+	node_data = node->data;
 	ifaces->iface_list = g_list_delete_link(ifaces->iface_list, node);
-	free(node->data);
+	free(node_data);
 
 	return IOTCON_ERROR_NONE;
 }
