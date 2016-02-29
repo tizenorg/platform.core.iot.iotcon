@@ -363,6 +363,12 @@ iotcon_value_h icl_value_clone(iotcon_value_h src)
 		dest = icl_value_create_byte_str(((icl_val_byte_str_s*)real)->s,
 				((icl_val_byte_str_s*)real)->len);
 		break;
+	case IOTCON_TYPE_LIST:
+		dest = icl_value_create_list(((icl_val_list_s*)real)->list);
+		break;
+	case IOTCON_TYPE_STATE:
+		dest = icl_value_create_state(((icl_val_state_s*)real)->state);
+		break;
 	default:
 		ERR("Invalid type(%d)", src->type);
 		break;

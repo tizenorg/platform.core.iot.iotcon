@@ -543,72 +543,15 @@ API int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone)
 void icl_state_clone_foreach(char *key, iotcon_value_h src_val, iotcon_state_h dest_state)
 {
 	FN_CALL;
-	int type, ret;
-	iotcon_value_h value, copied_val;
-	iotcon_list_h child_list, copied_list;
-	iotcon_state_h child_state;
-	iotcon_state_h copied_state = NULL;
+	iotcon_value_h copied_val;
 
-	type = src_val->type;
-	switch (type) {
-	case IOTCON_TYPE_INT:
-	case IOTCON_TYPE_BOOL:
-	case IOTCON_TYPE_DOUBLE:
-	case IOTCON_TYPE_STR:
-	case IOTCON_TYPE_BYTE_STR:
-	case IOTCON_TYPE_NULL:
-		copied_val = icl_value_clone(src_val);
-		if (NULL == copied_val) {
-			ERR("icl_value_clone() Fail");
-			return;
-		}
-
-		icl_state_set_value(dest_state, key, copied_val);
-		break;
-	case IOTCON_TYPE_LIST:
-		ret = icl_value_get_list(src_val, &child_list);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_value_get_list() Fail(%d)", ret);
-			return;
-		}
-
-		copied_list = icl_list_clone(child_list);
-		if (NULL == copied_list) {
-			ERR("icl_list_clone() Fail");
-			return;
-		}
-
-		value = icl_value_create_list(copied_list);
-		if (NULL == value) {
-			ERR("icl_value_create_list() Fail");
-			iotcon_list_destroy(copied_list);
-			return;
-		}
-
-		icl_state_set_value(dest_state, key, value);
-		break;
-	case IOTCON_TYPE_STATE:
-		ret = icl_value_get_state(src_val, &child_state);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_value_get_state() Fail(%d)", ret);
-			return;
-		}
-
-		g_hash_table_foreach(child_state->hash_table, (GHFunc)icl_state_clone_foreach,
-				copied_state);
-
-		value = icl_value_create_state(copied_state);
-		if (NULL == value) {
-			ERR("icl_value_create_state(%p) Fail", copied_state);
-			return;
-		}
-
-		icl_state_set_value(dest_state, key, value);
-		break;
-	default:
-		ERR("Invalid type(%d)", type);
+	copied_val = icl_value_clone(src_val);
+	if (NULL == copied_val) {
+		ERR("icl_value_clone() Fail");
 		return;
 	}
+
+	icl_state_set_value(dest_state, key, copied_val);
 }
 
 
