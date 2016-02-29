@@ -28,7 +28,7 @@ BuildRequires:  pkgconfig(cynara-creds-gdbus)
 BuildRequires:  python-xml
 %endif
 %if 0%{?tizen_version_major} >= 3
-Requires(post): /usr/bin/getent, /usr/bin/useradd, /usr/bin/groupadd
+Requires(post): /usr/bin/getent, /usr/sbin/useradd, /usr/sbin/groupadd
 %endif
 Requires(post): /sbin/ldconfig, /usr/bin/systemctl
 Requires(postun): /sbin/ldconfig, /usr/bin/systemctl
