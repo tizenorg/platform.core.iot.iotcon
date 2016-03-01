@@ -76,11 +76,11 @@ API int iotcon_query_get_resource_type(iotcon_query_h query,
 
 API int iotcon_query_get_interface(iotcon_query_h query, char **resource_iface)
 {
-	char *iface;
+	char *iface = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resource_iface, IOTCON_ERROR_INVALID_PARAMETER);
 
 	iotcon_query_lookup(query, ICL_QUERY_KEY_INTERFACE, &iface);
 	if (NULL == iface) {
