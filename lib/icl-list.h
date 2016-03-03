@@ -30,8 +30,6 @@ struct icl_list_s {
 int icl_list_remove(iotcon_list_h list, iotcon_value_h val);
 int icl_list_insert(iotcon_list_h list, iotcon_value_h value, int pos);
 
-iotcon_list_h icl_list_clone(iotcon_list_h list);
-
 iotcon_list_h icl_list_ref(iotcon_list_h list);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_LIST_H__ */
