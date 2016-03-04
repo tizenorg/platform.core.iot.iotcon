@@ -1,0 +1,5 @@
+[D-BUS Service]
+Name=@DBUS_INTERFACE@
+User=system
+Exec=/bin/false
+SystemdService=@PROJECT_NAME@.service

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <gio/gio.h>
+#include <glib.h>
 
 #include "icd.h"
 #include "icd-dbus.h"
@@ -23,19 +24,48 @@
 
 #define ICD_ALL_INTERFACES "0.0.0.0"
 #define ICD_RANDOM_PORT 0
+#define ICD_KILL_TIMEOUT_DURATION 10
+
+static GMainLoop *icd_loop;
+static int icd_kill_timeout;
+
+void icd_unset_kill_timeout()
+{
+	FN_CALL;
+	if (0 == icd_kill_timeout)
+		return;
+
+	g_source_remove(icd_kill_timeout);
+	icd_kill_timeout = 0;
+}
+
+static gboolean _icd_kill_cb(gpointer p)
+{
+	FN_CALL;
+	g_main_loop_quit(icd_loop);
+	return G_SOURCE_REMOVE;
+}
+
+void icd_set_kill_timeout()
+{
+	FN_CALL;
+	if (icd_kill_timeout)
+		return;
+
+	icd_kill_timeout = g_timeout_add_seconds(ICD_KILL_TIMEOUT_DURATION, _icd_kill_cb, NULL);
+}
 
 int main(int argc, char **argv)
 {
 	int ret;
 	guint id;
 	GThread *thread;
-	GMainLoop *loop;
 
 #if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
 #endif
 
-	loop = g_main_loop_new(NULL, FALSE);
+	icd_loop = g_main_loop_new(NULL, FALSE);
 
 	id = icd_dbus_init();
 	thread = icd_ioty_init(ICD_ALL_INTERFACES, ICD_RANDOM_PORT);
@@ -68,12 +98,13 @@ int main(int argc, char **argv)
 		icd_dbus_deinit(id);
 	}
 
-	g_main_loop_run(loop);
+	icd_set_kill_timeout();
+	g_main_loop_run(icd_loop);
 
 	icd_cynara_deinit();
 	icd_ioty_deinit(thread);
 	icd_dbus_deinit(id);
-	g_main_loop_unref(loop);
+	g_main_loop_unref(icd_loop);
 
 	return 0;
 }

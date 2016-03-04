@@ -21,5 +21,7 @@
 #define IC_DAEMON
 #include "ic-log.h"
 
+void icd_unset_kill_timeout();
+void icd_set_kill_timeout();
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_H__*/
