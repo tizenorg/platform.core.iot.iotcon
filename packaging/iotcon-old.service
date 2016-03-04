@@ -2,9 +2,10 @@
 Description=Tizen IoT Connectivity
 
 [Service]
-Type=simple
+Type=dbus
+BusName=org.tizen.iotcon.dbus
 ExecStart=/usr/bin/iotcon-daemon
-Restart=always
+Restart=on-failure
 User=system
 Group=system
 SmackProcessLabel=iotcon

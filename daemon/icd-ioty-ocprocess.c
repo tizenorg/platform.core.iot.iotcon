@@ -418,7 +418,7 @@ gpointer icd_ioty_ocprocess_thread(gpointer data)
 {
 	FN_CALL;
 	OCStackResult result;
-	const struct timespec delay = {0, 10 * 1000 * 1000}; /* 10 ms */
+	const struct timespec delay = {0, 100 * 1000 * 1000}; /* 100 ms */
 
 	icd_ioty_alive = 1;
 	while (icd_ioty_alive) {
@@ -430,7 +430,7 @@ gpointer icd_ioty_ocprocess_thread(gpointer data)
 			break;
 		}
 
-		/* TODO : Current '10ms' is not proven sleep time. Revise the time after test.
+		/* TODO : Current '100 ms' is not proven sleep time. Revise the time after test.
 		 * Or recommend changes to event driven architecture */
 		nanosleep(&delay, NULL);
 	}

@@ -254,6 +254,7 @@ int icl_dbus_get_timeout()
 
 int icl_dbus_start()
 {
+	int ret;
 	unsigned int id;
 	GError *error = NULL;
 
@@ -283,6 +284,22 @@ int icl_dbus_start()
 
 	g_dbus_proxy_set_default_timeout(G_DBUS_PROXY(icl_dbus_object),
 			ICL_DBUS_TIMEOUT_DEFAULT * 1000);
+
+	ic_dbus_call_initialize_sync(icl_dbus_get_object(),
+			&ret,
+			NULL,
+			&error);
+	if (error) {
+		ERR("ic_dbus_call_initialize_sync() Fail(%s)", error->message);
+		ret = icl_dbus_convert_dbus_error(error->code);
+		g_error_free(error);
+		return ret;
+	}
+
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon-daemon Fail(%d)", ret);
+		return icl_dbus_convert_daemon_error(ret);
+	}
 
 	icl_dbus_count++;
 	return IOTCON_ERROR_NONE;
