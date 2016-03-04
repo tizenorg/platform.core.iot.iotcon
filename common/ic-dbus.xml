@@ -1,5 +1,8 @@
 <node>
 	<interface name="org.tizen.iotcon.dbus">
+		<method name="initialize">
+			<arg type="i" name="ret" direction="out"/>
+		</method>
 		<method name="registerResource">
 			<arg type="s" name="uri_path" direction="in"/>
 			<arg type="as" name="resource_types" direction="in"/>

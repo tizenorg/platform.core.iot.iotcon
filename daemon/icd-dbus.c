@@ -296,6 +296,9 @@ static int _icd_dbus_client_list_get_client(const gchar *bus_name,
 
 	DBG("new client(%s) added", bus_name);
 	icd_dbus_client_list = g_list_append(icd_dbus_client_list, client);
+
+	icd_unset_kill_timeout();
+
 	*ret_client = client;
 
 	return IOTCON_ERROR_NONE;
@@ -322,6 +325,9 @@ static void _icd_dbus_name_owner_changed_cb(GDBusConnection *conn,
 		if (client) { /* found bus name in our bus list */
 			DBG("bus(%s) stopped", old_owner);
 			icd_dbus_client_list = g_list_remove_link(icd_dbus_client_list, client);
+
+			if (0 == g_list_length(icd_dbus_client_list))
+				icd_set_kill_timeout();
 		}
 		g_mutex_unlock(&icd_dbus_client_list_mutex);
 
@@ -635,6 +641,31 @@ static void _icd_dbus_encap_list_remove(const gchar *bus_name, int type,
 		cur_hd = cur_hd->next;
 	}
 	g_mutex_unlock(&icd_dbus_client_list_mutex);
+}
+
+static gboolean _dbus_handle_initialize(icDbus *object,
+		GDBusMethodInvocation *invocation)
+{
+	FN_CALL;
+	int ret;
+	const gchar *sender;
+	icd_dbus_client_s *client = NULL;
+
+	sender = g_dbus_method_invocation_get_sender(invocation);
+
+	g_mutex_lock(&icd_dbus_client_list_mutex);
+	ret = _icd_dbus_client_list_get_client(sender, &client);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("_icd_dbus_client_list_get_client() Fail(%d)", ret);
+		g_mutex_unlock(&icd_dbus_client_list_mutex);
+		ic_dbus_complete_initialize(object, invocation, ret);
+		return TRUE;
+	}
+	g_mutex_unlock(&icd_dbus_client_list_mutex);
+
+	ic_dbus_complete_initialize(object, invocation, IOTCON_ERROR_NONE);
+
+	return TRUE;
 }
 
 
@@ -1322,6 +1353,8 @@ static void _dbus_on_bus_acquired(GDBusConnection *conn, const gchar *name,
 		return;
 	}
 
+	g_signal_connect(icd_dbus_object, "handle-initialize",
+			G_CALLBACK(_dbus_handle_initialize), NULL);
 	g_signal_connect(icd_dbus_object, "handle-register-resource",
 			G_CALLBACK(_dbus_handle_register_resource), NULL);
 	g_signal_connect(icd_dbus_object, "handle-unregister-resource",
