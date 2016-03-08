@@ -1,6 +1,6 @@
 Name:       iotcon
 Summary:    Tizen IoT Connectivity
-Version:    0.0.7
+Version:    0.0.8
 Release:    0
 Group:      Network & Connectivity/Service
 License:    Apache-2.0
