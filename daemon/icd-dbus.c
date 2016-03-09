@@ -651,6 +651,13 @@ static gboolean _dbus_handle_initialize(icDbus *object,
 	const gchar *sender;
 	icd_dbus_client_s *client = NULL;
 
+	ret = icd_initialize();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_initialize() Fail(%d)", ret);
+		ic_dbus_complete_initialize(object, invocation, ret);
+		return TRUE;
+	}
+
 	sender = g_dbus_method_invocation_get_sender(invocation);
 
 	g_mutex_lock(&icd_dbus_client_list_mutex);

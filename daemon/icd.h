@@ -24,4 +24,6 @@
 void icd_unset_kill_timeout();
 void icd_set_kill_timeout();
 
+int icd_initialize();
+
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_H__*/
