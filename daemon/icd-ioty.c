@@ -64,7 +64,7 @@ void icd_ioty_csdk_unlock()
 }
 
 
-GThread* icd_ioty_init(const char *addr, unsigned short port)
+int icd_ioty_init(const char *addr, unsigned short port, GThread **out_thread)
 {
 	FN_CALL;
 	GError *error;
@@ -73,7 +73,7 @@ GThread* icd_ioty_init(const char *addr, unsigned short port)
 	OCStackResult result = OCInit(addr, port, OC_CLIENT_SERVER);
 	if (OC_STACK_OK != result) {
 		ERR("OCInit() Fail(%d)", result);
-		return NULL;
+		return icd_ioty_convert_error(result);
 	}
 
 	DBG("OCInit() Success");
@@ -83,10 +83,12 @@ GThread* icd_ioty_init(const char *addr, unsigned short port)
 	if (NULL == thread) {
 		ERR("g_thread_try_new() Fail(%s)", error->message);
 		g_error_free(error);
-		return NULL;
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	return thread;
+	*out_thread = thread;
+
+	return IOTCON_ERROR_NONE;
 }
 
 

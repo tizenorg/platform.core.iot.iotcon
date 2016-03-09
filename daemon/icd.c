@@ -26,8 +26,10 @@
 #define ICD_RANDOM_PORT 0
 #define ICD_KILL_TIMEOUT_DURATION 10
 
+static GThread *icd_thread;
 static GMainLoop *icd_loop;
 static int icd_kill_timeout;
+static int icd_connection;
 
 void icd_unset_kill_timeout()
 {
@@ -55,11 +57,50 @@ void icd_set_kill_timeout()
 	icd_kill_timeout = g_timeout_add_seconds(ICD_KILL_TIMEOUT_DURATION, _icd_kill_cb, NULL);
 }
 
-int main(int argc, char **argv)
+
+int icd_initialize()
 {
 	int ret;
+
+	if (true == icd_connection)
+		return IOTCON_ERROR_NONE;
+
+	ret = icd_ioty_init(ICD_ALL_INTERFACES, ICD_RANDOM_PORT, &icd_thread);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_ioty_init() Fail(%d)", ret);
+		return ret;
+	}
+
+	ret = icd_ioty_set_device_info();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_ioty_set_device_info() Fail(%d)", ret);
+		icd_ioty_deinit(icd_thread);
+		return ret;
+	}
+
+	ret = icd_ioty_set_platform_info();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_ioty_set_platform_info() Fail(%d)", ret);
+		icd_ioty_deinit(icd_thread);
+		return ret;
+	}
+
+	ret = icd_cynara_init();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icd_cynara_init() Fail(%d)", ret);
+		icd_ioty_deinit(icd_thread);
+		return ret;
+	}
+
+	icd_connection = true;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+int main(int argc, char **argv)
+{
 	guint id;
-	GThread *thread;
 
 #if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
@@ -68,41 +109,15 @@ int main(int argc, char **argv)
 	icd_loop = g_main_loop_new(NULL, FALSE);
 
 	id = icd_dbus_init();
-	thread = icd_ioty_init(ICD_ALL_INTERFACES, ICD_RANDOM_PORT);
-	if (NULL == thread) {
-		ERR("icd_ioty_init() Fail");
-		icd_dbus_deinit(id);
-		return -1;
-	}
-
-	ret = icd_ioty_set_device_info();
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_ioty_set_device_info() Fail(%d)", ret);
-		icd_ioty_deinit(thread);
-		icd_dbus_deinit(id);
-		return -1;
-	}
-
-	ret = icd_ioty_set_platform_info();
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_ioty_set_platform_info() Fail(%d)", ret);
-		icd_ioty_deinit(thread);
-		icd_dbus_deinit(id);
-		return -1;
-	}
-
-	ret = icd_cynara_init();
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("icd_cynara_init() Fail(%d)", ret);
-		icd_ioty_deinit(thread);
-		icd_dbus_deinit(id);
-	}
 
 	icd_set_kill_timeout();
 	g_main_loop_run(icd_loop);
 
-	icd_cynara_deinit();
-	icd_ioty_deinit(thread);
+	if (true == icd_connection) {
+		icd_cynara_deinit();
+		icd_ioty_deinit(icd_thread);
+		icd_connection = false;
+	}
 	icd_dbus_deinit(id);
 	g_main_loop_unref(icd_loop);
 

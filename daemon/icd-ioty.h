@@ -81,7 +81,7 @@ void icd_ioty_csdk_lock();
 
 void icd_ioty_csdk_unlock();
 
-GThread* icd_ioty_init(const char *addr, unsigned short port);
+int icd_ioty_init(const char *addr, unsigned short port, GThread **out_thread);
 
 void icd_ioty_deinit(GThread *thread);
 
