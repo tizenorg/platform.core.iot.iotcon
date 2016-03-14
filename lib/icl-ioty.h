@@ -44,6 +44,9 @@ void icl_ioty_csdk_unlock();
 void icl_ioty_deinit(GThread *thread);
 GThread* icl_ioty_init();
 
+int icl_ioty_set_device_info();
+int icl_ioty_set_platform_info();
+
 /* client APIs */
 int icl_ioty_find_resource(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,

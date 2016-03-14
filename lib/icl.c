@@ -48,6 +48,24 @@ API int iotcon_connect_for_service_mode(iotcon_service_mode_e mode)
 	switch (mode) {
 	case IOTCON_SERVICE_IP:
 		icl_thread = icl_ioty_init();
+		if (NULL == icl_thread) {
+			ERR("icl_ioty_init() Fail");
+			return -1;
+		}
+
+		ret = icl_ioty_set_device_info();
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_set_device_info() Fail(%d)", ret);
+			icl_ioty_deinit(icl_thread);
+			return -1;
+		}
+
+		ret = icl_ioty_set_platform_info();
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_set_platform_info() Fail(%d)", ret);
+			icl_ioty_deinit(icl_thread);
+			return -1;
+		}
 		break;
 	case IOTCON_SERVICE_BT:
 		ret = icl_dbus_start();
