@@ -210,22 +210,32 @@ API int iotcon_get_device_info(const char *host_address,
 		iotcon_device_info_cb cb,
 		void *user_data)
 {
-	int ret;
-	iotcon_service_mode_e mode;
+	int ret, conn_type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	ret = icl_check_connectivity_type(connectivity_type, icl_get_service_mode());
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_check_connectivity_type() Fail(%d)", ret);
+		return ret;
+	}
+
+	conn_type = connectivity_type;
+
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_get_device_info(host_address, connectivity_type, cb, user_data);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_get_device_info() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		ret = _icl_get_device_info(host_address, connectivity_type, cb, user_data);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_icl_get_device_info() Fail(%d)", ret);
@@ -233,8 +243,8 @@ API int iotcon_get_device_info(const char *host_address,
 		}
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", conn_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -430,22 +440,32 @@ API int iotcon_get_platform_info(const char *host_address,
 		iotcon_platform_info_cb cb,
 		void *user_data)
 {
-	int ret;
-	iotcon_service_mode_e mode;
+	int ret, conn_type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	ret = icl_check_connectivity_type(connectivity_type, icl_get_service_mode());
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_check_connectivity_type() Fail(%d)", ret);
+		return ret;
+	}
+
+	conn_type = connectivity_type;
+
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_get_platform_info(host_address, connectivity_type, cb, user_data);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_get_platform_info() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		ret = _icl_get_platform_info(host_address, connectivity_type, cb, user_data);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_icl_get_platform_info() Fail(%d)", ret);
@@ -453,8 +473,8 @@ API int iotcon_get_platform_info(const char *host_address,
 		}
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", conn_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	return IOTCON_ERROR_NONE;
