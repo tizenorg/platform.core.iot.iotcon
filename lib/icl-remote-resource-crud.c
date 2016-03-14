@@ -223,26 +223,30 @@ static void _icl_on_post_cb(GObject *object, GAsyncResult *g_async_res,
 API int iotcon_remote_resource_get(iotcon_remote_resource_h resource,
 		iotcon_query_h query, iotcon_remote_resource_response_cb cb, void *user_data)
 {
-	int ret;
 	GVariant *arg_query;
+	int ret, connectivity_type;
 	GVariant *arg_remote_resource;
 	icl_on_response_s *cb_container;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	connectivity_type = resource->connectivity_type;
+
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_remote_resource_get(resource, query, cb, user_data);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_remote_resource_get() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		cb_container = calloc(1, sizeof(icl_on_response_s));
 		if (NULL == cb_container) {
@@ -263,8 +267,8 @@ API int iotcon_remote_resource_get(iotcon_remote_resource_h resource,
 		icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -277,29 +281,32 @@ API int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
 		iotcon_remote_resource_response_cb cb,
 		void *user_data)
 {
-	int ret;
+	int ret, connectivity_type;
 	GVariant *arg_repr;
 	GVariant *arg_remote_resource;
 	GVariant *arg_query;
 	icl_on_response_s *cb_container;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
+	connectivity_type = resource->connectivity_type;
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_remote_resource_put(resource, repr, query, cb, user_data);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_remote_resource_put() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		cb_container = calloc(1, sizeof(icl_on_response_s));
 		if (NULL == cb_container) {
@@ -327,8 +334,8 @@ API int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
 		icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 	return IOTCON_ERROR_NONE;
 }
@@ -341,29 +348,32 @@ API int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
 		void *user_data)
 {
 
-	int ret;
 	GVariant *arg_repr;
 	GVariant *arg_query;
+	int ret, connectivity_type;
 	GVariant *arg_remote_resource;
 	icl_on_response_s *cb_container;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
+	connectivity_type = resource->connectivity_type;
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_remote_resource_post(resource, repr, query, cb, user_data);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_remote_resource_post() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		cb_container = calloc(1, sizeof(icl_on_response_s));
 		if (NULL == cb_container) {
@@ -391,8 +401,8 @@ API int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
 		icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -409,26 +419,29 @@ static void _icl_on_delete_cb(GObject *object, GAsyncResult *g_async_res,
 API int iotcon_remote_resource_delete(iotcon_remote_resource_h resource,
 		iotcon_remote_resource_response_cb cb, void *user_data)
 {
-	int ret;
+	int ret, connectivity_type;
 	GVariant *arg_remote_resource;
 	icl_on_response_s *cb_container;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
+	connectivity_type = resource->connectivity_type;
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_remote_resource_delete(resource, cb, user_data);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_remote_resource_delete() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		cb_container = calloc(1, sizeof(icl_on_response_s));
 		if (NULL == cb_container) {
@@ -448,8 +461,8 @@ API int iotcon_remote_resource_delete(iotcon_remote_resource_h resource,
 		icl_crud_cb_list = g_list_append(icl_crud_cb_list, cb_container);
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 	return IOTCON_ERROR_NONE;
 }
@@ -537,25 +550,26 @@ API int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resourc
 		iotcon_remote_resource_observe_cb cb,
 		void *user_data)
 {
-	int ret;
 	unsigned int sub_id;
 	GError *error = NULL;
 	int64_t signal_number;
 	int64_t observe_handle;
+	int ret, connectivity_type;
 	icl_on_observe_s *cb_container;
 	GVariant *arg_query, *arg_remote_resource;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(resource->observe_handle || resource->observe_sub_id, IOTCON_ERROR_ALREADY);
 
-	mode = icl_get_service_mode();
+	connectivity_type = resource->connectivity_type;
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_remote_resource_observe_register(resource, observe_policy, query, cb,
 				user_data);
 		if (IOTCON_ERROR_NONE != ret) {
@@ -563,7 +577,9 @@ API int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resourc
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
 		arg_query = icl_dbus_query_to_gvariant(query);
@@ -613,8 +629,8 @@ API int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resourc
 		icl_remote_resource_ref(resource);
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -623,10 +639,9 @@ API int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resourc
 
 API int iotcon_remote_resource_observe_deregister(iotcon_remote_resource_h resource)
 {
-	int ret;
 	GError *error = NULL;
 	GVariant *arg_options;
-	iotcon_service_mode_e mode;
+	int ret, connectivity_type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
@@ -635,16 +650,21 @@ API int iotcon_remote_resource_observe_deregister(iotcon_remote_resource_h resou
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	mode = icl_get_service_mode();
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	connectivity_type = resource->connectivity_type;
+
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_remote_resource_observe_deregister(resource);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_remote_resource_observe_deregister() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		arg_options = icl_dbus_options_to_gvariant(resource->header_options);
 
@@ -666,8 +686,8 @@ API int iotcon_remote_resource_observe_deregister(iotcon_remote_resource_h resou
 		resource->observe_sub_id = 0;
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	return IOTCON_ERROR_NONE;

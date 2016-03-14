@@ -41,15 +41,15 @@ API int iotcon_start_presence(unsigned int time_to_live)
 	RETV_IF(IC_PRESENCE_TTL_SECONDS_MAX < time_to_live, IOTCON_ERROR_INVALID_PARAMETER);
 
 	mode = icl_get_service_mode();
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+
+	if (IOTCON_SERVICE_IP & mode) {
 		ret = icl_ioty_start_presence(time_to_live);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_start_presence() Fail(%d)", ret);
 			return ret;
 		}
-		break;
-	case IOTCON_SERVICE_BT:
+	}
+	if (IOTCON_SERVICE_BT & mode) {
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		ic_dbus_call_start_presence_sync(icl_dbus_get_object(), time_to_live, &ret, NULL,
 				&error);
@@ -64,11 +64,8 @@ API int iotcon_start_presence(unsigned int time_to_live)
 			ERR("iotcon-daemon Fail(%d)", ret);
 			return icl_dbus_convert_daemon_error(ret);
 		}
-		break;
-	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
+
 	return IOTCON_ERROR_NONE;
 }
 
@@ -83,15 +80,15 @@ API int iotcon_stop_presence(void)
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 
 	mode = icl_get_service_mode();
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+
+	if (IOTCON_SERVICE_IP & mode) {
 		ret = icl_ioty_stop_presence();
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_stop_presence() Fail(%d)", ret);
 			return ret;
 		}
-		break;
-	case IOTCON_SERVICE_BT:
+	}
+	if (IOTCON_SERVICE_BT & mode) {
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		ic_dbus_call_stop_presence_sync(icl_dbus_get_object(), &ret, NULL, &error);
 		if (error) {
@@ -105,10 +102,6 @@ API int iotcon_stop_presence(void)
 			ERR("iotcon-daemon Fail(%d)", ret);
 			return icl_dbus_convert_daemon_error(ret);
 		}
-		break;
-	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -180,21 +173,28 @@ API int iotcon_add_presence_cb(const char *host_address,
 		iotcon_presence_h *presence_handle)
 {
 	FN_CALL;
-	int ret;
+	int ret, conn_type;
 	unsigned int sub_id;
 	GError *error = NULL;
 	icl_presence_s *presence;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == presence_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
+	ret = icl_check_connectivity_type(connectivity_type, icl_get_service_mode());
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_check_connectivity_type() Fail(%d)", ret);
+		return ret;
+	}
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	conn_type = connectivity_type;
+
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_add_presence_cb(host_address, connectivity_type, resource_type,
 				cb, user_data, presence_handle);
 		if (IOTCON_ERROR_NONE != ret) {
@@ -202,7 +202,9 @@ API int iotcon_add_presence_cb(const char *host_address,
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
 		if (resource_type && (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
 			ERR("The length of resource_type(%s) is invalid", resource_type);
@@ -270,8 +272,8 @@ API int iotcon_add_presence_cb(const char *host_address,
 		*presence_handle = presence;
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", conn_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 	return IOTCON_ERROR_NONE;
 }
@@ -280,24 +282,27 @@ API int iotcon_add_presence_cb(const char *host_address,
 API int iotcon_remove_presence_cb(iotcon_presence_h presence)
 {
 	FN_CALL;
-	int ret;
 	GError *error = NULL;
-	iotcon_service_mode_e mode;
+	int ret, connectivity_type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
+	connectivity_type = presence->connectivity_type;
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_remove_presence_cb(presence);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_remove_presence_cb() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		if (0 == presence->sub_id) { /* disconnected iotcon dbus */
 			WARN("Invalid Presence handle");
 			free(presence->resource_type);
@@ -331,8 +336,8 @@ API int iotcon_remove_presence_cb(iotcon_presence_h presence)
 
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	return IOTCON_ERROR_NONE;

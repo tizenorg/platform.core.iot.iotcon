@@ -28,6 +28,7 @@ struct icl_lite_resource {
 	int properties;
 	iotcon_lite_resource_post_request_cb cb;
 	void *cb_data;
+	iotcon_connectivity_type_e connectivity_type;
 };
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_LITE_RESOURCE_H__ */
