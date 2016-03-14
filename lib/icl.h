@@ -28,4 +28,7 @@
 
 iotcon_service_mode_e icl_get_service_mode();
 
+int icl_check_connectivity_type(iotcon_connectivity_type_e connectivity_type,
+		iotcon_service_mode_e mode);
+
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__ */

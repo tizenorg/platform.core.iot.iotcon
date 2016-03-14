@@ -1688,24 +1688,24 @@ static void _icl_ioty_monitoring_table_update(gpointer key, gpointer value, gpoi
 			_icl_ioty_monitoring_idle_cb, cb_container);
 }
 
-static void _icl_ioty_remote_resource_update_time_interval()
-{
-	if (icl_caching_table)
-		g_hash_table_foreach(icl_caching_table, _icl_ioty_caching_table_update, NULL);
-	if (icl_monitoring_table)
-		g_hash_table_foreach(icl_monitoring_table, _icl_ioty_monitoring_table_update, NULL);
-}
-
 int icl_ioty_remote_resource_set_time_interval(int time_interval)
 {
 	icl_remote_resource_time_interval = time_interval;
-	_icl_ioty_remote_resource_update_time_interval();
+
+	if (icl_caching_table)
+		g_hash_table_foreach(icl_caching_table, _icl_ioty_caching_table_update, NULL);
+
+	if (icl_monitoring_table)
+		g_hash_table_foreach(icl_monitoring_table, _icl_ioty_monitoring_table_update, NULL);
+
 	return IOTCON_ERROR_NONE;
 }
 
 int icl_ioty_remote_resource_get_time_interval(int *time_interval)
 {
 	RETV_IF(NULL == time_interval, IOTCON_ERROR_INVALID_PARAMETER);
+
 	*time_interval = icl_remote_resource_time_interval;
+
 	return IOTCON_ERROR_NONE;
 }

@@ -30,8 +30,9 @@ extern "C" {
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_SERVICE_IP, /**< IP(IPv4, IPv6) mode */
-	IOTCON_SERVICE_BT, /**< Bluetooth (EDR, LE) mode */
+	IOTCON_SERVICE_IP = (1 << 0), /**< IP(IPv4, IPv6) mode */
+	IOTCON_SERVICE_BT = (1 << 1), /**< Bluetooth (EDR, LE) mode */
+	IOTCON_SERVICE_BOTH = IOTCON_SERVICE_IP | IOTCON_SERVICE_BT, /**< Both mode */
 } iotcon_service_mode_e;
 
 /**

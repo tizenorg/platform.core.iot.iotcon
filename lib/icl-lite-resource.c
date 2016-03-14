@@ -277,12 +277,13 @@ static void _icl_lite_resource_conn_cleanup(iotcon_lite_resource_h resource)
 
 
 /* The length of uri_path should be less than or equal to 36. */
-API int iotcon_lite_resource_create(const char *uri_path,
+API int iotcon_lite_resource_create2(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int properties,
 		iotcon_state_h state,
 		iotcon_lite_resource_post_request_cb cb,
 		void *user_data,
+		iotcon_connectivity_type_e connectivity_type,
 		iotcon_lite_resource_h *resource_handle)
 {
 	int ret;
@@ -292,7 +293,6 @@ API int iotcon_lite_resource_create(const char *uri_path,
 	iotcon_lite_resource_h resource;
 	int64_t signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH];
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
@@ -301,18 +301,23 @@ API int iotcon_lite_resource_create(const char *uri_path,
 	RETV_IF(NULL == res_types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
+	ret = icl_check_connectivity_type(connectivity_type, icl_get_service_mode());
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_check_connectivity_type() Fail(%d)", ret);
+		return ret;
+	}
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_lite_resource_create(uri_path, res_types, properties, state, cb,
 				user_data, resource_handle);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_lite_resource_create() Fail(%d)", ret);
 			return ret;
 		}
+		(*resource_handle)->connectivity_type = connectivity_type;
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		resource = calloc(1, sizeof(struct icl_lite_resource));
 		if (NULL == resource) {
@@ -352,7 +357,6 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		free(types);
 		free(ifaces);
 
-
 		if (0 == resource->handle) {
 			ERR("iotcon-daemon Fail");
 			free(resource);
@@ -360,6 +364,7 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		}
 
 		resource->properties = properties;
+		resource->connectivity_type = connectivity_type;
 		resource->uri_path = ic_utils_strdup(uri_path);
 		if (state)
 			resource->state = icl_state_ref(state);
@@ -385,7 +390,7 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		*resource_handle = resource;
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
 		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 
@@ -393,26 +398,42 @@ API int iotcon_lite_resource_create(const char *uri_path,
 }
 
 
+/* The length of uri_path should be less than or equal to 36. */
+API int iotcon_lite_resource_create(const char *uri_path,
+		iotcon_resource_types_h res_types,
+		int properties,
+		iotcon_state_h state,
+		iotcon_lite_resource_post_request_cb cb,
+		void *user_data,
+		iotcon_lite_resource_h *resource_handle)
+{
+	int ret;
+	iotcon_connectivity_type_e connectivity_type = IOTCON_CONNECTIVITY_ALL;
+
+	ret = iotcon_lite_resource_create2(uri_path, res_types, properties,
+			state, cb, user_data, connectivity_type, resource_handle);
+
+	return ret;
+}
+
+
 API int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource)
 {
 	int ret;
 	GError *error = NULL;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
-
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (resource->connectivity_type) {
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_lite_resource_destroy(resource);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_lite_resource_destroy() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		if (0 == resource->handle) { /* disconnected iotcon dbus */
 			WARN("Invalid Resource handle");
 			iotcon_state_destroy(resource->state);
@@ -441,7 +462,7 @@ API int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource)
 		resource->sub_id = 0;
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
+		ERR("Invalid Connectivity Type(%d)", resource->connectivity_type);
 		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 	return IOTCON_ERROR_NONE;
@@ -452,22 +473,19 @@ API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 		iotcon_state_h state)
 {
 	int ret;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-
-	mode = icl_get_service_mode();
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (resource->connectivity_type) {
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_lite_resource_update_state(resource, state);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_lite_resource_update_state() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		if (state)
 			state = icl_state_ref(state);
 
@@ -481,7 +499,7 @@ API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 			WARN("_icl_lite_resource_notify() Fail");
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
+		ERR("Invalid Connectivity Type(%d)", resource->connectivity_type);
 		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 

@@ -33,6 +33,7 @@ struct icl_resource_response {
 	iotcon_representation_h repr;
 	int64_t oic_request_h;
 	int64_t oic_resource_h;
+	iotcon_connectivity_type_e connectivity_type;
 };
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESPONSE_H__ */
