@@ -90,9 +90,8 @@ int icl_ioty_parse_oic_discovery_payload(OCDevAddr *dev_addr,
 	}
 
 	for (i = 0; res_payload; i++, res_payload = res_payload->next) {
-		int port, properties;
+		int port, properties, conn_type;
 		iotcon_resource_interfaces_h ifaces;
-		iotcon_connectivity_type_e conn_type;
 		iotcon_resource_types_h types;
 		char host_addr[PATH_MAX] = {0};
 		char device_id[UUID_STRING_SIZE] = {0};

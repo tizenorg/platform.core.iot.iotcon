@@ -45,7 +45,7 @@ typedef struct {
 } icl_found_resource_s;
 
 static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *payload,
-		iotcon_connectivity_type_e connectivity_type);
+		int connectivity_type);
 
 static void _icl_found_resource_cb(GDBusConnection *connection,
 		const gchar *sender_name,
@@ -116,13 +116,12 @@ API int iotcon_find_resource(const char *host_address,
 		iotcon_found_resource_cb cb,
 		void *user_data)
 {
-	int ret, timeout;
 	unsigned int sub_id;
 	GError *error = NULL;
 	int64_t signal_number;
+	int ret, timeout, conn_type;
 	icl_found_resource_s *cb_container;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
@@ -131,10 +130,18 @@ API int iotcon_find_resource(const char *host_address,
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	mode = icl_get_service_mode();
+	ret = icl_check_connectivity_type(connectivity_type, icl_get_service_mode());
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_check_connectivity_type() Fail(%d)", ret);
+		return ret;
+	}
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	conn_type = connectivity_type;
+
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_find_resource(host_address, connectivity_type, resource_type,
 				is_secure, cb, user_data);
 		if (IOTCON_ERROR_NONE != ret) {
@@ -142,7 +149,9 @@ API int iotcon_find_resource(const char *host_address,
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		timeout = icl_dbus_get_timeout();
 
@@ -192,8 +201,8 @@ API int iotcon_find_resource(const char *host_address,
 				cb_container);
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", conn_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -492,7 +501,7 @@ API int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
 
 
 static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *payload,
-		iotcon_connectivity_type_e connectivity_type)
+		int connectivity_type)
 {
 	int ret;
 	iotcon_remote_resource_h resource;
@@ -572,15 +581,13 @@ API int iotcon_remote_resource_get_time_interval(int *time_interval)
 
 	mode = icl_get_service_mode();
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	if (IOTCON_SERVICE_IP & mode) {
 		ret = icl_ioty_remote_resource_get_time_interval(&arg_time_interval);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_remote_resource_set_time_interval() Fail(%d)", ret);
+			ERR("icl_ioty_remote_resource_get_time_interval() Fail(%d)", ret);
 			return ret;
 		}
-		break;
-	case IOTCON_SERVICE_BT:
+	} else {
 		ic_dbus_call_encap_get_time_interval_sync(icl_dbus_get_object(), &arg_time_interval,
 				NULL, &error);
 		if (error) {
@@ -589,10 +596,6 @@ API int iotcon_remote_resource_get_time_interval(int *time_interval)
 			g_error_free(error);
 			return ret;
 		}
-		break;
-	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM;
 	}
 
 	*time_interval = arg_time_interval;
@@ -613,15 +616,14 @@ API int iotcon_remote_resource_set_time_interval(int time_interval)
 
 	mode = icl_get_service_mode();
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	if (IOTCON_SERVICE_IP & mode) {
 		ret = icl_ioty_remote_resource_set_time_interval(time_interval);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_remote_resource_set_time_interval() Fail(%d)", ret);
 			return ret;
 		}
-		break;
-	case IOTCON_SERVICE_BT:
+	}
+	if (IOTCON_SERVICE_BT & mode) {
 		ic_dbus_call_encap_set_time_interval_sync(icl_dbus_get_object(), time_interval,
 				NULL, &error);
 		if (error) {
@@ -630,10 +632,6 @@ API int iotcon_remote_resource_set_time_interval(int time_interval)
 			g_error_free(error);
 			return ret;
 		}
-		break;
-	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM;
 	}
 
 	return IOTCON_ERROR_NONE;

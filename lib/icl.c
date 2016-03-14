@@ -37,16 +37,14 @@ API int iotcon_connect_for_service_mode(iotcon_service_mode_e mode)
 	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(mode < IOTCON_SERVICE_IP || IOTCON_SERVICE_BT < mode,
-			IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(0 == (IOTCON_SERVICE_BOTH & mode), IOTCON_ERROR_INVALID_PARAMETER);
 
 #if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
 #endif
 	icl_service_mode = mode;
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	if (IOTCON_SERVICE_IP & mode) {
 		ret = icl_ioty_init(&icl_thread);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_init() Fail(%d)", ret);
@@ -66,17 +64,13 @@ API int iotcon_connect_for_service_mode(iotcon_service_mode_e mode)
 			icl_ioty_deinit(icl_thread);
 			return ret;
 		}
-		break;
-	case IOTCON_SERVICE_BT:
+	}
+	if (IOTCON_SERVICE_BT & mode) {
 		ret = icl_dbus_start();
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_dbus_start() Fail(%d)", ret);
 			return ret;
 		}
-		break;
-	default:
-		ERR("Invalid mode (%d)", icl_service_mode);
-		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 	return IOTCON_ERROR_NONE;
 }
@@ -96,40 +90,24 @@ API int iotcon_connect(void)
 
 API void iotcon_disconnect(void)
 {
-	switch (icl_service_mode) {
-	case IOTCON_SERVICE_IP:
+	if (IOTCON_SERVICE_BT & icl_service_mode)
+		icl_dbus_stop();
+
+	if (IOTCON_SERVICE_IP & icl_service_mode) {
 		icl_ioty_deinit(icl_thread);
 		icl_thread = 0;
-		break;
-	case IOTCON_SERVICE_BT:
-		icl_dbus_stop();
-		break;
-	default:
-		ERR("Invalid serveice (%d)", icl_service_mode);
-		return;
 	}
 }
 
 API int iotcon_get_timeout(int *timeout_seconds)
 {
-	iotcon_service_mode_e mode;
-
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == timeout_seconds, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
-
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	if (IOTCON_SERVICE_IP & icl_service_mode)
 		*timeout_seconds = icl_timeout_seconds;
-		break;
-	case IOTCON_SERVICE_BT:
+	else
 		*timeout_seconds = icl_dbus_get_timeout();
-		break;
-	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM;
-	}
 
 	return IOTCON_ERROR_NONE;
 }
@@ -138,7 +116,6 @@ API int iotcon_get_timeout(int *timeout_seconds)
 API int iotcon_set_timeout(int timeout_seconds)
 {
 	int ret;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	if (ICL_DBUS_TIMEOUT_MAX < timeout_seconds || timeout_seconds <= 0) {
@@ -146,23 +123,44 @@ API int iotcon_set_timeout(int timeout_seconds)
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	mode = icl_get_service_mode();
-
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	if (IOTCON_SERVICE_IP & icl_service_mode)
 		icl_timeout_seconds = timeout_seconds;
-		break;
-	case IOTCON_SERVICE_BT:
+
+	if (IOTCON_SERVICE_BT & icl_service_mode) {
 		ret = icl_dbus_set_timeout(timeout_seconds);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_dbus_set_timeout() Fail(%d)", ret);
 			return ret;
 		}
-		break;
-	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM;
 	}
 
 	return IOTCON_ERROR_NONE;
 }
+
+
+int icl_check_connectivity_type(int connectivity_type, iotcon_service_mode_e mode)
+{
+	int ret = IOTCON_ERROR_NONE;
+
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
+		if (IOTCON_SERVICE_BT == mode)
+			ret = IOTCON_ERROR_INVALID_PARAMETER;
+		break;
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
+		if (IOTCON_SERVICE_IP == mode)
+			ret = IOTCON_ERROR_INVALID_PARAMETER;
+		break;
+	default:
+		ret = IOTCON_ERROR_INVALID_PARAMETER;
+	}
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+
+	return ret;
+}
+
