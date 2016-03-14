@@ -51,6 +51,7 @@ API int iotcon_response_create(iotcon_request_h request,
 
 	resp->oic_request_h = request->oic_request_h;
 	resp->oic_resource_h = request->oic_resource_h;
+	resp->connectivity_type = request->connectivity_type;
 
 	*response = resp;
 
@@ -211,25 +212,28 @@ static int _icl_response_check_representation_visibility(iotcon_response_h resp)
 API int iotcon_response_send(iotcon_response_h resp)
 {
 	FN_CALL;
-	int ret;
 	GError *error = NULL;
 	GVariant *arg_response;
-	iotcon_service_mode_e mode;
+	int ret, connectivity_type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
+	connectivity_type = resp->connectivity_type;
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_response_send(resp);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_response_send() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		ret = _icl_response_check_representation_visibility(resp);
 		if (IOTCON_ERROR_NONE != ret) {
@@ -254,8 +258,8 @@ API int iotcon_response_send(iotcon_response_h resp)
 		}
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
-		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	return IOTCON_ERROR_NONE;

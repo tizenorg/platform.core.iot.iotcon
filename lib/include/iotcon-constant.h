@@ -111,11 +111,9 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_CONNECTIVITY_IPV4 = 0, /**< Indicates Internet Protocol version 4 connectivity */
+	IOTCON_CONNECTIVITY_ALL = 0, /**< Indicates all connectivities */
+	IOTCON_CONNECTIVITY_IPV4, /**< Indicates Internet Protocol version 4 connectivity */
 	IOTCON_CONNECTIVITY_IPV6, /**< Indicates Internet Protocol version 6 connectivity */
-	IOTCON_CONNECTIVITY_BT_EDR, /**< Indicates Bluetooth Enhanced Data Rate connectivity */
-	IOTCON_CONNECTIVITY_BT_LE, /**< Indicates Bluetooth Low Energy connectivity */
-	IOTCON_CONNECTIVITY_ALL, /**< Indicates all connectivities */
 } iotcon_connectivity_type_e;
 
 /**

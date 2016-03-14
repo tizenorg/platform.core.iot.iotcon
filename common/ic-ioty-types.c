@@ -22,6 +22,7 @@
 
 #include "iotcon-types.h"
 #include "iotcon-options.h"
+#include "iotcon-internal.h"
 #include "ic-common.h"
 #include "ic-log.h"
 #include "ic-utils.h"
@@ -29,7 +30,9 @@
 
 OCConnectivityType ic_ioty_convert_connectivity_type(iotcon_connectivity_type_e conn_type)
 {
-	switch (conn_type) {
+	int connectivity_type = conn_type;
+
+	switch (connectivity_type) {
 	case IOTCON_CONNECTIVITY_IPV4:
 		return CT_ADAPTER_IP | CT_IP_USE_V4;
 	case IOTCON_CONNECTIVITY_IPV6:
@@ -132,7 +135,7 @@ int ic_ioty_convert_connectivity(const char *host_address, int conn_type, OCDevA
 int ic_ioty_parse_oic_dev_address(OCDevAddr *dev_addr, char **host_address,
 		int *conn_type)
 {
-	iotcon_connectivity_type_e connectivity_type;
+	int connectivity_type;
 	char host_addr[PATH_MAX] = {0};
 
 	connectivity_type = ic_ioty_parse_oic_transport(dev_addr->adapter,
