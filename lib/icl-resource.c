@@ -155,12 +155,13 @@ static void _icl_resource_conn_cleanup(iotcon_resource_h resource)
 
 
 /* The length of uri_path should be less than or equal to 36. */
-API int iotcon_resource_create(const char *uri_path,
+API int iotcon_resource_create2(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		iotcon_resource_interfaces_h ifaces,
 		int properties,
 		iotcon_request_handler_cb cb,
 		void *user_data,
+		iotcon_connectivity_type_e connectivity_type,
 		iotcon_resource_h *resource_handle)
 {
 	int ret;
@@ -170,7 +171,6 @@ API int iotcon_resource_create(const char *uri_path,
 	iotcon_resource_h resource;
 	int64_t signal_number;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH];
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
@@ -181,25 +181,29 @@ API int iotcon_resource_create(const char *uri_path,
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
+	ret = icl_check_connectivity_type(connectivity_type, icl_get_service_mode());
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_check_connectivity_type() Fail(%d)", ret);
+		return ret;
+	}
 
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_resource_create(uri_path, res_types, ifaces, properties, cb,
 				user_data, resource_handle);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_resource_create() Fail(%d)", ret);
 			return ret;
 		}
+		(*resource_handle)->connectivity_type = connectivity_type;
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		resource = calloc(1, sizeof(struct icl_resource));
 		if (NULL == resource) {
 			ERR("calloc() Fail(%d)", errno);
 			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
-
 
 		type_array = icl_dbus_resource_types_to_array(res_types);
 		if (NULL == type_array) {
@@ -243,6 +247,7 @@ API int iotcon_resource_create(const char *uri_path,
 		resource->uri_path = ic_utils_strdup(uri_path);
 		resource->ifaces = icl_resource_interfaces_ref(ifaces);
 		resource->properties = properties;
+		resource->connectivity_type = connectivity_type;
 
 		snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_REQUEST_HANDLER,
 				signal_number);
@@ -263,11 +268,30 @@ API int iotcon_resource_create(const char *uri_path,
 		*resource_handle = resource;
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
 		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 
 	return IOTCON_ERROR_NONE;
+}
+
+
+/* The length of uri_path should be less than or equal to 36. */
+API int iotcon_resource_create(const char *uri_path,
+		iotcon_resource_types_h res_types,
+		iotcon_resource_interfaces_h ifaces,
+		int properties,
+		iotcon_request_handler_cb cb,
+		void *user_data,
+		iotcon_resource_h *resource_handle)
+{
+	int ret;
+	iotcon_connectivity_type_e connectivity_type = IOTCON_CONNECTIVITY_ALL;
+
+	ret = iotcon_resource_create2(uri_path, res_types, ifaces, properties,
+			cb, user_data, connectivity_type, resource_handle);
+
+	return ret;
 }
 
 
@@ -276,23 +300,19 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 	FN_CALL;
 	int ret;
 	GError *error = NULL;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-
-	mode = icl_get_service_mode();
-
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (resource->connectivity_type) {
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_resource_destroy(resource);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_resource_destroy() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		if (0 == resource->handle) { /* iotcon dbus disconnected */
 			WARN("Invalid Resource handle");
 			iotcon_resource_interfaces_destroy(resource->ifaces);
@@ -323,7 +343,7 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 		resource->sub_id = 0;
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
+		ERR("Invalid Connectivity Type(%d)", resource->connectivity_type);
 		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 
@@ -337,22 +357,20 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource, const char *i
 	int ret;
 	GError *error = NULL;
 	iotcon_resource_interfaces_h resource_ifaces;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (resource->connectivity_type) {
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_resource_bind_interface(resource, iface);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_resource_bind_interface() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		if (0 == resource->sub_id) {
 			ERR("Invalid Resource handle");
@@ -393,7 +411,7 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource, const char *i
 
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
+		ERR("Invalid Connectivity Type(%d)", resource->connectivity_type);
 		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 
@@ -407,22 +425,20 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resour
 	int ret;
 	GError *error = NULL;
 	iotcon_resource_types_h resource_types;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (resource->connectivity_type) {
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_resource_bind_type(resource, resource_type);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_resource_bind_type() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		if (0 == resource->sub_id) {
 			ERR("Invalid Resource handle");
@@ -462,7 +478,7 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resour
 		resource->types = resource_types;
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
+		ERR("Invalid Connectivity Type(%d)", resource->connectivity_type);
 		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 
@@ -489,14 +505,11 @@ API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 {
 	GError *error = NULL;
 	int i, ret;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(parent == child, IOTCON_ERROR_INVALID_PARAMETER);
-
-
 
 	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
 		if (child == parent->children[i]) {
@@ -505,17 +518,15 @@ API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 		}
 	}
 
-	mode = icl_get_service_mode();
-
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (parent->connectivity_type) {
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_resource_bind_child_resource(parent, child);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_resource_bind_child_resource() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		if (0 == parent->sub_id) {
 			ERR("Invalid Resource handle(parent)");
@@ -550,7 +561,7 @@ API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 		ERR("There is no slot to bind a child resource");
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	default:
-		ERR("Invalid mode(%d)", mode);
+		ERR("Invalid Connectivity Type(%d)", parent->connectivity_type);
 		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 	return IOTCON_ERROR_NONE;
@@ -562,23 +573,20 @@ API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 {
 	GError *error = NULL;
 	int i, ret;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
-
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (parent->connectivity_type) {
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_resource_unbind_child_resource(parent, child);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_resource_unbind_child_resource() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		if (0 == parent->sub_id) {
 			ERR("Invalid Resource handle(parent)");
@@ -609,7 +617,7 @@ API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 		}
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
+		ERR("Invalid Connectivity Type(%d)", parent->connectivity_type);
 		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 
@@ -710,22 +718,19 @@ API int iotcon_resource_notify(iotcon_resource_h resource,
 	GError *error = NULL;
 	GVariant *obs;
 	GVariant *repr_gvar;
-	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	mode = icl_get_service_mode();
-
-	switch (mode) {
-	case IOTCON_SERVICE_IP:
+	switch (resource->connectivity_type) {
+	case IOTCON_CONNECTIVITY_ALL:
 		ret = icl_ioty_resource_notify(resource, repr, observers, qos);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_resource_notify() Fail(%d)", ret);
 			return ret;
 		}
 		break;
-	case IOTCON_SERVICE_BT:
+	case IOTCON_CONNECTIVITY_BT_ALL:
 		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 		if (0 == resource->sub_id) {
 			ERR("Invalid Resource handle");
@@ -760,7 +765,7 @@ API int iotcon_resource_notify(iotcon_resource_h resource,
 		}
 		break;
 	default:
-		ERR("Invalid mode(%d)", mode);
+		ERR("Invalid Connectivity Type(%d)", resource->connectivity_type);
 		return IOTCON_ERROR_SYSTEM; /* TODO : Error not connected? */
 	}
 
