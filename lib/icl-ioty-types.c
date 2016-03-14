@@ -622,6 +622,10 @@ int icl_ioty_parse_oic_rep_payload(OCRepPayload *payload, bool is_parent,
 		return ret;
 	}
 
+	/* uri path */
+	if (payload->uri)
+		repr->uri_path = strdup(payload->uri);
+
 	/* resource types */
 	if (payload->types) {
 		node = payload->types;
