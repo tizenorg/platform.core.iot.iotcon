@@ -81,10 +81,20 @@ TZ_VER_3=0
 TZ_VER_3=1
 %endif
 
-export LDFLAGS+="-Wl,--as-needed"
+# for aarch64, x86_64
+%define BUILD_ARCH %{_arch}
+
+%ifarch armv7l armv7hl armv7nhl armv7tnhl armv7thl
+%define BUILD_ARCH "arm"
+%endif
+
+%ifarch %{ix86}
+%define BUILD_ARCH "x86"
+%endif
+
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %cmake . -DMAJORVER=${MAJORVER} -DFULLVER=%{version} -DBIN_INSTALL_DIR:PATH=%{_bindir} \
-		-DTZ_VER_3=${TZ_VER_3} -DDBUS_INTERFACE=%{_dbus_interface}
+		-DTZ_VER_3=${TZ_VER_3} -DDBUS_INTERFACE=%{_dbus_interface} -DARCH=%{BUILD_ARCH}
 
 
 %install
