@@ -925,6 +925,7 @@ int icd_ioty_set_device_info()
 {
 	int ret;
 
+	/* Mandatory (oic.wk.d) */
 	ret = system_settings_set_changed_cb(SYSTEM_SETTINGS_KEY_DEVICE_NAME,
 			_icd_ioty_on_device_name_changed_cb, NULL);
 	if (SYSTEM_SETTINGS_ERROR_NONE != ret) {
@@ -960,7 +961,8 @@ int icd_ioty_set_platform_info()
 	int ret;
 	OCPlatformInfo platform_info = {0};
 
-	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_PLATFORM_NAME,
+	/* Mandatory (oic.wk.p) */
+	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_PLATFORM_NAME,
 			&platform_info.platformID);
 	if (SYSTEM_INFO_ERROR_NONE != ret) {
 		ERR("system_info_get_platform_string() Fail(%d)", ret);
@@ -968,7 +970,8 @@ int icd_ioty_set_platform_info()
 		return IOTCON_ERROR_SYSTEM;
 	}
 
-	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_MANUF_NAME,
+	/* Mandatory (oic.wk.p) */
+	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_MANUF_NAME,
 			&platform_info.manufacturerName);
 	if (SYSTEM_INFO_ERROR_NONE != ret) {
 		ERR("system_info_get_platform_string() Fail(%d)", ret);
@@ -976,29 +979,20 @@ int icd_ioty_set_platform_info()
 		return IOTCON_ERROR_SYSTEM;
 	}
 
-	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_MODEL_NAME,
+	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_MODEL_NAME,
 			&platform_info.modelNumber);
-	if (SYSTEM_INFO_ERROR_NONE != ret) {
-		ERR("system_info_get_platform_string() Fail(%d)", ret);
-		_ioty_free_platform_info(platform_info);
-		return IOTCON_ERROR_SYSTEM;
-	}
+	WARN_IF(SYSTEM_INFO_ERROR_NONE != ret, "system_info_get_platform_string(%s) Fail(%d)",
+			ICL_SYSTEM_INFO_MODEL_NAME, ret);
 
-	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_PLATFORM_VERSION,
+	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_PLATFORM_VERSION,
 			&platform_info.platformVersion);
-	if (SYSTEM_INFO_ERROR_NONE != ret) {
-		ERR("system_info_get_platform_string() Fail(%d)", ret);
-		_ioty_free_platform_info(platform_info);
-		return IOTCON_ERROR_SYSTEM;
-	}
+	WARN_IF(SYSTEM_INFO_ERROR_NONE != ret, "system_info_get_platform_string(%s) Fail(%d)",
+			ICL_SYSTEM_INFO_PLATFORM_VERSION, ret);
 
-	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_BUILD_STRING,
+	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_BUILD_STRING,
 			&platform_info.firmwareVersion);
-	if (SYSTEM_INFO_ERROR_NONE != ret) {
-		ERR("system_info_get_platform_string() Fail(%d)", ret);
-		_ioty_free_platform_info(platform_info);
-		return IOTCON_ERROR_SYSTEM;
-	}
+	WARN_IF(SYSTEM_INFO_ERROR_NONE != ret, "system_info_get_platform_string(%s) Fail(%d)",
+			ICL_SYSTEM_INFO_BUILD_STRING, ret);
 
 	/* platform_info.manufacturerUrl */
 	/* platform_info.dateOfManufacture */
