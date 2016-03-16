@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <errno.h>
 #include <glib.h>
 #include <tizen_type.h>
@@ -244,8 +245,8 @@ API int iotcon_resource_create(const char *uri_path,
 		resource->ifaces = icl_resource_interfaces_ref(ifaces);
 		resource->properties = properties;
 
-		snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_REQUEST_HANDLER,
-				signal_number);
+		snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64,
+				IC_DBUS_SIGNAL_REQUEST_HANDLER, signal_number);
 
 		sub_id = icl_dbus_subscribe_signal(signal_name, resource, _icl_resource_conn_cleanup,
 				_icl_request_handler);

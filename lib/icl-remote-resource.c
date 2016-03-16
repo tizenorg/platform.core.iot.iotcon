@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <errno.h>
 #include <glib.h>
 
@@ -168,7 +169,7 @@ API int iotcon_find_resource(const char *host_address,
 			return icl_dbus_convert_daemon_error(ret);
 		}
 
-		snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_FOUND_RESOURCE,
+		snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, IC_DBUS_SIGNAL_FOUND_RESOURCE,
 				signal_number);
 
 		cb_container = calloc(1, sizeof(icl_found_resource_s));

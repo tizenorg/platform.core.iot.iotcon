@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <errno.h>
 #include <glib.h>
 
@@ -176,7 +177,7 @@ static int _icl_get_device_info(const char *host_address,
 		return icl_dbus_convert_daemon_error(ret);
 	}
 
-	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_DEVICE,
+	snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, IC_DBUS_SIGNAL_DEVICE,
 			signal_number);
 
 	cb_container = calloc(1, sizeof(icl_device_info_s));
@@ -397,7 +398,7 @@ static int _icl_get_platform_info(const char *host_address,
 		return icl_dbus_convert_daemon_error(ret);
 	}
 
-	snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_PLATFORM,
+	snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, IC_DBUS_SIGNAL_PLATFORM,
 			signal_number);
 
 	cb_container = calloc(1, sizeof(icl_platform_info_s));

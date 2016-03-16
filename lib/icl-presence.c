@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <errno.h>
 #include <glib.h>
 
@@ -243,7 +244,7 @@ API int iotcon_add_presence_cb(const char *host_address,
 			return IOTCON_ERROR_IOTIVITY;
 		}
 
-		snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_PRESENCE,
+		snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, IC_DBUS_SIGNAL_PRESENCE,
 				presence->handle);
 
 		presence->cb = cb;

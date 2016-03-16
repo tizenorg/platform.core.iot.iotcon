@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <errno.h>
 #include <glib.h>
 
@@ -137,7 +138,7 @@ API int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
 			return icl_dbus_convert_daemon_error(ret);
 		}
 
-		snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_CACHING,
+		snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, IC_DBUS_SIGNAL_CACHING,
 				signal_number);
 
 		cb_container = calloc(1, sizeof(icl_caching_s));

@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <inttypes.h>
 #include <glib.h>
 
 #include <ocstack.h>
@@ -199,7 +200,8 @@ static int _ocprocess_response_signal(const char *dest, const char *signal_prefi
 	int ret;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
-	ret = snprintf(signal_name, sizeof(signal_name), "%s_%llx", signal_prefix, signal_number);
+	ret = snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, signal_prefix,
+			signal_number);
 	if (ret <= 0 || sizeof(signal_name) <= ret) {
 		ERR("snprintf() Fail(%d)", ret);
 		g_variant_unref(value);

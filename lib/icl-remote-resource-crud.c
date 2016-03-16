@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <errno.h>
 #include <glib.h>
 #include <gio/gio.h>
@@ -597,7 +598,7 @@ API int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resourc
 			return IOTCON_ERROR_IOTIVITY;
 		}
 
-		snprintf(signal_name, sizeof(signal_name), "%s_%llx", IC_DBUS_SIGNAL_OBSERVE,
+		snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, IC_DBUS_SIGNAL_OBSERVE,
 				signal_number);
 
 		sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
