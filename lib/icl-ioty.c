@@ -46,11 +46,11 @@
 #include "icl-ioty-types.h"
 #include "icl-ioty.h"
 
-static const char *ICL_SYSTEM_INFO_PLATFORM_NAME = "http://tizen.org/system/platform.name";
 static const char *ICL_SYSTEM_INFO_PLATFORM_VERSION = "http://tizen.org/feature/platform.version";
 static const char *ICL_SYSTEM_INFO_MANUF_NAME = "http://tizen.org/system/manufacturer";
 static const char *ICL_SYSTEM_INFO_MODEL_NAME = "http://tizen.org/system/model_name";
 static const char *ICL_SYSTEM_INFO_BUILD_STRING = "http://tizen.org/system/build.string";
+static const char *ICL_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
 
 static GMutex icl_csdk_mutex;
 static int icl_remote_resource_time_interval = IC_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
@@ -415,7 +415,7 @@ int icl_ioty_set_platform_info()
 	OCPlatformInfo platform_info = {0};
 
 	/* Mandatory (oic.wk.p) */
-	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_PLATFORM_NAME,
+	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_TIZEN_ID,
 			&platform_info.platformID);
 	if (SYSTEM_INFO_ERROR_NONE != ret) {
 		ERR("system_info_get_platform_string() Fail(%d)", ret);
