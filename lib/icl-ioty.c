@@ -20,7 +20,6 @@
 #include <octypes.h>
 #include <ocstack.h>
 #include <ocpayload.h>
-#include <system_info.h>
 #include <system_settings.h>
 
 #include "iotcon.h"
@@ -45,12 +44,6 @@
 #include "icl-ioty-ocprocess.h"
 #include "icl-ioty-types.h"
 #include "icl-ioty.h"
-
-static const char *ICL_SYSTEM_INFO_PLATFORM_NAME = "http://tizen.org/system/platform.name";
-static const char *ICL_SYSTEM_INFO_PLATFORM_VERSION = "http://tizen.org/feature/platform.version";
-static const char *ICL_SYSTEM_INFO_MANUF_NAME = "http://tizen.org/system/manufacturer";
-static const char *ICL_SYSTEM_INFO_MODEL_NAME = "http://tizen.org/system/model_name";
-static const char *ICL_SYSTEM_INFO_BUILD_STRING = "http://tizen.org/system/build.string";
 
 static GMutex icl_csdk_mutex;
 static int icl_remote_resource_time_interval = IC_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
@@ -338,17 +331,13 @@ int icl_ioty_get_platform_info(const char *host_address,
 static int _ioty_set_device_info()
 {
 	int ret;
-	char *device_name = NULL;
 	OCDeviceInfo device_info = {0};
 
-	/* Mandatory (oic.wk.d) */
-	ret = system_settings_get_value_string(SYSTEM_SETTINGS_KEY_DEVICE_NAME, &device_name);
-	if (SYSTEM_SETTINGS_ERROR_NONE != ret) {
-		ERR("system_settings_get_value_string() Fail(%d)", ret);
-		return IOTCON_ERROR_SYSTEM;
+	ret = ic_utils_get_device_info(&device_info);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("ic_utils_get_device_info() Fail(%d)", ret);
+		return ret;
 	}
-
-	device_info.deviceName = device_name;
 
 	icl_ioty_csdk_lock();
 	ret = OCSetDeviceInfo(device_info);
@@ -356,9 +345,10 @@ static int _ioty_set_device_info()
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCSetDeviceInfo() Fail(%d)", ret);
-		free(device_name);
+		free(device_info.deviceName);
 		return ic_ioty_parse_oic_error(ret);
 	}
+	free(device_info.deviceName);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -395,64 +385,16 @@ int icl_ioty_set_device_info()
 	return IOTCON_ERROR_NONE;
 }
 
-static void _ioty_free_platform_info(OCPlatformInfo platform_info)
-{
-	free(platform_info.manufacturerName);
-	free(platform_info.manufacturerUrl);
-	free(platform_info.modelNumber);
-	free(platform_info.dateOfManufacture);
-	free(platform_info.platformVersion);
-	free(platform_info.operatingSystemVersion);
-	free(platform_info.hardwareVersion);
-	free(platform_info.firmwareVersion);
-	free(platform_info.supportUrl);
-	free(platform_info.systemTime);
-}
-
 int icl_ioty_set_platform_info()
 {
 	int ret;
 	OCPlatformInfo platform_info = {0};
 
-	/* Mandatory (oic.wk.p) */
-	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_PLATFORM_NAME,
-			&platform_info.platformID);
-	if (SYSTEM_INFO_ERROR_NONE != ret) {
-		ERR("system_info_get_platform_string() Fail(%d)", ret);
-		_ioty_free_platform_info(platform_info);
-		return IOTCON_ERROR_SYSTEM;
+	ret = ic_utils_get_platform_info(&platform_info);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("ic_utils_get_platform_info() Fail(%d)", ret);
+		return ret;
 	}
-
-	/* Mandatory (oic.wk.p) */
-	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_MANUF_NAME,
-			&platform_info.manufacturerName);
-	if (SYSTEM_INFO_ERROR_NONE != ret) {
-		ERR("system_info_get_platform_string() Fail(%d)", ret);
-		_ioty_free_platform_info(platform_info);
-		return IOTCON_ERROR_SYSTEM;
-	}
-
-	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_MODEL_NAME,
-			&platform_info.modelNumber);
-	WARN_IF(SYSTEM_INFO_ERROR_NONE != ret, "system_info_get_platform_string(%s) Fail(%d)",
-			ICL_SYSTEM_INFO_MODEL_NAME, ret);
-
-	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_PLATFORM_VERSION,
-			&platform_info.platformVersion);
-	WARN_IF(SYSTEM_INFO_ERROR_NONE != ret, "system_info_get_platform_string(%s) Fail(%d)",
-			ICL_SYSTEM_INFO_PLATFORM_VERSION, ret);
-
-	ret = system_info_get_platform_string(ICL_SYSTEM_INFO_BUILD_STRING,
-			&platform_info.firmwareVersion);
-	WARN_IF(SYSTEM_INFO_ERROR_NONE != ret, "system_info_get_platform_string(%s) Fail(%d)",
-			ICL_SYSTEM_INFO_BUILD_STRING, ret);
-
-	/* platform_info.manufacturerUrl */
-	/* platform_info.dateOfManufacture */
-	/* platform_info.operatingSystemVersion */
-	/* platform_info.hardwareVersion */
-	/* platform_info.supportUrl */
-	/* platform_info.systemTime */
 
 	icl_ioty_csdk_lock();
 	ret = OCSetPlatformInfo(platform_info);
@@ -460,14 +402,13 @@ int icl_ioty_set_platform_info()
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCSetPlatformInfo() Fail(%d)", ret);
-		_ioty_free_platform_info(platform_info);
+		ic_utils_free_platform_info(&platform_info);
 		return ic_ioty_parse_oic_error(ret);
 	}
-	_ioty_free_platform_info(platform_info);
+	ic_utils_free_platform_info(&platform_info);
 
 	return IOTCON_ERROR_NONE;
 }
-
 
 int icl_ioty_add_presence_cb(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
