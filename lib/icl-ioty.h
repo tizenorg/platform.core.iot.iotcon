@@ -46,7 +46,7 @@ int icl_ioty_init(GThread **out_thread);
 
 int icl_ioty_set_device_info();
 int icl_ioty_set_platform_info();
-int icl_ioty_unset_device_info_changed_cb();
+void icl_ioty_unset_device_info_changed_cb();
 
 /* client APIs */
 int icl_ioty_find_resource(const char *host_address,

@@ -729,7 +729,7 @@ int icl_ioty_parse_oic_rep_payload(OCRepPayload *payload, bool is_parent,
 static int _icl_ioty_fill_oic_rep_payload_value_array(OCRepPayload *payload,
 		const char *key, struct icl_state_list_s *list)
 {
-	int i, len, ret;
+	int i, j, len, ret;
 	bool *b_arr;
 	double *d_arr;
 	char **str_arr;
@@ -811,10 +811,18 @@ static int _icl_ioty_fill_oic_rep_payload_value_array(OCRepPayload *payload,
 		}
 		for (node = list->list, i = 0; node; node = node->next, i++) {
 			state_arr[i] = OCRepPayloadCreate();
+			if (NULL == state_arr[i]) {
+				ERR("OCRepPayloadCreate() Fail");
+				free(state_arr);
+				return ret;
+			}
 			ret = _icl_ioty_fill_oic_rep_payload_value(state_arr[i],
 					((icl_val_state_s*)node->data)->state);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("_icl_ioty_fill_oic_rep_payload_value() Fail(%d)", ret);
+				for (j = 0; j <= i; j++)
+					OCRepPayloadDestroy(state_arr[i]);
+				free(state_arr);
 				return ret;
 			}
 		}
