@@ -365,11 +365,13 @@ static void _icl_ioty_on_device_name_changed_cb(system_settings_key_e key,
 	}
 }
 
-int icl_ioty_unset_device_info_changed_cb()
+void icl_ioty_unset_device_info_changed_cb()
 {
 	int ret;
+
 	ret = system_settings_unset_changed_cb(SYSTEM_SETTINGS_KEY_DEVICE_NAME);
-	WARN_IF(SYSTEM_SETTINGS_ERROR_NONE != ret, "system_settings_unset_changed_cb() Fail(%d)", ret);
+	WARN_IF(SYSTEM_SETTINGS_ERROR_NONE != ret,
+			"system_settings_unset_changed_cb() Fail(%d)", ret);
 }
 
 int icl_ioty_set_device_info()
