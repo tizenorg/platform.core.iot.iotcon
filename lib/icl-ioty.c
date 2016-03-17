@@ -370,6 +370,8 @@ int icl_ioty_unset_device_info_changed_cb()
 	int ret;
 	ret = system_settings_unset_changed_cb(SYSTEM_SETTINGS_KEY_DEVICE_NAME);
 	WARN_IF(SYSTEM_SETTINGS_ERROR_NONE != ret, "system_settings_unset_changed_cb() Fail(%d)", ret);
+
+	return IOTCON_ERROR_NONE;
 }
 
 int icl_ioty_set_device_info()
