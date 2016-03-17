@@ -82,9 +82,8 @@ static gboolean _icl_ioty_ocprocess_find_idle_cb(gpointer p)
 	RETV_IF(NULL == cb_data, G_SOURCE_REMOVE);
 
 	if (cb_data->cb) {
-		for (i = 0; i < cb_data->resource_count; i++) {
+		for (i = 0; i < cb_data->resource_count; i++)
 			cb_data->cb(cb_data->resource_list[i], IOTCON_ERROR_NONE, cb_data->user_data);
-		}
 	}
 
 	icl_destroy_find_cb_data(cb_data);

@@ -147,9 +147,8 @@ int icl_ioty_parse_oic_discovery_payload(OCDevAddr *dev_addr,
 			iotcon_resource_types_destroy(types);
 			continue;
 		}
-		for (; node; node = node->next) {
+		for (; node; node = node->next)
 			iotcon_resource_interfaces_add(ifaces, node->value);
-		}
 
 		/* Resource Properties */
 		properties = ic_ioty_parse_oic_properties(res_payload->bitmap);
@@ -979,18 +978,16 @@ int icl_ioty_convert_representation(iotcon_representation_h repr, OCPayload **pa
 
 	/* interfaces */
 	if (repr->interfaces) {
-		for (c = repr->interfaces->iface_list; c; c = c->next) {
+		for (c = repr->interfaces->iface_list; c; c = c->next)
 			OCRepPayloadAddInterface(repr_payload, c->data);
-		}
 	} else {
 		OCRepPayloadAddInterface(repr_payload, IOTCON_INTERFACE_DEFAULT);
 	}
 
 	/* resource types */
 	if (repr->res_types) {
-		for (c = repr->res_types->type_list; c; c = c->next) {
+		for (c = repr->res_types->type_list; c; c = c->next)
 			OCRepPayloadAddResourceType(repr_payload, c->data);
-		}
 	}
 
 	/* state */

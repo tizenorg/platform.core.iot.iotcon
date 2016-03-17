@@ -444,9 +444,8 @@ static int _icl_repr_compare_state_list_value(struct icl_list_s *list1,
 	if (NULL == list1->list || NULL == list2->list)
 		return !!(list1->list - list2->list);
 
-	for (c = list1->list; c; c = c->next) {
+	for (c = list1->list; c; c = c->next)
 		g_list_find_custom(list2->list, c->data, _icl_repr_compare_state_value_custom);
-	}
 
 	return IC_EQUAL;
 }
