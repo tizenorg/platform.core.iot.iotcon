@@ -26,6 +26,7 @@
 static GThread *icl_thread;
 static iotcon_service_mode_e icl_service_mode;
 static int icl_timeout_seconds = ICL_DBUS_TIMEOUT_DEFAULT;
+static int icl_connection_count;
 
 iotcon_service_mode_e icl_get_service_mode()
 {
@@ -45,26 +46,30 @@ API int iotcon_connect_for_service_mode(iotcon_service_mode_e mode)
 	icl_service_mode = mode;
 
 	if (IOTCON_SERVICE_IP & mode) {
-		ret = icl_ioty_init(&icl_thread);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_init() Fail(%d)", ret);
-			return ret;
-		}
+		icl_connection_count++;
+		if (1 == icl_connection_count) {
+			ret = icl_ioty_init(&icl_thread);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("icl_ioty_init() Fail(%d)", ret);
+				return ret;
+			}
 
-		ret = icl_ioty_set_device_info();
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_set_device_info() Fail(%d)", ret);
-			icl_ioty_deinit(icl_thread);
-			return ret;
-		}
+			ret = icl_ioty_set_device_info();
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("icl_ioty_set_device_info() Fail(%d)", ret);
+				icl_ioty_deinit(icl_thread);
+				return ret;
+			}
 
-		ret = icl_ioty_set_platform_info();
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_set_platform_info() Fail(%d)", ret);
-			icl_ioty_deinit(icl_thread);
-			return ret;
+			ret = icl_ioty_set_platform_info();
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("icl_ioty_set_platform_info() Fail(%d)", ret);
+				icl_ioty_deinit(icl_thread);
+				return ret;
+			}
 		}
 	}
+
 	if (IOTCON_SERVICE_BT & mode) {
 		ret = icl_dbus_start();
 		if (IOTCON_ERROR_NONE != ret) {
@@ -94,9 +99,12 @@ API void iotcon_disconnect(void)
 		icl_dbus_stop();
 
 	if (IOTCON_SERVICE_IP & icl_service_mode) {
-		icl_ioty_unset_device_info_changed_cb();
-		icl_ioty_deinit(icl_thread);
-		icl_thread = 0;
+		icl_connection_count--;
+		if (0 == icl_connection_count) {
+			icl_ioty_unset_device_info_changed_cb();
+			icl_ioty_deinit(icl_thread);
+			icl_thread = 0;
+		}
 	}
 }
 
