@@ -94,6 +94,7 @@ API void iotcon_disconnect(void)
 		icl_dbus_stop();
 
 	if (IOTCON_SERVICE_IP & icl_service_mode) {
+		icl_ioty_unset_device_info_changed_cb();
 		icl_ioty_deinit(icl_thread);
 		icl_thread = 0;
 	}
