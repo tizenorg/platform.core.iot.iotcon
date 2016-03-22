@@ -41,11 +41,6 @@ static GVariant* _icl_state_list_to_gvariant(iotcon_list_h list)
 
 	RETV_IF(NULL == list, NULL);
 
-	if (NULL == list->list || 0 == g_list_length(list->list)) {
-		DBG("list is empty");
-		return NULL;
-	}
-
 	g_variant_builder_init(&builder, G_VARIANT_TYPE_ARRAY);
 
 	switch (list->type) {

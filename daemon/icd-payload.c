@@ -24,9 +24,9 @@
 
 #include "iotcon.h"
 #include "ic-utils.h"
-#include "ic-ioty-types.h"
 #include "icd.h"
 #include "icd-ioty.h"
+#include "icd-ioty-type.h"
 #include "icd-payload.h"
 
 union icd_state_value_u {
@@ -108,7 +108,7 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 		}
 
 		/* Resource Properties */
-		properties = ic_ioty_parse_oic_properties(resource->bitmap);
+		properties = icd_ioty_oic_properties_to_properties(resource->bitmap);
 
 		/* port */
 		port = (resource->port) ? resource->port : dev_addr->port;

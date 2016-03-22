@@ -17,8 +17,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <inttypes.h>
 #include <glib.h>
+#include <inttypes.h>
 
 #include <ocstack.h>
 #include <octypes.h>
@@ -26,11 +26,11 @@
 
 #include "iotcon.h"
 #include "ic-utils.h"
-#include "ic-ioty-types.h"
 #include "icd.h"
 #include "icd-payload.h"
 #include "icd-dbus.h"
 #include "icd-ioty.h"
+#include "icd-ioty-type.h"
 #include "icd-ioty-ocprocess.h"
 
 static int icd_ioty_alive;
@@ -200,8 +200,7 @@ static int _ocprocess_response_signal(const char *dest, const char *signal_prefi
 	int ret;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
-	ret = snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, signal_prefix,
-			signal_number);
+	ret = snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, signal_prefix, signal_number);
 	if (ret <= 0 || sizeof(signal_name) <= ret) {
 		ERR("snprintf() Fail(%d)", ret);
 		g_variant_unref(value);
@@ -233,6 +232,26 @@ static inline GVariantBuilder* _ocprocess_parse_header_options(
 	return options;
 }
 
+static int _ioty_oic_action_to_ioty_action(int oic_action)
+{
+	int action;
+
+	switch (oic_action) {
+	case OC_OBSERVE_REGISTER:
+		action = IOTCON_OBSERVE_REGISTER;
+		break;
+	case OC_OBSERVE_DEREGISTER:
+		action = IOTCON_OBSERVE_DEREGISTER;
+		break;
+	case OC_OBSERVE_NO_OPTION:
+	default:
+		ERR("Invalid action (%d)", oic_action);
+		action = IOTCON_OBSERVE_NO_TYPE;
+	}
+	return action;
+}
+
+
 static void _icd_req_context_free(void *ctx)
 {
 	struct icd_req_context *req_ctx = ctx;
@@ -262,9 +281,9 @@ static int _worker_req_handler(void *context)
 		ctx->payload = NULL;
 	}
 
-	ret = ic_ioty_parse_oic_dev_address(&ctx->dev_addr, &host_address, &conn_type);
+	ret = icd_ioty_get_host_address(&ctx->dev_addr, &host_address, &conn_type);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("ic_ioty_parse_oic_dev_address() Fail(%d)", ret);
+		ERR("icd_ioty_get_host_address() Fail(%d)", ret);
 		g_variant_builder_clear(&payload_builder);
 		return ret;
 	}
@@ -278,8 +297,8 @@ static int _worker_req_handler(void *context)
 			ctx->observe_type,
 			ctx->observe_id,
 			&payload_builder,
-			IC_POINTER_TO_INT64(ctx->request_h),
-			IC_POINTER_TO_INT64(ctx->resource_h));
+			ICD_POINTER_TO_INT64(ctx->request_h),
+			ICD_POINTER_TO_INT64(ctx->resource_h));
 
 	free(host_address);
 
@@ -358,7 +377,7 @@ OCEntityHandlerResult icd_ioty_ocprocess_req_handler(OCEntityHandlerFlag flag,
 	if (OC_OBSERVE_FLAG & flag) {
 		/* observation info*/
 		req_ctx->observe_id = request->obsInfo.obsId;
-		req_ctx->observe_type = ic_ioty_parse_oic_action(request->obsInfo.action);
+		req_ctx->observe_type = _ioty_oic_action_to_ioty_action(request->obsInfo.action);
 	} else {
 		req_ctx->observe_type = IOTCON_OBSERVE_NO_TYPE;
 	}
@@ -481,7 +500,7 @@ OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 	find_ctx->signal_number = sig_context->signal_number;
 	find_ctx->bus_name = ic_utils_strdup(sig_context->bus_name);
 	find_ctx->payload = icd_payload_res_to_gvariant(resp->payload, &resp->devAddr);
-	find_ctx->conn_type = ic_ioty_parse_oic_transport(resp->devAddr.adapter,
+	find_ctx->conn_type = icd_ioty_transport_flag_to_conn_type(resp->devAddr.adapter,
 			resp->devAddr.flags);
 
 	ret = _ocprocess_worker_start(_worker_find_cb, find_ctx, _icd_find_context_free);
@@ -557,6 +576,31 @@ static int _ocprocess_worker(_ocprocess_cb cb, int type, OCPayload *payload, int
 	return ret;
 }
 
+static int _ocprocess_parse_oic_result(OCStackResult result)
+{
+	int res;
+
+	switch (result) {
+	case OC_STACK_OK:
+		res = IOTCON_RESPONSE_OK;
+		break;
+	case OC_STACK_RESOURCE_CREATED:
+		res = IOTCON_RESPONSE_RESOURCE_CREATED;
+		break;
+	case OC_STACK_RESOURCE_DELETED:
+		res = IOTCON_RESPONSE_RESOURCE_DELETED;
+		break;
+	case OC_STACK_UNAUTHORIZED_REQ:
+		res = IOTCON_RESPONSE_FORBIDDEN;
+		break;
+	default:
+		WARN("response error(%d)", result);
+		res = IOTCON_RESPONSE_ERROR;
+		break;
+	}
+
+	return res;
+}
 
 
 OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
@@ -574,7 +618,7 @@ OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	res = ic_ioty_parse_oic_response_result(resp->result);
+	res = _ocprocess_parse_oic_result(resp->result);
 
 	options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
 			resp->numRcvdVendorSpecificHeaderOptions);
@@ -606,7 +650,7 @@ OCStackApplicationResult icd_ioty_ocprocess_put_cb(void *ctx, OCDoHandle handle,
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	res = ic_ioty_parse_oic_response_result(resp->result);
+	res = _ocprocess_parse_oic_result(resp->result);
 
 	options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
 			resp->numRcvdVendorSpecificHeaderOptions);
@@ -638,7 +682,7 @@ OCStackApplicationResult icd_ioty_ocprocess_post_cb(void *ctx, OCDoHandle handle
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	res = ic_ioty_parse_oic_response_result(resp->result);
+	res = _ocprocess_parse_oic_result(resp->result);
 
 	options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
 			resp->numRcvdVendorSpecificHeaderOptions);
@@ -670,7 +714,7 @@ OCStackApplicationResult icd_ioty_ocprocess_delete_cb(void *ctx, OCDoHandle hand
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	res = ic_ioty_parse_oic_response_result(resp->result);
+	res = _ocprocess_parse_oic_result(resp->result);
 
 	options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
 			resp->numRcvdVendorSpecificHeaderOptions);
@@ -765,7 +809,7 @@ OCStackApplicationResult icd_ioty_ocprocess_observe_cb(void *ctx,
 		return cb_result;
 	}
 
-	res = ic_ioty_parse_oic_response_result(resp->result);
+	res = _ocprocess_parse_oic_result(resp->result);
 
 	options = _ocprocess_parse_header_options(resp->rcvdVendorSpecificHeaderOptions,
 			resp->numRcvdVendorSpecificHeaderOptions);
@@ -817,9 +861,9 @@ static int _worker_presence_cb(void *context)
 
 	RETV_IF(NULL == ctx, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = ic_ioty_parse_oic_dev_address(&ctx->dev_addr, &host_address, &conn_type);
+	ret = icd_ioty_get_host_address(&ctx->dev_addr, &host_address, &conn_type);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("ic_ioty_parse_oic_dev_address() Fail(%d)", ret);
+		ERR("icd_ioty_get_host_address() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -830,14 +874,14 @@ static int _worker_presence_cb(void *context)
 	free(host_address);
 
 	ret = _ocprocess_response_signal(NULL, IC_DBUS_SIGNAL_PRESENCE,
-			IC_POINTER_TO_INT64(ctx->handle), value);
+			ICD_POINTER_TO_INT64(ctx->handle), value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 
-	handle = icd_ioty_presence_table_get_handle(IC_IOTY_MULTICAST_ADDRESS);
+	handle = icd_ioty_presence_table_get_handle(ICD_MULTICAST_ADDRESS);
 	if (handle && (handle != ctx->handle)) {
 		ret = _ocprocess_response_signal(NULL, IC_DBUS_SIGNAL_PRESENCE,
-				IC_POINTER_TO_INT64(handle), value2);
+				ICD_POINTER_TO_INT64(handle), value2);
 		if (IOTCON_ERROR_NONE != ret)
 			ERR("_ocprocess_response_signal() Fail(%d)", ret);
 	} else {
@@ -860,14 +904,14 @@ static void _presence_cb_response_error(OCDoHandle handle, int ret_val)
 	value2 = g_variant_ref(value);
 
 	ret = _ocprocess_response_signal(NULL, IC_DBUS_SIGNAL_PRESENCE,
-			IC_POINTER_TO_INT64(handle), value);
+			ICD_POINTER_TO_INT64(handle), value);
 	if (IOTCON_ERROR_NONE != ret)
 		ERR("_ocprocess_response_signal() Fail(%d)", ret);
 
-	handle2 = icd_ioty_presence_table_get_handle(IC_IOTY_MULTICAST_ADDRESS);
+	handle2 = icd_ioty_presence_table_get_handle(ICD_MULTICAST_ADDRESS);
 	if (handle2 && (handle2 != handle)) {
 		ret = _ocprocess_response_signal(NULL, IC_DBUS_SIGNAL_PRESENCE,
-				IC_POINTER_TO_INT64(handle), value2);
+				ICD_POINTER_TO_INT64(handle), value2);
 		if (IOTCON_ERROR_NONE != ret)
 			ERR("_ocprocess_response_signal() Fail(%d)", ret);
 	} else {
@@ -875,6 +919,29 @@ static void _presence_cb_response_error(OCDoHandle handle, int ret_val)
 	}
 }
 
+
+static int _presence_trigger_to_ioty_trigger(OCPresenceTrigger src,
+		iotcon_presence_trigger_e *dest)
+{
+	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
+
+	switch (src) {
+	case OC_PRESENCE_TRIGGER_CREATE:
+		*dest = IOTCON_PRESENCE_RESOURCE_CREATED;
+		break;
+	case OC_PRESENCE_TRIGGER_CHANGE:
+		*dest = IOTCON_PRESENCE_RESOURCE_UPDATED;
+		break;
+	case OC_PRESENCE_TRIGGER_DELETE:
+		*dest = IOTCON_PRESENCE_RESOURCE_DESTROYED;
+		break;
+	default:
+		ERR("Invalid trigger(%d)", src);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
 
 
 OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle handle,
@@ -901,7 +968,13 @@ OCStackApplicationResult icd_ioty_ocprocess_presence_cb(void *ctx, OCDoHandle ha
 	switch (resp->result) {
 	case OC_STACK_OK:
 		presence_ctx->result = IOTCON_PRESENCE_OK;
-		presence_ctx->trigger = ic_ioty_parse_oic_trigger(payload->trigger);
+		ret = _presence_trigger_to_ioty_trigger(payload->trigger, &presence_ctx->trigger);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("_presence_trigger_to_ioty_trigger() Fail(%d)", ret);
+			_presence_cb_response_error(handle, ret);
+			free(presence_ctx);
+			return OC_STACK_KEEP_TRANSACTION;
+		}
 		break;
 	case OC_STACK_PRESENCE_STOPPED:
 		presence_ctx->result = IOTCON_PRESENCE_STOPPED;
@@ -1032,9 +1105,9 @@ static int _worker_encap_get_cb(void *context)
 	struct icd_encap_get_context *encap_get_ctx = context;
 
 	/* GET ENCAP INFO */
-	ret = ic_ioty_parse_oic_dev_address(&encap_get_ctx->dev_addr, &host_address, &conn_type);
+	ret = icd_ioty_get_host_address(&encap_get_ctx->dev_addr, &host_address, &conn_type);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("ic_ioty_parse_oic_dev_address() Fail");
+		ERR("icd_ioty_get_host_address() Fail");
 		return ret;
 	}
 
@@ -1140,9 +1213,9 @@ static int _worker_encap_get(void *context)
 	if (false == encap_ctx->is_valid)
 		return IOTCON_ERROR_NONE;
 
-	ret = ic_ioty_parse_oic_dev_address(&encap_ctx->dev_addr, &host_address, &conn_type);
+	ret = icd_ioty_get_host_address(&encap_ctx->dev_addr, &host_address, &conn_type);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("ic_ioty_parse_oic_dev_address() Fail");
+		ERR("icd_ioty_get_host_address() Fail");
 		return ret;
 	}
 

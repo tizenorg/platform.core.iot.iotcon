@@ -52,7 +52,6 @@ struct icl_resource {
 	int64_t handle;
 	iotcon_resource_h children[ICL_CONTAINED_RESOURCES_MAX];
 	iotcon_observers_h observers;
-	iotcon_connectivity_type_e connectivity_type;
 };
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_H__*/
