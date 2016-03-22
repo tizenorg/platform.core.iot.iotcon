@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__
+#ifndef __IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_TYPE_H__
+#define __IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_TYPE_H__
 
-#include "iotcon.h"
-#include "ic-common.h"
-#include "ic-log.h"
+#include <octypes.h>
 
-#ifdef API
-#undef API
-#endif
-#define API __attribute__((visibility("default")))
+OCConnectivityType icd_ioty_conn_type_to_oic_conn_type(int conn_type);
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__ */
+int icd_ioty_transport_flag_to_conn_type(OCTransportAdapter adapter,
+		OCTransportFlags flag);
+
+int icd_ioty_get_dev_addr(const char *host_address, int conn_type, OCDevAddr *dev_addr);
+
+int icd_ioty_get_host_address(OCDevAddr *dev_addr, char **host_address, int *conn_type);
+
+int icd_ioty_oic_properties_to_properties(int oic_properties);
+
+#endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_TYPE_H__*/

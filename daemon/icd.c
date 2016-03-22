@@ -119,6 +119,7 @@ int main(int argc, char **argv)
 		icd_connection = false;
 	}
 
+	icd_ioty_unset_device_info_changed_cb();
 	icd_cynara_deinit();
 	icd_dbus_deinit(id);
 	g_main_loop_unref(icd_loop);

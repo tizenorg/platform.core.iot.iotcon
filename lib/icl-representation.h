@@ -37,8 +37,5 @@ struct icl_representation_s {
 };
 
 iotcon_representation_h icl_representation_ref(iotcon_representation_h repr);
-int icl_representation_compare(iotcon_representation_h repr1,
-		iotcon_representation_h repr2);
-
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__ */

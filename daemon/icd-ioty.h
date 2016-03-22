@@ -26,6 +26,11 @@
 #include "iotcon.h"
 #include "ic-dbus.h"
 
+#define ICD_IOTY_COAP "coap://"
+#define ICD_IOTY_COAPS "coaps://"
+
+#define ICD_MULTICAST_ADDRESS "224.0.1.187:5683"
+
 typedef struct {
 	int64_t signal_number;
 	char *bus_name;
@@ -128,6 +133,7 @@ int icd_ioty_observer_stop(OCDoHandle handle, GVariant *options);
 int icd_ioty_get_info(int type, const char *host_address, int conn_type, int timeout,
 		int64_t signal_number, const char *bus_name);
 
+void icd_ioty_unset_device_info_changed_cb();
 int icd_ioty_set_device_info();
 int icd_ioty_set_platform_info();
 
@@ -156,5 +162,17 @@ int icd_ioty_start_encap(int type, const char *uri_path, const char *host_addres
 
 int icd_ioty_stop_encap(int type, const char  *uri_path, const char *host_address);
 
+static inline int icd_ioty_convert_error(int ret)
+{
+	switch (ret) {
+	case OC_STACK_NO_MEMORY:
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	case OC_STACK_NO_RESOURCE:
+		return IOTCON_ERROR_NO_DATA;
+	default:
+		break;
+	}
+	return IOTCON_ERROR_IOTIVITY;
+}
 
 #endif /*__IOT_CONNECTIVITY_MANAGER_DAEMON_IOTIVITY_H__*/

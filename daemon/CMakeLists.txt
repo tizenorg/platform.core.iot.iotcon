@@ -8,7 +8,7 @@ SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/common/ic-dbus.c
 	PROPERTIES GENERATED TRUE)
 
 SET(PKG_MODULES gio-2.0 dlog gio-unix-2.0 capi-system-system-settings capi-system-info
-		capi-network-bluetooth uuid)
+		capi-network-bluetooth uuid capi-network-wifi)
 
 IF(TZ_VER_3)
 	SET(PKG_MODULES ${PKG_MODULES} cynara-client cynara-session cynara-creds-gdbus)
