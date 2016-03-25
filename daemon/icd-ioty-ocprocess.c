@@ -771,7 +771,7 @@ static void _observe_cb_response_error(const char *dest,
 	g_variant_builder_init(&options, G_VARIANT_TYPE("a(qs)"));
 	payload = icd_payload_representation_empty_gvariant();
 
-	value = g_variant_new("(a(qs)vii)", &options, payload, ret_val, 0);
+	value = g_variant_new("(a(qs)vii)", &options, payload, ret_val, -1);
 
 	ret = _ocprocess_response_signal(dest, IC_DBUS_SIGNAL_OBSERVE, signal_number, value);
 	if (IOTCON_ERROR_NONE != ret)
