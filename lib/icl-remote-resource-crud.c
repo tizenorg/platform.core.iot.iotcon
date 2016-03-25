@@ -99,6 +99,9 @@ static int _icl_parse_crud_gvariant(iotcon_request_type_e request_type,
 	else
 		g_variant_get(gvar, "(a(qs)vi)", &options_iter, &repr_gvar, &res);
 
+	if (res < IOTCON_ERROR_NONE)
+		return icl_dbus_convert_daemon_error(res);
+
 	if (options_iter) {
 		options = _icl_parse_options_iter(options_iter);
 		g_variant_iter_free(options_iter);
@@ -113,8 +116,6 @@ static int _icl_parse_crud_gvariant(iotcon_request_type_e request_type,
 			return IOTCON_ERROR_SYSTEM;
 		}
 	}
-
-	res = icl_dbus_convert_daemon_error(res);
 
 	resp = calloc(1, sizeof(struct icl_resource_response));
 	if (NULL == resp) {
@@ -186,9 +187,10 @@ static void _icl_on_crud_cb(iotcon_request_type_e request_type,
 		free(cb_container);
 		return;
 	}
-	if (cb_container->cb)
+	if (cb_container->cb) {
 		cb_container->cb(cb_container->resource, IOTCON_ERROR_NONE, request_type,
 				response, cb_container->user_data);
+	}
 
 	if (response)
 		iotcon_response_destroy(response);
@@ -403,6 +405,11 @@ static void _icl_on_observe_cb(GDBusConnection *connection,
 
 	g_variant_get(parameters, "(a(qs)vii)", &options_iter, &repr_gvar, &res, &seq_number);
 
+	if (res < IOTCON_ERROR_NONE && cb_container->cb) {
+		cb_container->cb(cb_container->resource, icl_dbus_convert_daemon_error(res),
+				seq_number, NULL, cb_container->user_data);
+	}
+
 	if (options_iter) {
 		options = _icl_parse_options_iter(options_iter);
 		g_variant_iter_free(options_iter);
@@ -415,14 +422,13 @@ static void _icl_on_observe_cb(GDBusConnection *connection,
 			if (options)
 				iotcon_options_destroy(options);
 
-			if (cb_container->cb)
+			if (cb_container->cb) {
 				cb_container->cb(cb_container->resource, IOTCON_ERROR_SYSTEM, -1,
 						NULL, cb_container->user_data);
+			}
 			return;
 		}
 	}
-
-	res = icl_dbus_convert_daemon_error(res);
 
 	response = calloc(1, sizeof(struct icl_resource_response));
 	if (NULL == response) {
@@ -432,18 +438,20 @@ static void _icl_on_observe_cb(GDBusConnection *connection,
 		if (options)
 			iotcon_options_destroy(options);
 
-		if (cb_container->cb)
+		if (cb_container->cb) {
 			cb_container->cb(cb_container->resource, IOTCON_ERROR_OUT_OF_MEMORY, -1,
 					NULL, cb_container->user_data);
+		}
 		return;
 	}
 	response->result = res;
 	response->repr = repr;
 	response->header_options = options;
 
-	if (cb_container->cb)
+	if (cb_container->cb) {
 		cb_container->cb(cb_container->resource, IOTCON_ERROR_NONE, seq_number,
 				response, cb_container->user_data);
+	}
 
 	if (response)
 		iotcon_response_destroy(response);

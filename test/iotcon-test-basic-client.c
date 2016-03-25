@@ -39,6 +39,8 @@ static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
 	iotcon_representation_h repr;
 	iotcon_response_result_e response_result;
 
+	RETM_IF(IOTCON_ERROR_NONE != err, "_on_observe error(%d)", err);
+
 	ret = iotcon_response_get_result(response, &response_result);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_response_get_result() Fail(%d)", ret);
