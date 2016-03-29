@@ -28,6 +28,7 @@
 #include "icl-resource-types.h"
 #include "icl-dbus.h"
 
+#define ICL_PRESENCE_TTL_SECONDS_DEFAULT 60 /* 60 sec */
 #define ICL_PRESENCE_TTL_SECONDS_MAX (60 * 60 * 24) /* 60 sec/min * 60 min/hr * 24 hr/day */
 
 typedef struct icl_presence {
@@ -58,7 +59,11 @@ API int iotcon_start_presence(unsigned int time_to_live)
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(ICL_PRESENCE_TTL_SECONDS_MAX < time_to_live, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (0 == time_to_live)
+		time_to_live = ICL_PRESENCE_TTL_SECONDS_DEFAULT;
+	else if (ICL_PRESENCE_TTL_SECONDS_MAX < time_to_live)
+		time_to_live = ICL_PRESENCE_TTL_SECONDS_MAX;
 
 	ic_dbus_call_start_presence_sync(icl_dbus_get_object(), time_to_live, &ret, NULL,
 			&error);
