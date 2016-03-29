@@ -175,9 +175,9 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum  {
-    IOTCON_PRESENCE_RESOURCE_CREATED, /**< Indicates for resource creation operation of server */
-    IOTCON_PRESENCE_RESOURCE_UPDATED, /**< Indicates for resource update operation of server */
-    IOTCON_PRESENCE_RESOURCE_DESTROYED, /**< Indicates for resource destruction operation of server */
+	IOTCON_PRESENCE_RESOURCE_CREATED, /**< Indicates for resource creation operation of server */
+	IOTCON_PRESENCE_RESOURCE_UPDATED, /**< Indicates for resource update operation of server */
+	IOTCON_PRESENCE_RESOURCE_DESTROYED, /**< Indicates for resource destruction operation of server */
 } iotcon_presence_trigger_e;
 
 /**

@@ -88,32 +88,32 @@
 		if (expr) { \
 			ERR("(%s)", #expr); \
 			return; \
-		}\
-	} while(0)
+		} \
+	} while (0)
 
 #define RETV_IF(expr, val) \
-	do {\
+	do { \
 		if (expr) { \
 			ERR("(%s)", #expr); \
 			return (val); \
 		} \
-	} while(0)
+	} while (0)
 
 #define RETM_IF(expr, fmt, arg...) \
-	do {\
+	do { \
 		if (expr) { \
 			ERR(fmt, ##arg); \
 			return; \
-		}\
-	} while(0)
+		} \
+	} while (0)
 
 #define RETVM_IF(expr, val, fmt, arg...) \
-	do {\
+	do { \
 		if (expr) { \
 			ERR(fmt, ##arg); \
 			return (val); \
 		} \
-	} while(0)
+	} while (0)
 
 #define ERR_IF(expr) \
 	do { \

@@ -33,8 +33,7 @@
  *
  * @{
  */
-typedef enum
-{
+typedef enum {
 	IOTCON_ERROR_NONE = TIZEN_ERROR_NONE, /**< Successful */
 	IOTCON_ERROR_IO_ERROR = TIZEN_ERROR_IO_ERROR, /**< I/O error */
 	IOTCON_ERROR_OUT_OF_MEMORY = TIZEN_ERROR_OUT_OF_MEMORY, /**< Out of memory */
@@ -49,7 +48,7 @@ typedef enum
 	IOTCON_ERROR_ALREADY = TIZEN_ERROR_IOTCON | 0x04, /**< Already */
 	IOTCON_ERROR_DBUS = TIZEN_ERROR_IOTCON | 0x05, /**< D-Bus errors */
 	IOTCON_ERROR_SYSTEM = TIZEN_ERROR_IOTCON | 0x06, /**< System errors */
-}iotcon_error_e;
+} iotcon_error_e;
 
 /**
  * @}
