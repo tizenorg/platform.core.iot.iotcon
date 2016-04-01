@@ -179,7 +179,7 @@ static void _icl_on_crud_cb(iotcon_request_type_e request_type,
 
 	ret = _icl_parse_crud_gvariant(request_type, result, &response);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_icl_parse_crud_gvariant() Fail(%s)", ret);
+		ERR("_icl_parse_crud_gvariant() Fail(%d)", ret);
 		if (cb_container->cb) {
 			cb_container->cb(cb_container->resource, ret, request_type, NULL,
 					cb_container->user_data);

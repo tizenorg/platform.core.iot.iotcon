@@ -122,8 +122,8 @@ int icd_ioty_get_dev_addr(const char *host_address, int conn_type, OCDevAddr *de
 		break;
 	case IOTCON_CONNECTIVITY_IPV6:
 		dev_host = strtok_r(host, "]", &ptr);
-		snprintf(dev_addr->addr, sizeof(dev_addr->addr), "%s", dev_host);
-		dev_addr->port = atoi(strtok_r(NULL, "]", &ptr));
+		snprintf(dev_addr->addr, sizeof(dev_addr->addr), "%s", dev_host + 1);
+		dev_addr->port = atoi(strtok_r(NULL, ":", &ptr));
 		break;
 	case IOTCON_CONNECTIVITY_BT_EDR:
 		snprintf(dev_addr->addr, sizeof(dev_addr->addr), "%s", host);
