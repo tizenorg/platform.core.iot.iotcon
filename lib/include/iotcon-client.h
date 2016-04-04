@@ -325,7 +325,9 @@ int iotcon_presence_response_get_resource_type(iotcon_presence_response_h respon
 
 /**
  * @brief Specifies the type of function passed to iotcon_find_resource().
- * @details Called when a resource is found from the remote server.
+ * @details Called when a resource is found from the remote server.\n
+ * The @a resource completes its life cycle in the function.
+ * If you want to send requests(GET, PUT, POST, DELETE, and OBSERVE) on the @a resource, you must clone the @a resource using iotcon_remote_resource_clone().
  * The @a result could be one of #iotcon_error_e.
  *
  * @since_tizen 3.0
