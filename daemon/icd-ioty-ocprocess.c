@@ -611,9 +611,10 @@ OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 	GVariantBuilder *options;
 
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
+	RETV_IF(NULL == resp, OC_STACK_DELETE_TRANSACTION);
 
 	if (NULL == resp->payload) {
-		ERR("payload is empty");
+		ERR("payload is empty(%d)", resp->result);
 		icd_ioty_complete_error(ICD_CRUD_GET, ctx, IOTCON_ERROR_IOTIVITY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
@@ -643,9 +644,10 @@ OCStackApplicationResult icd_ioty_ocprocess_put_cb(void *ctx, OCDoHandle handle,
 	GVariantBuilder *options;
 
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
+	RETV_IF(NULL == resp, OC_STACK_DELETE_TRANSACTION);
 
 	if (NULL == resp->payload) {
-		ERR("payload is empty");
+		ERR("payload is empty(%d)", resp->result);
 		icd_ioty_complete_error(ICD_CRUD_PUT, ctx, IOTCON_ERROR_IOTIVITY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
@@ -675,9 +677,10 @@ OCStackApplicationResult icd_ioty_ocprocess_post_cb(void *ctx, OCDoHandle handle
 	GVariantBuilder *options;
 
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
+	RETV_IF(NULL == resp, OC_STACK_DELETE_TRANSACTION);
 
 	if (NULL == resp->payload) {
-		ERR("payload is empty");
+		ERR("payload is empty(%d)", resp->result);
 		icd_ioty_complete_error(ICD_CRUD_POST, ctx, IOTCON_ERROR_IOTIVITY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
@@ -707,9 +710,10 @@ OCStackApplicationResult icd_ioty_ocprocess_delete_cb(void *ctx, OCDoHandle hand
 	GVariantBuilder *options;
 
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
+	RETV_IF(NULL == resp, OC_STACK_DELETE_TRANSACTION);
 
 	if (NULL == resp->payload) {
-		ERR("payload is empty");
+		ERR("payload is empty(%d)", resp->result);
 		icd_ioty_complete_error(ICD_CRUD_DELETE, ctx, IOTCON_ERROR_IOTIVITY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
@@ -1243,6 +1247,7 @@ OCStackApplicationResult icd_ioty_ocprocess_encap_observe_cb(void *ctx, OCDoHand
 	int ret;
 	icd_encap_worker_ctx_s *encap_ctx = ctx;
 
+	RETV_IF(NULL == ctx, OC_STACK_KEEP_TRANSACTION);
 	RETV_IF(NULL == resp, OC_STACK_KEEP_TRANSACTION);
 
 	if (OC_OBSERVE_DEREGISTER == resp->sequenceNumber)

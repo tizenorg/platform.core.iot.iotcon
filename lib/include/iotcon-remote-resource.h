@@ -443,7 +443,8 @@ typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
  * @details Use this function to start caching the resource's attribute.\n
  * Although, remote resource is not observable, it keeps the representation up-to-date.
  * Because It checks whether representation is changed, periodically.\n
- * The default checking interval is 10 seconds, but it may be changed by an administrator.
+ * The default checking interval is 10 seconds, but it may be changed by an administrator.\n
+ * Also, you can get the cached representation even when the remote resource is off-line.
  *
  * @since_tizen 3.0
  * @privlevel public
