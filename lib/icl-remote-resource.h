@@ -30,6 +30,7 @@ typedef enum {
 } icl_remote_resource_device_state_e;
 
 struct icl_remote_resource {
+	bool is_found;
 	int ref_count;
 	char *uri_path;
 	char *host_address;

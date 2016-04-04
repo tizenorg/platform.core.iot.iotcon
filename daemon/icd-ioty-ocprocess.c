@@ -613,7 +613,7 @@ OCStackApplicationResult icd_ioty_ocprocess_get_cb(void *ctx, OCDoHandle handle,
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
 
 	if (NULL == resp->payload) {
-		ERR("payload is empty");
+		ERR("payload is empty(%d)", resp->result);
 		icd_ioty_complete_error(ICD_CRUD_GET, ctx, IOTCON_ERROR_IOTIVITY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
@@ -645,7 +645,7 @@ OCStackApplicationResult icd_ioty_ocprocess_put_cb(void *ctx, OCDoHandle handle,
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
 
 	if (NULL == resp->payload) {
-		ERR("payload is empty");
+		ERR("payload is empty(%d)", resp->result);
 		icd_ioty_complete_error(ICD_CRUD_PUT, ctx, IOTCON_ERROR_IOTIVITY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
@@ -677,7 +677,7 @@ OCStackApplicationResult icd_ioty_ocprocess_post_cb(void *ctx, OCDoHandle handle
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
 
 	if (NULL == resp->payload) {
-		ERR("payload is empty");
+		ERR("payload is empty(%d)", resp->result);
 		icd_ioty_complete_error(ICD_CRUD_POST, ctx, IOTCON_ERROR_IOTIVITY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}
@@ -709,7 +709,7 @@ OCStackApplicationResult icd_ioty_ocprocess_delete_cb(void *ctx, OCDoHandle hand
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
 
 	if (NULL == resp->payload) {
-		ERR("payload is empty");
+		ERR("payload is empty(%d)", resp->result);
 		icd_ioty_complete_error(ICD_CRUD_DELETE, ctx, IOTCON_ERROR_IOTIVITY);
 		return OC_STACK_DELETE_TRANSACTION;
 	}

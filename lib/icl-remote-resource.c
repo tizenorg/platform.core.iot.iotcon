@@ -72,6 +72,8 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 		return;
 	}
 
+	resource->is_found = true;
+
 	if (cb)
 		cb(resource, IOTCON_ERROR_NONE, cb_container->user_data);
 
