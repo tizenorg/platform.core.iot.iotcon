@@ -75,6 +75,11 @@ API int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resourc
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
+	if (true == resource->is_found) {
+		ERR("The resource should be cloned.");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
 	if (0 != resource->monitoring_sub_id) {
 		ERR("Already Start Monitoring");
 		return IOTCON_ERROR_ALREADY;

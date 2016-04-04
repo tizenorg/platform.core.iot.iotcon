@@ -98,6 +98,11 @@ API int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
+	if (true == resource->is_found) {
+		ERR("The resource should be cloned.");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
 	if (0 != resource->caching_sub_id) {
 		ERR("Already Start Caching");
 		return IOTCON_ERROR_ALREADY;
