@@ -232,6 +232,11 @@ API int iotcon_remote_resource_get(iotcon_remote_resource_h resource,
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
+	if (true == resource->is_found) {
+		ERR("The resource should be cloned.");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
 	cb_container = calloc(1, sizeof(icl_on_response_s));
 	if (NULL == cb_container) {
 		ERR("calloc() Fail(%d)", errno);
@@ -270,6 +275,11 @@ API int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (true == resource->is_found) {
+		ERR("The resource should be cloned.");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
 
 	cb_container = calloc(1, sizeof(icl_on_response_s));
 	if (NULL == cb_container) {
@@ -317,6 +327,11 @@ API int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
+	if (true == resource->is_found) {
+		ERR("The resource should be cloned.");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
 	cb_container = calloc(1, sizeof(icl_on_response_s));
 	if (NULL == cb_container) {
 		ERR("calloc() Fail(%d)", errno);
@@ -363,6 +378,11 @@ API int iotcon_remote_resource_delete(iotcon_remote_resource_h resource,
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (true == resource->is_found) {
+		ERR("The resource should be cloned.");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
 
 	cb_container = calloc(1, sizeof(icl_on_response_s));
 	if (NULL == cb_container) {
@@ -488,6 +508,11 @@ API int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resourc
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(resource->observe_handle || resource->observe_sub_id, IOTCON_ERROR_ALREADY);
 
+	if (true == resource->is_found) {
+		ERR("The resource should be cloned.");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
 	arg_remote_resource = icl_dbus_remote_resource_to_gvariant(resource);
 	arg_query = icl_dbus_query_to_gvariant(query);
 
@@ -548,6 +573,12 @@ API int iotcon_remote_resource_observe_deregister(iotcon_remote_resource_h resou
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (true == resource->is_found) {
+		ERR("The resource should be cloned.");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
 	if (0 == resource->observe_handle) {
 		ERR("It doesn't have a observe_handle");
 		return IOTCON_ERROR_INVALID_PARAMETER;

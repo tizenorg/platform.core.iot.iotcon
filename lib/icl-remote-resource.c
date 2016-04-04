@@ -72,6 +72,8 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 		return;
 	}
 
+	resource->is_found = true;
+
 	if (cb)
 		cb(resource, IOTCON_ERROR_NONE, cb_container->user_data);
 
@@ -222,8 +224,15 @@ API int iotcon_remote_resource_create(const char *host_address,
 static void _icl_remote_resource_destroy(iotcon_remote_resource_h resource)
 {
 	RET_IF(NULL == resource);
-	if (resource->ref_count < 0)
+	if (resource->ref_count < 0) {
 		ERR("Invalid ref_count (%d)", resource->ref_count);
+		return;
+	}
+	if (true == resource->is_found) {
+		ERR("It can't be destroyed by user.");
+		return;
+	}
+
 	free(resource->uri_path);
 	free(resource->host_address);
 	free(resource->device_id);
