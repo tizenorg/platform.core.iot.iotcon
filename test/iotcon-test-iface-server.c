@@ -18,6 +18,7 @@
 #include <glib.h>
 
 #include <iotcon.h>
+#include <iotcon-internal.h>
 #include "test.h"
 
 #define ROOM_RESOURCE_URI "/room/1"

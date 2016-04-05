@@ -17,6 +17,7 @@
 #define __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__
 
 #include <glib.h>
+#include <octypes.h>
 
 #include "iotcon-types.h"
 
@@ -25,9 +26,9 @@
 #define IC_STR_NULL "(NULL)"
 
 char* ic_utils_strdup(const char *src);
-const char* ic_utils_dbus_encode_str(const char *src);
-char* ic_utils_dbus_decode_str(char *src);
-void ic_utils_gvariant_array_free(GVariant **value);
 bool ic_utils_check_oic_feature_supported();
+int ic_utils_get_device_info(OCDeviceInfo *device_info);
+int ic_utils_get_platform_info(OCPlatformInfo *platform_info);
+void ic_utils_free_platform_info(OCPlatformInfo *platform_info);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_INTERNAL_COMMON_UTILITY_H__ */

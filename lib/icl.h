@@ -17,6 +17,7 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_H__
 
 #include "iotcon.h"
+#include "iotcon-internal.h"
 #include "ic-common.h"
 #include "ic-log.h"
 

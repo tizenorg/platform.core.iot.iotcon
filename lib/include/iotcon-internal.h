@@ -23,32 +23,6 @@ extern "C" {
 #include <iotcon.h>
 
 /**
- * @file iotcon-internal.h
- */
-
-/**
- * @brief Bluetooth Enhanced Data Rate Connectivity
- *
- * @since_tizen 3.0
- */
-#define IOTCON_CONNECTIVITY_BT_EDR 10000
-
-/**
- * @brief Bluetooth Low Energy Connectivity
- *
- * @since_tizen 3.0
- */
-#define IOTCON_CONNECTIVITY_BT_LE 10001
-
-/**
- * @brief Bluetooth Enhanced Data Rate Connectivity & Low Energy Connectivity
- *
- * @since_tizen 3.0
- */
-#define IOTCON_CONNECTIVITY_BT_ALL 10002
-
-
-/**
  * @brief Starts presence of a server.
  * @details Use this function to send server's announcements to clients.\n
  * Server can call this function when online for the first time or come back from offline to online.
@@ -56,7 +30,7 @@ extern "C" {
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks If @a time_to_live is 0, server will set default value as 60 seconds.\n
  * If @a time_to_live is very big, server will set maximum value as (60 * 60 * 24) seconds.
@@ -85,7 +59,7 @@ int iotcon_start_presence(unsigned int time_to_live);
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful

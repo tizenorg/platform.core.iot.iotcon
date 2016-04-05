@@ -210,7 +210,7 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  * @param[in] observe_policy The type to specify how client wants to observe.
@@ -245,7 +245,7 @@ int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  *
@@ -299,7 +299,7 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  * @param[in] query The query to send to server
@@ -329,7 +329,7 @@ int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  * @param[in] repr The handle of the representation
@@ -363,7 +363,7 @@ int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  * @param[in] repr The handle of the representation
@@ -397,7 +397,7 @@ int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  * @param[in] cb The callback function
@@ -443,13 +443,13 @@ typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
  * @details Use this function to start caching the resource's attribute.\n
  * Although, remote resource is not observable, it keeps the representation up-to-date.
  * Because It checks whether representation is changed, periodically.\n
- * The default checking interval is 10 seconds, but it may be changed by an administrator.\n
+ * The default checking interval is 10 seconds, but it may be changed by an administrator. \n
  * Also, you can get the cached representation even when the remote resource is off-line.
  *
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the remote resource to be cached
  * @param[in] cb The callback function to add into callback list
@@ -478,7 +478,7 @@ int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the remote resource
  *
@@ -522,7 +522,7 @@ typedef void (*iotcon_remote_resource_state_changed_cb)(iotcon_remote_resource_h
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the remote resource
  * @param[in] cb The callback function to add into callback list
@@ -548,7 +548,7 @@ int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the remote resource
  *

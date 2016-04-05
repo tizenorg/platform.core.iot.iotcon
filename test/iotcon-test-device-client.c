@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdlib.h>
 
 #include <glib.h>
 #include <iotcon.h>
+#include <iotcon-internal.h>
 #include "test.h"
 
 static void _request_device_info(iotcon_device_info_h info, iotcon_error_e result, void *user_data)
@@ -166,7 +168,7 @@ static void _request_platform_info(iotcon_platform_info_h info, iotcon_error_e r
 	INFO("system_time : %s", system_time);
 }
 
-int main()
+int main(int argc, char **argv)
 {
 	int ret;
 	GMainLoop *loop;
@@ -180,7 +182,7 @@ int main()
 		return -1;
 	}
 
-	ret = iotcon_get_device_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+	ret = iotcon_get_device_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_ALL,
 			_request_device_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_get_device_info() Fail(%d)", ret);
@@ -188,7 +190,7 @@ int main()
 		return -1;
 	}
 
-	ret = iotcon_get_platform_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+	ret = iotcon_get_platform_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_ALL,
 			_request_platform_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_get_platform_info() Fail(%d)", ret);

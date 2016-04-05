@@ -19,6 +19,7 @@
 #include <glib.h>
 
 #include "iotcon-types.h"
+#include "iotcon-internal.h"
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-resource-interfaces.h"
@@ -33,7 +34,6 @@ iotcon_resource_interfaces_h icl_resource_interfaces_ref(
 
 	return ifaces;
 }
-
 
 API int iotcon_resource_interfaces_create(iotcon_resource_interfaces_h *ret_ifaces)
 {

@@ -176,7 +176,7 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks @a uri_path length must be less than or equal 36.\n
  * You must destroy @a resource_handle by calling iotcon_lite_resource_destroy()
@@ -215,11 +215,11 @@ int iotcon_lite_resource_create(const char *uri_path,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
- * @remarks When a normal variable is used, there are only dbus error and permission\n
- * denied error. If the errors of this API are not handled, then you must check\n
- * whether dbus is running and an application have the privileges for the API.
+ * @remarks When a normal variable is used, there are only permission denied error.
+ * If the errors of this API are not handled, then you must check an application have
+ * the privileges for the API.
  *
  * @param[in] resource The handle of the lite resource to be unregistered
  *
@@ -240,7 +240,7 @@ int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource);
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the lite resource
  * @param[in] state The state handle to update
