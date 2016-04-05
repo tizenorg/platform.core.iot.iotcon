@@ -140,7 +140,8 @@ API int iotcon_list_add_str(iotcon_list_h list, char *val, int pos)
 }
 
 
-API int iotcon_list_add_byte_str(iotcon_list_h list, unsigned char *val, int len, int pos)
+API int iotcon_list_add_byte_str(iotcon_list_h list, unsigned char *val, int len,
+		int pos)
 {
 	iotcon_value_h value;
 
@@ -315,8 +316,8 @@ API int iotcon_list_get_nth_str(iotcon_list_h list, int pos, char **val)
 }
 
 
-API int iotcon_list_get_nth_byte_str(iotcon_list_h list, int pos, unsigned char **val,
-		int *len)
+API int iotcon_list_get_nth_byte_str(iotcon_list_h list, int pos,
+		unsigned char **val, int *len)
 {
 	unsigned char *byte_val;
 	int ret, byte_len;
@@ -444,6 +445,7 @@ API int iotcon_list_get_length(iotcon_list_h list, unsigned int *length)
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == length, IOTCON_ERROR_INVALID_PARAMETER);
+
 	if (NULL == list->list)
 		*length = 0;
 	else
@@ -629,7 +631,7 @@ API int iotcon_list_foreach_state(iotcon_list_h list, iotcon_list_state_cb cb,
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(IOTCON_TYPE_STATE != list->type, IOTCON_ERROR_INVALID_TYPE,
 			"Invalid Type(%d)", list->type);
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);;
+	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	cur = list->list;
 	while (cur) {
