@@ -196,8 +196,8 @@ static void _on_response_post(iotcon_remote_resource_h resource,
 	}
 }
 
-static void _on_response_put(iotcon_remote_resource_h resource, iotcon_response_h response,
-		void *user_data)
+static void _on_response_put(iotcon_remote_resource_h resource,
+		iotcon_response_h response, void *user_data)
 {
 	int ret;
 	iotcon_response_result_e response_result;
@@ -596,7 +596,7 @@ int main(int argc, char **argv)
 	}
 
 	/* find door typed resources */
-	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_ALL,
 			DOOR_RESOURCE_TYPE, false, _found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);

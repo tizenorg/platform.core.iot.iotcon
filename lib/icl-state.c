@@ -375,7 +375,8 @@ API int iotcon_state_add_null(iotcon_state_h state, const char *key)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_get_list(iotcon_state_h state, const char *key, iotcon_list_h *list)
+API int iotcon_state_get_list(iotcon_state_h state, const char *key,
+		iotcon_list_h *list)
 {
 	iotcon_value_h value = NULL;
 	icl_val_list_s *real = NULL;
@@ -402,7 +403,8 @@ API int iotcon_state_get_list(iotcon_state_h state, const char *key, iotcon_list
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_add_list(iotcon_state_h state, const char *key, iotcon_list_h list)
+API int iotcon_state_add_list(iotcon_state_h state, const char *key,
+		iotcon_list_h list)
 {
 	iotcon_value_h value = NULL;
 
@@ -410,6 +412,7 @@ API int iotcon_state_add_list(iotcon_state_h state, const char *key, iotcon_list
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
+
 
 	value = icl_value_create_list(list);
 	if (NULL == value) {
@@ -422,7 +425,8 @@ API int iotcon_state_add_list(iotcon_state_h state, const char *key, iotcon_list
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_get_state(iotcon_state_h src, const char *key, iotcon_state_h *dest)
+API int iotcon_state_get_state(iotcon_state_h src, const char *key,
+		iotcon_state_h *dest)
 {
 	icl_val_state_s *real = NULL;
 	iotcon_value_h value = NULL;
@@ -449,7 +453,8 @@ API int iotcon_state_get_state(iotcon_state_h src, const char *key, iotcon_state
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_add_state(iotcon_state_h state, const char *key, iotcon_state_h val)
+API int iotcon_state_add_state(iotcon_state_h state, const char *key,
+		iotcon_state_h val)
 {
 	iotcon_value_h value = NULL;
 
@@ -540,7 +545,8 @@ API int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone)
 }
 
 
-void icl_state_clone_foreach(char *key, iotcon_value_h src_val, iotcon_state_h dest_state)
+void icl_state_clone_foreach(char *key, iotcon_value_h src_val,
+		iotcon_state_h dest_state)
 {
 	FN_CALL;
 	iotcon_value_h copied_val;
@@ -555,7 +561,8 @@ void icl_state_clone_foreach(char *key, iotcon_value_h src_val, iotcon_state_h d
 }
 
 
-API int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb, void *user_data)
+API int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb,
+		void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key;
