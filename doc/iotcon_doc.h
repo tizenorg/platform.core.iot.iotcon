@@ -21,7 +21,7 @@
  * @ingroup CAPI_NETWORK_FRAMEWORK
  * @defgroup CAPI_IOT_CONNECTIVITY_MODULE Iotcon
  *
- * @brief The Iotcon API provides functions for IoT connectivity
+ * @brief The Iotcon API provides functions for IoT connectivity.
  *
  * @section CAPI_IOT_CONNECTIVITY_MODULE_HEADER Required Header
  * \#include <iotcon.h>
@@ -35,7 +35,7 @@
  *
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_RESOURCE Resource
  * A Resource is a component in a server that can be viewed and conrolled by another client.\n
- * There are different resource types, for example a temperature sensor, a light controller etc.\n\n
+ * There are different resource types, for example a temperature sensor, a light controller etc.\n
  *
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_RESOURCE_REGISTRATION Resource registration
  * Registering a resource requires a URI and handler to process requests.\n

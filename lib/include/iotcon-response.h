@@ -32,7 +32,7 @@
  *  \#include <iotcon.h>
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_RESPONSE_MODULE_OVERVIEW Overview
- * The iotcon response API provides methos for managing handle and get response information.
+ * The iotcon response API provides methods for managing handle and get response information.
  *
  * Example (Client side) :
  * @code
@@ -147,7 +147,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 			return;
 		}
 
-		ret = iotcon_representation_set_state(resopnse, _create_state());
+		ret = iotcon_representation_set_state(response, _create_state());
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_representation_destroy(repr);
 			iotcon_response_destroy(response);
@@ -226,7 +226,7 @@ void iotcon_response_destroy(iotcon_response_h resp);
 
 
 /**
- * @brief Gets header options of the response
+ * @brief Gets header options of the response.
  *
  * @since_tizen 3.0
  *
@@ -247,7 +247,7 @@ void iotcon_response_destroy(iotcon_response_h resp);
 int iotcon_response_get_options(iotcon_response_h resp, iotcon_options_h *options);
 
 /**
- * @brief Gets representation of the response
+ * @brief Gets representation of the response.
  *
  * @since_tizen 3.0
  *
@@ -268,7 +268,7 @@ int iotcon_response_get_options(iotcon_response_h resp, iotcon_options_h *option
 int iotcon_response_get_representation(iotcon_response_h resp, iotcon_representation_h *repr);
 
 /**
- * @brief Gets result of the response
+ * @brief Gets result of the response.
  *
  * @since_tizen 3.0
  *
@@ -288,7 +288,7 @@ int iotcon_response_get_result(iotcon_response_h resp,
 
 
 /**
- * @brief Sets result into the response
+ * @brief Sets result into the response.
  * @details The @a result could be one of #iotcon_response_result_e.
  *
  * @since_tizen 3.0
@@ -308,7 +308,7 @@ int iotcon_response_get_result(iotcon_response_h resp,
 int iotcon_response_set_result(iotcon_response_h resp, iotcon_response_result_e result);
 
 /**
- * @brief Sets representation into the response
+ * @brief Sets representation into the response.
  *
  * @since_tizen 3.0
  *
@@ -331,7 +331,7 @@ int iotcon_response_set_representation(iotcon_response_h resp, const char *iface
 		iotcon_representation_h repr);
 
 /**
- * @brief Sets header options into the response
+ * @brief Sets header options into the response.
  *
  * @since_tizen 3.0
  *
@@ -355,7 +355,7 @@ int iotcon_response_set_options(iotcon_response_h resp, iotcon_options_h options
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resp The handle of the response to send
  *
@@ -363,7 +363,6 @@ int iotcon_response_set_options(iotcon_response_h resp, iotcon_options_h options
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  */
