@@ -121,7 +121,8 @@ API int iotcon_resource_types_add(iotcon_resource_types_h types, const char *typ
 }
 
 
-API int iotcon_resource_types_remove(iotcon_resource_types_h types, const char *type)
+API int iotcon_resource_types_remove(iotcon_resource_types_h types,
+		const char *type)
 {
 	GList *found_node;
 	char *node_data;

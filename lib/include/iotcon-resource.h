@@ -153,7 +153,7 @@ static void _create_resource()
 	iotcon_resource_interfaces_destroy(resource_ifaces);
 	iotcon_resource_types_destroy(resource_types);
 
-	// 3. bind door resouce to room resource
+	// 3. bind door resource to room resource
 	ret = iotcon_resource_bind_child_resource(_resource_room, resource_door);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_destroy(resource_door);
@@ -216,7 +216,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks @a uri_path length must be less than or equal 36.\n
  * You must destroy @a resource by calling iotcon_resource_destroy()
@@ -235,7 +235,6 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
- * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -263,11 +262,11 @@ int iotcon_resource_create(const char *uri_path,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
- * @remarks When a normal variable is used, there are only dbus error and permission\n
- * denied error. If the errors of this API are not handled, then you must check\n
- * whether dbus is running and an application have the privileges for the API.
+ * @remarks When a normal variable is used, there are only permission denied error.
+ * If the errors of this API are not handled, then you must check an application have
+ * the privileges for the API.
  *
  * @param[in] resource_handle The handle of the resource to be unregistered
  *
@@ -275,7 +274,6 @@ int iotcon_resource_create(const char *uri_path,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_resource_create()
@@ -294,7 +292,7 @@ int iotcon_resource_destroy(iotcon_resource_h resource_handle);
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks @a iface could be a value such as #IOTCON_INTERFACE_DEFAULT.
  *
@@ -305,7 +303,6 @@ int iotcon_resource_destroy(iotcon_resource_h resource_handle);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -325,7 +322,7 @@ int iotcon_resource_bind_interface(iotcon_resource_h resource, const char *iface
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
@@ -338,7 +335,6 @@ int iotcon_resource_bind_interface(iotcon_resource_h resource, const char *iface
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -388,7 +384,7 @@ int iotcon_resource_set_request_handler(iotcon_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] parent The handle of the parent resource
  * @param[in] child The handle of the child resource to be added to the parent resource
@@ -398,7 +394,6 @@ int iotcon_resource_set_request_handler(iotcon_resource_h resource,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_ALREADY  Already done
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -419,7 +414,7 @@ int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] parent The handle of the parent resource
  * @param[in] child The handle of the child resource to be unbound from the parent resource
@@ -428,7 +423,6 @@ int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -450,7 +444,7 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  * @param[in] repr The handle of the representation
@@ -461,7 +455,6 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation error
  * @retval #IOTCON_ERROR_SYSTEM  System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
