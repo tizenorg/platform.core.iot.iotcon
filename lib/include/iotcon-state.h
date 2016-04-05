@@ -324,7 +324,7 @@ int iotcon_state_add_state(iotcon_state_h dest, const char *key, iotcon_state_h 
 
 /**
  * @brief Adds a new key with NULL value into the state.
- * @details If @a key is already exists, current value will be replaced with NULL
+ * @details If @a key is already exists, current value will be replaced with NULL.
  *
  * @since_tizen 3.0
  *
@@ -528,7 +528,7 @@ int iotcon_state_get_type(iotcon_state_h state, const char *key,
 		iotcon_type_e *type);
 
 /**
- * @brief Specifies the type of function passed to iotcon_state_foreach()
+ * @brief Specifies the type of function passed to iotcon_state_foreach().
  *
  * @since_tizen 3.0
  *

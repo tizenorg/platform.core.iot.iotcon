@@ -56,7 +56,7 @@ typedef struct {
  * @details iotcon_value_h is an opaque data structure to have variant datatype and
  * store values along with information about the type of that value.\n
  * The range of possible values is determined by the type.\n
- * The type of iotcon_value_h should be one of them\n
+ * The type of iotcon_value_h should be one of them.\n
  * #IOTCON_TYPE_INT\n
  * #IOTCON_TYPE_BOOL\n
  * #IOTCON_TYPE_DOUBLE\n

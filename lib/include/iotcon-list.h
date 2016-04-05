@@ -535,7 +535,7 @@ int iotcon_list_get_type(iotcon_list_h list, iotcon_type_e *type);
 int iotcon_list_get_length(iotcon_list_h list, unsigned int *length);
 
 /**
- * @brief Specifies the type of function passed to iotcon_list_foreach_int()
+ * @brief Specifies the type of function passed to iotcon_list_foreach_int().
  *
  * @since_tizen 3.0
  *
@@ -575,7 +575,7 @@ typedef bool (*iotcon_list_int_cb)(int pos, int value, void *user_data);
 int iotcon_list_foreach_int(iotcon_list_h list, iotcon_list_int_cb cb, void *user_data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_list_foreach_bool()
+ * @brief Specifies the type of function passed to iotcon_list_foreach_bool().
  *
  * @since_tizen 3.0
  *
@@ -656,7 +656,7 @@ int iotcon_list_foreach_double(iotcon_list_h list, iotcon_list_double_cb cb,
 		void *user_data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_list_foreach_byte_str()
+ * @brief Specifies the type of function passed to iotcon_list_foreach_byte_str().
  *
  * @since_tizen 3.0
  *
@@ -699,7 +699,7 @@ int iotcon_list_foreach_byte_str(iotcon_list_h list, iotcon_list_byte_str_cb cb,
 		void *user_data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_list_foreach_str()
+ * @brief Specifies the type of function passed to iotcon_list_foreach_str().
  *
  * @since_tizen 3.0
  *
@@ -739,7 +739,7 @@ typedef bool (*iotcon_list_str_cb)(int pos, const char *value, void *user_data);
 int iotcon_list_foreach_str(iotcon_list_h list, iotcon_list_str_cb cb, void *user_data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_list_foreach_list()
+ * @brief Specifies the type of function passed to iotcon_list_foreach_list().
  *
  * @since_tizen 3.0
  *
@@ -779,7 +779,7 @@ typedef bool (*iotcon_list_list_cb)(int pos, iotcon_list_h value, void *user_dat
 int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_cb cb, void *user_data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_list_foreach_state()
+ * @brief Specifies the type of function passed to iotcon_list_foreach_state().
  *
  * @since_tizen 3.0
  *

@@ -187,7 +187,7 @@ int iotcon_resource_types_add(iotcon_resource_types_h types, const char *type);
 int iotcon_resource_types_remove(iotcon_resource_types_h types, const char *type);
 
 /**
- * @brief Specifies the type of function passed to iotcon_resource_types_foreach()
+ * @brief Specifies the type of function passed to iotcon_resource_types_foreach().
  *
  * @since_tizen 3.0
  *
