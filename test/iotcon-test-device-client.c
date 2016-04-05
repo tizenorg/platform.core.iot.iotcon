@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdlib.h>
 
 #include <glib.h>
 #include <iotcon.h>
 #include "test.h"
 
-static void _request_device_info(iotcon_device_info_h info, iotcon_error_e result, void *user_data)
+static void _request_device_info(iotcon_device_info_h info, iotcon_error_e result,
+		void *user_data)
 {
 	int ret;
 	char *device_name = NULL;
@@ -60,7 +62,8 @@ static void _request_device_info(iotcon_device_info_h info, iotcon_error_e resul
 	INFO("data_model_version : %s", data_model_ver);
 }
 
-static void _request_platform_info(iotcon_platform_info_h info, iotcon_error_e result, void *user_data)
+static void _request_platform_info(iotcon_platform_info_h info, iotcon_error_e result,
+		void *user_data)
 {
 	int ret;
 	char *platform_id = NULL;
@@ -166,33 +169,33 @@ static void _request_platform_info(iotcon_platform_info_h info, iotcon_error_e r
 	INFO("system_time : %s", system_time);
 }
 
-int main()
+int main(int argc, char **argv)
 {
 	int ret;
 	GMainLoop *loop;
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* connect iotcon */
-	ret = iotcon_connect();
+	/* initialize iotcon */
+	ret = iotcon_initialize();
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_connect() Fail(%d)", ret);
+		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
 	}
 
-	ret = iotcon_get_device_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+	ret = iotcon_get_device_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_ALL,
 			_request_device_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_get_device_info() Fail(%d)", ret);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
-	ret = iotcon_get_platform_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+	ret = iotcon_get_platform_info(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_ALL,
 			_request_platform_info, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_get_platform_info() Fail(%d)", ret);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -200,8 +203,8 @@ int main()
 
 	g_main_loop_unref(loop);
 
-	/* disconnect iotcon */
-	iotcon_disconnect();
+	/* deinitialize iotcon */
+	iotcon_deinitialize();
 
 	return 0;
 }

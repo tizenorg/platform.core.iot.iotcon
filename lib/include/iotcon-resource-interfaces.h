@@ -189,7 +189,7 @@ int iotcon_resource_interfaces_remove(iotcon_resource_interfaces_h ifaces,
 		const char *iface);
 
 /**
- * @brief Specifies the iface of function passed to iotcon_resource_interfaces_foreach()
+ * @brief Specifies the iface of function passed to iotcon_resource_interfaces_foreach().
  *
  * @since_tizen 3.0
  *

@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <iotcon.h>
+
 #include "test.h"
 
 static char *room_resource_device_id;
@@ -392,10 +393,10 @@ int main(int argc, char **argv)
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* connect iotcon */
-	ret = iotcon_connect();
+	/* initialize iotcon */
+	ret = iotcon_initialize();
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_connect() Fail(%d)", ret);
+		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
 	}
 
@@ -404,7 +405,7 @@ int main(int argc, char **argv)
 			ROOM_RESOURCE_TYPE, false, _found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -413,8 +414,8 @@ int main(int argc, char **argv)
 
 	g_list_free_full(device_id_list, free);
 
-	/* disconnect iotcon */
-	iotcon_disconnect();
+	/* deinitialize iotcon */
+	iotcon_deinitialize();
 
 	return 0;
 }
