@@ -144,7 +144,8 @@ API int iotcon_options_remove(iotcon_options_h options, unsigned short id)
 }
 
 
-API int iotcon_options_lookup(iotcon_options_h options, unsigned short id, char **data)
+API int iotcon_options_lookup(iotcon_options_h options, unsigned short id,
+		char **data)
 {
 	char *value;
 
@@ -164,8 +165,8 @@ API int iotcon_options_lookup(iotcon_options_h options, unsigned short id, char 
 }
 
 
-API int iotcon_options_foreach(iotcon_options_h options, iotcon_options_foreach_cb cb,
-		void *user_data)
+API int iotcon_options_foreach(iotcon_options_h options,
+		iotcon_options_foreach_cb cb, void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key, value;

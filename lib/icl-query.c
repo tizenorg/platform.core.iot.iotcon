@@ -28,10 +28,12 @@
 
 API int iotcon_query_create(iotcon_query_h *ret_query)
 {
+	iotcon_query_h query;
+
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == ret_query, IOTCON_ERROR_INVALID_PARAMETER);
 
-	iotcon_query_h query = calloc(1, sizeof(struct icl_query));
+	query = calloc(1, sizeof(struct icl_query));
 	if (NULL == query) {
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
@@ -93,7 +95,8 @@ API int iotcon_query_get_interface(iotcon_query_h query, char **resource_iface)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_query_set_resource_type(iotcon_query_h query, const char *resource_type)
+API int iotcon_query_set_resource_type(iotcon_query_h query,
+		const char *resource_type)
 {
 	int length_old = 0;
 	int length_new = 0;

@@ -355,7 +355,8 @@ static iotcon_representation_h _get_light_representation(light_resource_s *light
 	return repr;
 }
 
-static int _light_request_handler_get(light_resource_s *light, iotcon_request_h request)
+static int _light_request_handler_get(light_resource_s *light,
+		iotcon_request_h request)
 {
 	int ret;
 	iotcon_representation_h repr;
@@ -615,7 +616,8 @@ static iotcon_representation_h _get_room_representation(room_resource_s *room)
 	return repr;
 }
 
-static int _room_request_handler_get(room_resource_s *room, iotcon_request_h request)
+static int _room_request_handler_get(room_resource_s *room,
+		iotcon_request_h request)
 {
 	int ret;
 	iotcon_query_h query;
@@ -660,8 +662,8 @@ static int _room_request_handler_get(room_resource_s *room, iotcon_request_h req
 	return 0;
 }
 
-static void _light_request_handler(iotcon_resource_h resource, iotcon_request_h request,
-		void *user_data)
+static void _light_request_handler(iotcon_resource_h resource,
+		iotcon_request_h request, void *user_data)
 {
 	int ret;
 	iotcon_request_type_e type;
@@ -686,8 +688,8 @@ static void _light_request_handler(iotcon_resource_h resource, iotcon_request_h 
 	}
 }
 
-static void _fan_request_handler(iotcon_resource_h resource, iotcon_request_h request,
-		void *user_data)
+static void _fan_request_handler(iotcon_resource_h resource,
+		iotcon_request_h request, void *user_data)
 {
 	int ret;
 	iotcon_request_type_e type;
@@ -712,8 +714,8 @@ static void _fan_request_handler(iotcon_resource_h resource, iotcon_request_h re
 	}
 }
 
-static void _room_request_handler(iotcon_resource_h resource, iotcon_request_h request,
-		void *user_data)
+static void _room_request_handler(iotcon_resource_h resource,
+		iotcon_request_h request, void *user_data)
 {
 	FN_CALL;
 	int ret;

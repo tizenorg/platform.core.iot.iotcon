@@ -34,7 +34,6 @@ iotcon_resource_interfaces_h icl_resource_interfaces_ref(
 	return ifaces;
 }
 
-
 API int iotcon_resource_interfaces_create(iotcon_resource_interfaces_h *ret_ifaces)
 {
 	iotcon_resource_interfaces_h ifaces;
@@ -75,8 +74,8 @@ static int _icl_resource_interfaces_strcmp(const void *a, const void *b)
 }
 
 
-static bool _icl_resource_interfaces_duplicate_check(iotcon_resource_interfaces_h ifaces,
-		const char *iface)
+static bool _icl_resource_interfaces_duplicate_check(
+		iotcon_resource_interfaces_h ifaces, const char *iface)
 {
 	GList *node = NULL;
 
