@@ -1,5 +1,0 @@
-[D-BUS Service]
-Name=@DBUS_INTERFACE@
-User=@USER@
-Exec=/bin/false
-SystemdService=@PROJECT_NAME@.service

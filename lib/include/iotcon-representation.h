@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE Representation
  *
- * @brief Iotcon Representation provides API to manage representation
+ * @brief Iotcon Representation provides API to manage representation.
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
@@ -398,7 +398,7 @@ int iotcon_representation_set_state(iotcon_representation_h repr, iotcon_state_h
 int iotcon_representation_get_state(iotcon_representation_h repr, iotcon_state_h *state);
 
 /**
- * @brief Adds a new child representation on to the end of the parent representation
+ * @brief Adds a new child representation on to the end of the parent representation.
  * @details Duplicated child representation is allowed to append.
  *
  * @since_tizen 3.0
@@ -431,7 +431,7 @@ int iotcon_representation_remove_child(iotcon_representation_h parent,
 		iotcon_representation_h child);
 
 /**
- * @brief Specifies the type of function passed to iotcon_representation_foreach_children()
+ * @brief Specifies the type of function passed to iotcon_representation_foreach_children().
  *
  * @since_tizen 3.0
  *
@@ -472,7 +472,7 @@ int iotcon_representation_foreach_children(iotcon_representation_h parent,
 		iotcon_children_cb cb, void *user_data);
 
 /**
- * @brief Gets the number of children representation in the parent representation
+ * @brief Gets the number of children representation in the parent representation.
  *
  * @since_tizen 3.0
  *

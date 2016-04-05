@@ -166,7 +166,7 @@ int iotcon_observers_create(iotcon_observers_h *observers);
 void iotcon_observers_destroy(iotcon_observers_h observers);
 
 /**
- * @brief Adds a observer id into the observers handle
+ * @brief Adds a observer id into the observers handle.
  *
  * @since_tizen 3.0
  *

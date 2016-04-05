@@ -63,15 +63,14 @@ typedef struct icl_resource* iotcon_resource_h;
  * @brief The handle of lite resource.
  * @details @a iotcon_lite_resource_h is an opaque data structure to represent registered
  * resource by server. A resource has host_address, uri_path, resource types, and internal
- * handle. If observable attribute of resource is true, client can observe
- * this resource.
+ * handle. If observable attribute of resource is true, client can observe this resource.
  *
  * @since_tizen 3.0
  */
 typedef struct icl_lite_resource* iotcon_lite_resource_h;
 
 /**
-* @brief The handle of response
+* @brief The handle of response.
 * @details @a iotcon_response_h is an opaque data structure to respond to client.
 * @a iotcon_response_h is a data type of server's response which consists of result,
 * header options, query, representation.
@@ -90,7 +89,7 @@ typedef struct icl_resource_response* iotcon_response_h;
 typedef struct icl_observers* iotcon_observers_h;
 
 /**
-* @brief The handle of request
+* @brief The handle of request.
 * @details @a iotcon_request_h is an opaque data structure to request to a particular resource.
 * @a iotcon_request_h is a data type of client's request which consists of header options,
 * query, representation.
@@ -100,7 +99,7 @@ typedef struct icl_observers* iotcon_observers_h;
 typedef struct icl_resource_request* iotcon_request_h;
 
 /**
- * @brief The handle of remote resource
+ * @brief The handle of remote resource.
  * @details When Client success to find out resource from remote server,
  * server's resource information is reorganized as @a iotcon_remote_resource_h by Iotcon.
  * Client can request CRUD to server by using this.
@@ -148,7 +147,7 @@ typedef struct icl_device_info* iotcon_device_info_h;
 typedef struct icl_platform_info* iotcon_platform_info_h;
 
 /**
- * @brief The handle of resource interface
+ * @brief The handle of resource interface.
  * @details @a iotcon_resource_interfaces_h is an opaque data structure to have list
  * of resource interfaces. A resource interface is datatype of string.
  *
@@ -157,7 +156,7 @@ typedef struct icl_platform_info* iotcon_platform_info_h;
 typedef struct icl_resource_ifaces* iotcon_resource_interfaces_h;
 
 /**
- * @brief The handle of resource types
+ * @brief The handle of resource types.
  * @details @a iotcon_resource_types_h is an opaque data structure to have list
  * of resource types. A resource type is datatype of string.
  *
@@ -166,7 +165,7 @@ typedef struct icl_resource_ifaces* iotcon_resource_interfaces_h;
 typedef struct icl_resource_types* iotcon_resource_types_h;
 
 /**
- * @brief The handle of options
+ * @brief The handle of options.
  * @details @a iotcon_options_h is an opaque data structure to have attribute value map
  * which consists of a key and a value.
  * Datatype of key is integer and value is string.
@@ -176,7 +175,7 @@ typedef struct icl_resource_types* iotcon_resource_types_h;
 typedef struct icl_options* iotcon_options_h;
 
 /**
- * @brief The handle of query
+ * @brief The handle of query.
  * @details @a iotcon_query_h is an opaque data structure to have attribute value map
  * which consists of key and value.
  * Data ype of both key and value are string.

@@ -226,7 +226,7 @@ int iotcon_options_remove(iotcon_options_h options, unsigned short id);
 int iotcon_options_lookup(iotcon_options_h options, unsigned short id, char **data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_options_foreach()
+ * @brief Specifies the type of function passed to iotcon_options_foreach().
  *
  * @since_tizen 3.0
  *
