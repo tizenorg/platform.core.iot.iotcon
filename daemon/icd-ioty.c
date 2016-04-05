@@ -288,7 +288,7 @@ int icd_ioty_notify(OCResourceHandle handle, GVariant *msg, GVariant *observers,
 	oc_qos = _icd_ioty_convert_qos(qos);
 
 	icd_ioty_csdk_lock();
-	/* TODO : QoS is come from lib. */
+	// TODO: QoS is come from lib.
 	if (msg_length)
 		ret = OCNotifyListOfObservers(handle, obs_ids, obs_length, payload, oc_qos);
 	else
@@ -467,7 +467,7 @@ int icd_ioty_find_resource(const char *host_address,
 	icd_ioty_csdk_unlock();
 
 	if (OC_STACK_OK != result) {
-		ERR("OCDoResource() Fail(%d)", result);
+		ERR("OCDoResource(DISCOVER) Fail(%d)", result);
 		free(context->bus_name);
 		free(context);
 		return icd_ioty_convert_error(result);
@@ -685,7 +685,7 @@ static gboolean _icd_ioty_crud(int type,
 	free(uri);
 
 	if (OC_STACK_OK != result) {
-		ERR("OCDoResource() Fail(%d)", result);
+		ERR("OCDoResource(CRUD:%d) Fail(%d)", rest_type, result);
 		icd_ioty_complete_error(type, invocation, icd_ioty_convert_error(result));
 		return TRUE;
 	}
@@ -756,7 +756,7 @@ static OCDoHandle _icd_ioty_observe_register(const char *uri_path,
 	icd_ioty_csdk_unlock();
 
 	if (OC_STACK_OK != result) {
-		ERR("OCDoResource() Fail(%d)", result);
+		ERR("OCDoResource(OBSERVE:%d) Fail(%d)", method, result);
 		if (cbdata->cd)
 			cbdata->cd(cbdata->context);
 		return NULL;
@@ -914,7 +914,7 @@ int icd_ioty_get_info(int type, const char *host_address, int conn_type, int tim
 	icd_ioty_csdk_unlock();
 
 	if (OC_STACK_OK != result) {
-		ERR("OCDoResource() Fail(%d)", result);
+		ERR("OCDoResource(DISCOVER) Fail(%d)", result);
 		free(context->bus_name);
 		free(context);
 		return icd_ioty_convert_error(result);
@@ -1017,7 +1017,7 @@ int icd_ioty_set_platform_info()
 	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_TIZEN_ID,
 			&platform_info.platformID);
 	if (SYSTEM_INFO_ERROR_NONE != ret) {
-		ERR("system_info_get_platform_string() Fail(%d)", ret);
+		ERR("system_info_get_platform_string(tizenid) Fail(%d)", ret);
 		_ioty_free_platform_info(platform_info);
 		return IOTCON_ERROR_SYSTEM;
 	}
@@ -1026,22 +1026,25 @@ int icd_ioty_set_platform_info()
 	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_MANUF_NAME,
 			&platform_info.manufacturerName);
 	if (SYSTEM_INFO_ERROR_NONE != ret) {
-		ERR("system_info_get_platform_string() Fail(%d)", ret);
+		ERR("system_info_get_platform_string(manufacturer) Fail(%d)", ret);
 		_ioty_free_platform_info(platform_info);
 		return IOTCON_ERROR_SYSTEM;
 	}
 
 	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_MODEL_NAME,
 			&platform_info.modelNumber);
-	WARN_IF(SYSTEM_INFO_ERROR_NONE != ret, "system_info_get_platform_string() Fail(%d)", ret);
+	if (SYSTEM_INFO_ERROR_NONE != ret)
+		WARN("system_info_get_platform_string(model_name) Fail(%d)", ret);
 
 	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_PLATFORM_VERSION,
 			&platform_info.platformVersion);
-	WARN_IF(SYSTEM_INFO_ERROR_NONE != ret, "system_info_get_platform_string() Fail(%d)", ret);
+	if (SYSTEM_INFO_ERROR_NONE != ret)
+		WARN("system_info_get_platform_string(platform.version) Fail(%d)", ret);
 
 	ret = system_info_get_platform_string(ICD_SYSTEM_INFO_BUILD_STRING,
 			&platform_info.firmwareVersion);
-	WARN_IF(SYSTEM_INFO_ERROR_NONE != ret, "system_info_get_platform_string() Fail(%d)", ret);
+	if (SYSTEM_INFO_ERROR_NONE != ret)
+		WARN("system_info_get_platform_string(build.string) Fail(%d)", ret);
 
 	/* platform_info.manufacturerUrl */
 	/* platform_info.dateOfManufacture */
@@ -1220,7 +1223,7 @@ OCDoHandle icd_ioty_subscribe_presence(int type, const char *host_address, int c
 	icd_ioty_csdk_unlock();
 
 	if (OC_STACK_OK != result) {
-		ERR("OCDoResource() Fail(%d)", result);
+		ERR("OCDoResource(PRESENCE) Fail(%d)", result);
 		_icd_ioty_presence_table_remove(address);
 		return NULL;
 	}
@@ -1422,7 +1425,7 @@ gboolean icd_ioty_encap_get(gpointer user_data)
 	icd_ioty_csdk_unlock();
 
 	if (OC_STACK_OK != result)
-		ERR("OCDoResource() Fail(%d)", result);
+		ERR("OCDoResource(GET) Fail(%d)", result);
 
 	return G_SOURCE_CONTINUE;
 }

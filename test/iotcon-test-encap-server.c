@@ -176,7 +176,7 @@ static iotcon_lite_resource_h _create_door_resource(char *uri_path, char *type,
 	ret = iotcon_lite_resource_create(uri_path, resource_types, properties, state,
 			_door_state_changed, NULL, &handle);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_resource_create() Fail");
+		ERR("iotcon_lite_resource_create() Fail");
 		iotcon_state_destroy(state);
 		iotcon_resource_types_destroy(resource_types);
 		return NULL;

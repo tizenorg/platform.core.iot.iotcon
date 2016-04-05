@@ -672,7 +672,7 @@ static void _light_request_handler(iotcon_resource_h resource, iotcon_request_h 
 
 	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_request_get_types() Fail(%d)", ret);
+		ERR("iotcon_request_get_request_type() Fail(%d)", ret);
 		_send_response(request, NULL, iface, IOTCON_RESPONSE_ERROR);
 		return;
 	}
@@ -698,7 +698,7 @@ static void _fan_request_handler(iotcon_resource_h resource, iotcon_request_h re
 
 	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_request_get_types() Fail(%d)", ret);
+		ERR("iotcon_request_get_request_type() Fail(%d)", ret);
 		_send_response(request, NULL, iface, IOTCON_RESPONSE_ERROR);
 		return;
 	}
@@ -734,7 +734,7 @@ static void _room_request_handler(iotcon_resource_h resource, iotcon_request_h r
 
 	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_request_get_types() Fail(%d)", ret);
+		ERR("iotcon_request_get_request_type() Fail(%d)", ret);
 		_send_response(request, NULL, iface, IOTCON_RESPONSE_ERROR);
 		return;
 	}

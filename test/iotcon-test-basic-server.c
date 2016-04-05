@@ -430,7 +430,7 @@ static int _request_handler_delete(iotcon_resource_h resource, iotcon_request_h 
 
 	ret = iotcon_resource_destroy(resource);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_unregiser_resource() Fail(%d)", ret);
+		ERR("iotcon_resource_destroy() Fail(%d)", ret);
 		return -1;
 	}
 
@@ -481,7 +481,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_request_get_types() Fail(%d)", ret);
+		ERR("iotcon_request_get_request_type() Fail(%d)", ret);
 		_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 		return;
 	}

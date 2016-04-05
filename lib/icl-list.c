@@ -152,7 +152,7 @@ API int iotcon_list_add_byte_str(iotcon_list_h list, unsigned char *val, int len
 
 	value = icl_value_create_byte_str(val, len);
 	if (NULL == value) {
-		ERR("icl_value_create_str() Fail");
+		ERR("icl_value_create_byte_str() Fail");
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 

@@ -200,7 +200,8 @@ static int _ocprocess_response_signal(const char *dest, const char *signal_prefi
 	int ret;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
-	ret = snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, signal_prefix, signal_number);
+	ret = snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, signal_prefix,
+			signal_number);
 	if (ret <= 0 || sizeof(signal_name) <= ret) {
 		ERR("snprintf() Fail(%d)", ret);
 		g_variant_unref(value);
@@ -245,7 +246,7 @@ static int _ioty_oic_action_to_ioty_action(int oic_action)
 		break;
 	case OC_OBSERVE_NO_OPTION:
 	default:
-		ERR("Invalid action (%d)", oic_action);
+		ERR("Invalid action(%d)", oic_action);
 		action = IOTCON_OBSERVE_NO_TYPE;
 	}
 	return action;
@@ -256,11 +257,14 @@ static void _icd_req_context_free(void *ctx)
 {
 	struct icd_req_context *req_ctx = ctx;
 
+	RET_IF(NULL == ctx);
+
 	free(req_ctx->bus_name);
 	if (req_ctx->payload)
 		g_variant_unref(req_ctx->payload);
 	g_variant_builder_unref(req_ctx->options);
 	g_variant_builder_unref(req_ctx->query);
+
 	free(req_ctx);
 }
 
@@ -486,8 +490,7 @@ OCStackApplicationResult icd_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 	RETV_IF(NULL == ctx, OC_STACK_KEEP_TRANSACTION);
 	RETV_IF(NULL == resp, OC_STACK_KEEP_TRANSACTION);
 	if (NULL == resp->payload)
-		/* normal case : payload COULD be NULL */
-		return OC_STACK_KEEP_TRANSACTION;
+		return OC_STACK_KEEP_TRANSACTION; /* normal case : payload COULD be NULL */
 	RETVM_IF(PAYLOAD_TYPE_DISCOVERY != resp->payload->type,
 			OC_STACK_KEEP_TRANSACTION, "Invalid payload type(%d)", resp->payload->type);
 

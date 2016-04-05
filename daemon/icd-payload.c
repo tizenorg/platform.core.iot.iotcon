@@ -328,7 +328,8 @@ GVariant* icd_payload_representation_empty_gvariant(void)
 	g_variant_builder_init(&repr, G_VARIANT_TYPE("a{sv}"));
 	g_variant_builder_init(&children, G_VARIANT_TYPE("av"));
 
-	value = g_variant_new("(sasasa{sv}av)", IC_STR_NULL, &ifaces, &types, &repr, &children);
+	value = g_variant_new("(sasasa{sv}av)", IC_STR_NULL, &ifaces, &types, &repr,
+			&children);
 
 	return value;
 }

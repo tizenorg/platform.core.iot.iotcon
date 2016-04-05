@@ -283,7 +283,7 @@ static int _icd_dbus_client_list_get_client(const gchar *bus_name,
 
 	client = calloc(1, sizeof(icd_dbus_client_s));
 	if (NULL == client) {
-		ERR("calloc(client) Fail(%d)", errno);
+		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
@@ -446,7 +446,7 @@ static int _icd_dbus_presence_list_add(const gchar *bus_name,
 
 	presence_handle = calloc(1, sizeof(icd_presence_handle_s));
 	if (NULL == presence_handle) {
-		ERR("calloc(handle) Fail(%d)", errno);
+		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 	presence_handle->handle = handle;
@@ -579,7 +579,7 @@ static int _icd_dbus_encap_list_add(const gchar *bus_name, int type,
 
 	encap_handle = calloc(1, sizeof(icd_encap_handle_s));
 	if (NULL == encap_handle) {
-		ERR("calloc(handle) Fail(%d)", errno);
+		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 	encap_handle->type = type;

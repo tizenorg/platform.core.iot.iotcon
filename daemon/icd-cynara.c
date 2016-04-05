@@ -43,9 +43,7 @@ static cynara *_cynara;
 int icd_cynara_init()
 {
 #ifdef TZ_VER_3
-	int ret;
-	ret = cynara_initialize(&_cynara, NULL);
-
+	int ret = cynara_initialize(&_cynara, NULL);
 	if (CYNARA_API_SUCCESS != ret) {
 		ERR("cynara_initialize() Fail(%d)", ret);
 		return IOTCON_ERROR_SYSTEM;
@@ -97,13 +95,13 @@ static int _icd_cynara_check(GDBusMethodInvocation *invocation, const char **pri
 
 	ret = cynara_creds_gdbus_get_client(conn, sender, CLIENT_METHOD_SMACK, &client);
 	if (CYNARA_API_SUCCESS != ret) {
-		ERR("cynara_creds_dbus_get_client() Fail(%d)", ret);
+		ERR("cynara_creds_gdbus_get_client() Fail(%d)", ret);
 		return IOTCON_ERROR_SYSTEM;
 	}
 
 	ret = cynara_creds_gdbus_get_user(conn, sender, USER_METHOD_UID, &user);
 	if (CYNARA_API_SUCCESS != ret) {
-		ERR("cynara_creds_dbus_get_user() Fail(%d)", ret);
+		ERR("cynara_creds_gdbus_get_user() Fail(%d)", ret);
 		free(client);
 		return IOTCON_ERROR_SYSTEM;
 	}
