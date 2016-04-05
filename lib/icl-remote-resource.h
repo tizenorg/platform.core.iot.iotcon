@@ -21,13 +21,7 @@
 
 #include "iotcon-types.h"
 #include "iotcon-remote-resource.h"
-
 #include "icl-options.h"
-
-typedef enum {
-	ICL_DEVICE_STATE_ALIVE,
-	ICL_DEVICE_STATE_LOST_SIGNAL,
-} icl_remote_resource_device_state_e;
 
 struct icl_remote_resource {
 	bool is_found;
@@ -41,14 +35,10 @@ struct icl_remote_resource {
 	iotcon_resource_interfaces_h ifaces;
 	iotcon_connectivity_type_e connectivity_type;
 	int64_t observe_handle;
-	unsigned int observe_sub_id;
-	unsigned int monitoring_sub_id;
-	unsigned int caching_sub_id;
 	iotcon_representation_h cached_repr;
 };
 
 void icl_remote_resource_ref(iotcon_remote_resource_h resource);
 void icl_remote_resource_unref(iotcon_remote_resource_h resource);
-void icl_remote_resource_crud_stop(iotcon_remote_resource_h resource);
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__ */

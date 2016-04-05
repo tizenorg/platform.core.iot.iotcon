@@ -45,6 +45,57 @@
  * @{
  */
 
+ /**
+ * @brief Starts presence of a server.
+ * @details Use this function to send server's announcements to clients.\n
+ * Server can call this function when online for the first time or come back from offline to online.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/network.get
+ * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks If @a time_to_live is 0, server will set default value as 60 seconds.\n
+ * If @a time_to_live is very big, server will set maximum value as (60 * 60 * 24) seconds.
+ * (24 hours)
+ *
+ * @param[in] time_to_live The interval of announcing presence in seconds.
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @see iotcon_stop_presence()
+ * @see iotcon_add_presence_cb()
+ * @see iotcon_remove_presence_cb()
+ */
+int iotcon_start_presence(unsigned int time_to_live);
+
+/**
+ * @brief Stops presence of a server.
+ * @details Use this function to stop sending server's announcements to clients.
+ * Server can call this function when terminating, entering to offline or out of network.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/network.get
+ * @privilege %http://tizen.org/privilege/internet
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_SYSTEM System error
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @see iotcon_start_presence()
+ * @see iotcon_add_presence_cb()
+ * @see iotcon_remove_presence_cb()
+ */
+int iotcon_stop_presence(void);
+
+
 /**
  * @}
  */
