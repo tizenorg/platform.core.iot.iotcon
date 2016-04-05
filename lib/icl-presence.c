@@ -17,9 +17,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <errno.h>
 #include <glib.h>
-#include <inttypes.h>
 
 #include "iotcon-types.h"
 #include "iotcon-internal.h"
@@ -27,56 +27,48 @@
 #include "icl.h"
 #include "icl-resource-types.h"
 #include "icl-dbus.h"
+#include "icl-presence.h"
 
-#define ICL_PRESENCE_TTL_SECONDS_DEFAULT 60 /* 60 sec */
-#define ICL_PRESENCE_TTL_SECONDS_MAX (60 * 60 * 24) /* 60 sec/min * 60 min/hr * 24 hr/day */
-
-typedef struct icl_presence {
-	char *host_address;
-	iotcon_connectivity_type_e connectivity_type;
-	char *resource_type;
-	iotcon_presence_cb cb;
-	void *user_data;
-	unsigned int sub_id;
-	int64_t handle;
-} icl_presence_s;
-
-
-typedef struct icl_presence_response {
-	char *host_address;
-	iotcon_connectivity_type_e connectivity_type;
-	char *resource_type;
-	iotcon_presence_result_e result;
-	iotcon_presence_trigger_e trigger;
-} icl_presence_response_s;
-
+#include "icl-ioty.h"
 
 API int iotcon_start_presence(unsigned int time_to_live)
 {
 	FN_CALL;
 	int ret;
 	GError *error = NULL;
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 
 	if (0 == time_to_live)
-		time_to_live = ICL_PRESENCE_TTL_SECONDS_DEFAULT;
-	else if (ICL_PRESENCE_TTL_SECONDS_MAX < time_to_live)
-		time_to_live = ICL_PRESENCE_TTL_SECONDS_MAX;
+		time_to_live = IC_PRESENCE_TTL_SECONDS_DEFAULT;
+	else if (IC_PRESENCE_TTL_SECONDS_MAX < time_to_live)
+		time_to_live = IC_PRESENCE_TTL_SECONDS_MAX;
 
-	ic_dbus_call_start_presence_sync(icl_dbus_get_object(), time_to_live, &ret, NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_start_presence_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return ret;
+	mode = icl_get_service_mode();
+
+	if (IOTCON_SERVICE_IP & mode) {
+		ret = icl_ioty_start_presence(time_to_live);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_start_presence() Fail(%d)", ret);
+			return ret;
+		}
 	}
+	if (IOTCON_SERVICE_BT & mode) {
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		ic_dbus_call_start_presence_sync(icl_dbus_get_object(), time_to_live, &ret, NULL,
+				&error);
+		if (error) {
+			ERR("ic_dbus_call_start_presence_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			return ret;
+		}
 
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon-daemon Fail(%d)", ret);
+			return icl_dbus_convert_daemon_error(ret);
+		}
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -88,21 +80,33 @@ API int iotcon_stop_presence(void)
 	FN_CALL;
 	int ret;
 	GError *error = NULL;
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 
-	ic_dbus_call_stop_presence_sync(icl_dbus_get_object(), &ret, NULL, &error);
-	if (error) {
-		ERR("ic_dbus_call_stop_presence_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return ret;
+	mode = icl_get_service_mode();
+
+	if (IOTCON_SERVICE_IP & mode) {
+		ret = icl_ioty_stop_presence();
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_stop_presence() Fail(%d)", ret);
+			return ret;
+		}
 	}
+	if (IOTCON_SERVICE_BT & mode) {
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		ic_dbus_call_stop_presence_sync(icl_dbus_get_object(), &ret, NULL, &error);
+		if (error) {
+			ERR("ic_dbus_call_stop_presence_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			return ret;
+		}
 
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon-daemon Fail(%d)", ret);
+			return icl_dbus_convert_daemon_error(ret);
+		}
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -174,82 +178,108 @@ API int iotcon_add_presence_cb(const char *host_address,
 		iotcon_presence_h *presence_handle)
 {
 	FN_CALL;
-	int ret;
+	int ret, conn_type;
 	unsigned int sub_id;
 	GError *error = NULL;
 	icl_presence_s *presence;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == presence_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (resource_type && (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
-		ERR("The length of resource_type(%s) is invalid", resource_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-
-	if ((IOTCON_MULTICAST_ADDRESS == host_address || '\0' == host_address[0])
-			&& (IOTCON_CONNECTIVITY_IPV4 != connectivity_type
-				&& IOTCON_CONNECTIVITY_ALL != connectivity_type)) {
-		ERR("Multicast is available only if IPV4");
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-
-	presence = calloc(1, sizeof(icl_presence_s));
-	if (NULL == presence) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
-
-	ic_dbus_call_subscribe_presence_sync(icl_dbus_get_object(),
-			ic_utils_dbus_encode_str(host_address),
-			connectivity_type,
-			ic_utils_dbus_encode_str(resource_type),
-			&(presence->handle),
-			NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_subscribe_presence_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		free(presence);
+	ret = icl_check_connectivity_type(connectivity_type, icl_get_service_mode());
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_check_connectivity_type() Fail(%d)", ret);
 		return ret;
 	}
 
-	if (0 == presence->handle) {
-		ERR("iotcon-daemon Fail");
-		free(presence);
-		return IOTCON_ERROR_IOTIVITY;
+	conn_type = connectivity_type;
+
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
+		ret = icl_ioty_add_presence_cb(host_address, connectivity_type, resource_type,
+				cb, user_data, presence_handle);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_add_presence_cb() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
+		if (resource_type && (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
+			ERR("The length of resource_type(%s) is invalid", resource_type);
+			return IOTCON_ERROR_INVALID_PARAMETER;
+		}
+
+		if ((IOTCON_MULTICAST_ADDRESS == host_address || '\0' == host_address[0])
+				&& (IOTCON_CONNECTIVITY_IPV4 != connectivity_type
+					&& IOTCON_CONNECTIVITY_ALL != connectivity_type)) {
+			ERR("Multicast is available only if IPV4");
+			return IOTCON_ERROR_INVALID_PARAMETER;
+		}
+
+		presence = calloc(1, sizeof(icl_presence_s));
+		if (NULL == presence) {
+			ERR("calloc() Fail(%d)", errno);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+
+		ic_dbus_call_subscribe_presence_sync(icl_dbus_get_object(),
+				ic_utils_dbus_encode_str(host_address),
+				connectivity_type,
+				ic_utils_dbus_encode_str(resource_type),
+				&(presence->handle),
+				NULL,
+				&error);
+		if (error) {
+			ERR("ic_dbus_call_subscribe_presence_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			free(presence);
+			return ret;
+		}
+
+		if (0 == presence->handle) {
+			ERR("iotcon-daemon Fail");
+			free(presence);
+			return IOTCON_ERROR_IOTIVITY;
+		}
+
+		snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, IC_DBUS_SIGNAL_PRESENCE,
+				presence->handle);
+
+		presence->cb = cb;
+		presence->user_data = user_data;
+
+		if (host_address)
+			presence->host_address = strdup(host_address);
+		presence->connectivity_type = connectivity_type;
+		if (resource_type)
+			presence->resource_type = strdup(resource_type);
+
+		sub_id = icl_dbus_subscribe_signal(signal_name, presence,
+				_icl_presence_conn_cleanup, _icl_presence_cb);
+		if (0 == sub_id) {
+			ERR("icl_dbus_subscribe_signal() Fail");
+			free(presence->resource_type);
+			free(presence->host_address);
+			free(presence);
+			return IOTCON_ERROR_DBUS;
+		}
+
+		presence->sub_id = sub_id;
+
+		*presence_handle = presence;
+		break;
+	default:
+		ERR("Invalid Connectivity Type(%d)", conn_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
-
-	snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, IC_DBUS_SIGNAL_PRESENCE,
-			presence->handle);
-
-	presence->cb = cb;
-	presence->user_data = user_data;
-
-	if (host_address)
-		presence->host_address = strdup(host_address);
-	presence->connectivity_type = connectivity_type;
-	if (resource_type)
-		presence->resource_type = strdup(resource_type);
-
-	sub_id = icl_dbus_subscribe_signal(signal_name, presence,
-			_icl_presence_conn_cleanup, _icl_presence_cb);
-	if (0 == sub_id) {
-		ERR("icl_dbus_subscribe_signal() Fail");
-		free(presence->resource_type);
-		free(presence->host_address);
-		free(presence);
-		return IOTCON_ERROR_DBUS;
-	}
-
-	presence->sub_id = sub_id;
-
-	*presence_handle = presence;
-
 	return IOTCON_ERROR_NONE;
 }
 
@@ -257,42 +287,63 @@ API int iotcon_add_presence_cb(const char *host_address,
 API int iotcon_remove_presence_cb(iotcon_presence_h presence)
 {
 	FN_CALL;
-	int ret;
 	GError *error = NULL;
+	int ret, connectivity_type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (0 == presence->sub_id) { /* disconnected iotcon dbus */
-		WARN("Invalid Presence handle");
-		free(presence->resource_type);
-		free(presence->host_address);
-		free(presence);
-		return IOTCON_ERROR_NONE;
-	}
+	connectivity_type = presence->connectivity_type;
 
-	if (NULL == icl_dbus_get_object()) {
-		ERR("icl_dbus_get_object() return NULL");
-		return IOTCON_ERROR_DBUS;
-	}
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
+		ret = icl_ioty_remove_presence_cb(presence);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remove_presence_cb() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
+		if (0 == presence->sub_id) { /* disconnected iotcon dbus */
+			WARN("Invalid Presence handle");
+			free(presence->resource_type);
+			free(presence->host_address);
+			free(presence);
+			return IOTCON_ERROR_NONE;
+		}
 
-	ic_dbus_call_unsubscribe_presence_sync(icl_dbus_get_object(), presence->handle,
-			presence->host_address, &ret, NULL, &error);
-	if (error) {
-		ERR("ic_dbus_call_unsubscribe_presence_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return ret;
-	}
+		if (NULL == icl_dbus_get_object()) {
+			ERR("icl_dbus_get_object() return NULL");
+			return IOTCON_ERROR_DBUS;
+		}
 
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
-	}
-	presence->handle = 0;
+		ic_dbus_call_unsubscribe_presence_sync(icl_dbus_get_object(), presence->handle,
+				presence->host_address, &ret, NULL, &error);
+		if (error) {
+			ERR("ic_dbus_call_unsubscribe_presence_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			return ret;
+		}
 
-	icl_dbus_unsubscribe_signal(presence->sub_id);
-	presence->sub_id = 0;
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon-daemon Fail(%d)", ret);
+			return icl_dbus_convert_daemon_error(ret);
+		}
+		presence->handle = 0;
+
+		icl_dbus_unsubscribe_signal(presence->sub_id);
+		presence->sub_id = 0;
+
+		break;
+	default:
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
 
 	return IOTCON_ERROR_NONE;
 }

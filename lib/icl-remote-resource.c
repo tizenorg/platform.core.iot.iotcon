@@ -17,9 +17,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <errno.h>
 #include <glib.h>
-#include <inttypes.h>
 
 #include "iotcon-types.h"
 #include "iotcon-internal.h"
@@ -33,6 +33,8 @@
 #include "icl-resource-interfaces.h"
 #include "icl-payload.h"
 
+#include "icl-ioty.h"
+
 #define ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL 3600 /* 60 min */
 
 typedef struct {
@@ -44,7 +46,7 @@ typedef struct {
 } icl_found_resource_s;
 
 static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *payload,
-		iotcon_connectivity_type_e connectivity_type);
+		int connectivity_type);
 
 static void _icl_found_resource_cb(GDBusConnection *connection,
 		const gchar *sender_name,
@@ -117,70 +119,96 @@ API int iotcon_find_resource(const char *host_address,
 		iotcon_found_resource_cb cb,
 		void *user_data)
 {
-	int ret, timeout;
 	unsigned int sub_id;
 	GError *error = NULL;
 	int64_t signal_number;
+	int ret, timeout, conn_type;
 	icl_found_resource_s *cb_container;
 	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	if (resource_type && (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
 		ERR("The length of resource_type(%s) is invalid", resource_type);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	timeout = icl_dbus_get_timeout();
-
-	ic_dbus_call_find_resource_sync(icl_dbus_get_object(),
-			ic_utils_dbus_encode_str(host_address),
-			connectivity_type,
-			ic_utils_dbus_encode_str(resource_type),
-			is_secure,
-			timeout,
-			&signal_number,
-			&ret,
-			NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_find_resource_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
+	ret = icl_check_connectivity_type(connectivity_type, icl_get_service_mode());
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_check_connectivity_type() Fail(%d)", ret);
 		return ret;
 	}
 
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
+	conn_type = connectivity_type;
+
+	switch (conn_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
+		ret = icl_ioty_find_resource(host_address, connectivity_type, resource_type,
+				is_secure, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_find_resource() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	case IOTCON_CONNECTIVITY_BT_EDR:
+	case IOTCON_CONNECTIVITY_BT_LE:
+	case IOTCON_CONNECTIVITY_BT_ALL:
+		RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
+		timeout = icl_dbus_get_timeout();
+
+		ic_dbus_call_find_resource_sync(icl_dbus_get_object(),
+				ic_utils_dbus_encode_str(host_address),
+				connectivity_type,
+				ic_utils_dbus_encode_str(resource_type),
+				is_secure,
+				timeout,
+				&signal_number,
+				&ret,
+				NULL,
+				&error);
+		if (error) {
+			ERR("ic_dbus_call_find_resource_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			return ret;
+		}
+
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("iotcon-daemon Fail(%d)", ret);
+			return icl_dbus_convert_daemon_error(ret);
+		}
+
+		snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, IC_DBUS_SIGNAL_FOUND_RESOURCE,
+				signal_number);
+
+		cb_container = calloc(1, sizeof(icl_found_resource_s));
+		if (NULL == cb_container) {
+			ERR("calloc() Fail(%d)", errno);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+
+		cb_container->cb = cb;
+		cb_container->user_data = user_data;
+
+		sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
+				_icl_find_resource_conn_cleanup, _icl_found_resource_cb);
+		if (0 == sub_id) {
+			ERR("icl_dbus_subscribe_signal() Fail");
+			return IOTCON_ERROR_DBUS;
+		}
+		cb_container->id = sub_id;
+
+		cb_container->timeout_id = g_timeout_add_seconds(timeout, _icl_timeout_find_resource,
+				cb_container);
+		break;
+	default:
+		ERR("Invalid Connectivity Type(%d)", conn_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, IC_DBUS_SIGNAL_FOUND_RESOURCE,
-			signal_number);
-
-	cb_container = calloc(1, sizeof(icl_found_resource_s));
-	if (NULL == cb_container) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
-
-	cb_container->cb = cb;
-	cb_container->user_data = user_data;
-
-	sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
-			_icl_find_resource_conn_cleanup, _icl_found_resource_cb);
-	if (0 == sub_id) {
-		ERR("icl_dbus_subscribe_signal() Fail");
-		return IOTCON_ERROR_DBUS;
-	}
-
-	cb_container->id = sub_id;
-
-	cb_container->timeout_id = g_timeout_add_seconds(timeout, _icl_timeout_find_resource,
-			cb_container);
-
-	return ret;
+	return IOTCON_ERROR_NONE;
 }
 
 /* If you know the information of resource, then you can make a proxy of the resource. */
@@ -224,10 +252,12 @@ API int iotcon_remote_resource_create(const char *host_address,
 static void _icl_remote_resource_destroy(iotcon_remote_resource_h resource)
 {
 	RET_IF(NULL == resource);
+
 	if (resource->ref_count < 0) {
 		ERR("Invalid ref_count (%d)", resource->ref_count);
 		return;
 	}
+
 	if (true == resource->is_found) {
 		ERR("It can't be destroyed by user.");
 		return;
@@ -483,7 +513,7 @@ API int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
 
 
 static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *payload,
-		iotcon_connectivity_type_e conn_type)
+		int connectivity_type)
 {
 	int ret;
 	iotcon_remote_resource_h resource;
@@ -493,7 +523,6 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 	iotcon_resource_interfaces_h ifaces;
 	char *uri_path, *device_id, *res_type, *iface, *addr;
 	int properties, is_secure, port;
-	int connectivity_type = conn_type;
 
 	g_variant_get(payload, "(&s&sasasib&si)", &uri_path, &device_id, &ifaces_iter,
 			&types_iter, &properties, &is_secure, &addr, &port);
@@ -529,7 +558,7 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 	while (g_variant_iter_loop(ifaces_iter, "s", &iface))
 		iotcon_resource_interfaces_add(ifaces, iface);
 
-	ret = iotcon_remote_resource_create(host_addr, conn_type, uri_path,
+	ret = iotcon_remote_resource_create(host_addr, connectivity_type, uri_path,
 			properties, res_types, ifaces, &resource);
 
 	iotcon_resource_interfaces_destroy(ifaces);
@@ -546,7 +575,7 @@ static iotcon_remote_resource_h _icl_remote_resource_from_gvariant(GVariant *pay
 		iotcon_remote_resource_destroy(resource);
 		return NULL;
 	}
-	resource->connectivity_type = conn_type;
+	resource->connectivity_type = connectivity_type;
 	resource->properties = properties;
 
 	return resource;
@@ -557,17 +586,31 @@ API int iotcon_remote_resource_get_time_interval(int *time_interval)
 {
 	GError *error = NULL;
 	int ret, arg_time_interval;
+	iotcon_service_mode_e mode;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == time_interval, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ic_dbus_call_encap_get_time_interval_sync(icl_dbus_get_object(), &arg_time_interval,
-			NULL, &error);
-	if (error) {
-		ERR("ic_dbus_call_encap_get_time_interval_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return ret;
+	mode = icl_get_service_mode();
+
+	if (IOTCON_SERVICE_IP & mode) {
+		ret = icl_ioty_remote_resource_get_time_interval(&arg_time_interval);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_get_time_interval() Fail(%d)", ret);
+			return ret;
+		}
+	} else if (IOTCON_SERVICE_BT & mode) {
+		ic_dbus_call_encap_get_time_interval_sync(icl_dbus_get_object(), &arg_time_interval,
+				NULL, &error);
+		if (error) {
+			ERR("ic_dbus_call_encap_get_time_interval_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			return ret;
+		}
+	} else {
+		ERR("Invalid Mode(%d)", mode);
+		return IOTCON_ERROR_SYSTEM;
 	}
 
 	*time_interval = arg_time_interval;
@@ -579,19 +622,31 @@ API int iotcon_remote_resource_get_time_interval(int *time_interval)
 API int iotcon_remote_resource_set_time_interval(int time_interval)
 {
 	int ret;
+	iotcon_service_mode_e mode;
 	GError *error = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL < time_interval || time_interval <= 0,
 			IOTCON_ERROR_INVALID_PARAMETER);
 
-	ic_dbus_call_encap_set_time_interval_sync(icl_dbus_get_object(), time_interval,
-			NULL, &error);
-	if (error) {
-		ERR("ic_dbus_call_encap_set_time_interval_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return ret;
+	mode = icl_get_service_mode();
+
+	if (IOTCON_SERVICE_IP & mode) {
+		ret = icl_ioty_remote_resource_set_time_interval(time_interval);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_set_time_interval() Fail(%d)", ret);
+			return ret;
+		}
+	}
+	if (IOTCON_SERVICE_BT & mode) {
+		ic_dbus_call_encap_set_time_interval_sync(icl_dbus_get_object(), time_interval,
+				NULL, &error);
+		if (error) {
+			ERR("ic_dbus_call_encap_set_time_interval_sync() Fail(%s)", error->message);
+			ret = icl_dbus_convert_dbus_error(error->code);
+			g_error_free(error);
+			return ret;
+		}
 	}
 
 	return IOTCON_ERROR_NONE;

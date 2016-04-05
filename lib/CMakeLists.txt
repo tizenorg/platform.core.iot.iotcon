@@ -7,8 +7,15 @@ SET(CLIENT_SRCS ${CLIENT_SRCS} ${CMAKE_SOURCE_DIR}/common/ic-dbus.c)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/common/ic-dbus.c
 	PROPERTIES GENERATED TRUE)
 
-pkg_check_modules(client_pkgs REQUIRED glib-2.0 dlog capi-base-common gio-2.0 capi-system-info
-	gio-unix-2.0)
+pkg_check_modules(client_pkgs REQUIRED glib-2.0 dlog capi-base-common gio-2.0
+	capi-system-info capi-system-system-settings gio-unix-2.0 iotivity)
+
+FOREACH(flag ${client_pkgs_CFLAGS_OTHER})
+	IF(${flag} MATCHES "\\-D+")
+		ADD_DEFINITIONS(${flag})
+	ENDIF(${flag} MATCHES "\\-D+")
+ENDFOREACH(flag)
+
 INCLUDE_DIRECTORIES(${client_pkgs_INCLUDE_DIRS})
 LINK_DIRECTORIES(${client_pkgs_LIBRARY_DIRS})
 
@@ -16,7 +23,7 @@ ADD_DEFINITIONS("-DIOTCON_DBUS_INTERFACE=\"${DBUS_INTERFACE}\"")
 
 ADD_LIBRARY(${CLIENT} SHARED ${CLIENT_SRCS})
 ADD_DEPENDENCIES(${CLIENT} GENERATED_DBUS_CODE)
-TARGET_LINK_LIBRARIES(${CLIENT}	${client_pkgs_LIBRARIES})
+TARGET_LINK_LIBRARIES(${CLIENT} ${client_pkgs_LIBRARIES})
 SET_TARGET_PROPERTIES(${CLIENT} PROPERTIES VERSION ${FULLVER} SOVERSION ${MAJORVER})
 INSTALL(TARGETS ${CLIENT} DESTINATION ${LIB_INSTALL_DIR})
 
