@@ -20,8 +20,6 @@
 
 #include "iotcon-types.h"
 
-#include "icl-dbus.h"
-
 /**
  * @brief The maximum number of children resources which can be held in a parent resource.
  *
@@ -48,10 +46,10 @@ struct icl_resource {
 	iotcon_resource_interfaces_h ifaces;
 	iotcon_request_handler_cb cb;
 	void *user_data;
-	unsigned int sub_id;
 	int64_t handle;
 	iotcon_resource_h children[ICL_CONTAINED_RESOURCES_MAX];
 	iotcon_observers_h observers;
+	iotcon_connectivity_type_e connectivity_type;
 };
 
 bool icl_resource_check_uri_path(const char *uri_path);

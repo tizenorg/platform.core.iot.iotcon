@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <iotcon.h>
+
 #include "test.h"
 
 static char *room_resource_device_id;
