@@ -72,7 +72,8 @@ API int iotcon_request_get_request_type(iotcon_request_h request,
 
 
 /* The content of the request should not be freed by user. */
-API int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *options)
+API int iotcon_request_get_options(iotcon_request_h request,
+		iotcon_options_h *options)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);

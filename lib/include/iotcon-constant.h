@@ -50,35 +50,39 @@
 #define IOTCON_FUNC_CONTINUE true
 
 /**
- * @brief Default Interface
+ * @brief Default Interface.
  *
  * @since_tizen 3.0
  */
 #define IOTCON_INTERFACE_DEFAULT "oic.if.baseline"
 
 /**
- * @brief List Links Interface which is used to list the references to other resources contained in a resource
+ * @brief List Links Interface which is used to list the references to other resources
+ * contained in a resource.
  *
  * @since_tizen 3.0
  */
 #define IOTCON_INTERFACE_LINK "oic.if.ll"
 
 /**
- * @brief Batch Interface which is used to manipulate (GET, PUT, POST, DELETE) on other resource contained in a resource
+ * @brief Batch Interface which is used to manipulate (GET, PUT, POST, DELETE) on other
+ * resource contained in a resource.
  *
  * @since_tizen 3.0
  */
 #define IOTCON_INTERFACE_BATCH "oic.if.b"
 
 /**
- * @brief Group Interface which is used to manipulate (GET, PUT, POST) a group of remote resources
+ * @brief Group Interface which is used to manipulate (GET, PUT, POST) a group of remote
+ * resources.
  *
  * @since_tizen 3.0
  */
 #define IOTCON_INTERFACE_GROUP "oic.mi.grp"
 
 /**
- * @brief Read-Only Interface which is used to limit the methods that can be applied to a resource to GET only
+ * @brief Read-Only Interface which is used to limit the methods that can be applied to a
+ * resource to GET only.
  *
  * @since_tizen 3.0
  */

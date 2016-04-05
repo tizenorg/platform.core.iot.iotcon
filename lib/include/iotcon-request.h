@@ -126,7 +126,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
  */
 
 /**
- * @brief Gets host address of the request
+ * @brief Gets host address of the request.
  *
  * @since_tizen 3.0
  *
@@ -152,7 +152,7 @@ int iotcon_request_get_host_address(iotcon_request_h request,
 		char **host_address);
 
 /**
- * @brief Gets connectivity type of the request
+ * @brief Gets connectivity type of the request.
  *
  * @since_tizen 3.0
  *
@@ -176,7 +176,7 @@ int iotcon_request_get_connectivity_type(iotcon_request_h request,
 		iotcon_connectivity_type_e *connectivity_type);
 
 /**
- * @brief Gets an representation of the request
+ * @brief Gets an representation of the request.
  *
  * @since_tizen 3.0
  *
@@ -202,8 +202,8 @@ int iotcon_request_get_representation(iotcon_request_h request,
 		iotcon_representation_h *repr);
 
 /**
- * @brief Gets type of the request
- * @details @a type could be one of the #iotcon_request_type_e
+ * @brief Gets type of the request.
+ * @details @a type could be one of the #iotcon_request_type_e.
  *
  * @since_tizen 3.0
  *
@@ -226,7 +226,7 @@ int iotcon_request_get_representation(iotcon_request_h request,
 int iotcon_request_get_request_type(iotcon_request_h request, iotcon_request_type_e *type);
 
 /**
- * @brief Gets options of the request
+ * @brief Gets options of the request.
  *
  * @since_tizen 3.0
  *
@@ -251,7 +251,7 @@ int iotcon_request_get_request_type(iotcon_request_h request, iotcon_request_typ
 int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *options);
 
 /**
- * @brief Gets query of the request
+ * @brief Gets query of the request.
  *
  * @since_tizen 3.0
  *
@@ -276,7 +276,7 @@ int iotcon_request_get_options(iotcon_request_h request, iotcon_options_h *optio
 int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query);
 
 /**
- * @brief Gets observation action of the request
+ * @brief Gets observation action of the request.
  *
  * @since_tizen 3.0
  * @details The @a observe_type could be one of #iotcon_observe_type_e.
@@ -301,7 +301,7 @@ int iotcon_request_get_observe_type(iotcon_request_h request,
 		iotcon_observe_type_e *observe_type);
 
 /**
- * @brief Gets observation id of the request
+ * @brief Gets observation id of the request.
  *
  * @since_tizen 3.0
  *
