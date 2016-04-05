@@ -24,6 +24,7 @@
 
 #include "icl-options.h"
 
+
 typedef enum {
 	ICL_DEVICE_STATE_ALIVE,
 	ICL_DEVICE_STATE_LOST_SIGNAL,
@@ -50,5 +51,6 @@ struct icl_remote_resource {
 void icl_remote_resource_ref(iotcon_remote_resource_h resource);
 void icl_remote_resource_unref(iotcon_remote_resource_h resource);
 void icl_remote_resource_crud_stop(iotcon_remote_resource_h resource);
+
 
 #endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__ */
