@@ -46,7 +46,6 @@ typedef enum {
 	IOTCON_ERROR_REPRESENTATION = TIZEN_ERROR_IOTCON | 0x02, /**< Representation errors */
 	IOTCON_ERROR_INVALID_TYPE = TIZEN_ERROR_IOTCON | 0x03, /**< Invalid type */
 	IOTCON_ERROR_ALREADY = TIZEN_ERROR_IOTCON | 0x04, /**< Already */
-	IOTCON_ERROR_DBUS = TIZEN_ERROR_IOTCON | 0x05, /**< D-Bus errors */
 	IOTCON_ERROR_SYSTEM = TIZEN_ERROR_IOTCON | 0x06, /**< System errors */
 } iotcon_error_e;
 

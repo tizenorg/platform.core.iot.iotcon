@@ -133,7 +133,6 @@ static void _find_light_resource()
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
- * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
  * @see iotcon_remote_resource_destroy()
@@ -211,7 +210,7 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  * @param[in] observe_policy The type to specify how client wants to observe.
@@ -224,7 +223,6 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
- * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -246,7 +244,7 @@ int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  *
@@ -254,7 +252,6 @@ int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -301,7 +298,7 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  * @param[in] query The query to send to server
@@ -312,7 +309,6 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -331,7 +327,7 @@ int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  * @param[in] repr The handle of the representation
@@ -343,7 +339,6 @@ int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -365,7 +360,7 @@ int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  * @param[in] repr The handle of the representation
@@ -377,7 +372,6 @@ int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -399,7 +393,7 @@ int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource
  * @param[in] cb The callback function
@@ -409,7 +403,6 @@ int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -445,13 +438,13 @@ typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
  * @details Use this function to start caching the resource's attribute.\n
  * Although, remote resource is not observable, it keeps the representation up-to-date.
  * Because It checks whether representation is changed, periodically.\n
- * The default checking interval is 10 seconds, but it may be changed by an administrator.\n
+ * The default checking interval is 10 seconds, but it may be changed by an administrator. \n
  * Also, you can get the cached representation even when the remote resource is off-line.
  *
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the remote resource to be cached
  * @param[in] cb The callback function to add into callback list
@@ -460,7 +453,6 @@ typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
@@ -480,7 +472,7 @@ int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the remote resource
  *
@@ -488,7 +480,6 @@ int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -524,7 +515,7 @@ typedef void (*iotcon_remote_resource_state_changed_cb)(iotcon_remote_resource_h
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the remote resource
  * @param[in] cb The callback function to add into callback list
@@ -550,7 +541,7 @@ int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the remote resource
  *
@@ -558,7 +549,6 @@ int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -820,6 +810,49 @@ int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
 int iotcon_remote_resource_get_cached_representation(
 		iotcon_remote_resource_h resource,
 		iotcon_representation_h *representation);
+
+/**
+ * @brief Gets the time interval of monitoring & caching API of remote resource.
+ * @details This API get the time interval of iotcon_remote_resource_start_monitoring(),
+ * and iotcon_remote_resource_start_caching().\n
+ * The functions operate GET method, every saved time interval.
+ * Default time interval is 10 seconds.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[out] time_interval Seconds for time interval
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @see iotcon_remote_resource_set_time_interval()
+ * @see iotcon_remote_resource_start_monitoring()
+ * @see iotcon_remote_resource_start_caching()
+ */
+int iotcon_remote_resource_get_time_interval(int *time_interval);
+
+/**
+ * @brief Sets the time interval of monitoring & caching API of remote resource.
+ * @details This API set the time interval of iotcon_remote_resource_start_monitoring(),
+ * and iotcon_remote_resource_start_caching().
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] time_interval Seconds for time interval (must be in range from 1 to 3600)
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @see iotcon_remote_resource_get_time_interval()
+ * @see iotcon_remote_resource_start_monitoring()
+ * @see iotcon_remote_resource_start_caching()
+ */
+int iotcon_remote_resource_set_time_interval(int time_interval);
+
 
 /**
  * @}

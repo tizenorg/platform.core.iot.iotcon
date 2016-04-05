@@ -237,18 +237,18 @@ int main(int argc, char **argv)
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* connect iotcon */
-	ret = iotcon_connect();
+	ret = iotcon_initialize("iotcon test - encapsulation client");
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_connect() Fail(%d)", ret);
+		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
 	}
 
 	/* find door typed resources */
-	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_ALL,
 			DOOR_RESOURCE_TYPE, false, _found_resource, &resource);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -258,7 +258,7 @@ int main(int argc, char **argv)
 	g_list_free_full(device_id_list, free);
 
 	/* disconnect iotcon */
-	iotcon_disconnect();
+	iotcon_deinitialize();
 
 	return 0;
 }
