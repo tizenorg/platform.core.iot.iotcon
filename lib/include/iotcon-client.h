@@ -85,7 +85,7 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
@@ -105,7 +105,6 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
- * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -130,7 +129,7 @@ int iotcon_add_presence_cb(const char *host_address,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] presence_handle The presence handle to be unsubscribed
  *
@@ -138,7 +137,6 @@ int iotcon_add_presence_cb(const char *host_address,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -325,9 +323,10 @@ int iotcon_presence_response_get_resource_type(iotcon_presence_response_h respon
 
 /**
  * @brief Specifies the type of function passed to iotcon_find_resource().
- * @details Called when a resource is found from the remote server.\n
+ * @details Called when a resource is found from the remote server. \n
  * The @a resource completes its life cycle in the function.
- * If you want to send requests(GET, PUT, POST, DELETE, and OBSERVE) on the @a resource, you must clone the @a resource using iotcon_remote_resource_clone().
+ * If you want to send requests(GET, PUT, POST, DELETE, and OBSERVE) on the @a resource,
+ * you must clone the @a resource using iotcon_remote_resource_clone(). \n
  * The @a result could be one of #iotcon_error_e.
  *
  * @since_tizen 3.0
@@ -353,7 +352,7 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
@@ -370,7 +369,6 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -416,7 +414,7 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] host_address The host address of remote server
  * @param[in] connectivity_type The connectivity type
@@ -427,7 +425,6 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -494,7 +491,7 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] host_address The host address of remote server
  * @param[in] connectivity_type The connectivity type
@@ -506,7 +503,6 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  * @retval #IOTCON_ERROR_NONE Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied

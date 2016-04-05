@@ -18,7 +18,6 @@
 #include <glib.h>
 
 #include <iotcon.h>
-#include <iotcon-internal.h>
 #include "test.h"
 
 #define DOOR_RESOURCE_URI "/door/1"
@@ -255,7 +254,8 @@ static int _request_handler_get(door_resource_s *door, iotcon_request_h request)
 	return 0;
 }
 
-static int _set_door_representation(door_resource_s *door, iotcon_representation_h repr)
+static int _set_door_representation(door_resource_s *door,
+		iotcon_representation_h repr)
 {
 	int ret;
 	bool bval;
@@ -423,7 +423,8 @@ static int _request_handler_post(door_resource_s *door, iotcon_request_h request
 	return 0;
 }
 
-static int _request_handler_delete(iotcon_resource_h resource, iotcon_request_h request)
+static int _request_handler_delete(iotcon_resource_h resource,
+		iotcon_request_h request)
 {
 	int ret;
 	INFO("DELETE request");

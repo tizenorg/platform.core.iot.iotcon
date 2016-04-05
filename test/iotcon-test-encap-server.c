@@ -18,7 +18,6 @@
 #include <glib.h>
 
 #include <iotcon.h>
-#include <iotcon-internal.h>
 #include "test.h"
 
 #define DOOR_RESOURCE_URI "/door/1"
