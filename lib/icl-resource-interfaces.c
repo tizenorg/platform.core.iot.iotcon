@@ -34,13 +34,12 @@ iotcon_resource_interfaces_h icl_resource_interfaces_ref(
 	return ifaces;
 }
 
-
 API int iotcon_resource_interfaces_create(iotcon_resource_interfaces_h *ret_ifaces)
 {
 	iotcon_resource_interfaces_h ifaces;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == ret_ifaces, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == ret_ifaces, IOTCON_ERROR_INVALID_PARAMETER, "ret_ifaces is NULL");
 
 	ifaces = calloc(1, sizeof(struct icl_resource_ifaces));
 	if (NULL == ifaces) {
@@ -58,7 +57,7 @@ API int iotcon_resource_interfaces_create(iotcon_resource_interfaces_h *ret_ifac
 
 API void iotcon_resource_interfaces_destroy(iotcon_resource_interfaces_h ifaces)
 {
-	RET_IF(NULL == ifaces);
+	RETM_IF(NULL == ifaces, "ifaces is NULL");
 
 	ifaces->ref_count--;
 
@@ -75,13 +74,13 @@ static int _icl_resource_interfaces_strcmp(const void *a, const void *b)
 }
 
 
-static bool _icl_resource_interfaces_duplicate_check(iotcon_resource_interfaces_h ifaces,
-		const char *iface)
+static bool _icl_resource_interfaces_duplicate_check(
+		iotcon_resource_interfaces_h ifaces, const char *iface)
 {
 	GList *node = NULL;
 
-	RETV_IF(NULL == ifaces, false);
-	RETV_IF(NULL == iface, false);
+	RETVM_IF(NULL == ifaces, false, "ifaces is NULL");
+	RETVM_IF(NULL == iface, false, "iface is NULL");
 
 	node = g_list_find_custom(ifaces->iface_list, iface, _icl_resource_interfaces_strcmp);
 	if (NULL == node)
@@ -98,8 +97,8 @@ API int iotcon_resource_interfaces_add(iotcon_resource_interfaces_h ifaces,
 	char *resource_iface;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER, "ifaces is NULL");
+	RETVM_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER, "iface is NULL");
 	RETVM_IF(1 < ifaces->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
 
@@ -127,8 +126,8 @@ API int iotcon_resource_interfaces_remove(iotcon_resource_interfaces_h ifaces,
 	char *node_data;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER, "ifaces is NULL");
+	RETVM_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER, "iface is NULL");
 	RETVM_IF(1 < ifaces->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
 
@@ -152,8 +151,8 @@ API int iotcon_resource_interfaces_foreach(iotcon_resource_interfaces_h ifaces,
 	GList *node;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER, "ifaces is NULL");
+	RETVM_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER, "cb is NULL");
 
 	for (node = ifaces->iface_list; node; node = node->next) {
 		if (IOTCON_FUNC_STOP == cb((const char*)node->data, user_data))
@@ -172,8 +171,8 @@ API int iotcon_resource_interfaces_clone(iotcon_resource_interfaces_h src,
 	iotcon_resource_interfaces_h resource_ifaces;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER, "src is NULL");
+	RETVM_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER, "dest is NULL");
 
 	resource_ifaces = calloc(1, sizeof(struct icl_resource_ifaces));
 	if (NULL == resource_ifaces) {

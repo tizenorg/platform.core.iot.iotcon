@@ -125,7 +125,7 @@ iotcon_value_h icl_value_create_str(const char *val)
 {
 	icl_basic_s *value;
 
-	RETV_IF(NULL == val, NULL);
+	RETVM_IF(NULL == val, NULL, "val is NULL");
 
 	value = (icl_basic_s*)_icl_value_create(IOTCON_TYPE_STR);
 	if (NULL == value) {
@@ -143,7 +143,7 @@ iotcon_value_h icl_value_create_byte_str(const unsigned char *val, int len)
 {
 	icl_val_byte_str_s *value;
 
-	RETV_IF(NULL == val, NULL);
+	RETVM_IF(NULL == val, NULL, "val is NULL");
 
 	value = (icl_val_byte_str_s*)_icl_value_create(IOTCON_TYPE_BYTE_STR);
 	if (NULL == value) {
@@ -198,7 +198,7 @@ int icl_value_get_int(iotcon_value_h value, int *val)
 {
 	icl_basic_s *real = (icl_basic_s*)value;
 
-	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER, "value is NULL");
 	RETVM_IF(IOTCON_TYPE_INT != real->type, IOTCON_ERROR_INVALID_PARAMETER,
 			"Invalid Type(%d)", real->type);
 
@@ -211,7 +211,7 @@ int icl_value_get_bool(iotcon_value_h value, bool *val)
 {
 	icl_basic_s *real = (icl_basic_s*)value;
 
-	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER, "value is NULL");
 	RETVM_IF(IOTCON_TYPE_BOOL != real->type, IOTCON_ERROR_INVALID_PARAMETER,
 			"Invalid Type(%d)", real->type);
 
@@ -224,7 +224,7 @@ int icl_value_get_double(iotcon_value_h value, double *val)
 {
 	icl_basic_s *real = (icl_basic_s*)value;
 
-	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER, "value is NULL");
 	RETVM_IF(IOTCON_TYPE_DOUBLE != real->type, IOTCON_ERROR_INVALID_PARAMETER,
 			"Invalid Type(%d)", real->type);
 
@@ -237,7 +237,7 @@ int icl_value_get_str(iotcon_value_h value, char **val)
 {
 	icl_basic_s *real = (icl_basic_s*)value;
 
-	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER, "value is NULL");
 	RETVM_IF(IOTCON_TYPE_STR != real->type, IOTCON_ERROR_INVALID_PARAMETER,
 			"Invalid Type(%d)", real->type);
 
@@ -251,7 +251,7 @@ int icl_value_get_byte_str(iotcon_value_h value, unsigned char **val, int *len)
 {
 	icl_val_byte_str_s *real = (icl_val_byte_str_s*)value;
 
-	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER, "value is NULL");
 	RETVM_IF(IOTCON_TYPE_BYTE_STR != real->type, IOTCON_ERROR_INVALID_PARAMETER,
 			"Invalid Type(%d)", real->type);
 
@@ -266,7 +266,7 @@ int icl_value_get_list(iotcon_value_h value, iotcon_list_h *list)
 {
 	icl_val_list_s *real = (icl_val_list_s*)value;
 
-	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER, "value is NULL");
 	RETVM_IF(IOTCON_TYPE_LIST != real->type, IOTCON_ERROR_INVALID_PARAMETER,
 			"Invalid Type(%d)", real->type);
 
@@ -279,7 +279,7 @@ int icl_value_get_state(iotcon_value_h value, iotcon_state_h *state)
 {
 	icl_val_state_s *real = (icl_val_state_s*)value;
 
-	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER, "value is NULL");
 	RETVM_IF(IOTCON_TYPE_STATE != real->type, IOTCON_ERROR_INVALID_PARAMETER,
 			"Invalid Type(%d)", real->type);
 
@@ -296,7 +296,7 @@ void icl_value_destroy(gpointer data)
 	iotcon_list_h list;
 	iotcon_state_h state;
 
-	RET_IF(NULL == data);
+	RETM_IF(NULL == data, "data is NULL");
 
 	value = data;
 
@@ -341,7 +341,7 @@ iotcon_value_h icl_value_clone(iotcon_value_h src)
 	iotcon_value_h dest = NULL;
 	icl_basic_s *real = (icl_basic_s*)src;
 
-	RETV_IF(NULL == src, NULL);
+	RETVM_IF(NULL == src, NULL, "src is NULL");
 
 	switch (src->type) {
 	case IOTCON_TYPE_INT:

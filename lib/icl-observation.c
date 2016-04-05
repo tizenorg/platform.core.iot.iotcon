@@ -25,7 +25,8 @@
 API int iotcon_observers_create(iotcon_observers_h *ret_observers)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == ret_observers, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == ret_observers, IOTCON_ERROR_INVALID_PARAMETER,
+			"ret_observers is NULL");
 
 	iotcon_observers_h observers = calloc(1, sizeof(struct icl_observers));
 	if (NULL == observers) {
@@ -41,7 +42,7 @@ API int iotcon_observers_create(iotcon_observers_h *ret_observers)
 
 API void iotcon_observers_destroy(iotcon_observers_h observers)
 {
-	RET_IF(NULL == observers);
+	RETM_IF(NULL == observers, "observers is NULL");
 
 	g_list_free(observers->observers_list);
 	free(observers);
@@ -51,7 +52,7 @@ API void iotcon_observers_destroy(iotcon_observers_h observers)
 API int iotcon_observers_add(iotcon_observers_h observers, int obs_id)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER, "observers is NULL");
 
 	observers->observers_list = g_list_append(observers->observers_list,
 			GUINT_TO_POINTER(obs_id));
@@ -63,7 +64,7 @@ API int iotcon_observers_add(iotcon_observers_h observers, int obs_id)
 API int iotcon_observers_remove(iotcon_observers_h observers, int obs_id)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == observers, IOTCON_ERROR_INVALID_PARAMETER, "observers is NULL");
 
 	observers->observers_list = g_list_remove(observers->observers_list,
 			GUINT_TO_POINTER(obs_id));

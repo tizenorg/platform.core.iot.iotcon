@@ -28,10 +28,12 @@
 
 API int iotcon_query_create(iotcon_query_h *ret_query)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == ret_query, IOTCON_ERROR_INVALID_PARAMETER);
+	iotcon_query_h query;
 
-	iotcon_query_h query = calloc(1, sizeof(struct icl_query));
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETVM_IF(NULL == ret_query, IOTCON_ERROR_INVALID_PARAMETER, "ret_query is NULL");
+
+	query = calloc(1, sizeof(struct icl_query));
 	if (NULL == query) {
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
@@ -47,7 +49,7 @@ API int iotcon_query_create(iotcon_query_h *ret_query)
 
 API void iotcon_query_destroy(iotcon_query_h query)
 {
-	RET_IF(NULL == query);
+	RETM_IF(NULL == query, "query is NULL");
 
 	g_hash_table_unref(query->hash);
 	free(query);
@@ -60,8 +62,9 @@ API int iotcon_query_get_resource_type(iotcon_query_h query,
 	char *type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER, "query is NULL");
+	RETVM_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER,
+			"resource_type is NULL");
 
 	iotcon_query_lookup(query, ICL_QUERY_KEY_RESOURCE_TYPE, &type);
 	if (NULL == type) {
@@ -79,8 +82,9 @@ API int iotcon_query_get_interface(iotcon_query_h query, char **resource_iface)
 	char *iface = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == resource_iface, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER, "query is NULL");
+	RETVM_IF(NULL == resource_iface, IOTCON_ERROR_INVALID_PARAMETER,
+			"resource_iface is NULL");
 
 	iotcon_query_lookup(query, ICL_QUERY_KEY_INTERFACE, &iface);
 	if (NULL == iface) {
@@ -93,14 +97,15 @@ API int iotcon_query_get_interface(iotcon_query_h query, char **resource_iface)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_query_set_resource_type(iotcon_query_h query, const char *resource_type)
+API int iotcon_query_set_resource_type(iotcon_query_h query,
+		const char *resource_type)
 {
 	int length_old = 0;
 	int length_new = 0;
 	char *value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER, "query is NULL");
 
 	value = g_hash_table_lookup(query->hash, ICL_QUERY_KEY_RESOURCE_TYPE);
 	if (value)
@@ -130,7 +135,7 @@ API int iotcon_query_set_interface(iotcon_query_h query, const char *resource_if
 	char *value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER, "query is NULL");
 
 	value = g_hash_table_lookup(query->hash, ICL_QUERY_KEY_INTERFACE);
 	if (value)
@@ -158,9 +163,9 @@ API int iotcon_query_add(iotcon_query_h query, const char *key, const char *valu
 	int query_len;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER, "query is NULL");
+	RETVM_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER, "qukeyery is NULL");
+	RETVM_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER, "value is NULL");
 
 	/* first query : ?key=value
 	 * Rest of query : ;key=value */
@@ -184,8 +189,8 @@ API int iotcon_query_remove(iotcon_query_h query, const char *key)
 	char *value;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER, "query is NULL");
+	RETVM_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER, "key is NULL");
 
 	value = g_hash_table_lookup(query->hash, key);
 	if (NULL == value) {
@@ -211,9 +216,9 @@ API int iotcon_query_lookup(iotcon_query_h query, const char *key, char **data)
 	char *value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == data, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER, "query is NULL");
+	RETVM_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER, "key is NULL");
+	RETVM_IF(NULL == data, IOTCON_ERROR_INVALID_PARAMETER, "data is NULL");
 
 	value = g_hash_table_lookup(query->hash, key);
 	if (NULL == value) {
@@ -233,8 +238,8 @@ API int iotcon_query_foreach(iotcon_query_h query, iotcon_query_foreach_cb cb,
 	gpointer key, value;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER, "query is NULL");
+	RETVM_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER, "cb is NULL");
 
 	g_hash_table_iter_init(&iter, query->hash);
 	while (g_hash_table_iter_next(&iter, &key, &value)) {

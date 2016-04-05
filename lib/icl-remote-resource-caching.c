@@ -16,181 +16,80 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <errno.h>
 #include <glib.h>
-#include <inttypes.h>
 
 #include "iotcon.h"
-#include "iotcon-internal.h"
-#include "ic-dbus.h"
 #include "ic-utils.h"
 #include "icl.h"
-#include "icl-dbus.h"
-#include "icl-dbus-type.h"
+#include "icl-types.h"
 #include "icl-representation.h"
 #include "icl-list.h"
 #include "icl-value.h"
-#include "icl-payload.h"
 #include "icl-remote-resource.h"
-
-typedef struct {
-	iotcon_remote_resource_cached_representation_changed_cb cb;
-	void *user_data;
-	iotcon_remote_resource_h resource;
-} icl_caching_s;
-
-
-static void _icl_caching_cb(GDBusConnection *connection,
-		const gchar *sender_name,
-		const gchar *object_path,
-		const gchar *interface_name,
-		const gchar *signal_name,
-		GVariant *parameters,
-		gpointer user_data)
-{
-	FN_CALL;
-	int ret;
-	iotcon_representation_h repr, cached_repr;
-	icl_caching_s *cb_container = user_data;
-	iotcon_remote_resource_cached_representation_changed_cb cb = cb_container->cb;
-
-	repr = icl_representation_from_gvariant(parameters);
-
-	ret = iotcon_representation_clone(repr, &cached_repr);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_clone() Fail(%d)", ret);
-		return;
-	}
-
-	if (cb_container->resource->cached_repr)
-		iotcon_representation_destroy(cb_container->resource->cached_repr);
-	cb_container->resource->cached_repr = cached_repr;
-
-	if (cb) {
-		cb(cb_container->resource, cb_container->resource->cached_repr,
-				cb_container->user_data);
-	}
-}
-
-
-static void _icl_caching_conn_cleanup(icl_caching_s *cb_container)
-{
-	if (cb_container->resource->cached_repr) {
-		iotcon_representation_destroy(cb_container->resource->cached_repr);
-		cb_container->resource->cached_repr = NULL;
-	}
-	cb_container->resource->caching_sub_id = 0;
-	icl_remote_resource_unref(cb_container->resource);
-	free(cb_container);
-}
-
+#include "icl-ioty.h"
 
 API int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
 		iotcon_remote_resource_cached_representation_changed_cb cb, void *user_data)
 {
-	int ret, sub_id;
-	GError *error = NULL;
-	int64_t signal_number;
-	icl_caching_s *cb_container;
-	char signal_name[IC_DBUS_SIGNAL_LENGTH] = {0};
+	int ret, connectivity_type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER, "resource is NULL");
 
 	if (true == resource->is_found) {
 		ERR("The resource should be cloned.");
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	if (0 != resource->caching_sub_id) {
-		ERR("Already Start Caching");
-		return IOTCON_ERROR_ALREADY;
-	}
-
 	INFO("Start Caching");
 
-	ic_dbus_call_start_caching_sync(icl_dbus_get_object(),
-			resource->uri_path,
-			resource->host_address,
-			resource->connectivity_type,
-			&signal_number,
-			&ret,
-			NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_start_caching_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return IOTCON_ERROR_DBUS;
+	connectivity_type = resource->connectivity_type;
+
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
+		ret = icl_ioty_remote_resource_start_caching(resource, cb, user_data);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_start_caching() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	default:
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
-	}
-
-	snprintf(signal_name, sizeof(signal_name), "%s_%"PRIx64, IC_DBUS_SIGNAL_CACHING,
-			signal_number);
-
-	cb_container = calloc(1, sizeof(icl_caching_s));
-	if (NULL == cb_container) {
-		ERR("calloc() Fail(%d)", errno);
-		return IOTCON_ERROR_OUT_OF_MEMORY;
-	}
-
-	cb_container->cb = cb;
-	cb_container->user_data = user_data;
-
-	sub_id = icl_dbus_subscribe_signal(signal_name, cb_container,
-			_icl_caching_conn_cleanup, _icl_caching_cb);
-	if (0 == sub_id) {
-		ERR("icl_dbus_subscribe_signal() Fail");
-		free(cb_container);
-		return IOTCON_ERROR_DBUS;
-	}
-	resource->caching_sub_id = sub_id;
-	cb_container->resource = resource;
-	icl_remote_resource_ref(resource);
-
 	return IOTCON_ERROR_NONE;
 }
 
 
 API int iotcon_remote_resource_stop_caching(iotcon_remote_resource_h resource)
 {
-	int ret;
-	GError *error = NULL;
+	int ret, connectivity_type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-
-	if (0 == resource->caching_sub_id) {
-		ERR("Not Cached");
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
+	RETVM_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER, "resource is NULL");
 
 	INFO("Stop Caching");
 
-	ic_dbus_call_stop_caching_sync(icl_dbus_get_object(),
-			resource->uri_path,
-			resource->host_address,
-			&ret,
-			NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_stop_caching_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		return ret;
-	}
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_dbus_error(ret);
-	}
+	connectivity_type = resource->connectivity_type;
 
-	icl_dbus_unsubscribe_signal(resource->caching_sub_id);
-	resource->caching_sub_id = 0;
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
+		ret = icl_ioty_remote_resource_stop_caching(resource);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_remote_resource_stop_caching() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	default:
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
 
 	return IOTCON_ERROR_NONE;
 }
@@ -201,8 +100,9 @@ API int iotcon_remote_resource_get_cached_representation(
 		iotcon_representation_h *representation)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == representation, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER, "resource is NULL");
+	RETVM_IF(NULL == representation, IOTCON_ERROR_INVALID_PARAMETER,
+			"representation is NULL");
 
 	if (NULL == resource->cached_repr) {
 		ERR("No Caching Representation");

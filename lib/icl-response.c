@@ -20,13 +20,13 @@
 #include "iotcon.h"
 #include "ic-utils.h"
 #include "icl.h"
-#include "icl-dbus.h"
-#include "icl-dbus-type.h"
 #include "icl-resource.h"
 #include "icl-representation.h"
 #include "icl-options.h"
 #include "icl-request.h"
 #include "icl-response.h"
+
+#include "icl-ioty.h"
 
 /* the last index of iotcon_response_result_e */
 #define ICL_RESPONSE_RESULT_MAX (IOTCON_RESPONSE_FORBIDDEN + 1)
@@ -37,8 +37,8 @@ API int iotcon_response_create(iotcon_request_h request,
 	FN_CALL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER, "request is NULL");
+	RETVM_IF(NULL == response, IOTCON_ERROR_INVALID_PARAMETER, "response is NULL");
 
 	iotcon_response_h resp = calloc(1, sizeof(struct icl_resource_response));
 	if (NULL == resp) {
@@ -48,6 +48,7 @@ API int iotcon_response_create(iotcon_request_h request,
 
 	resp->oic_request_h = request->oic_request_h;
 	resp->oic_resource_h = request->oic_resource_h;
+	resp->connectivity_type = request->connectivity_type;
 
 	*response = resp;
 
@@ -57,7 +58,7 @@ API int iotcon_response_create(iotcon_request_h request,
 
 API void iotcon_response_destroy(iotcon_response_h resp)
 {
-	RET_IF(NULL == resp);
+	RETM_IF(NULL == resp, "resp is NULL");
 
 	if (resp->repr)
 		iotcon_representation_destroy(resp->repr);
@@ -72,8 +73,8 @@ API int iotcon_response_get_options(iotcon_response_h resp,
 		iotcon_options_h *options)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER, "resp is NULL");
+	RETVM_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER, "options is NULL");
 	RETV_IF(NULL == resp->header_options, IOTCON_ERROR_NO_DATA);
 
 	*options = resp->header_options;
@@ -85,8 +86,8 @@ API int iotcon_response_get_representation(iotcon_response_h resp,
 		iotcon_representation_h *repr)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER, "resp is NULL");
+	RETVM_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER, "repr is NULL");
 	RETV_IF(NULL == resp->repr, IOTCON_ERROR_NO_DATA);
 
 	*repr = resp->repr;
@@ -99,8 +100,8 @@ API int iotcon_response_get_result(iotcon_response_h resp,
 		iotcon_response_result_e *result)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == result, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER, "resp is NULL");
+	RETVM_IF(NULL == result, IOTCON_ERROR_INVALID_PARAMETER, "result is NULL");
 
 	*result = resp->result;
 
@@ -111,7 +112,7 @@ API int iotcon_response_set_result(iotcon_response_h resp,
 		iotcon_response_result_e result)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER, "resp is NULL");
 
 	if (result < IOTCON_RESPONSE_OK || ICL_RESPONSE_RESULT_MAX <= result) {
 		ERR("Invalid result(%d)", result);
@@ -123,12 +124,12 @@ API int iotcon_response_set_result(iotcon_response_h resp,
 }
 
 
-API int iotcon_response_set_representation(iotcon_response_h resp, const char *iface,
-		iotcon_representation_h repr)
+API int iotcon_response_set_representation(iotcon_response_h resp,
+		const char *iface, iotcon_representation_h repr)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER, "resp is NULL");
+	RETVM_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER, "iface is NULL");
 
 	free(resp->iface);
 	resp->iface = strdup(iface);
@@ -149,7 +150,7 @@ API int iotcon_response_set_options(iotcon_response_h resp,
 		iotcon_options_h options)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER, "resp is NULL");
 
 	if (options)
 		options = icl_options_ref(options);
@@ -162,80 +163,29 @@ API int iotcon_response_set_options(iotcon_response_h resp,
 	return IOTCON_ERROR_NONE;
 }
 
-static bool _icl_response_representation_child_cb(iotcon_representation_h child,
-		void *user_data)
-{
-	char *iface = user_data;
-
-	if (IC_STR_EQUAL == strcmp(IOTCON_INTERFACE_BATCH, iface))
-		child->visibility = ICL_VISIBILITY_REPR;
-	else
-		child->visibility = ICL_VISIBILITY_PROP;
-
-	return IOTCON_FUNC_CONTINUE;
-}
-
-
-static int _icl_response_check_representation_visibility(iotcon_response_h resp)
-{
-	int ret;
-
-	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
-	if (NULL == resp->repr)
-		return IOTCON_ERROR_NONE;
-
-	iotcon_representation_h first = resp->repr;
-
-	DBG("interface type of response : %s", resp->iface);
-
-	if (IC_STR_EQUAL == strcmp(IOTCON_INTERFACE_LINK, resp->iface)
-			|| IC_STR_EQUAL == strcmp(IOTCON_INTERFACE_BATCH, resp->iface))
-		first->visibility = ICL_VISIBILITY_NONE;
-	else
-		first->visibility = ICL_VISIBILITY_REPR;
-
-	ret = iotcon_representation_foreach_children(first,
-			_icl_response_representation_child_cb, resp->iface);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_foreach_children() Fail(%d)", ret);
-		return ret;
-	}
-
-	return IOTCON_ERROR_NONE;
-}
-
-
 API int iotcon_response_send(iotcon_response_h resp)
 {
 	FN_CALL;
-	int ret;
-	GError *error = NULL;
-	GVariant *arg_response;
+	int ret, connectivity_type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
-	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER, "resp is NULL");
 
-	ret = _icl_response_check_representation_visibility(resp);
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_icl_response_check_representation_visibility() Fail(%d)", ret);
-		return ret;
-	}
+	connectivity_type = resp->connectivity_type;
 
-	arg_response = icl_dbus_response_to_gvariant(resp);
-	ic_dbus_call_send_response_sync(icl_dbus_get_object(), arg_response, &ret, NULL,
-			&error);
-	if (error) {
-		ERR("ic_dbus_call_send_response_sync() Fail(%s)", error->message);
-		ret = icl_dbus_convert_dbus_error(error->code);
-		g_error_free(error);
-		g_variant_unref(arg_response);
-		return ret;
-	}
-
-	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon-daemon Fail(%d)", ret);
-		return icl_dbus_convert_daemon_error(ret);
+	switch (connectivity_type) {
+	case IOTCON_CONNECTIVITY_IPV4:
+	case IOTCON_CONNECTIVITY_IPV6:
+	case IOTCON_CONNECTIVITY_ALL:
+		ret = icl_ioty_response_send(resp);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_ioty_response_send() Fail(%d)", ret);
+			return ret;
+		}
+		break;
+	default:
+		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
 	return IOTCON_ERROR_NONE;

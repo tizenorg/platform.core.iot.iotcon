@@ -25,7 +25,7 @@
 
 iotcon_resource_types_h icl_resource_types_ref(iotcon_resource_types_h types)
 {
-	RETV_IF(NULL == types, NULL);
+	RETVM_IF(NULL == types, NULL, "types is NULL");
 	RETV_IF(types->ref_count <= 0, NULL);
 
 	types->ref_count++;
@@ -39,7 +39,7 @@ API int iotcon_resource_types_create(iotcon_resource_types_h *ret_types)
 	iotcon_resource_types_h types;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == ret_types, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == ret_types, IOTCON_ERROR_INVALID_PARAMETER, "ret_types is NULL");
 
 	types = calloc(1, sizeof(struct icl_resource_types));
 	if (NULL == types) {
@@ -57,7 +57,7 @@ API int iotcon_resource_types_create(iotcon_resource_types_h *ret_types)
 
 API void iotcon_resource_types_destroy(iotcon_resource_types_h types)
 {
-	RET_IF(NULL == types);
+	RETM_IF(NULL == types, "types is NULL");
 
 	types->ref_count--;
 
@@ -79,8 +79,8 @@ static bool _icl_resource_types_duplicate_check(iotcon_resource_types_h types,
 {
 	GList *found_node = NULL;
 
-	RETV_IF(NULL == types, false);
-	RETV_IF(NULL == type, false);
+	RETVM_IF(NULL == types, false, "types is NULL");
+	RETVM_IF(NULL == type, false, "type is NULL");
 
 	found_node = g_list_find_custom(types->type_list, type, _icl_resource_types_strcmp);
 	if (NULL == found_node)
@@ -97,8 +97,8 @@ API int iotcon_resource_types_add(iotcon_resource_types_h types, const char *typ
 	char *resource_type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER, "types is NULL");
+	RETVM_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER, "type is NULL");
 	RETVM_IF(1 < types->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
 
@@ -125,14 +125,15 @@ API int iotcon_resource_types_add(iotcon_resource_types_h types, const char *typ
 }
 
 
-API int iotcon_resource_types_remove(iotcon_resource_types_h types, const char *type)
+API int iotcon_resource_types_remove(iotcon_resource_types_h types,
+		const char *type)
 {
 	GList *found_node;
 	char *node_data;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER, "types is NULL");
+	RETVM_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER, "type is NULL");
 	RETVM_IF(1 < types->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
 
@@ -156,8 +157,8 @@ API int iotcon_resource_types_foreach(iotcon_resource_types_h types,
 	GList *node;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER, "types is NULL");
+	RETVM_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER, "cb is NULL");
 
 	for (node = types->type_list; node; node = node->next) {
 		if (IOTCON_FUNC_STOP == cb((const char*)node->data, user_data))
@@ -176,8 +177,8 @@ API int iotcon_resource_types_clone(iotcon_resource_types_h src,
 	iotcon_resource_types_h resource_types;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER, "src is NULL");
+	RETVM_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER, "dest is NULL");
 
 	resource_types = calloc(1, sizeof(struct icl_resource_types));
 	if (NULL == resource_types) {
