@@ -355,7 +355,8 @@ static iotcon_representation_h _get_light_representation(light_resource_s *light
 	return repr;
 }
 
-static int _light_request_handler_get(light_resource_s *light, iotcon_request_h request)
+static int _light_request_handler_get(light_resource_s *light,
+		iotcon_request_h request)
 {
 	int ret;
 	iotcon_representation_h repr;
@@ -615,7 +616,8 @@ static iotcon_representation_h _get_room_representation(room_resource_s *room)
 	return repr;
 }
 
-static int _room_request_handler_get(room_resource_s *room, iotcon_request_h request)
+static int _room_request_handler_get(room_resource_s *room,
+		iotcon_request_h request)
 {
 	int ret;
 	iotcon_query_h query;
@@ -660,8 +662,8 @@ static int _room_request_handler_get(room_resource_s *room, iotcon_request_h req
 	return 0;
 }
 
-static void _light_request_handler(iotcon_resource_h resource, iotcon_request_h request,
-		void *user_data)
+static void _light_request_handler(iotcon_resource_h resource,
+		iotcon_request_h request, void *user_data)
 {
 	int ret;
 	iotcon_request_type_e type;
@@ -686,8 +688,8 @@ static void _light_request_handler(iotcon_resource_h resource, iotcon_request_h 
 	}
 }
 
-static void _fan_request_handler(iotcon_resource_h resource, iotcon_request_h request,
-		void *user_data)
+static void _fan_request_handler(iotcon_resource_h resource,
+		iotcon_request_h request, void *user_data)
 {
 	int ret;
 	iotcon_request_type_e type;
@@ -712,8 +714,8 @@ static void _fan_request_handler(iotcon_resource_h resource, iotcon_request_h re
 	}
 }
 
-static void _room_request_handler(iotcon_resource_h resource, iotcon_request_h request,
-		void *user_data)
+static void _room_request_handler(iotcon_resource_h resource,
+		iotcon_request_h request, void *user_data)
 {
 	FN_CALL;
 	int ret;
@@ -759,10 +761,10 @@ int main(int argc, char **argv)
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* connect iotcon */
-	ret = iotcon_connect();
+	/* initialize iotcon */
+	ret = iotcon_initialize();
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_connect() Fail(%d)", ret);
+		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
 	}
 
@@ -770,7 +772,7 @@ int main(int argc, char **argv)
 	ret = _set_room_resource(&room);
 	if (0 != ret) {
 		ERR("_set_room_resource() Fail(%d)", ret);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -778,7 +780,7 @@ int main(int argc, char **argv)
 	if (0 != ret) {
 		ERR("_set_room_resource() Fail(%d)", ret);
 		_free_room_resource(&room);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -787,7 +789,7 @@ int main(int argc, char **argv)
 		ERR("_set_room_resource() Fail(%d)", ret);
 		_free_room_resource(&room);
 		_free_light_resource(&light);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -802,7 +804,7 @@ int main(int argc, char **argv)
 		_free_fan_resource(&fan);
 		_free_light_resource(&light);
 		_free_room_resource(&room);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -815,7 +817,7 @@ int main(int argc, char **argv)
 		_free_fan_resource(&fan);
 		_free_light_resource(&light);
 		_free_room_resource(&room);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -827,7 +829,7 @@ int main(int argc, char **argv)
 		_free_fan_resource(&fan);
 		_free_light_resource(&light);
 		_free_room_resource(&room);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -841,7 +843,7 @@ int main(int argc, char **argv)
 		_free_fan_resource(&fan);
 		_free_light_resource(&light);
 		_free_room_resource(&room);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -854,7 +856,7 @@ int main(int argc, char **argv)
 		_free_fan_resource(&fan);
 		_free_light_resource(&light);
 		_free_room_resource(&room);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -868,8 +870,8 @@ int main(int argc, char **argv)
 	_free_light_resource(&light);
 	_free_room_resource(&room);
 
-	/* disconnect iotcon */
-	iotcon_disconnect();
+	/* deinitialize iotcon */
+	iotcon_deinitialize();
 
 	return 0;
 }

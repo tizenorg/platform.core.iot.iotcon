@@ -23,7 +23,7 @@
 #include "icl-options.h"
 
 /**
- * @brief HeaderOption range from 2048 to 3000
+ * @brief HeaderOption range from 2048 to 3000.
  * NOTE: HeaderOptionID  is an unsigned integer value which MUST be within
  * range of 2048 to 3000 inclusive of lower and upper bound.
  * HeaderOptions instance creation fails if above condition is not satisfied.
@@ -144,7 +144,8 @@ API int iotcon_options_remove(iotcon_options_h options, unsigned short id)
 }
 
 
-API int iotcon_options_lookup(iotcon_options_h options, unsigned short id, char **data)
+API int iotcon_options_lookup(iotcon_options_h options, unsigned short id,
+		char **data)
 {
 	char *value;
 
@@ -164,8 +165,8 @@ API int iotcon_options_lookup(iotcon_options_h options, unsigned short id, char 
 }
 
 
-API int iotcon_options_foreach(iotcon_options_h options, iotcon_options_foreach_cb cb,
-		void *user_data)
+API int iotcon_options_foreach(iotcon_options_h options,
+		iotcon_options_foreach_cb cb, void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key, value;

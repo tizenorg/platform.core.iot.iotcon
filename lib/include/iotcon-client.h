@@ -85,7 +85,7 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
@@ -105,7 +105,6 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
- * @retval #IOTCON_ERROR_DBUS  Dbus errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -130,7 +129,7 @@ int iotcon_add_presence_cb(const char *host_address,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] presence_handle The presence handle to be unsubscribed
  *
@@ -138,7 +137,6 @@ int iotcon_add_presence_cb(const char *host_address,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
@@ -150,7 +148,7 @@ int iotcon_add_presence_cb(const char *host_address,
 int iotcon_remove_presence_cb(iotcon_presence_h presence_handle);
 
 /**
- * @brief Gets host address from the presence handle
+ * @brief Gets host address from the presence handle.
  *
  * @since_tizen 3.0
  *
@@ -170,7 +168,7 @@ int iotcon_remove_presence_cb(iotcon_presence_h presence_handle);
 int iotcon_presence_get_host_address(iotcon_presence_h presence, char **host_address);
 
 /**
- * @brief Gets connectivity type from the presence handle
+ * @brief Gets connectivity type from the presence handle.
  * @details The @a connectivity_type could be one of #iotcon_connectivity_type_e.
  *
  * @since_tizen 3.0
@@ -190,7 +188,7 @@ int iotcon_presence_get_connectivity_type(iotcon_presence_h presence,
 		iotcon_connectivity_type_e *connectivity_type);
 
 /**
- * @brief Gets resource type from the presence handle
+ * @brief Gets resource type from the presence handle.
  *
  * @since_tizen 3.0
  *
@@ -211,7 +209,7 @@ int iotcon_presence_get_resource_type(iotcon_presence_h presence,
 		char **resource_type);
 
 /**
- * @brief Gets result from the presence response handle
+ * @brief Gets result from the presence response handle.
  *
  * @details The @a result could be one of #iotcon_presence_result_e.
  * @since_tizen 3.0
@@ -233,7 +231,7 @@ int iotcon_presence_response_get_result(iotcon_presence_response_h response,
 		iotcon_presence_result_e *result);
 
 /**
- * @brief Gets trigger from the presence response handle
+ * @brief Gets trigger from the presence response handle.
  *
  * @details The @a trigger could be one of #iotcon_presence_trigger_e.
  * It is set only if a response result is IOTCON_PRESENCE_OK.
@@ -256,7 +254,7 @@ int iotcon_presence_response_get_trigger(iotcon_presence_response_h response,
 		iotcon_presence_trigger_e *trigger);
 
 /**
- * @brief Gets host address from the presence response handle
+ * @brief Gets host address from the presence response handle.
  *
  * @since_tizen 3.0
  *
@@ -279,7 +277,7 @@ int iotcon_presence_response_get_host_address(iotcon_presence_response_h respons
 		char **host_address);
 
 /**
- * @brief Gets connectivity type from the presence response handle
+ * @brief Gets connectivity type from the presence response handle.
  *
  * @details The @a connectivity_type could be one of #iotcon_connectivity_type_e.
  * @since_tizen 3.0
@@ -301,7 +299,7 @@ int iotcon_presence_response_get_connectivity_type(iotcon_presence_response_h re
 		iotcon_connectivity_type_e *connectivity_type);
 
 /**
- * @brief Gets resource type from the presence response handle
+ * @brief Gets resource type from the presence response handle.
  *
  * @since_tizen 3.0
  *
@@ -325,9 +323,10 @@ int iotcon_presence_response_get_resource_type(iotcon_presence_response_h respon
 
 /**
  * @brief Specifies the type of function passed to iotcon_find_resource().
- * @details Called when a resource is found from the remote server.\n
+ * @details Called when a resource is found from the remote server. \n
  * The @a resource completes its life cycle in the function.
- * If you want to send requests(GET, PUT, POST, DELETE, and OBSERVE) on the @a resource, you must clone the @a resource using iotcon_remote_resource_clone().
+ * If you want to send requests(GET, PUT, POST, DELETE, and OBSERVE) on the @a resource,
+ * you must clone the @a resource using iotcon_remote_resource_clone(). \n
  * The @a result could be one of #iotcon_error_e.
  *
  * @since_tizen 3.0
@@ -353,11 +352,11 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
- * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.\n
+ * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.
  *
  * @param[in] host_address The address or addressable name of server
  * @param[in] connectivity_type The connectivity type
@@ -370,11 +369,10 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @pre iotcon_connect() should be called to connect a connection to the iotcon.
+ * @pre iotcon_initialize() should be called to initialize.
  * @post iotcon_found_resource_cb() will be invoked.
  *
  * @see iotcon_found_resource_cb()
@@ -416,7 +414,7 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] host_address The host address of remote server
  * @param[in] connectivity_type The connectivity type
@@ -427,11 +425,10 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @pre iotcon_connect() should be called to connect a connection to the iotcon.
+ * @pre iotcon_initialize() should be called to initialize.
  * @post iotcon_device_info_cb() will be invoked.
  *
  * @see iotcon_device_info_cb()
@@ -444,7 +441,7 @@ int iotcon_get_device_info(const char *host_address,
 		void *user_data);
 
 /**
- * @brief Gets device properties from the device information handle
+ * @brief Gets device properties from the device information handle.
  *
  * @since_tizen 3.0
  *
@@ -494,7 +491,7 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/d2d.datasharing
+ * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] host_address The host address of remote server
  * @param[in] connectivity_type The connectivity type
@@ -506,12 +503,11 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  * @retval #IOTCON_ERROR_NONE Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_DBUS  Dbus error
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
- * @pre iotcon_connect() should be called to connect a connection to the iotcon.
+ * @pre iotcon_initialize() should be called to initialize.
  * @post iotcon_platform_info_cb() will be invoked.
  *
  * @see iotcon_platform_info_cb()
@@ -524,7 +520,7 @@ int iotcon_get_platform_info(const char *host_address,
 		void *user_data);
 
 /**
- * @brief Gets platform properties from the platform information handle
+ * @brief Gets platform properties from the platform information handle.
  *
  * @since_tizen 3.0
  *

@@ -311,7 +311,7 @@ int iotcon_query_remove(iotcon_query_h query, const char *key);
 int iotcon_query_lookup(iotcon_query_h query, const char *key, char **data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_query_foreach()
+ * @brief Specifies the type of function passed to iotcon_query_foreach().
  *
  * @since_tizen 3.0
  *

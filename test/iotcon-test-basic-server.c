@@ -18,7 +18,6 @@
 #include <glib.h>
 
 #include <iotcon.h>
-#include <iotcon-internal.h>
 #include "test.h"
 
 #define DOOR_RESOURCE_URI "/door/1"
@@ -255,7 +254,8 @@ static int _request_handler_get(door_resource_s *door, iotcon_request_h request)
 	return 0;
 }
 
-static int _set_door_representation(door_resource_s *door, iotcon_representation_h repr)
+static int _set_door_representation(door_resource_s *door,
+		iotcon_representation_h repr)
 {
 	int ret;
 	bool bval;
@@ -423,7 +423,8 @@ static int _request_handler_post(door_resource_s *door, iotcon_request_h request
 	return 0;
 }
 
-static int _request_handler_delete(iotcon_resource_h resource, iotcon_request_h request)
+static int _request_handler_delete(iotcon_resource_h resource,
+		iotcon_request_h request)
 {
 	int ret;
 	INFO("DELETE request");
@@ -562,10 +563,10 @@ int main(int argc, char **argv)
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* connect iotcon */
-	ret = iotcon_connect();
+	/* initialize iotcon */
+	ret = iotcon_initialize();
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_connect() Fail(%d)", ret);
+		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
 	}
 
@@ -573,7 +574,7 @@ int main(int argc, char **argv)
 	ret = _set_door_resource(&my_door);
 	if (0 != ret) {
 		ERR("_set_door_resource() Fail");
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -582,7 +583,7 @@ int main(int argc, char **argv)
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_resource_interfaces_add() Fail(%d)", ret);
 		_free_door_resource(&my_door);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 	my_door.properties |= IOTCON_RESOURCE_OBSERVABLE;
@@ -597,7 +598,7 @@ int main(int argc, char **argv)
 	if (NULL == my_door.handle) {
 		ERR("_create_door_resource() Fail");
 		_free_door_resource(&my_door);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -613,8 +614,8 @@ int main(int argc, char **argv)
 
 	_free_door_resource(&my_door);
 
-	/* disconnect iotcon */
-	iotcon_disconnect();
+	/* deinitialize iotcon */
+	iotcon_deinitialize();
 
 	return 0;
 }

@@ -18,7 +18,6 @@
 #include <glib.h>
 
 #include <iotcon.h>
-#include <iotcon-internal.h>
 #include "test.h"
 
 #define DOOR_RESOURCE_URI "/door/1"
@@ -197,10 +196,10 @@ int main(int argc, char **argv)
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* connect iotcon */
-	ret = iotcon_connect();
+	/* initialize iotcon */
+	ret = iotcon_initialize();
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_connect() Fail(%d)", ret);
+		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
 	}
 
@@ -215,7 +214,7 @@ int main(int argc, char **argv)
 	ret = _set_door_resource(&my_door);
 	if (0 != ret) {
 		ERR("_set_door_resource() Fail");
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -229,7 +228,7 @@ int main(int argc, char **argv)
 		ERR("_create_door_resource() Fail");
 		_free_door_resource(&my_door);
 		iotcon_stop_presence();
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -246,8 +245,8 @@ int main(int argc, char **argv)
 
 	iotcon_stop_presence();
 
-	/* disconnect iotcon */
-	iotcon_disconnect();
+	/* deinitialize iotcon */
+	iotcon_deinitialize();
 
 	return 0;
 }

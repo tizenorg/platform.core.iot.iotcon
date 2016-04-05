@@ -196,8 +196,8 @@ static void _on_response_post(iotcon_remote_resource_h resource,
 	}
 }
 
-static void _on_response_put(iotcon_remote_resource_h resource, iotcon_response_h response,
-		void *user_data)
+static void _on_response_put(iotcon_remote_resource_h resource,
+		iotcon_response_h response, void *user_data)
 {
 	int ret;
 	iotcon_response_result_e response_result;
@@ -588,19 +588,19 @@ int main(int argc, char **argv)
 
 	loop = g_main_loop_new(NULL, FALSE);
 
-	/* connect iotcon */
-	ret = iotcon_connect();
+	/* initialize iotcon */
+	ret = iotcon_initialize();
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_connect() Fail(%d)", ret);
+		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
 	}
 
 	/* find door typed resources */
-	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_IPV4,
+	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_ALL,
 			DOOR_RESOURCE_TYPE, false, _found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
-		iotcon_disconnect();
+		iotcon_deinitialize();
 		return -1;
 	}
 
@@ -609,8 +609,8 @@ int main(int argc, char **argv)
 
 	g_list_free_full(device_id_list, free);
 
-	/* disconnect iotcon */
-	iotcon_disconnect();
+	/* deinitialize iotcon */
+	iotcon_deinitialize();
 
 	return 0;
 }
