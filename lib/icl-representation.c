@@ -114,6 +114,8 @@ API int iotcon_representation_set_uri_path(iotcon_representation_h repr,
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(false == icl_resource_check_uri_path(uri_path),
+			IOTCON_ERROR_INVALID_PARAMETER);
 
 	free(repr->uri_path);
 	repr->uri_path = strdup(uri_path);

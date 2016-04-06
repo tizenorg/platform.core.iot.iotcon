@@ -152,6 +152,65 @@ static void _icl_resource_conn_cleanup(iotcon_resource_h resource)
 }
 
 
+bool icl_resource_check_uri_path(const char *uri_path)
+{
+	int i;
+
+	if (ICL_URI_PATH_LENGTH_MAX < strlen(uri_path)) {
+		ERR("The length of URI path(%s) should be less than or equal to %d.", uri_path,
+				ICL_URI_PATH_LENGTH_MAX);
+		return false;
+	}
+
+	if ('/' != uri_path[0])
+		return false;
+
+	for (i = 0; '\0' != uri_path[i]; i++) {
+		if ('?' == uri_path[i])
+			return false;
+	}
+
+	return true;
+}
+
+
+bool _check_type_interface(const char *src)
+{
+	int i;
+
+	if (src[0] < 'a' || 'z' < src[0])
+		return false;
+
+	for (i = 1; '\0' != src[i]; i++) {
+		if ('.' == src[i])
+			return true;
+		if ('-' == src[i])
+			return true;
+		if ((src[i] < 'a' || 'z' < src[i]) && (src[i] < '0' || '9' < src[i]))
+			return false;
+	}
+	return true;
+}
+
+
+bool icl_resource_check_type(const char *type)
+{
+	if (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(type)) {
+		ERR("The length of type(%s) should be less than or equal to %d.", type,
+				ICL_RESOURCE_TYPE_LENGTH_MAX);
+		return false;
+	}
+
+	return _check_type_interface(type);
+}
+
+
+bool icl_resource_check_interface(const char *iface)
+{
+	return _check_type_interface(iface);
+}
+
+
 /* The length of uri_path should be less than or equal to 36. */
 API int iotcon_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
@@ -172,8 +231,8 @@ API int iotcon_resource_create(const char *uri_path,
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(ICL_URI_PATH_LENGTH_MAX < strlen(uri_path),
-			IOTCON_ERROR_INVALID_PARAMETER, "Invalid uri_path(%s)", uri_path);
+	RETV_IF(false == icl_resource_check_uri_path(uri_path),
+			IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == res_types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
@@ -303,6 +362,8 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource, const char *i
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(false == icl_resource_check_interface(iface), IOTCON_ERROR_INVALID_PARAMETER);
+
 	if (0 == resource->sub_id) {
 		ERR("Invalid Resource handle");
 		return IOTCON_ERROR_INVALID_PARAMETER;
@@ -355,6 +416,9 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource, const char *resour
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(false == icl_resource_check_type(resource_type),
+			IOTCON_ERROR_INVALID_PARAMETER);
+
 	if (0 == resource->sub_id) {
 		ERR("Invalid Resource handle");
 		return IOTCON_ERROR_INVALID_PARAMETER;

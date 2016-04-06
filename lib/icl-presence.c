@@ -25,6 +25,7 @@
 #include "iotcon-internal.h"
 #include "ic-utils.h"
 #include "icl.h"
+#include "icl-resource.h"
 #include "icl-resource-types.h"
 #include "icl-dbus.h"
 
@@ -184,11 +185,8 @@ API int iotcon_add_presence_cb(const char *host_address,
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == presence_handle, IOTCON_ERROR_INVALID_PARAMETER);
-
-	if (resource_type && (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
-		ERR("The length of resource_type(%s) is invalid", resource_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
+	RETV_IF(resource_type && (false == icl_resource_check_type(resource_type)),
+			IOTCON_ERROR_INVALID_PARAMETER);
 
 	if ((IOTCON_MULTICAST_ADDRESS == host_address || '\0' == host_address[0])
 			&& (IOTCON_CONNECTIVITY_IPV4 != connectivity_type

@@ -54,4 +54,8 @@ struct icl_resource {
 	iotcon_observers_h observers;
 };
 
+bool icl_resource_check_uri_path(const char *uri_path);
+bool icl_resource_check_type(const char *type);
+bool icl_resource_check_interface(const char *iface);
+
 #endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_H__*/
