@@ -21,6 +21,7 @@
 #include "iotcon-types.h"
 #include "ic-utils.h"
 #include "icl.h"
+#include "icl-resource.h"
 #include "icl-resource-interfaces.h"
 
 iotcon_resource_interfaces_h icl_resource_interfaces_ref(
@@ -102,6 +103,7 @@ API int iotcon_resource_interfaces_add(iotcon_resource_interfaces_h ifaces,
 	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(1 < ifaces->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
+	RETV_IF(false == icl_resource_check_interface(iface), IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (true == _icl_resource_interfaces_duplicate_check(ifaces, iface)) {
 		ERR("%s is already contained.", iface);

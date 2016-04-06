@@ -21,6 +21,7 @@
 #include "iotcon-types.h"
 #include "ic-utils.h"
 #include "icl.h"
+#include "icl-resource.h"
 #include "icl-resource-types.h"
 
 iotcon_resource_types_h icl_resource_types_ref(iotcon_resource_types_h types)
@@ -101,12 +102,7 @@ API int iotcon_resource_types_add(iotcon_resource_types_h types, const char *typ
 	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(1 < types->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
 			"Don't modify it. It is already set.");
-
-	if (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(type)) {
-		ERR("The length of type(%s) should be less than or equal to %d.", type,
-				ICL_RESOURCE_TYPE_LENGTH_MAX);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
+	RETV_IF(false == icl_resource_check_type(type), IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (true == _icl_resource_types_duplicate_check(types, type)) {
 		ERR("%s is already contained.", type);

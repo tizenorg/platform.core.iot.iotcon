@@ -305,8 +305,8 @@ API int iotcon_lite_resource_create(const char *uri_path,
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(ICL_URI_PATH_LENGTH_MAX < strlen(uri_path),
-			IOTCON_ERROR_INVALID_PARAMETER, "Invalid uri_path(%s)", uri_path);
+	RETV_IF(false == icl_resource_check_uri_path(uri_path),
+			IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == res_types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
 

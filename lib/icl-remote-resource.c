@@ -29,6 +29,7 @@
 #include "icl-dbus.h"
 #include "icl-representation.h"
 #include "icl-remote-resource.h"
+#include "icl-resource.h"
 #include "icl-resource-types.h"
 #include "icl-resource-interfaces.h"
 #include "icl-payload.h"
@@ -77,6 +78,7 @@ static void _icl_found_resource_cb(GDBusConnection *connection,
 	if (cb)
 		cb(resource, IOTCON_ERROR_NONE, cb_container->user_data);
 
+	resource->is_found = false;
 	iotcon_remote_resource_destroy(resource);
 }
 
@@ -127,10 +129,8 @@ API int iotcon_find_resource(const char *host_address,
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
-	if (resource_type && (ICL_RESOURCE_TYPE_LENGTH_MAX < strlen(resource_type))) {
-		ERR("The length of resource_type(%s) is invalid", resource_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
+	RETV_IF(resource_type && (false == icl_resource_check_type(resource_type)),
+			IOTCON_ERROR_INVALID_PARAMETER);
 
 	timeout = icl_dbus_get_timeout();
 
@@ -198,6 +198,8 @@ API int iotcon_remote_resource_create(const char *host_address,
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(false == icl_resource_check_uri_path(uri_path),
+			IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);

@@ -23,6 +23,7 @@
 #include "iotcon-types.h"
 #include "ic-utils.h"
 #include "icl.h"
+#include "icl-resource.h"
 #include "icl-resource-types.h"
 #include "icl-query.h"
 
@@ -101,12 +102,14 @@ API int iotcon_query_set_resource_type(iotcon_query_h query, const char *resourc
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(resource_type && (false == icl_resource_check_type(resource_type)),
+			IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = g_hash_table_lookup(query->hash, ICL_QUERY_KEY_RESOURCE_TYPE);
 	if (value)
 		length_old = (sizeof(ICL_QUERY_KEY_RESOURCE_TYPE) - 1) + strlen(value) + 2;
 
-	if (resource_type && *resource_type)
+	if (resource_type)
 		length_new = (sizeof(ICL_QUERY_KEY_RESOURCE_TYPE) - 1) + strlen(resource_type) + 2;
 
 	if (ICL_QUERY_LENGTH_MAX < query->len - length_old + length_new) {
@@ -131,12 +134,14 @@ API int iotcon_query_set_interface(iotcon_query_h query, const char *resource_if
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(resource_iface && (false == icl_resource_check_interface(resource_iface)),
+			IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = g_hash_table_lookup(query->hash, ICL_QUERY_KEY_INTERFACE);
 	if (value)
 		length_old = (sizeof(ICL_QUERY_KEY_INTERFACE) - 1) + strlen(value) + 2;
 
-	if (resource_iface && *resource_iface)
+	if (resource_iface)
 		length_new = (sizeof(ICL_QUERY_KEY_INTERFACE) - 1) + strlen(resource_iface) + 2;
 
 	if (ICL_QUERY_LENGTH_MAX < query->len - length_old + length_new) {
