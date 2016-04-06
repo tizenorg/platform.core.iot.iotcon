@@ -183,7 +183,8 @@ int iotcon_remote_resource_clone(iotcon_remote_resource_h src, iotcon_remote_res
 
 /**
  * @brief Specifies the type of observe callback passed to iotcon_remote_resource_observe_register().
- * The @a err could be one of #iotcon_error_e.
+ * The @a err could be one of #iotcon_error_e.\n
+ * The @a response is created by a server. Therefore, you can't get any values that the server didn't set.
  *
  * @since_tizen 3.0
  *
@@ -266,9 +267,10 @@ int iotcon_remote_resource_observe_deregister(iotcon_remote_resource_h resource)
 /**
  * @brief Specifies the type of response function.
  * @details The function passed to iotcon_remote_resource_get(), iotcon_remote_resource_put(),
- * iotcon_remote_resource_post(), iotcon_remote_resource_delete().
- * The @a err could be one of #iotcon_error_e.
- * The @a request_type could be one of #iotcon_request_type_e.
+ * iotcon_remote_resource_post(), iotcon_remote_resource_delete().\n
+ * The @a err could be one of #iotcon_error_e.\n
+ * The @a request_type could be one of #iotcon_request_type_e.\n
+ * The @a response is created by a server. Therefore, you can't get any values that the server didn't set.
  *
  * @since_tizen 3.0
  *

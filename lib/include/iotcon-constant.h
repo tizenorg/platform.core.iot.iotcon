@@ -33,7 +33,7 @@
  *
  * @since_tizen 3.0
  */
-#define IOTCON_MULTICAST_ADDRESS NULL /**< Multicast Address */
+#define IOTCON_MULTICAST_ADDRESS NULL
 
 /**
  * @brief Use this value as the return value to stop foreach function.
