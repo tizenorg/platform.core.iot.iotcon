@@ -286,6 +286,7 @@ int iotcon_representation_set_uri_path(iotcon_representation_h repr,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA No data available
  */
 int iotcon_representation_get_uri_path(iotcon_representation_h repr, char **uri_path);
 
@@ -320,6 +321,7 @@ int iotcon_representation_set_resource_types(iotcon_representation_h repr,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA No data available
  */
 int iotcon_representation_get_resource_types(iotcon_representation_h repr,
 		iotcon_resource_types_h *types);
@@ -357,6 +359,7 @@ int iotcon_representation_set_resource_interfaces(iotcon_representation_h repr,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA No data available
  */
 int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr,
 		iotcon_resource_interfaces_h *ifaces);

@@ -408,6 +408,11 @@ API int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == device_id, IOTCON_ERROR_INVALID_PARAMETER);
 
+	if (NULL == resource->device_id) {
+		ERR("If you want to get device ID, you should call iotcon_find_resource().");
+		return IOTCON_ERROR_NO_DATA;
+	}
+
 	*device_id = resource->device_id;
 
 	return IOTCON_ERROR_NONE;
@@ -459,6 +464,7 @@ API int iotcon_remote_resource_get_options(iotcon_remote_resource_h resource,
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == resource->header_options, IOTCON_ERROR_NO_DATA);
 
 	*options = resource->header_options;
 

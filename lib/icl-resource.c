@@ -614,6 +614,7 @@ API int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 		ERR("Invalid index(%d)", index);
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
+	RETV_IF(NULL == parent->children[index], IOTCON_ERROR_NO_DATA);
 
 	*child = parent->children[index];
 

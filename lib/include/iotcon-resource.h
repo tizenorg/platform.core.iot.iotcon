@@ -513,6 +513,7 @@ int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *numb
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA No data available
  *
  * @see iotcon_resource_get_number_of_children()
  * @see iotcon_resource_get_uri_path()
