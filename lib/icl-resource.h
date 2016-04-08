@@ -17,17 +17,11 @@
 #define __IOT_CONNECTIVITY_MANAGER_LIBRARY_RESOURCE_H__
 
 #include <stdint.h>
+#include <glib.h>
 
 #include "iotcon-types.h"
 
 #include "icl-dbus.h"
-
-/**
- * @brief The maximum number of children resources which can be held in a parent resource.
- *
- * @since_tizen 3.0
- */
-#define ICL_CONTAINED_RESOURCES_MAX 5
 
 /**
  * @brief The maximum length of uri_path which can be held in a resource.
@@ -50,8 +44,8 @@ struct icl_resource {
 	void *user_data;
 	unsigned int sub_id;
 	int64_t handle;
-	iotcon_resource_h children[ICL_CONTAINED_RESOURCES_MAX];
 	iotcon_observers_h observers;
+	GList *children;
 };
 
 bool icl_resource_check_uri_path(const char *uri_path);
