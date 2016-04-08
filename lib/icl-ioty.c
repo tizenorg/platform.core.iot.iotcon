@@ -1433,48 +1433,33 @@ int icl_ioty_resource_bind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
 	FN_CALL;
-	int i, ret;
+	OCStackResult ret;
 	OCResourceHandle handle_parent, handle_child;
 
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(parent == child, IOTCON_ERROR_INVALID_PARAMETER);
 
-	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
-		if (child == parent->children[i]) {
-			ERR("Child resource was already bound to parent resource.");
-			return IOTCON_ERROR_ALREADY;
-		}
-	}
-
 	handle_parent = IC_INT64_TO_POINTER(parent->handle);
 	handle_child = IC_INT64_TO_POINTER(child->handle);
 
-	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
-		if (NULL == parent->children[i]) {
-			icl_ioty_csdk_lock();
-			ret = OCBindResource(handle_parent, handle_child);
-			icl_ioty_csdk_unlock();
+	icl_ioty_csdk_lock();
+	ret = OCBindResource(handle_parent, handle_child);
+	icl_ioty_csdk_unlock();
 
-			if (OC_STACK_OK != ret) {
-				ERR("OCBindResource() Fail(%d)", ret);
-				return ic_ioty_parse_oic_error(ret);
-			}
-
-			parent->children[i] = child;
-			return IOTCON_ERROR_NONE;
-		}
+	if (OC_STACK_OK != ret) {
+		ERR("OCBindResource() Fail(%d)", ret);
+		return ic_ioty_parse_oic_error(ret);
 	}
 
-	ERR("There is no slot to bind a child resource");
-	return IOTCON_ERROR_OUT_OF_MEMORY;
+	return IOTCON_ERROR_NONE;
 }
 
 int icl_ioty_resource_unbind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
 	FN_CALL;
-	int i, ret;
+	OCStackResult ret;
 	OCResourceHandle handle_parent, handle_child;
 
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
@@ -1490,11 +1475,6 @@ int icl_ioty_resource_unbind_child_resource(iotcon_resource_h parent,
 	if (OC_STACK_OK != ret) {
 		ERR("OCUnBindResource() Fail(%d)", ret);
 		return ic_ioty_parse_oic_error(ret);
-	}
-
-	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
-		if (child == parent->children[i])
-			parent->children[i] = NULL;
 	}
 
 	return IOTCON_ERROR_NONE;
