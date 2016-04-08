@@ -491,8 +491,8 @@ API int iotcon_resource_set_request_handler(iotcon_resource_h resource,
 API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
+	int ret;
 	GError *error = NULL;
-	int i, ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -509,45 +509,42 @@ API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
-	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
-		if (child == parent->children[i]) {
-			ERR("Child resource was already bound to parent resource.");
-			return IOTCON_ERROR_ALREADY;
-		}
+	/* It should be removed in IoTivity 1.1.0 */
+	if (5 <= g_list_length(parent->children)) {
+		ERR("There is no slot to bind a child resource.");
+		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
-		if (NULL == parent->children[i]) {
-			ic_dbus_call_bind_resource_sync(icl_dbus_get_object(), parent->handle,
-					child->handle, &ret, NULL, &error);
-			if (error) {
-				ERR("ic_dbus_call_bind_resource_sync() Fail(%s)", error->message);
-				ret = icl_dbus_convert_dbus_error(error->code);
-				g_error_free(error);
-				return ret;
-			}
-
-			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon-daemon Fail(%d)", ret);
-				return icl_dbus_convert_daemon_error(ret);
-			}
-
-			parent->children[i] = child;
-
-			return IOTCON_ERROR_NONE;
-		}
+	if (g_list_find(parent->children, child)) {
+		ERR("Child resource was already bound to parent resource.");
+		return IOTCON_ERROR_ALREADY;
 	}
 
-	ERR("There is no slot to bind a child resource");
-	return IOTCON_ERROR_OUT_OF_MEMORY;
+	ic_dbus_call_bind_resource_sync(icl_dbus_get_object(), parent->handle,
+			child->handle, &ret, NULL, &error);
+	if (error) {
+		ERR("ic_dbus_call_bind_resource_sync() Fail(%s)", error->message);
+		ret = icl_dbus_convert_dbus_error(error->code);
+		g_error_free(error);
+		return ret;
+	}
+
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon-daemon Fail(%d)", ret);
+		return icl_dbus_convert_daemon_error(ret);
+	}
+
+	parent->children = g_list_append(parent->children, child);
+
+	return IOTCON_ERROR_NONE;
 }
 
 
 API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
+	int ret;
 	GError *error = NULL;
-	int i, ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == icl_dbus_get_object(), IOTCON_ERROR_DBUS);
@@ -560,6 +557,11 @@ API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 	}
 	if (0 == child->sub_id) {
 		ERR("Invalid Resource handle(child)");
+		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	if (NULL == g_list_find(parent->children, child)) {
+		ERR("child resource is not bound to parent resource.");
 		return IOTCON_ERROR_INVALID_PARAMETER;
 	}
 
@@ -577,9 +579,11 @@ API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 		return icl_dbus_convert_daemon_error(ret);
 	}
 
-	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
-		if (child == parent->children[i])
-			parent->children[i] = NULL;
+	parent->children = g_list_remove(parent->children, child);
+
+	if (0 == g_list_length(parent->children)) {
+		g_list_free(parent->children);
+		parent->children = NULL;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -588,17 +592,11 @@ API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 
 API int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *number)
 {
-	int i;
-
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == number, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*number = 0;
-	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
-		if (resource->children[i])
-			*number += 1;
-	}
+	*number = g_list_length(resource->children);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -607,16 +605,22 @@ API int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *
 API int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 		iotcon_resource_h *child)
 {
+	iotcon_resource_h resource;
+
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
-	if ((index < 0) || (ICL_CONTAINED_RESOURCES_MAX <= index)) {
-		ERR("Invalid index(%d)", index);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+	RETV_IF(index < 0, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == parent->children, IOTCON_ERROR_NO_DATA);
+
+	resource = g_list_nth_data(parent->children, index);
+	if (NULL == resource) {
+		ERR("g_list_nth_data() Fail");
+		return IOTCON_ERROR_NO_DATA;
 	}
 	RETV_IF(NULL == parent->children[index], IOTCON_ERROR_NO_DATA);
 
-	*child = parent->children[index];
+	*child = resource;
 
 	return IOTCON_ERROR_NONE;
 }
