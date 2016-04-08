@@ -658,6 +658,7 @@ int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA No data available
  *
  * @see iotcon_remote_resource_get_uri_path()
  * @see iotcon_remote_resource_get_host_address()
@@ -763,6 +764,7 @@ int iotcon_remote_resource_get_properties(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA No data available
  *
  * @see iotcon_remote_resource_get_uri_path()
  * @see iotcon_remote_resource_get_host_address()
