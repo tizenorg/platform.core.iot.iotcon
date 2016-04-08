@@ -243,7 +243,7 @@ API int iotcon_resource_set_request_handler(iotcon_resource_h resource,
 API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
-	int i, ret, connectivity_type;
+	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
@@ -251,27 +251,18 @@ API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(parent == child, IOTCON_ERROR_INVALID_PARAMETER);
 
-	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
-		if (child == parent->children[i]) {
-			ERR("Child resource was already bound to parent resource.");
-			return IOTCON_ERROR_ALREADY;
-		}
+	if (g_list_find(parent->children, child)) {
+		ERR("Child resource was already bound to parent resource.");
+		return IOTCON_ERROR_ALREADY;
 	}
 
-	connectivity_type = parent->connectivity_type;
-
-	switch (connectivity_type) {
-	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_resource_bind_child_resource(parent, child);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_resource_bind_child_resource() Fail(%d)", ret);
-			return ret;
-		}
-		break;
-	default:
-		ERR("Invalid Connectivity Type(%d)", connectivity_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+	ret = icl_ioty_resource_bind_child_resource(parent, child);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_ioty_resource_bind_child_resource() Fail(%d)", ret);
+		return ret;
 	}
+	parent->children = g_list_append(parent->children, child);
+
 	return IOTCON_ERROR_NONE;
 }
 
@@ -279,26 +270,29 @@ API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
-	int ret, connectivity_type;
+	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
-	connectivity_type = parent->connectivity_type;
-
-	switch (connectivity_type) {
-	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_resource_unbind_child_resource(parent, child);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_resource_unbind_child_resource() Fail(%d)", ret);
-			return ret;
-		}
-		break;
-	default:
-		ERR("Invalid Connectivity Type(%d)", connectivity_type);
+	if (NULL == g_list_find(parent->children, child)) {
+		ERR("child resource is not bound to parent resource.");
 		return IOTCON_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = icl_ioty_resource_unbind_child_resource(parent, child);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_ioty_resource_unbind_child_resource() Fail(%d)", ret);
+		return ret;
+	}
+
+	parent->children = g_list_remove(parent->children, child);
+
+	if (0 == g_list_length(parent->children)) {
+		g_list_free(parent->children);
+		parent->children = NULL;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -308,17 +302,11 @@ API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 API int iotcon_resource_get_number_of_children(iotcon_resource_h resource,
 		int *number)
 {
-	int i;
-
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == number, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*number = 0;
-	for (i = 0; i < ICL_CONTAINED_RESOURCES_MAX; i++) {
-		if (resource->children[i])
-			*number += 1;
-	}
+	*number = g_list_length(resource->children);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -327,16 +315,21 @@ API int iotcon_resource_get_number_of_children(iotcon_resource_h resource,
 API int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 		iotcon_resource_h *child)
 {
+	iotcon_resource_h resource;
+
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
-	if ((index < 0) || (ICL_CONTAINED_RESOURCES_MAX <= index)) {
-		ERR("Invalid index(%d)", index);
-		return IOTCON_ERROR_INVALID_PARAMETER;
-	}
-	RETV_IF(NULL == parent->children[index], IOTCON_ERROR_NO_DATA);
+	RETV_IF(index < 0, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == parent->children, IOTCON_ERROR_NO_DATA);
 
-	*child = parent->children[index];
+	resource = g_list_nth_data(parent->children, index);
+	if (NULL == resource) {
+		ERR("g_list_nth_data() Fail");
+		return IOTCON_ERROR_NO_DATA;
+	}
+
+	*child = resource;
 
 	return IOTCON_ERROR_NONE;
 }

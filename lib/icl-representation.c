@@ -282,10 +282,7 @@ API int iotcon_representation_get_children_count(iotcon_representation_h parent,
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == count, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (NULL == parent->children)
-		*count = 0;
-	else
-		*count = g_list_length(parent->children);
+	*count = g_list_length(parent->children);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -293,16 +290,21 @@ API int iotcon_representation_get_children_count(iotcon_representation_h parent,
 API int iotcon_representation_get_nth_child(iotcon_representation_h parent,
 		int pos, iotcon_representation_h *child)
 {
+	iotcon_representation_h repr;
+
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == parent->children, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(pos < 0, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == parent->children, IOTCON_ERROR_NO_DATA);
 
-	*child = g_list_nth_data(parent->children, pos);
-	if (NULL == *child) {
+	repr = g_list_nth_data(parent->children, pos);
+	if (NULL == repr) {
 		ERR("g_list_nth_data() Fail");
 		return IOTCON_ERROR_NO_DATA;
 	}
+
+	*child = repr;
 
 	return IOTCON_ERROR_NONE;
 }
