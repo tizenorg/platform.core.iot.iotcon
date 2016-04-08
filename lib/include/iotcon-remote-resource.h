@@ -594,7 +594,7 @@ int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource,
 		char **uri_path);
 
 /**
- * @brief Gets connectivity type of the remote resource
+ * @brief Gets a connectivity type of the remote resource
  *
  * @since_tizen 3.0
  *
@@ -619,7 +619,7 @@ int iotcon_remote_resource_get_connectivity_type(iotcon_remote_resource_h resour
 		iotcon_connectivity_type_e *connectivity_type);
 
 /**
- * @brief Gets an host address of the remote resource
+ * @brief Gets a host address of the remote resource
  *
  * @since_tizen 3.0
  *
@@ -645,11 +645,13 @@ int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resource,
 		char **host_address);
 
 /**
- * @brief Gets an device id of the remote resource
+ * @brief Gets a device id of the remote resource
  *
  * @since_tizen 3.0
  *
- * @remarks @a device_id must not be released using free().
+ * @remarks @a device_id must not be released using free().\n
+ * If @a resource is created by calling iotcon_remote_resource_create(), you cannot get
+ * @a device_id. In this case, the return value of this function is #IOTCON_ERROR_NO_DATA.
  *
  * @param[in] resource The handle of the remote resource
  * @param[out] device_id The device id of the remote resource
@@ -658,6 +660,7 @@ int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA No data available
  *
  * @see iotcon_remote_resource_get_uri_path()
  * @see iotcon_remote_resource_get_host_address()
@@ -763,6 +766,7 @@ int iotcon_remote_resource_get_properties(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA No data available
  *
  * @see iotcon_remote_resource_get_uri_path()
  * @see iotcon_remote_resource_get_host_address()
