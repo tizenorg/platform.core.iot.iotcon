@@ -19,7 +19,6 @@
 #include <octypes.h>
 #include <ocstack.h>
 #include <ocpayload.h>
-#include <ocrandom.h>
 
 #include "iotcon.h"
 #include "ic-utils.h"
@@ -93,21 +92,11 @@ int icl_ioty_parse_oic_discovery_payload(OCDevAddr *dev_addr,
 		iotcon_resource_interfaces_h ifaces;
 		iotcon_resource_types_h types;
 		char host_addr[PATH_MAX] = {0};
-		char device_id[UUID_STRING_SIZE] = {0};
 		OCStringLL *node;
-		OCRandomUuidResult random_res;
 
 		/* uri path */
 		if (NULL == res_payload->uri) {
 			ERR("res_payload uri is NULL");
-			_icl_ioty_free_resource_list(res_list, res_count);
-			return IOTCON_ERROR_IOTIVITY;
-		}
-
-		/* device id */
-		random_res = OCConvertUuidToString(payload->sid, device_id);
-		if (RAND_UUID_OK != random_res) {
-			ERR("OCConvertUuidToString() Fail(%d)", random_res);
 			_icl_ioty_free_resource_list(res_list, res_count);
 			return IOTCON_ERROR_IOTIVITY;
 		}
@@ -182,7 +171,7 @@ int icl_ioty_parse_oic_discovery_payload(OCDevAddr *dev_addr,
 			return ret;
 		}
 
-		res_list[i]->device_id = strdup(device_id);
+		res_list[i]->device_id = strdup(payload->sid);
 		if (NULL == res_list[i]->device_id) {
 			ERR("strdup(device_id) Fail(%d)", errno);
 			_icl_ioty_free_resource_list(res_list, res_count);
@@ -201,17 +190,9 @@ int icl_ioty_parse_oic_discovery_payload(OCDevAddr *dev_addr,
 int icl_ioty_parse_oic_device_payload(OCDevicePayload *payload,
 		iotcon_device_info_h *device_info)
 {
-	char device_id[UUID_STRING_SIZE] = {0};
 	struct icl_device_info *info = NULL;
-	OCRandomUuidResult random_res;
 
 	RETV_IF(NULL == device_info, IOTCON_ERROR_INVALID_PARAMETER);
-
-	random_res = OCConvertUuidToString(payload->sid, device_id);
-	if (RAND_UUID_OK != random_res) {
-		ERR("OCConvertUuidToString() Fail(%d)", random_res);
-		return IOTCON_ERROR_IOTIVITY;
-	}
 
 	info = calloc(1, sizeof(struct icl_device_info));
 	if (NULL == info) {
@@ -222,7 +203,7 @@ int icl_ioty_parse_oic_device_payload(OCDevicePayload *payload,
 	info->device_name = ic_utils_strdup(payload->deviceName);
 	info->spec_ver = ic_utils_strdup(payload->specVersion);
 	info->data_model_ver = ic_utils_strdup(payload->dataModelVersion);
-	info->device_id = ic_utils_strdup(device_id);
+	info->device_id = ic_utils_strdup(payload->sid);
 
 	*device_info = info;
 	return IOTCON_ERROR_NONE;
