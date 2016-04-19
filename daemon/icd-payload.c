@@ -20,7 +20,6 @@
 #include <ocstack.h>
 #include <octypes.h>
 #include <ocpayload.h>
-#include <ocrandom.h>
 
 #include "iotcon.h"
 #include "ic-utils.h"
@@ -52,11 +51,9 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 	OCStringLL *node;
 	GVariantBuilder types;
 	GVariantBuilder ifaces;
-	OCRandomUuidResult random_res;
 	OCDiscoveryPayload *discovered;
 	struct OCResourcePayload *resource;
 	int i, properties, res_count;
-	char device_id[UUID_STRING_SIZE] = {0};
 
 	discovered = (OCDiscoveryPayload*)payload;
 	resource = discovered->resources;
@@ -72,13 +69,6 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 		/* uri path */
 		if (NULL == resource->uri) {
 			ERR("resource uri is NULL");
-			continue;
-		}
-
-		/* device id */
-		random_res = OCConvertUuidToString(discovered->sid, device_id);
-		if (RAND_UUID_OK != random_res) {
-			ERR("OCConvertUuidToString() Fail(%d)", random_res);
 			continue;
 		}
 
@@ -115,8 +105,8 @@ GVariant** icd_payload_res_to_gvariant(OCPayload *payload, OCDevAddr *dev_addr)
 
 		/* TODO
 		 * Check "resource->secure" and "resource->bitmap" */
-		value[i] = g_variant_new("(ssasasibsi)", resource->uri, device_id, &ifaces, &types,
-				properties, resource->secure, dev_addr->addr, port);
+		value[i] = g_variant_new("(ssasasibsi)", resource->uri, discovered->sid, &ifaces,
+				&types, properties, resource->secure, dev_addr->addr, port);
 		DBG("found resource[%d] : %s", i, g_variant_print(value[i], FALSE));
 	}
 
@@ -359,17 +349,9 @@ static GVariant* _icd_payload_platform_to_gvariant(OCPlatformPayload *repr)
 static GVariant* _icd_payload_device_to_gvariant(OCDevicePayload *repr)
 {
 	GVariant *value;
-	OCRandomUuidResult random_res;
-	char device_id[UUID_STRING_SIZE] = {0};
-
-	random_res = OCConvertUuidToString(repr->sid, device_id);
-	if (RAND_UUID_OK != random_res) {
-		ERR("OCConvertUuidToString() Fail(%d)", random_res);
-		return NULL;
-	}
 
 	value = g_variant_new("(ssss)", repr->deviceName, repr->specVersion,
-			device_id, repr->dataModelVersion);
+			repr->sid, repr->dataModelVersion);
 
 	return value;
 }
