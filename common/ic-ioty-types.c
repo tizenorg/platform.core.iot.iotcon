@@ -48,17 +48,22 @@ OCConnectivityType ic_ioty_convert_connectivity_type(
 iotcon_connectivity_type_e ic_ioty_parse_oic_transport(
 		OCTransportAdapter adapter, OCTransportFlags flag)
 {
+	iotcon_connectivity_type_e type = IOTCON_CONNECTIVITY_ALL;
+
 	/* Need to consider to allow various connectivity types */
 	switch (adapter) {
 	case OC_ADAPTER_IP:
 		if (OC_IP_USE_V4 & flag)
-			return IOTCON_CONNECTIVITY_IPV4;
+			type = IOTCON_CONNECTIVITY_IPV4;
 		else if (OC_IP_USE_V6 & flag)
-			return IOTCON_CONNECTIVITY_IPV6;
+			type = IOTCON_CONNECTIVITY_IPV6;
+		else
+			ERR("Invalid Flag(%d)", flag);
+		break;
 	default:
 		ERR("Invalid Adpater(%d)", adapter);
 	}
-	return IOTCON_CONNECTIVITY_ALL;
+	return type;
 }
 
 
