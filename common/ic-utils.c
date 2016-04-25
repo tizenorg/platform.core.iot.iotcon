@@ -35,10 +35,13 @@ static const char *IC_SYSTEM_INFO_MANUF_NAME = "http://tizen.org/system/manufact
 static const char *IC_SYSTEM_INFO_MODEL_NAME = "http://tizen.org/system/model_name";
 static const char *IC_SYSTEM_INFO_BUILD_STRING = "http://tizen.org/system/build.string";
 static const char *IC_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
+// TODO: Can't access in user side daemon
+/*
 #ifdef TZ_VER_3
 static const char *IC_PRIV_FILE_NETWORK_GET = "/usr/share/iotcon/iotcon-network-get";
 static const char *IC_PRIV_FILE_INTERNET = "/usr/share/iotcon/iotcon-internet";
 #endif
+*/
 
 char* ic_utils_strdup(const char *src)
 {
@@ -137,6 +140,9 @@ int ic_utils_get_platform_info(OCPlatformInfo *platform_info)
 
 bool ic_utils_check_permission()
 {
+	return true;
+// TODO: Can't access file in user side daemon
+/*
 #ifdef TZ_VER_3
 	int ret;
 	static int have_permission = -1;
@@ -163,5 +169,6 @@ bool ic_utils_check_permission()
 #else
 	return true;
 #endif
+*/
 }
 
