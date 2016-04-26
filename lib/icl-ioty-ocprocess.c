@@ -15,6 +15,8 @@
  */
 
 #include <stdlib.h>
+#include <time.h>
+#include <pthread.h>
 #include <ocstack.h>
 #include <octypes.h>
 
@@ -38,7 +40,13 @@
 #include "icl-ioty-types.h"
 #include "icl-ioty-ocprocess.h"
 
+#define ICL_IOTY_TIME_INTERVAL_MIN 0
+#define ICL_IOTY_TIME_INTERVAL_DEFAULT 100
+
 static int icl_ioty_alive = 1;
+static int icl_ioty_polling_interval;
+static pthread_cond_t icl_ioty_polling_cond = PTHREAD_COND_INITIALIZER;
+static pthread_mutex_t icl_ioty_polling_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void icl_ioty_ocprocess_stop()
 {
@@ -50,25 +58,72 @@ void icl_ioty_ocprocess_start()
 	icl_ioty_alive = 1;
 }
 
+
+API int iotcon_polling_get_interval(int *interval)
+{
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(NULL == interval, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*interval = icl_ioty_polling_interval;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_polling_set_interval(int interval)
+{
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(interval <= ICL_IOTY_TIME_INTERVAL_MIN, IOTCON_ERROR_INVALID_PARAMETER);
+
+	icl_ioty_polling_interval = interval;
+
+	pthread_mutex_lock(&icl_ioty_polling_mutex);
+	pthread_cond_signal(&icl_ioty_polling_cond);
+	pthread_mutex_unlock(&icl_ioty_polling_mutex);
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_polling_invoke()
+{
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+
+	pthread_mutex_lock(&icl_ioty_polling_mutex);
+	pthread_cond_signal(&icl_ioty_polling_cond);
+	pthread_mutex_unlock(&icl_ioty_polling_mutex);
+
+	return IOTCON_ERROR_NONE;
+}
+
+
 gpointer icl_ioty_ocprocess_thread(gpointer data)
 {
 	FN_CALL;
 	OCStackResult result;
-	const struct timespec delay = {0, 10 * 1000 * 1000}; /* 10 ms */
+	struct timespec ts;
 
+	icl_ioty_polling_interval = ICL_IOTY_TIME_INTERVAL_DEFAULT;
+
+	pthread_mutex_lock(&icl_ioty_polling_mutex);
 	while (icl_ioty_alive) {
 		icl_ioty_csdk_lock();
 		result = OCProcess();
 		icl_ioty_csdk_unlock();
 		if (OC_STACK_OK != result) {
 			ERR("OCProcess() Fail(%d)", result);
+			pthread_mutex_unlock(&icl_ioty_polling_mutex);
 			break;
 		}
 
-		// TODO: Current '10ms' is not proven sleep time. Revise the time after test.
+		// TODO: Current '100ms' is not proven sleep time. Revise the time after test.
 		// TODO: Or recommend changes to event driven architecture
-		nanosleep(&delay, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		ts.tv_sec += icl_ioty_polling_interval / 1000;
+		ts.tv_nsec += (icl_ioty_polling_interval % 1000) * 1000000;
+		pthread_cond_timedwait(&icl_ioty_polling_cond, &icl_ioty_polling_mutex, &ts);
 	}
+	pthread_mutex_unlock(&icl_ioty_polling_mutex);
 
 	return NULL;
 }
