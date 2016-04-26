@@ -28,6 +28,10 @@
 
 #ifdef TZ_VER_3
 static int _ic_oic_feature_supported = -1;
+static const char *IC_FEATURE_OIC = "http://tizen.org/feature/iot.oic";
+
+static int _ic_oic_security_feature_supported = -1;
+static const char *IC_FEATURE_OIC_SECURITY = "http://tizen.org/feature/iot.oic.security";
 #endif
 
 static const char *IC_SYSTEM_INFO_PLATFORM_VERSION = "http://tizen.org/feature/platform.version";
@@ -74,6 +78,20 @@ bool ic_utils_check_oic_feature_supported()
 		_ic_oic_feature_supported = feature_supported ? 1 : 0;
 	}
 	return _ic_oic_feature_supported;
+#else
+	return true;
+#endif
+}
+
+bool ic_utils_check_oic_security_feature_supported()
+{
+#ifdef TZ_VER_3
+	if (_ic_oic_security_feature_supported < 0) {
+		bool feature_supported = false;
+		system_info_get_platform_bool(IC_FEATURE_OIC_SECURITY, &feature_supported);
+		_ic_oic_security_feature_supported = feature_supported ? 1 : 0;
+	}
+	return _ic_oic_security_feature_supported;
 #else
 	return true;
 #endif
