@@ -27,11 +27,36 @@ static pthread_t icl_thread;
 static int icl_timeout_seconds = ICL_TIMEOUT_DEFAULT;
 static int icl_init_count;
 
+API int iotcon_secure_initialize(const char *file_path)
+{
+	int ret;
+
+	RETV_IF(false == ic_utils_check_oic_security_feature(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_permission((IC_PERMISSION_INTERNET|IC_PERMISSION_NETWORK_GET)),
+			IOTCON_ERROR_PERMISSION_DENIED);
+	// TODO Consider (NULL == Path)
+	RETV_IF(NULL == file_path, IOTCON_ERROR_INVALID_PARAMETER);
+
+	ret = icl_ioty_set_persistent_storage(file_path);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_set_persistent_storage() Fail(%d)", ret);
+		return ret;
+	}
+
+	ret = iotcon_initialize();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_initialize() Fail(%d)", ret);
+		return ret;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
 API int iotcon_initialize(void)
 {
 	int ret;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission((IC_PERMISSION_INTERNET|IC_PERMISSION_NETWORK_GET)),
 			IOTCON_ERROR_PERMISSION_DENIED);
 
@@ -77,7 +102,7 @@ API void iotcon_deinitialize(void)
 
 API int iotcon_get_timeout(int *timeout_seconds)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == timeout_seconds, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*timeout_seconds = icl_timeout_seconds;
@@ -88,7 +113,7 @@ API int iotcon_get_timeout(int *timeout_seconds)
 
 API int iotcon_set_timeout(int timeout_seconds)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	if (ICL_TIMEOUT_MAX < timeout_seconds || timeout_seconds <= 0) {
 		ERR("timeout_seconds(%d) must be in range from 1 to 3600", timeout_seconds);
 		return IOTCON_ERROR_INVALID_PARAMETER;
