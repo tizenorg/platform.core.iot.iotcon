@@ -27,7 +27,7 @@ static GThread *icl_thread;
 static int icl_timeout_seconds = ICL_TIMEOUT_DEFAULT;
 static int icl_connection_count;
 
-API int iotcon_initialize()
+API int iotcon_initialize(void)
 {
 	int ret;
 
