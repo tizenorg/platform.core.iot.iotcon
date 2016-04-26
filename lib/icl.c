@@ -31,7 +31,7 @@ API int iotcon_initialize()
 {
 	int ret;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 
 #if !GLIB_CHECK_VERSION(2, 35, 0)
@@ -76,7 +76,7 @@ API void iotcon_deinitialize(void)
 
 API int iotcon_get_timeout(int *timeout_seconds)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == timeout_seconds, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*timeout_seconds = icl_timeout_seconds;
@@ -87,7 +87,7 @@ API int iotcon_get_timeout(int *timeout_seconds)
 
 API int iotcon_set_timeout(int timeout_seconds)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	if (ICL_TIMEOUT_MAX < timeout_seconds || timeout_seconds <= 0) {
 		ERR("timeout_seconds(%d) must be in range from 1 to 3600", timeout_seconds);
 		return IOTCON_ERROR_INVALID_PARAMETER;
