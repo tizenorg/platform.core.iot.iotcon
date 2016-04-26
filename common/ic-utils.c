@@ -28,7 +28,11 @@
 
 
 #ifdef TZ_VER_3
-static int _ic_oic_feature_supported = -1;
+static int _ic_oic_feature = -1;
+static const char *IC_FEATURE_OIC = "http://tizen.org/feature/iot.oic";
+
+static int _ic_oic_security_feature = -1;
+static const char *IC_FEATURE_OIC_SECURITY = "http://tizen.org/feature/iot.oic.security";
 #endif
 
 // TODO: Can't access in user side daemon
@@ -111,15 +115,29 @@ bool ic_utils_check_permission(int permssion)
 #endif
 }
 
-bool ic_utils_check_oic_feature_supported()
+bool ic_utils_check_oic_feature()
 {
 #ifdef TZ_VER_3
-	if (_ic_oic_feature_supported < 0) {
+	if (_ic_oic_feature < 0) {
 		bool feature_supported = false;
 		system_info_get_platform_bool(IC_FEATURE_OIC, &feature_supported);
-		_ic_oic_feature_supported = feature_supported ? 1 : 0;
+		_ic_oic_feature = feature_supported ? 1 : 0;
 	}
-	return _ic_oic_feature_supported;
+	return _ic_oic_feature;
+#else
+	return true;
+#endif
+}
+
+bool ic_utils_check_oic_security_feature()
+{
+#ifdef TZ_VER_3
+	if (_ic_oic_security_feature < 0) {
+		bool feature_supported = false;
+		system_info_get_platform_bool(IC_FEATURE_OIC_SECURITY, &feature_supported);
+		_ic_oic_security_feature = feature_supported ? 1 : 0;
+	}
+	return _ic_oic_security_feature;
 #else
 	return true;
 #endif

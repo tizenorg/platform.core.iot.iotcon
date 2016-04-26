@@ -36,8 +36,13 @@ extern "C" {
  * @section CAPI_IOT_CONNECTIVITY_MODULE_FEATURE Related Features
  * This API is related with the following features:\n
  * - http://tizen.org/feature/iot.oic\n
+ * - http://tizen.org/feature/iot.oic.security\n
  *
  * It is recommended to design feature related codes in your application for reliability.\n
+ *
+ * If the feature(http://tizen.org/feature/iot.oic.security) for OIC security architecture
+ * is applied, you should set a file using iotcon_set_persistent_storage.
+ * Then applications communicate with each other based on OIC security architecture.
  *
  * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
  *
@@ -49,7 +54,35 @@ extern "C" {
  */
 
 /**
- * @brief Initializes to the iotcon service.
+ * @brief Initializes IoTCon with secure mode.
+ * @details Call this function to start IoTCon above OIC security architecture
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/network.get
+ * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks If the device has the feature("http://tizen.org/feature/iot.oic.security"),
+ * you must call this function instead of iotcon_initialize().\n
+ * @a file_path point to a file for handling secure virtual resources.
+ * The file that is CBOR(Concise Binary Object Representation)-format must already exist
+ * in @a file_path. We recommend to use application-local file for @a file_path.
+ *
+ * @param[in] file_path file path to point to storage for handling secure virtual resources.
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ *
+ * @see iotcon_deinitialize()
+ */
+int iotcon_secure_initialize(const char *file_path);
+
+/**
+ * @brief Initializes IoTCon.
  * @details Call this function to start IoTCon.
  *
  * @since_tizen 3.0
@@ -62,14 +95,18 @@ extern "C" {
  *
  * @return  0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @pre iotcon_set_persistent_storage() should be called
+ * when the security feature("http://tizen.org/feature/iot.oic.security") is applied.
  *
  * @see iotcon_deinitialize()
  */
-int iotcon_initialize();
+int iotcon_initialize(void);
 
 /**
- * @brief Deinitializes from the iotcon service.
+ * @brief Deinitializes IoTCon.
  * @details Frees the resources allocated to IoTCon.
  *
  * @since_tizen 3.0
