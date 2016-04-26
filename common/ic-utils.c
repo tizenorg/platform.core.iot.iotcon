@@ -17,6 +17,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <time.h>
 #include <glib.h>
 #include <system_info.h>
 #include <system_settings.h>
@@ -36,10 +37,12 @@ static const char *IC_SYSTEM_INFO_MODEL_NAME = "http://tizen.org/system/model_na
 static const char *IC_SYSTEM_INFO_BUILD_STRING = "http://tizen.org/system/build.string";
 static const char *IC_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
 
-static pthread_mutex_t icl_utils_mutex_init = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t icl_utils_mutex_ioty = PTHREAD_MUTEX_INITIALIZER;
-static __thread int icl_utils_pthread_oldstate;
-static __thread int icl_utils_mutex_count;
+static pthread_mutex_t ic_utils_mutex_init = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t ic_utils_mutex_ioty = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t ic_utils_mutex_polling = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t ic_utils_cond_polling = PTHREAD_COND_INITIALIZER;
+static __thread int ic_utils_pthread_oldstate;
+static __thread int ic_utils_mutex_count;
 
 // TODO: Can't access in user side daemon
 /*
@@ -183,11 +186,13 @@ static inline pthread_mutex_t* _utils_mutex_get(int type)
 
 	switch (type) {
 	case IC_UTILS_MUTEX_INIT:
-		mutex = &icl_utils_mutex_init;
+		mutex = &ic_utils_mutex_init;
 		break;
 	case IC_UTILS_MUTEX_IOTY:
-		mutex = &icl_utils_mutex_ioty;
+		mutex = &ic_utils_mutex_ioty;
 		break;
+	case IC_UTILS_MUTEX_POLLING:
+		mutex = &ic_utils_mutex_polling;
 	default:
 		ERR("Invalid type(%d)", type);
 		mutex = NULL;
@@ -200,9 +205,9 @@ void ic_utils_mutex_lock(int type)
 {
 	int ret;
 
-	icl_utils_mutex_count++;
-	if (1 == icl_utils_mutex_count) {
-		ret = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &icl_utils_pthread_oldstate);
+	ic_utils_mutex_count++;
+	if (1 == ic_utils_mutex_count) {
+		ret = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &ic_utils_pthread_oldstate);
 		WARN_IF(0 != ret, "pthread_setcancelstate() Fail(%d)", ret);
 	}
 
@@ -214,12 +219,48 @@ void ic_utils_mutex_unlock(int type)
 {
 	int ret;
 
-	icl_utils_mutex_count--;
-	if (0 == icl_utils_mutex_count) {
-		ret = pthread_setcancelstate(icl_utils_pthread_oldstate, NULL);
+	ic_utils_mutex_count--;
+	if (0 == ic_utils_mutex_count) {
+		ret = pthread_setcancelstate(ic_utils_pthread_oldstate, NULL);
 		WARN_IF(0 != ret, "pthread_setcancelstate() Fail(%d)", ret);
 	}
 
 	ret = pthread_mutex_unlock(_utils_mutex_get(type));
 	WARN_IF(0 != ret, "pthread_mutex_unlock() Fail(%d)", ret);
+}
+
+static inline pthread_cond_t* _utils_cond_get(int type)
+{
+	pthread_cond_t *cond;
+
+	if (IC_UTILS_COND_POLLING == type) {
+		cond = &ic_utils_cond_polling;
+	} else {
+		ERR("Invalid type(%d)", type);
+		cond = NULL;
+	}
+
+	return cond;
+}
+
+void ic_utils_cond_signal(int type)
+{
+	int ret;
+
+	ret = pthread_cond_signal(_utils_cond_get(type));
+	WARN_IF(0 != ret, "pthread_cond_signal() Fail(%d)", ret);
+}
+
+void ic_utils_cond_timedwait(int cond_type, int mutex_type, int polling_interval)
+{
+	int ret;
+	struct timespec ts;
+
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	ts.tv_sec += polling_interval / 1000;
+	ts.tv_nsec += (polling_interval % 1000) * 1000000;
+
+	ret = pthread_cond_timedwait(_utils_cond_get(cond_type), _utils_mutex_get(mutex_type),
+			&ts);
+	WARN_IF(0 != ret, "pthread_cond_timedwait() Fail(%d)", ret);
 }
