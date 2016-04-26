@@ -28,8 +28,6 @@
 
 #define IC_OBSERVE_ID_MAX_LEN 256
 
-#define IC_FEATURE_OIC "http://tizen.org/feature/iot.oic"
-
 #define IC_IOTY_COAP "coap://"
 #define IC_IOTY_COAPS "coaps://"
 #define IC_IOTY_MULTICAST_ADDRESS "224.0.1.187:5683"
