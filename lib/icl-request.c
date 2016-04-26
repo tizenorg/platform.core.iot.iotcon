@@ -21,7 +21,7 @@
 API int iotcon_request_get_host_address(iotcon_request_h request,
 		char **host_address)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -34,7 +34,7 @@ API int iotcon_request_get_host_address(iotcon_request_h request,
 API int iotcon_request_get_connectivity_type(iotcon_request_h request,
 		iotcon_connectivity_type_e *connectivity_type)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == connectivity_type, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -48,7 +48,7 @@ API int iotcon_request_get_connectivity_type(iotcon_request_h request,
 API int iotcon_request_get_representation(iotcon_request_h request,
 		iotcon_representation_h *repr)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -61,7 +61,7 @@ API int iotcon_request_get_representation(iotcon_request_h request,
 API int iotcon_request_get_request_type(iotcon_request_h request,
 		iotcon_request_type_e *type)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -75,7 +75,7 @@ API int iotcon_request_get_request_type(iotcon_request_h request,
 API int iotcon_request_get_options(iotcon_request_h request,
 		iotcon_options_h *options)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 	WARN_IF(NULL == request->header_options, "Not Set header options");
@@ -89,7 +89,7 @@ API int iotcon_request_get_options(iotcon_request_h request,
 /* The content of the request should not be freed by user. */
 API int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
 	WARN_IF(NULL == request->query, "Not Set query");
@@ -103,7 +103,7 @@ API int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query
 API int iotcon_request_get_observe_type(iotcon_request_h request,
 		iotcon_observe_type_e *observe_type)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == observe_type, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -115,7 +115,7 @@ API int iotcon_request_get_observe_type(iotcon_request_h request,
 
 API int iotcon_request_get_observe_id(iotcon_request_h request, int *observe_id)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == observe_id, IOTCON_ERROR_INVALID_PARAMETER);
 

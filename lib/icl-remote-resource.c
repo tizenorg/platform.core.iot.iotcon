@@ -42,7 +42,7 @@ API int iotcon_find_resource(const char *host_address,
 {
 	int ret;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(resource_type && (false == icl_resource_check_type(resource_type)),
@@ -79,7 +79,7 @@ API int iotcon_remote_resource_create(const char *host_address,
 	FN_CALL;
 	iotcon_remote_resource_h resource = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(false == icl_resource_check_uri_path(uri_path),
@@ -192,7 +192,7 @@ API int iotcon_remote_resource_clone(iotcon_remote_resource_h src,
 	int ret;
 	iotcon_remote_resource_h resource = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -245,7 +245,7 @@ API int iotcon_remote_resource_clone(iotcon_remote_resource_h src,
 API int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource,
 		char **uri_path)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -259,7 +259,7 @@ API int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource,
 API int iotcon_remote_resource_get_host_address(
 		iotcon_remote_resource_h resource, char **host_address)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == host_address, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -273,7 +273,7 @@ API int iotcon_remote_resource_get_host_address(
 API int iotcon_remote_resource_get_connectivity_type(
 		iotcon_remote_resource_h resource, iotcon_connectivity_type_e *connectivity_type)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == connectivity_type, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -287,7 +287,7 @@ API int iotcon_remote_resource_get_connectivity_type(
 API int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
 		char **device_id)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == device_id, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(NULL == resource->device_id, IOTCON_ERROR_NO_DATA,
@@ -302,7 +302,7 @@ API int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
 API int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
 		iotcon_resource_types_h *types)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -316,7 +316,7 @@ API int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
 API int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource,
 		iotcon_resource_interfaces_h *ifaces)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -329,7 +329,7 @@ API int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource,
 API int iotcon_remote_resource_get_properties(iotcon_remote_resource_h resource,
 		int *properties)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == properties, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -341,7 +341,7 @@ API int iotcon_remote_resource_get_properties(iotcon_remote_resource_h resource,
 API int iotcon_remote_resource_get_options(iotcon_remote_resource_h resource,
 		iotcon_options_h *options)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 	WARN_IF(NULL == resource->header_options, "Not Set header options");
@@ -355,7 +355,7 @@ API int iotcon_remote_resource_get_options(iotcon_remote_resource_h resource,
 API int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
 		iotcon_options_h options)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (options)
@@ -373,7 +373,7 @@ API int iotcon_remote_resource_get_time_interval(int *time_interval)
 {
 	int ret, arg_time_interval;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == time_interval, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = icl_ioty_remote_resource_get_time_interval(&arg_time_interval);
@@ -392,7 +392,7 @@ API int iotcon_remote_resource_set_time_interval(int time_interval)
 {
 	int ret;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(ICL_REMOTE_RESOURCE_MAX_TIME_INTERVAL < time_interval || time_interval <= 0,
 			IOTCON_ERROR_INVALID_PARAMETER);
 
