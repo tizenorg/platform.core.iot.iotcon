@@ -49,6 +49,25 @@ extern "C" {
  */
 
 /**
+ * @brief Sets persistent storage
+ * @details This API set @a path to point to storage for handle secure virtual resources.
+ *
+ * @since_tizen 3.0
+ *
+ * @remarks If the device has the feature("http://tizen.org/feature/iot.oic.security"),
+ * you must call this function before iotcon_initialize() is called.
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ *
+ * @post iotcon_initialize()
+ */
+int iotcon_set_persistent_storage(const char *path);
+
+/**
  * @brief Connects to the iotcon service.
  * @details Call this function to start Iotcon.
  *
