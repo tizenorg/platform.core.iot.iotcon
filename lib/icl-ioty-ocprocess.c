@@ -15,7 +15,7 @@
  */
 #include <stdlib.h>
 #include <sys/prctl.h>
-
+#include <time.h>
 #include <ocstack.h>
 #include <octypes.h>
 
@@ -39,7 +39,11 @@
 #include "icl-ioty-types.h"
 #include "icl-ioty-ocprocess.h"
 
+#define ICL_IOTY_TIME_INTERVAL_MIN 0
+#define ICL_IOTY_TIME_INTERVAL_DEFAULT 100
+
 static int icl_ioty_alive = 1;
+static int icl_ioty_polling_interval;
 
 void icl_ioty_ocprocess_stop()
 {
@@ -51,18 +55,60 @@ void icl_ioty_ocprocess_start()
 	icl_ioty_alive = 1;
 }
 
+
+API int iotcon_polling_get_interval(int *interval)
+{
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(NULL == interval, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*interval = icl_ioty_polling_interval;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_polling_set_interval(int interval)
+{
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(interval <= ICL_IOTY_TIME_INTERVAL_MIN, IOTCON_ERROR_INVALID_PARAMETER);
+
+	icl_ioty_polling_interval = interval;
+
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_POLLING);
+	ic_utils_cond_signal(IC_UTILS_COND_POLLING);
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_POLLING);
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+API int iotcon_polling_invoke(void)
+{
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_POLLING);
+	ic_utils_cond_signal(IC_UTILS_COND_POLLING);
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_POLLING);
+
+	return IOTCON_ERROR_NONE;
+}
+
+
 void* icl_ioty_ocprocess_thread(void *data)
 {
 	FN_CALL;
 	int ret;
 	OCStackResult result;
-	const struct timespec delay = {0, 10 * 1000 * 1000}; /* 10 ms */
+	struct timespec ts;
+
+	icl_ioty_polling_interval = ICL_IOTY_TIME_INTERVAL_DEFAULT;
 
 	/* For setting this thread name */
 	ret = prctl(PR_SET_NAME, "iotcon_ocprocess_thread");
 	if (0 != ret)
 		ERR("prctl(PR_SET_NAME) Fail(%d)", ret);
 
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_POLLING);
 	while (icl_ioty_alive) {
 		ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 		result = OCProcess();
@@ -72,10 +118,14 @@ void* icl_ioty_ocprocess_thread(void *data)
 			break;
 		}
 
-		// TODO: Current '10ms' is not proven sleep time. Revise the time after test.
+		// TODO: Current '100ms' is not proven sleep time. Revise the time after test.
 		// TODO: Or recommend changes to event driven architecture
-		nanosleep(&delay, NULL);
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		ts.tv_sec += icl_ioty_polling_interval / 1000;
+		ts.tv_nsec += (icl_ioty_polling_interval % 1000) * 1000000;
+		ic_utils_cond_timedwait(IC_UTILS_COND_POLLING, IC_UTILS_MUTEX_POLLING, &ts);
 	}
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_POLLING);
 
 	return NULL;
 }
