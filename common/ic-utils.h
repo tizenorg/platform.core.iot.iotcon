@@ -16,6 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_INTERNAL_COMMON_UTILITY_H__
 #define __IOT_CONNECTIVITY_INTERNAL_COMMON_UTILITY_H__
 
+#include <time.h>
 #include <octypes.h>
 #include "iotcon-types.h"
 
@@ -30,10 +31,19 @@ bool ic_utils_check_permission();
 void ic_utils_mutex_lock(int type);
 void ic_utils_mutex_unlock(int type);
 
+void ic_utils_cond_signal(int type);
+void ic_utils_cond_timedwait(int cond_type, int mutex_type, int polling_interval);
+
 enum IC_UTILS_MUTEX {
 	IC_UTILS_MUTEX_INIT,
 	IC_UTILS_MUTEX_IOTY,
+	IC_UTILS_MUTEX_POLLING,
 	IC_UTILS_MUTEX_MAX
+};
+
+enum IC_UTILS_COND {
+	IC_UTILS_COND_POLLING,
+	IC_UTILS_COND_MAX
 };
 
 #endif /* __IOT_CONNECTIVITY_INTERNAL_COMMON_UTILITY_H__ */
