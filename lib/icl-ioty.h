@@ -42,6 +42,8 @@ typedef struct {
 void icl_ioty_deinit(pthread_t thread);
 int icl_ioty_init(pthread_t *out_thread);
 
+int icl_ioty_set_persistent_storage(const char *file_path);
+
 int icl_ioty_set_device_info(const char *device_name);
 int icl_ioty_set_platform_info();
 
