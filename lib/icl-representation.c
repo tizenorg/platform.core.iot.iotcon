@@ -52,7 +52,7 @@ API int iotcon_representation_create(iotcon_representation_h *ret_repr)
 {
 	iotcon_representation_h repr;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == ret_repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	repr = calloc(1, sizeof(struct icl_representation_s));
@@ -103,7 +103,7 @@ API void iotcon_representation_destroy(iotcon_representation_h repr)
 API int iotcon_representation_get_uri_path(iotcon_representation_h repr,
 		char **uri_path)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == repr->uri_path, IOTCON_ERROR_NO_DATA);
@@ -116,7 +116,7 @@ API int iotcon_representation_get_uri_path(iotcon_representation_h repr,
 API int iotcon_representation_set_uri_path(iotcon_representation_h repr,
 		const char *uri_path)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(false == icl_resource_check_uri_path(uri_path),
@@ -135,7 +135,7 @@ API int iotcon_representation_set_uri_path(iotcon_representation_h repr,
 API int iotcon_representation_get_resource_types(iotcon_representation_h repr,
 		iotcon_resource_types_h *types)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
 	WARN_IF(NULL == repr->res_types, "Not Set Resource Types");
@@ -148,7 +148,7 @@ API int iotcon_representation_get_resource_types(iotcon_representation_h repr,
 API int iotcon_representation_set_resource_types(iotcon_representation_h repr,
 		iotcon_resource_types_h types)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (types)
@@ -165,7 +165,7 @@ API int iotcon_representation_set_resource_types(iotcon_representation_h repr,
 API int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr,
 		iotcon_resource_interfaces_h *ifaces)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 	WARN_IF(NULL == repr->interfaces, "Not Set Resource Interfaces");
@@ -178,7 +178,7 @@ API int iotcon_representation_get_resource_interfaces(iotcon_representation_h re
 API int iotcon_representation_set_resource_interfaces(
 		iotcon_representation_h repr, iotcon_resource_interfaces_h ifaces)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (ifaces)
@@ -195,7 +195,7 @@ API int iotcon_representation_set_resource_interfaces(
 API int iotcon_representation_set_state(iotcon_representation_h repr,
 		iotcon_state_h state)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (state)
@@ -213,7 +213,7 @@ API int iotcon_representation_set_state(iotcon_representation_h repr,
 API int iotcon_representation_get_state(iotcon_representation_h repr,
 		iotcon_state_h *state)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -227,7 +227,7 @@ API int iotcon_representation_add_child(iotcon_representation_h parent,
 {
 	iotcon_representation_h repr;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -242,7 +242,7 @@ API int iotcon_representation_add_child(iotcon_representation_h parent,
 API int iotcon_representation_remove_child(iotcon_representation_h parent,
 		iotcon_representation_h child)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -259,7 +259,7 @@ API int iotcon_representation_foreach_children(iotcon_representation_h parent,
 {
 	GList *list, *next;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -277,7 +277,7 @@ API int iotcon_representation_foreach_children(iotcon_representation_h parent,
 API int iotcon_representation_get_child_count(iotcon_representation_h parent,
 		unsigned int *count)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == count, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -291,7 +291,7 @@ API int iotcon_representation_get_nth_child(iotcon_representation_h parent,
 {
 	iotcon_representation_h repr;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(pos < 0, IOTCON_ERROR_INVALID_PARAMETER);
@@ -319,7 +319,7 @@ API int iotcon_representation_clone(const iotcon_representation_h src,
 	iotcon_resource_interfaces_h ifaces;
 	iotcon_representation_h cloned_repr, copied_repr;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
 

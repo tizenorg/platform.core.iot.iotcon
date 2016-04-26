@@ -41,7 +41,7 @@ API int iotcon_lite_resource_create(const char *uri_path,
 {
 	int ret;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(false == icl_resource_check_uri_path(uri_path),
@@ -65,7 +65,7 @@ API int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource)
 {
 	int ret, connectivity_type;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -92,7 +92,7 @@ API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 {
 	int ret, connectivity_type;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -118,7 +118,7 @@ API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 API int iotcon_lite_resource_get_state(iotcon_lite_resource_h resource,
 		iotcon_state_h *state)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 
