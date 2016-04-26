@@ -175,7 +175,6 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks @a uri_path length must be less than or equal 36.\n
@@ -213,7 +212,6 @@ int iotcon_lite_resource_create(const char *uri_path,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks When a normal variable is used, there are only permission denied error.
@@ -237,7 +235,6 @@ int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource);
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the lite resource
