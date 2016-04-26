@@ -39,7 +39,7 @@ API int iotcon_state_create(iotcon_state_h *ret_state)
 {
 	iotcon_state_h state;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == ret_state, IOTCON_ERROR_INVALID_PARAMETER);
 
 	state = calloc(1, sizeof(struct icl_state_s));
@@ -77,7 +77,7 @@ API int iotcon_state_remove(iotcon_state_h state, const char *key)
 	gboolean ret = FALSE;
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -101,7 +101,7 @@ API int iotcon_state_get_int(iotcon_state_h state, const char *key, int *val)
 {
 	iotcon_value_h value;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
@@ -127,7 +127,7 @@ API int iotcon_state_add_int(iotcon_state_h state, const char *key, int val)
 {
 	iotcon_value_h value;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -147,7 +147,7 @@ API int iotcon_state_get_bool(iotcon_state_h state, const char *key, bool *val)
 	icl_basic_s *real = NULL;
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
@@ -173,7 +173,7 @@ API int iotcon_state_add_bool(iotcon_state_h state, const char *key, bool val)
 {
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -193,7 +193,7 @@ API int iotcon_state_get_double(iotcon_state_h state, const char *key, double *v
 	icl_basic_s *real = NULL;
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
@@ -219,7 +219,7 @@ API int iotcon_state_add_double(iotcon_state_h state, const char *key, double va
 {
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -239,7 +239,7 @@ API int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val)
 	icl_basic_s *real = NULL;
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
@@ -265,7 +265,7 @@ API int iotcon_state_add_str(iotcon_state_h state, const char *key, char *val)
 {
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
@@ -287,7 +287,7 @@ API int iotcon_state_get_byte_str(iotcon_state_h state, const char *key,
 	iotcon_value_h value = NULL;
 	icl_val_byte_str_s *real = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
@@ -316,7 +316,7 @@ API int iotcon_state_add_byte_str(iotcon_state_h state, const char *key,
 {
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
@@ -338,7 +338,7 @@ API int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_nul
 	icl_basic_s *real = NULL;
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == is_null, IOTCON_ERROR_INVALID_PARAMETER);
@@ -359,7 +359,7 @@ API int iotcon_state_add_null(iotcon_state_h state, const char *key)
 {
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -380,7 +380,7 @@ API int iotcon_state_get_list(iotcon_state_h state, const char *key,
 	iotcon_value_h value = NULL;
 	icl_val_list_s *real = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
@@ -407,7 +407,7 @@ API int iotcon_state_add_list(iotcon_state_h state, const char *key,
 {
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
@@ -430,7 +430,7 @@ API int iotcon_state_get_state(iotcon_state_h src, const char *key,
 	icl_val_state_s *real = NULL;
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
@@ -457,7 +457,7 @@ API int iotcon_state_add_state(iotcon_state_h state, const char *key,
 {
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
@@ -478,7 +478,7 @@ API int iotcon_state_get_type(iotcon_state_h state, const char *key,
 {
 	iotcon_value_h value = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
@@ -507,7 +507,7 @@ int icl_state_set_value(iotcon_state_h state, const char *key, iotcon_value_h va
 
 API int iotcon_state_get_keys_count(iotcon_state_h state, unsigned int *count)
 {
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == count, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == state->hash_table, IOTCON_ERROR_INVALID_PARAMETER);
@@ -524,7 +524,7 @@ API int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone)
 
 	iotcon_state_h temp = NULL;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == state_clone, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -566,7 +566,7 @@ API int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb,
 	GHashTableIter iter;
 	gpointer key;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 

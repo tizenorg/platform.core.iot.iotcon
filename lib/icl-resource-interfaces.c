@@ -39,7 +39,7 @@ API int iotcon_resource_interfaces_create(iotcon_resource_interfaces_h *ret_ifac
 {
 	iotcon_resource_interfaces_h ifaces;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == ret_ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ifaces = calloc(1, sizeof(struct icl_resource_ifaces));
@@ -97,7 +97,7 @@ API int iotcon_resource_interfaces_add(iotcon_resource_interfaces_h ifaces,
 {
 	char *resource_iface;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(1 < ifaces->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
@@ -127,7 +127,7 @@ API int iotcon_resource_interfaces_remove(iotcon_resource_interfaces_h ifaces,
 	GList *node;
 	char *node_data;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
 	RETVM_IF(1 < ifaces->ref_count, IOTCON_ERROR_INVALID_PARAMETER,
@@ -152,7 +152,7 @@ API int iotcon_resource_interfaces_foreach(iotcon_resource_interfaces_h ifaces,
 {
 	GList *node;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -172,7 +172,7 @@ API int iotcon_resource_interfaces_clone(iotcon_resource_interfaces_h src,
 	char *resource_iface;
 	iotcon_resource_interfaces_h resource_ifaces;
 
-	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == src, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == dest, IOTCON_ERROR_INVALID_PARAMETER);
 
