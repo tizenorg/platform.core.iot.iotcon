@@ -128,6 +128,62 @@ int iotcon_get_timeout(int *timeout_seconds);
 int iotcon_set_timeout(int timeout_seconds);
 
 /**
+ * @brief Gets the polling interval(milliseconds) of iotcon.
+ * @details This API gets the polling interval of iotcon.
+ * Default polling interval is 100 milliseconds.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[out] interval Milliseconds for polling interval
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @pre iotcon_initialize() should be called to initialize.
+ *
+ * @see iotcon_set_timeout()
+ */
+int iotcon_polling_get_interval(int *interval);
+
+/**
+ * @brief Sets the polling interval(milliseconds) of iotcon.
+ * @details This API sets the polling interval of iotcon.
+ * The closer to 0, the faster it operates. It is invoked immediately for changing the interval.
+ * Default polling interval is 100 milliseconds. If you want the faster operation,
+ * we recommend you set 10 milliseconds for polling interval.
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] interval Milliseconds for polling interval (must be in range from 1 to 999)
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
+ *
+ * @pre iotcon_initialize() should be called to initialize.
+ *
+ * @see iotcon_polling_get_interval()
+ */
+int iotcon_polling_set_interval(int interval);
+
+/**
+ * @brief invokes a next message from a queue for receiving messages from others, immediately.
+ * @details This API invokes a next message from a queue for receiving messages from others, immediately. After calling the API, it continues the polling with existing interval.
+ *
+ * @since_tizen 3.0
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ *
+ * @pre iotcon_initialize() should be called to initialize.
+ */
+int iotcon_polling_invoke();
+
+/**
  * @}
  */
 
