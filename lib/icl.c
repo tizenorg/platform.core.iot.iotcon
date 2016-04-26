@@ -60,6 +60,7 @@ API void iotcon_deinitialize(void)
 {
 	icl_connection_count--;
 	if (0 == icl_connection_count) {
+		icl_ioty_unset_persistent_storage();
 		icl_ioty_deinit(icl_thread);
 		icl_thread = 0;
 	}
