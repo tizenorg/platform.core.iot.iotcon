@@ -36,8 +36,13 @@ extern "C" {
  * @section CAPI_IOT_CONNECTIVITY_MODULE_FEATURE Related Features
  * This API is related with the following features:\n
  * - http://tizen.org/feature/iot.oic\n
+ * - http://tizen.org/feature/iot.oic.security\n
  *
  * It is recommended to design feature related codes in your application for reliability.\n
+ *
+ * If the feature(http://tizen.org/feature/iot.oic.security) for OIC security architecture
+ * is applied, you should set a file using iotcon_set_persistent_storage.
+ * Then applications communicate with each other based on OIC security architecture.
  *
  * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
  *
@@ -47,6 +52,30 @@ extern "C" {
  *
  * @{
  */
+
+/**
+ * @brief Sets persistent storage.
+ * @details This API set @a path to point to storage for handling secure virtual resources.
+ *
+ * @since_tizen 3.0
+ *
+ * @remarks If the device has the feature("http://tizen.org/feature/iot.oic.security"),
+ * you must call this function before iotcon_initialize() is called.\n
+ * A file that is CBOR(Concise Binary Object Representation)-format must already exist
+ * in @a path. We recommend to use application-local file for @a path.
+ *
+ * @param[in] file_path file path to point to storage for handling secure virtual resources
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ *
+ * @post iotcon_initialize()
+ */
+int iotcon_set_persistent_storage(const char *file_path);
 
 /**
  * @brief Connects to the iotcon service.
@@ -63,6 +92,9 @@ extern "C" {
  * @return  0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE Successful
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @pre iotcon_set_persistent_storage() should be called
+ * when the security feature("http://tizen.org/feature/iot.oic.security") is applied.
  *
  * @see iotcon_deinitialize()
  */

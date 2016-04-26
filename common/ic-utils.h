@@ -22,7 +22,8 @@
 #define IC_EQUAL 0
 
 char* ic_utils_strdup(const char *src);
-bool ic_utils_check_oic_feature_supported();
+bool ic_utils_check_oic_feature();
+bool ic_utils_check_oic_security_feature();
 int ic_utils_get_platform_info(OCPlatformInfo *platform_info);
 void ic_utils_free_platform_info(OCPlatformInfo *platform_info);
 bool ic_utils_check_permission();
