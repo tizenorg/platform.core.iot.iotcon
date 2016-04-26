@@ -331,9 +331,6 @@ int ic_ioty_convert_properties(int properties)
 	if (IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE & properties)
 		prop |= OC_EXPLICIT_DISCOVERABLE;
 
-	// TODO: Secure option is not supported yet.
-	properties = (properties & OC_SECURE) ? (properties ^ OC_SECURE) : properties;
-
 	return prop;
 }
 
