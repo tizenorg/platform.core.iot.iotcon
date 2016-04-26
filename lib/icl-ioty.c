@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <pthread.h>
+#include <errno.h>
 #include <glib.h>
 #include <octypes.h>
 #include <ocstack.h>
@@ -48,6 +49,8 @@
 static int icl_remote_resource_time_interval = IC_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
 static GHashTable *icl_monitoring_table;
 static GHashTable *icl_caching_table;
+static char icl_svr_db_file[PATH_MAX];
+static OCPersistentStorage icl_ioty_ps;
 
 
 void icl_ioty_deinit(pthread_t thread)
@@ -64,6 +67,44 @@ void icl_ioty_deinit(pthread_t thread)
 	result = OCStop();
 	if (OC_STACK_OK != result)
 		ERR("OCStop() Fail(%d)", result);
+}
+
+static FILE* _icl_ioty_ps_fopen(const char *path, const char *mode)
+{
+	return fopen(icl_svr_db_file, mode);
+}
+
+API int iotcon_set_persistent_storage(const char *path)
+{
+	FN_CALL;
+	OCStackResult result;
+
+	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_oic_security_feature(),
+			IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(NULL == path, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (-1 == access(path, R_OK | W_OK)) {
+		ERR("access() Fail(%d)", errno);
+		return IOTCON_ERROR_SYSTEM;
+	}
+
+	snprintf(icl_svr_db_file, sizeof(icl_svr_db_file), "%s", path);
+	SECURE_DBG("icl_svr_db_file : %s", icl_svr_db_file);
+
+	icl_ioty_ps.open = _icl_ioty_ps_fopen;
+	icl_ioty_ps.read = fread;
+	icl_ioty_ps.write = fwrite;
+	icl_ioty_ps.close = fclose;
+	icl_ioty_ps.unlink = unlink;
+
+	result = OCRegisterPersistentStorageHandler(&icl_ioty_ps);
+	if (OC_STACK_OK != result) {
+		ERR("OCRegisterPersistentStorageHandler() Fail(%d)", result);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
+	return IOTCON_ERROR_NONE;
 }
 
 int icl_ioty_init(pthread_t *out_thread)
@@ -566,6 +607,9 @@ static int _icl_ioty_remote_resource_observe(iotcon_remote_resource_h resource,
 		return ret;
 	}
 
+	if (IOTCON_RESOURCE_SECURE & resource->properties)
+		dev_addr.flags |= OC_FLAG_SECURE;
+
 	/* options */
 	if (resource->header_options && resource->header_options->hash) {
 		ret = icl_ioty_convert_header_options(resource->header_options, oic_options,
@@ -767,6 +811,9 @@ static int _icl_ioty_remote_resource_crud(
 		free(uri);
 		return ret;
 	}
+
+	if (IOTCON_RESOURCE_SECURE & resource->properties)
+		dev_addr.flags |= OC_FLAG_SECURE;
 
 	/* representation */
 	if (repr) {
