@@ -30,6 +30,11 @@
 static int _ic_oic_feature_supported = -1;
 #endif
 
+#ifdef TZ_VER_3
+static const char *IC_PRIV_FILE_NETWORK_GET = "/usr/share/iotcon/iotcon-network-get";
+static const char *IC_PRIV_FILE_INTERNET = "/usr/share/iotcon/iotcon-internet";
+#endif
+
 static const char *IC_SYSTEM_INFO_PLATFORM_VERSION = "http://tizen.org/feature/platform.version";
 static const char *IC_SYSTEM_INFO_MANUF_NAME = "http://tizen.org/system/manufacturer";
 static const char *IC_SYSTEM_INFO_MODEL_NAME = "http://tizen.org/system/model_name";
@@ -42,12 +47,6 @@ static __thread int icl_utils_pthread_oldstate;
 static __thread int icl_utils_mutex_count;
 
 // TODO: Can't access in user side daemon
-/*
-#ifdef TZ_VER_3
-static const char *IC_PRIV_FILE_NETWORK_GET = "/usr/share/iotcon/iotcon-network-get";
-static const char *IC_PRIV_FILE_INTERNET = "/usr/share/iotcon/iotcon-internet";
-#endif
-*/
 
 char* ic_utils_strdup(const char *src)
 {
@@ -63,6 +62,49 @@ char* ic_utils_strdup(const char *src)
 	}
 
 	return dest;
+}
+
+bool ic_utils_check_permission(int permssion)
+{
+	return true;
+// TODO: Can't access file in user side daemon
+
+	int ret;
+	static int has_network_permission = -1;
+	static int has_internet_permission = -1;
+
+	/* check network.get privilege */
+	if (IC_PERMISSION_NETWORK_GET & permssion) {
+		if (-1 == has_network_permission) {
+			ret = access(IC_PRIV_FILE_NETWORK_GET, R_OK);
+			if (0 != ret) {
+				ERR("Permission denied(network.get)");
+				has_network_permission = 0;
+				return false;
+			}
+			has_network_permission = 1;
+		} else if (0 == has_network_permission) {
+			ERR("Permission denied(network.get)");
+			return false;
+		}
+	}
+
+	/* check internet privilege */
+	if (IC_PERMISSION_INTERNET & permssion) {
+		if (-1 == has_internet_permission) {
+			ret = access(IC_PRIV_FILE_INTERNET, R_OK);
+			if (0 != ret) {
+				ERR("Permission denied(internet)");
+				has_internet_permission = 0;
+				return false;
+			}
+			has_internet_permission = 1;
+		} else if (0 == has_internet_permission) {
+			ERR("Permission denied(internet)");
+			return false;
+		}
+	}
+	return true;
 }
 
 bool ic_utils_check_oic_feature_supported()
@@ -144,39 +186,6 @@ int ic_utils_get_platform_info(OCPlatformInfo *platform_info)
 	return IOTCON_ERROR_NONE;
 }
 
-bool ic_utils_check_permission()
-{
-	return true;
-// TODO: Can't access file in user side daemon
-/*
-#ifdef TZ_VER_3
-	int ret;
-	static int have_permission = -1;
-
-	if (-1 == have_permission) {
-		ret = access(IC_PRIV_FILE_NETWORK_GET, R_OK);
-		if (0 != ret) {
-			ERR("Permission denied(network.get)");
-			have_permission = 0;
-			return false;
-		}
-
-		ret = access(IC_PRIV_FILE_INTERNET, R_OK);
-		if (0 != ret) {
-			ERR("Permission denied(internet)");
-			have_permission = 0;
-			return false;
-		}
-		have_permission = 1;
-	} else if (0 == have_permission) {
-		return false;
-	}
-	return true;
-#else
-	return true;
-#endif
-*/
-}
 
 static inline pthread_mutex_t* _utils_mutex_get(int type)
 {
