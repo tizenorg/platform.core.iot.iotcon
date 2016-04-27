@@ -36,12 +36,6 @@ static const char *IC_SYSTEM_INFO_MODEL_NAME = "http://tizen.org/system/model_na
 static const char *IC_SYSTEM_INFO_BUILD_STRING = "http://tizen.org/system/build.string";
 static const char *IC_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
 // TODO: Can't access in user side daemon
-/*
-#ifdef TZ_VER_3
-static const char *IC_PRIV_FILE_NETWORK_GET = "/usr/share/iotcon/iotcon-network-get";
-static const char *IC_PRIV_FILE_INTERNET = "/usr/share/iotcon/iotcon-internet";
-#endif
-*/
 
 char* ic_utils_strdup(const char *src)
 {
@@ -138,37 +132,4 @@ int ic_utils_get_platform_info(OCPlatformInfo *platform_info)
 	return IOTCON_ERROR_NONE;
 }
 
-bool ic_utils_check_permission()
-{
-	return true;
-// TODO: Can't access file in user side daemon
-/*
-#ifdef TZ_VER_3
-	int ret;
-	static int have_permission = -1;
-
-	if (-1 == have_permission) {
-		ret = access(IC_PRIV_FILE_NETWORK_GET, R_OK);
-		if (0 != ret) {
-			ERR("Permission denied(network.get)");
-			have_permission = 0;
-			return false;
-		}
-
-		ret = access(IC_PRIV_FILE_INTERNET, R_OK);
-		if (0 != ret) {
-			ERR("Permission denied(internet)");
-			have_permission = 0;
-			return false;
-		}
-		have_permission = 1;
-	} else if (0 == have_permission) {
-		return false;
-	}
-	return true;
-#else
-	return true;
-#endif
-*/
-}
 
