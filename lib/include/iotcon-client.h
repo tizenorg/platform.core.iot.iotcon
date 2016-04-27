@@ -83,15 +83,13 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  * @a host_address could be #IOTCON_MULTICAST_ADDRESS for IPv4 multicast.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
  * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.\n
  * You must destroy @a presence by calling iotcon_unsubscribe_presence()
- * if @a presence is no longer needed.
+ * if @a presence is no longer needed.\n
+ * %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] host_address The address or addressable name of the server
  * @param[in] connectivity_type The connectivity type
@@ -106,7 +104,6 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
- * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @post When the resource receive presence, iotcon_presence_cb() will be called.
  *
@@ -127,9 +124,8 @@ int iotcon_add_presence_cb(const char *host_address,
  * @details Request not to receive server's presence any more.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] presence_handle The presence handle to be unsubscribed
  *
@@ -138,7 +134,6 @@ int iotcon_add_presence_cb(const char *host_address,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
- * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @see iotcon_start_presence()
  * @see iotcon_stop_presence()
@@ -350,13 +345,11 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
  * information of the resource.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
- * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.
+ * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space. \n
+ * %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] host_address The address or addressable name of server
  * @param[in] connectivity_type The connectivity type
@@ -370,7 +363,6 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
- * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @pre iotcon_initialize() should be called to initialize.
  * @post iotcon_found_resource_cb() will be invoked.
@@ -412,9 +404,8 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  * information.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] host_address The host address of remote server
  * @param[in] connectivity_type The connectivity type
@@ -426,7 +417,6 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
- * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @pre iotcon_initialize() should be called to initialize.
  * @post iotcon_device_info_cb() will be invoked.
@@ -489,9 +479,8 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  * with information.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] host_address The host address of remote server
  * @param[in] connectivity_type The connectivity type
@@ -505,7 +494,6 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
- * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
  * @pre iotcon_initialize() should be called to initialize.
  * @post iotcon_platform_info_cb() will be invoked.

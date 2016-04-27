@@ -27,12 +27,45 @@ static pthread_t icl_thread;
 static int icl_timeout_seconds = ICL_TIMEOUT_DEFAULT;
 static int icl_init_count;
 
+/*
+#ifdef TZ_VER_3
+static const char *IC_PRIV_FILE_NETWORK_GET = "/usr/share/iotcon/iotcon-network-get";
+#endif
+*/
+
+static bool _ic_check_permission()
+{
+	return true;
+// TODO: Can't access file in user side daemon
+/*
+#ifdef TZ_VER_3
+	int ret;
+	static int have_permission = -1;
+
+	if (-1 == have_permission) {
+		ret = access(IC_PRIV_FILE_NETWORK_GET, R_OK);
+		if (0 != ret) {
+			ERR("Permission denied(network.get)");
+			have_permission = 0;
+			return false;
+		}
+		have_permission = 1;
+	} else if (0 == have_permission) {
+		return false;
+	}
+	return true;
+#else
+	return true;
+#endif
+*/
+}
+
 API int iotcon_initialize()
 {
 	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == _ic_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 
 #if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
