@@ -32,7 +32,8 @@ API int iotcon_initialize()
 	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == ic_utils_check_permission((IC_PERMISSION_INTERNET|IC_PERMISSION_NETWORK_GET)),
+			IOTCON_ERROR_PERMISSION_DENIED);
 
 #if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
