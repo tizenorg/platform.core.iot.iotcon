@@ -39,7 +39,6 @@ static const char *IC_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
 /*
 #ifdef TZ_VER_3
 static const char *IC_PRIV_FILE_NETWORK_GET = "/usr/share/iotcon/iotcon-network-get";
-static const char *IC_PRIV_FILE_INTERNET = "/usr/share/iotcon/iotcon-internet";
 #endif
 */
 
@@ -151,13 +150,6 @@ bool ic_utils_check_permission()
 		ret = access(IC_PRIV_FILE_NETWORK_GET, R_OK);
 		if (0 != ret) {
 			ERR("Permission denied(network.get)");
-			have_permission = 0;
-			return false;
-		}
-
-		ret = access(IC_PRIV_FILE_INTERNET, R_OK);
-		if (0 != ret) {
-			ERR("Permission denied(internet)");
 			have_permission = 0;
 			return false;
 		}
