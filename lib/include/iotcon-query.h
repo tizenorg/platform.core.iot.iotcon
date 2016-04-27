@@ -331,7 +331,7 @@ typedef bool (*iotcon_query_foreach_cb)(const char *key, const char *value,
 		void *user_data);
 
 /**
- * @brief Gets all datas of the query by invoking the callback function.
+ * @brief Gets all data of the query by invoking the callback function.
  * @details iotcon_query_foreach_cb() will be called for each query.\n
  * If iotcon_query_foreach_cb() returns false, iteration will be stop.
  *
