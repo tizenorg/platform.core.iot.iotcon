@@ -51,13 +51,11 @@
  * Server can call this function when online for the first time or come back from offline to online.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks If @a time_to_live is 0, server will set default value as 60 seconds.\n
  * If @a time_to_live is very big, server will set maximum value as (60 * 60 * 24) seconds
- * (24 hours).
+ * (24 hours).\n
+ * %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] time_to_live The interval of announcing presence in seconds.
  *
@@ -79,9 +77,8 @@ int iotcon_start_presence(unsigned int time_to_live);
  * Server can call this function when terminating, entering to offline or out of network.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful

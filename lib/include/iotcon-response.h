@@ -352,9 +352,8 @@ int iotcon_response_set_options(iotcon_response_h resp, iotcon_options_h options
  * @brief Send response for incoming request.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] resp The handle of the response to send
  *
