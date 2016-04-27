@@ -84,7 +84,6 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
@@ -128,7 +127,6 @@ int iotcon_add_presence_cb(const char *host_address,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] presence_handle The presence handle to be unsubscribed
@@ -351,7 +349,6 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
@@ -413,7 +410,6 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] host_address The host address of remote server
@@ -490,7 +486,6 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] host_address The host address of remote server
