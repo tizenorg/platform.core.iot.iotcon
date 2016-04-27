@@ -246,7 +246,7 @@ typedef bool (*iotcon_options_foreach_cb)(unsigned short id, const char *data,
 		void *user_data);
 
 /**
- * @brief Gets all datas of the options by invoking the callback function.
+ * @brief Gets all data of the options by invoking the callback function.
  * @details iotcon_options_foreach_cb() will be called for each option.\n
  * If iotcon_options_foreach_cb() returns false, iteration will be stop.
  *
