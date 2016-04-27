@@ -299,14 +299,14 @@ API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 }
 
 
-API int iotcon_resource_get_number_of_children(iotcon_resource_h resource,
-		int *number)
+API int iotcon_resource_get_child_count(iotcon_resource_h resource,
+		unsigned int *count)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == number, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == count, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*number = g_list_length(resource->children);
+	*count = g_list_length(resource->children);
 
 	return IOTCON_ERROR_NONE;
 }

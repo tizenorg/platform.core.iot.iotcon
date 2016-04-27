@@ -275,7 +275,7 @@ API int iotcon_representation_foreach_children(iotcon_representation_h parent,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_representation_get_children_count(iotcon_representation_h parent,
+API int iotcon_representation_get_child_count(iotcon_representation_h parent,
 		unsigned int *count)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
