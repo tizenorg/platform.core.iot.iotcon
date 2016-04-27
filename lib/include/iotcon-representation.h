@@ -484,7 +484,7 @@ int iotcon_representation_foreach_children(iotcon_representation_h parent,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_representation_get_children_count(iotcon_representation_h parent,
+int iotcon_representation_get_child_count(iotcon_representation_h parent,
 		unsigned int *count);
 
 /**
