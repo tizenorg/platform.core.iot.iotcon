@@ -476,7 +476,7 @@ int iotcon_resource_notify(iotcon_resource_h resource, iotcon_representation_h r
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of the resource
- * @param[out] number The number of children resources
+ * @param[out] count The count of children resources
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -489,7 +489,8 @@ int iotcon_resource_notify(iotcon_resource_h resource, iotcon_representation_h r
  * @see iotcon_resource_get_interfaces()
  * @see iotcon_resource_get_properties()
  */
-int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *number);
+int iotcon_resource_get_children_count(iotcon_resource_h resource,
+		unsigned int *count);
 
 /**
  * @brief Gets the child resource at the given index in the parent resource.
@@ -508,7 +509,7 @@ int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *numb
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA No data available
  *
- * @see iotcon_resource_get_number_of_children()
+ * @see iotcon_resource_get_children_count()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
@@ -532,7 +533,7 @@ int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_resource_get_number_of_children()
+ * @see iotcon_resource_get_children_count()
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
@@ -555,7 +556,7 @@ int iotcon_resource_get_uri_path(iotcon_resource_h resource, char **uri_path);
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_resource_get_number_of_children()
+ * @see iotcon_resource_get_children_count()
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_interfaces()
@@ -578,7 +579,7 @@ int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_resource_get_number_of_children()
+ * @see iotcon_resource_get_children_count()
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
@@ -602,7 +603,7 @@ int iotcon_resource_get_interfaces(iotcon_resource_h resource,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_resource_get_number_of_children()
+ * @see iotcon_resource_get_children_count()
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
