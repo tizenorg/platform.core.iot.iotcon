@@ -55,10 +55,10 @@ extern "C" {
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks You must free all resources of the Iotcon by calling iotcon_deinitialize()
- * if Iotcon API is no longer needed.
+ * if Iotcon API is no longer needed.\n
+ * %http://tizen.org/privilege/internet privilege is needed if you want use wifi.
  *
  * @return  0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE Successful

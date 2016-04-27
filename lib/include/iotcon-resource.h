@@ -215,12 +215,11 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks @a uri_path length must be less than or equal 36.\n
  * You must destroy @a resource by calling iotcon_resource_destroy()
- * if @a resource is no longer needed.
+ * if @a resource is no longer needed.\n
+ * %http://tizen.org/privilege/internet privilege is needed if you want use wifi.
  *
  * @param[in] uri_path The URI path of the resource
  * @param[in] res_types The list of type of the resource
@@ -261,12 +260,11 @@ int iotcon_resource_create(const char *uri_path,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks When a normal variable is used, there are only permission denied error.
  * If the errors of this API are not handled, then you must check an application have
- * the privileges for the API.
+ * the privileges for the API.\n
+ * %http://tizen.org/privilege/internet privilege is needed if you want use wifi.
  *
  * @param[in] resource_handle The handle of the resource to be unregistered
  *
@@ -291,10 +289,9 @@ int iotcon_resource_destroy(iotcon_resource_h resource_handle);
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
  *
- * @remarks @a iface could be a value such as #IOTCON_INTERFACE_DEFAULT.
+ * @remarks @a iface could be a value such as #IOTCON_INTERFACE_DEFAULT.\n
+ * %http://tizen.org/privilege/internet privilege is needed if you want use wifi.
  *
  * @param[in] resource The handle of the resource
  * @param[in] iface The interface to be bound to the resource
@@ -321,12 +318,11 @@ int iotcon_resource_bind_interface(iotcon_resource_h resource, const char *iface
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
- * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.
+ * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.\n
+ * %http://tizen.org/privilege/internet privilege is needed if you want use wifi.
  *
  * @param[in] resource_handle The handle of the resource
  * @param[in] resource_type The type to be bound to the resource
@@ -383,8 +379,8 @@ int iotcon_resource_set_request_handler(iotcon_resource_h resource,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed if you want use wifi.
  *
  * @param[in] parent The handle of the parent resource
  * @param[in] child The handle of the child resource to be added to the parent resource
@@ -413,8 +409,8 @@ int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed if you want use wifi.
  *
  * @param[in] parent The handle of the parent resource
  * @param[in] child The handle of the child resource to be unbound from the parent resource
@@ -443,8 +439,8 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed if you want use wifi.
  *
  * @param[in] resource The handle of the resource
  * @param[in] repr The handle of the representation
@@ -471,12 +467,12 @@ int iotcon_resource_notify(iotcon_resource_h resource, iotcon_representation_h r
 		iotcon_observers_h observers, iotcon_qos_e qos);
 
 /**
- * @brief Gets the number of children resources of the resource.
+ * @brief Gets the number of child resources of the resource.
  *
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of the resource
- * @param[out] number The number of children resources
+ * @param[out] count The number of child resources
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -489,7 +485,8 @@ int iotcon_resource_notify(iotcon_resource_h resource, iotcon_representation_h r
  * @see iotcon_resource_get_interfaces()
  * @see iotcon_resource_get_properties()
  */
-int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *number);
+int iotcon_resource_get_child_count(iotcon_resource_h resource,
+		unsigned int *count);
 
 /**
  * @brief Gets the child resource at the given index in the parent resource.
@@ -508,7 +505,7 @@ int iotcon_resource_get_number_of_children(iotcon_resource_h resource, int *numb
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA No data available
  *
- * @see iotcon_resource_get_number_of_children()
+ * @see iotcon_resource_get_child_count()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
@@ -532,7 +529,7 @@ int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_resource_get_number_of_children()
+ * @see iotcon_resource_get_child_count()
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
@@ -555,7 +552,7 @@ int iotcon_resource_get_uri_path(iotcon_resource_h resource, char **uri_path);
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_resource_get_number_of_children()
+ * @see iotcon_resource_get_child_count()
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_interfaces()
@@ -578,7 +575,7 @@ int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_resource_get_number_of_children()
+ * @see iotcon_resource_get_child_count()
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
@@ -602,7 +599,7 @@ int iotcon_resource_get_interfaces(iotcon_resource_h resource,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_resource_get_number_of_children()
+ * @see iotcon_resource_get_child_count()
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
