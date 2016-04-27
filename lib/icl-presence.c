@@ -35,7 +35,8 @@ API int iotcon_start_presence(unsigned int time_to_live)
 	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
+			IOTCON_ERROR_PERMISSION_DENIED);
 
 	if (0 == time_to_live)
 		time_to_live = IC_PRESENCE_TTL_SECONDS_DEFAULT;
@@ -58,7 +59,8 @@ API int iotcon_stop_presence(void)
 	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
+			IOTCON_ERROR_PERMISSION_DENIED);
 
 	ret = icl_ioty_stop_presence();
 	if (IOTCON_ERROR_NONE != ret) {
@@ -81,7 +83,8 @@ API int iotcon_add_presence_cb(const char *host_address,
 	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
+			IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == presence_handle, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(resource_type && (false == icl_resource_check_type(resource_type)),
@@ -120,7 +123,8 @@ API int iotcon_remove_presence_cb(iotcon_presence_h presence)
 	int ret, connectivity_type;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
+			IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
 
 	connectivity_type = presence->connectivity_type;
