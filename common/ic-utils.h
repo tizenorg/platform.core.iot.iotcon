@@ -21,11 +21,16 @@
 
 #define IC_EQUAL 0
 
+enum {
+	IC_PERMISSION_NETWORK_GET = (1 << 0),
+	IC_PERMISSION_INTERNET = (1 << 1),
+};
+
 char* ic_utils_strdup(const char *src);
+bool ic_utils_check_permission(int permssion);
 bool ic_utils_check_oic_feature_supported();
 int ic_utils_get_platform_info(OCPlatformInfo *platform_info);
 void ic_utils_free_platform_info(OCPlatformInfo *platform_info);
-bool ic_utils_check_permission();
 
 void ic_utils_mutex_lock(int type);
 void ic_utils_mutex_unlock(int type);
