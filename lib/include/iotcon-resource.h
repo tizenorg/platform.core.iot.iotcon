@@ -215,7 +215,6 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks @a uri_path length must be less than or equal 36.\n
@@ -261,7 +260,6 @@ int iotcon_resource_create(const char *uri_path,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks When a normal variable is used, there are only permission denied error.
@@ -291,7 +289,6 @@ int iotcon_resource_destroy(iotcon_resource_h resource_handle);
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks @a iface could be a value such as #IOTCON_INTERFACE_DEFAULT.
@@ -321,7 +318,6 @@ int iotcon_resource_bind_interface(iotcon_resource_h resource, const char *iface
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
@@ -383,7 +379,6 @@ int iotcon_resource_set_request_handler(iotcon_resource_h resource,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] parent The handle of the parent resource
@@ -413,7 +408,6 @@ int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] parent The handle of the parent resource
@@ -443,7 +437,6 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the resource

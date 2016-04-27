@@ -353,7 +353,6 @@ int iotcon_response_set_options(iotcon_response_h resp, iotcon_options_h options
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resp The handle of the response to send

@@ -52,7 +52,6 @@
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks If @a time_to_live is 0, server will set default value as 60 seconds.\n
@@ -80,7 +79,6 @@ int iotcon_start_presence(unsigned int time_to_live);
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
  * @return 0 on success, otherwise a negative error value.
