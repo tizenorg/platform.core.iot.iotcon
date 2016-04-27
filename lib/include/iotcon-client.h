@@ -83,15 +83,13 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  * @a host_address could be #IOTCON_MULTICAST_ADDRESS for IPv4 multicast.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
  * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.\n
  * You must destroy @a presence by calling iotcon_unsubscribe_presence()
- * if @a presence is no longer needed.
+ * if @a presence is no longer needed.\n
+ * %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] host_address The address or addressable name of the server
  * @param[in] connectivity_type The connectivity type
@@ -127,9 +125,8 @@ int iotcon_add_presence_cb(const char *host_address,
  * @details Request not to receive server's presence any more.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] presence_handle The presence handle to be unsubscribed
  *
@@ -350,13 +347,11 @@ typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
  * information of the resource.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
  *
  * @remarks The length of @a resource_type should be less than or equal to 61.\n
  * The @a resource_type must start with a lowercase alphabetic character, followed by a sequence
- * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space.
+ * of lowercase alphabetic, numeric, ".", or "-" characters, and contains no white space. \n
+ * %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] host_address The address or addressable name of server
  * @param[in] connectivity_type The connectivity type
@@ -412,9 +407,8 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  * information.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] host_address The host address of remote server
  * @param[in] connectivity_type The connectivity type
@@ -489,9 +483,8 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  * with information.
  *
  * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed for networking.
  *
  * @param[in] host_address The host address of remote server
  * @param[in] connectivity_type The connectivity type
