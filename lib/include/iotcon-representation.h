@@ -472,19 +472,19 @@ int iotcon_representation_foreach_children(iotcon_representation_h parent,
 		iotcon_children_cb cb, void *user_data);
 
 /**
- * @brief Gets the number of children representation in the parent representation.
+ * @brief Gets the number of child representations in the parent representation.
  *
  * @since_tizen 3.0
  *
  * @param[in] parent The parent representation handle
- * @param[out] count The number of children representation
+ * @param[out] count The number of child representations
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_representation_get_children_count(iotcon_representation_h parent,
+int iotcon_representation_get_child_count(iotcon_representation_h parent,
 		unsigned int *count);
 
 /**

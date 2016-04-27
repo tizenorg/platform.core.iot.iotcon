@@ -98,9 +98,9 @@ static void _print_repr(iotcon_representation_h recv_repr)
 			DBG("null value is null");
 	}
 
-	ret = iotcon_representation_get_children_count(recv_repr, &children_count);
+	ret = iotcon_representation_get_child_count(recv_repr, &children_count);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_get_children_count() Fail(%d)", ret);
+		ERR("iotcon_representation_get_child_count() Fail(%d)", ret);
 		return;
 	}
 
