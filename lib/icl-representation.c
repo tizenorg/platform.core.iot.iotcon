@@ -139,7 +139,9 @@ API int iotcon_representation_get_resource_types(iotcon_representation_h repr,
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == types, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == repr->res_types, IOTCON_ERROR_NO_DATA);
+
+	if (NULL == repr->res_types)
+		WARN("Not Set Resource Types");
 
 	*types = repr->res_types;
 
@@ -169,7 +171,9 @@ API int iotcon_representation_get_resource_interfaces(iotcon_representation_h re
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ifaces, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == repr->interfaces, IOTCON_ERROR_NO_DATA);
+
+	if (NULL == repr->interfaces)
+		WARN("Not Set Resource Interfaces");
 
 	*ifaces = repr->interfaces;
 

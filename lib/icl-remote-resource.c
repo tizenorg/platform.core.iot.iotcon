@@ -347,7 +347,9 @@ API int iotcon_remote_resource_get_options(iotcon_remote_resource_h resource,
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == resource->header_options, IOTCON_ERROR_NO_DATA);
+
+	if (NULL == resource->header_options)
+		WARN("Not Set header options");
 
 	*options = resource->header_options;
 
