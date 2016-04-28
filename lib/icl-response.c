@@ -75,7 +75,6 @@ API int iotcon_response_get_options(iotcon_response_h resp,
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == resp->header_options, IOTCON_ERROR_NO_DATA);
 
 	*options = resp->header_options;
 

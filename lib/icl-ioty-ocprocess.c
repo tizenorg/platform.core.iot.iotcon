@@ -567,6 +567,9 @@ OCEntityHandlerResult icl_ioty_ocprocess_request_cb(OCEntityHandlerFlag flag,
 	else
 		repr = NULL;
 
+	if (NULL == repr->uri_path)
+		repr->uri_path = ic_utils_strdup(resource->uri_path);
+
 	/* for iotcon_resource_notify */
 	if (IOTCON_OBSERVE_REGISTER == obs_type) {
 		if (NULL == resource->observers)
