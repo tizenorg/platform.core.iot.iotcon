@@ -79,6 +79,8 @@ API int iotcon_request_get_options(iotcon_request_h request,
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == options, IOTCON_ERROR_INVALID_PARAMETER);
 
+	WARN_IF(NULL == request->header_options, "Not Set header options");
+
 	*options = request->header_options;
 
 	return IOTCON_ERROR_NONE;
@@ -91,6 +93,8 @@ API int iotcon_request_get_query(iotcon_request_h request, iotcon_query_h *query
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == request, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == query, IOTCON_ERROR_INVALID_PARAMETER);
+
+	WARN_IF(NULL == request->query, "Not Set query");
 
 	*query = request->query;
 
