@@ -239,7 +239,6 @@ void iotcon_response_destroy(iotcon_response_h resp);
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_NO_DATA  No data
  *
  * @see iotcon_response_get_representation()
  * @see iotcon_response_get_result()

@@ -562,10 +562,14 @@ OCEntityHandlerResult icl_ioty_ocprocess_request_cb(OCEntityHandlerFlag flag,
 	}
 
 	/* representation */
-	if (request->payload)
+	if (request->payload) {
 		icl_ioty_parse_oic_rep_payload((OCRepPayload*)request->payload, true, &repr);
-	else
+		if (repr && NULL == repr->uri_path)
+			repr->uri_path = ic_utils_strdup(resource->uri_path);
+	} else {
 		repr = NULL;
+	}
+
 
 	/* for iotcon_resource_notify */
 	if (IOTCON_OBSERVE_REGISTER == obs_type) {

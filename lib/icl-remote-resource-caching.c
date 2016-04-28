@@ -104,11 +104,7 @@ API int iotcon_remote_resource_get_cached_representation(
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == representation, IOTCON_ERROR_INVALID_PARAMETER);
-
-	if (NULL == resource->cached_repr) {
-		ERR("No Caching Representation");
-		return IOTCON_ERROR_NO_DATA;
-	}
+	WARN_IF(NULL == resource->cached_repr, "No Cached Representation");
 
 	*representation = resource->cached_repr;
 
