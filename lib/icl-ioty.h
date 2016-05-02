@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_H__
+#ifndef __IOT_CONNECTIVITY_LIBRARY_IOTIVITY_H__
+#define __IOT_CONNECTIVITY_LIBRARY_IOTIVITY_H__
 
 #include <stdint.h>
 #include <glib.h>
@@ -142,5 +142,5 @@ int icl_ioty_lite_resource_notify(iotcon_lite_resource_h resource);
 
 int icl_ioty_response_send(iotcon_response_h response);
 
-#endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_H__*/
+#endif /*__IOT_CONNECTIVITY_LIBRARY_IOTIVITY_H__*/
 

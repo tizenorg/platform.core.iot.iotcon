@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ static void _print_repr(iotcon_representation_h recv_repr)
 		}
 
 		if (TEST_STR_EQUAL == strncmp(LIGHT_RESOURCE_URI_PREFIX, uri_path,
-				strlen(LIGHT_RESOURCE_URI_PREFIX))) {
+					strlen(LIGHT_RESOURCE_URI_PREFIX))) {
 			ret = iotcon_state_get_keys_count(child_state, &key_count);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("iotcon_state_get_keys_count() Fail(%d)", ret);
@@ -143,7 +143,7 @@ static void _print_repr(iotcon_representation_h recv_repr)
 				DBG("brightness : %d", int_val);
 			}
 		} else if (TEST_STR_EQUAL == strncmp(FAN_RESOURCE_URI_PREFIX, uri_path,
-				strlen(FAN_RESOURCE_URI_PREFIX))) {
+					strlen(FAN_RESOURCE_URI_PREFIX))) {
 			ret = iotcon_state_get_keys_count(child_state, &key_count);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("iotcon_state_get_keys_count() Fail(%d)", ret);
@@ -307,7 +307,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 	node = g_list_find_custom(device_id_list, resource_device_id, _device_id_compare);
 
 	if (node && TEST_STR_EQUAL == strncmp(ROOM_RESOURCE_URI_PREFIX, resource_uri_path,
-			strlen(ROOM_RESOURCE_URI_PREFIX))) {
+				strlen(ROOM_RESOURCE_URI_PREFIX))) {
 		DBG("uri_path \"%s\" already found. skip !", resource_uri_path);
 		return;
 	}
@@ -366,7 +366,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 	}
 
 	if (TEST_STR_EQUAL == strncmp(ROOM_RESOURCE_URI_PREFIX, resource_uri_path,
-			strlen(ROOM_RESOURCE_URI_PREFIX))) {
+				strlen(ROOM_RESOURCE_URI_PREFIX))) {
 		ret = iotcon_remote_resource_clone(resource, &cloned_resource);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_remote_resource_clone() Fail(%d)", ret);

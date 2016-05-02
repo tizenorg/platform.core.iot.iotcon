@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__
+#ifndef __IOT_CONNECTIVITY_LIBRARY_CLIENT_H__
+#define __IOT_CONNECTIVITY_LIBRARY_CLIENT_H__
 
 #include <stdint.h>
 #include <gio/gio.h>
@@ -41,4 +41,4 @@ struct icl_remote_resource {
 void icl_remote_resource_ref(iotcon_remote_resource_h resource);
 void icl_remote_resource_unref(iotcon_remote_resource_h resource);
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_CLIENT_H__ */
+#endif /* __IOT_CONNECTIVITY_LIBRARY_CLIENT_H__ */

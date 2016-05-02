@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ API int iotcon_initialize()
 		}
 	}
 
-		return IOTCON_ERROR_NONE;
+	return IOTCON_ERROR_NONE;
 }
 
 API void iotcon_deinitialize(void)

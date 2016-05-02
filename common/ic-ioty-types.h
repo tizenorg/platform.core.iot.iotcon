@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __IOT_CONNECTIVITY_MANAGER_COMMON_IOTIVITY_TYPES_H__
-#define __IOT_CONNECTIVITY_MANAGER_COMMON_IOTIVITY_TYPES_H__
+#ifndef __IOT_CONNECTIVITY_COMMON_IOTIVITY_TYPES_H__
+#define __IOT_CONNECTIVITY_COMMON_IOTIVITY_TYPES_H__
 
 #include <octypes.h>
 
@@ -41,4 +41,4 @@ int ic_ioty_convert_connectivity(const char *host_address, int conn_type,
 		OCDevAddr *dev_addr);
 int ic_ioty_convert_properties(int properties);
 
-#endif /*__IOT_CONNECTIVITY_MANAGER_COMMON_IOTIVITY_TYPES_H__*/
+#endif /*__IOT_CONNECTIVITY_COMMON_IOTIVITY_TYPES_H__*/
