@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_LITE_RESOURCE_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_LITE_RESOURCE_H__
+#ifndef __IOT_CONNECTIVITY_LIBRARY_LITE_RESOURCE_H__
+#define __IOT_CONNECTIVITY_LIBRARY_LITE_RESOURCE_H__
 
 #include <stdint.h>
 #include "iotcon-lite-resource.h"
@@ -30,5 +30,5 @@ struct icl_lite_resource {
 	iotcon_connectivity_type_e connectivity_type;
 };
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_LITE_RESOURCE_H__ */
+#endif /* __IOT_CONNECTIVITY_LIBRARY_LITE_RESOURCE_H__ */
 

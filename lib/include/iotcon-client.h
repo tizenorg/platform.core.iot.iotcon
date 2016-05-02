@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_CLIENT_H__
-#define __IOT_CONNECTIVITY_MANAGER_CLIENT_H__
+#ifndef __IOT_CONNECTIVITY_CLIENT_H__
+#define __IOT_CONNECTIVITY_CLIENT_H__
 
 #include <iotcon-types.h>
 #include <iotcon-remote-resource.h>
@@ -545,4 +545,4 @@ int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
  * @}
  */
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_CLIENT_H__ */
+#endif /* __IOT_CONNECTIVITY_CLIENT_H__ */

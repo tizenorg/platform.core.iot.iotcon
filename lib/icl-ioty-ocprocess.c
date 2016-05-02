@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -332,7 +332,7 @@ OCStackApplicationResult icl_ioty_ocprocess_observe_cb(void *ctx,
 	RETV_IF(NULL == resp, OC_STACK_KEEP_TRANSACTION);
 
 	cb_result = (OC_OBSERVE_DEREGISTER == resp->sequenceNumber) ?
-			OC_STACK_DELETE_TRANSACTION : OC_STACK_KEEP_TRANSACTION;
+		OC_STACK_DELETE_TRANSACTION : OC_STACK_KEEP_TRANSACTION;
 
 	if (NULL == resp->payload) {
 		ERR("payload is empty(%d)", resp->result);

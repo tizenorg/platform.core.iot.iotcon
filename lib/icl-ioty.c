@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,15 +115,15 @@ static gboolean _icl_ioty_timeout(gpointer user_data)
 		switch (cb_info->op) {
 		case ICL_FIND_RESOURCE:
 			((iotcon_found_resource_cb)cb_info->cb)(NULL, IOTCON_ERROR_TIMEOUT,
-					cb_info->user_data);
+				cb_info->user_data);
 			break;
 		case ICL_GET_DEVICE_INFO:
 			((iotcon_device_info_cb)cb_info->cb)(NULL, IOTCON_ERROR_TIMEOUT,
-					cb_info->user_data);
+				cb_info->user_data);
 			break;
 		case ICL_GET_PLATFORM_INFO:
 			((iotcon_platform_info_cb)cb_info->cb)(NULL, IOTCON_ERROR_TIMEOUT,
-					cb_info->user_data);
+				cb_info->user_data);
 			break;
 		default:
 			ERR("Invalid operation(%d)", cb_info->op);
@@ -937,7 +937,7 @@ static void _icl_ioty_monitoring_get_cb(iotcon_remote_resource_h resource,
 		state = IOTCON_REMOTE_RESOURCE_LOST_SIGNAL;
 	} else {
 		state = (IOTCON_RESPONSE_OK == response->result) ?
-				IOTCON_REMOTE_RESOURCE_ALIVE : IOTCON_REMOTE_RESOURCE_LOST_SIGNAL;
+			IOTCON_REMOTE_RESOURCE_ALIVE : IOTCON_REMOTE_RESOURCE_LOST_SIGNAL;
 	}
 
 	if (state != cb_container->state) {
@@ -1710,7 +1710,7 @@ int icl_ioty_response_send(iotcon_response_h response_handle)
 				/ sizeof(response.sendVendorSpecificHeaderOptions[0]));
 
 		response.numSendVendorSpecificHeaderOptions =
-				g_hash_table_size(response_handle->header_options->hash);
+			g_hash_table_size(response_handle->header_options->hash);
 	}
 
 

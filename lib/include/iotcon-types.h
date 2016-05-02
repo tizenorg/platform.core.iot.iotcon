@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_TYPES_H__
-#define __IOT_CONNECTIVITY_MANAGER_TYPES_H__
+#ifndef __IOT_CONNECTIVITY_TYPES_H__
+#define __IOT_CONNECTIVITY_TYPES_H__
 
 #include <tizen_type.h>
 
@@ -70,14 +70,14 @@ typedef struct icl_resource* iotcon_resource_h;
 typedef struct icl_lite_resource* iotcon_lite_resource_h;
 
 /**
-* @brief The handle of response.
-* @details @a iotcon_response_h is an opaque data structure to respond to client.
-* @a iotcon_response_h is a data type of server's response which consists of result,
-* header options, query, representation.
-*
-*
-* @since_tizen 3.0
-*/
+ * @brief The handle of response.
+ * @details @a iotcon_response_h is an opaque data structure to respond to client.
+ * @a iotcon_response_h is a data type of server's response which consists of result,
+ * header options, query, representation.
+ *
+ *
+ * @since_tizen 3.0
+ */
 typedef struct icl_resource_response* iotcon_response_h;
 
 /**
@@ -89,13 +89,13 @@ typedef struct icl_resource_response* iotcon_response_h;
 typedef struct icl_observers* iotcon_observers_h;
 
 /**
-* @brief The handle of request.
-* @details @a iotcon_request_h is an opaque data structure to request to a particular resource.
-* @a iotcon_request_h is a data type of client's request which consists of header options,
-* query, representation.
-*
-* @since_tizen 3.0
-*/
+ * @brief The handle of request.
+ * @details @a iotcon_request_h is an opaque data structure to request to a particular resource.
+ * @a iotcon_request_h is a data type of client's request which consists of header options,
+ * query, representation.
+ *
+ * @since_tizen 3.0
+ */
 typedef struct icl_resource_request* iotcon_request_h;
 
 /**
@@ -229,4 +229,4 @@ typedef struct icl_state_s* iotcon_state_h;
 #include <iotcon-resource-types.h>
 #include <iotcon-resource-interfaces.h>
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_TYPES_H__ */
+#endif /* __IOT_CONNECTIVITY_TYPES_H__ */
