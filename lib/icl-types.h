@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_TYPES_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_TYPES_H__
+#ifndef __IOT_CONNECTIVITY_LIBRARY_TYPES_H__
+#define __IOT_CONNECTIVITY_LIBRARY_TYPES_H__
 
 #include <stdint.h>
 #include "iotcon-types.h"
@@ -133,4 +133,4 @@ void icl_destroy_caching_container(void *data);
 
 void icl_destroy_request_container(icl_request_container_s *cb_container);
 
-#endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_TYPES_H__*/
+#endif /*__IOT_CONNECTIVITY_LIBRARY_TYPES_H__*/

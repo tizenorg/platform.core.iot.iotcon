@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__
+#ifndef __IOT_CONNECTIVITY_LIBRARY_REPRESENTATION_H__
+#define __IOT_CONNECTIVITY_LIBRARY_REPRESENTATION_H__
 
 #include <glib.h>
 
@@ -41,4 +41,4 @@ int icl_representation_compare(iotcon_representation_h repr1,
 		iotcon_representation_h repr2);
 
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_REPRESENTATION_H__ */
+#endif /* __IOT_CONNECTIVITY_LIBRARY_REPRESENTATION_H__ */

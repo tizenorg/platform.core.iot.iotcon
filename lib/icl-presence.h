@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_PRESENCE_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_PRESENCE_H__
+#ifndef __IOT_CONNECTIVITY_LIBRARY_PRESENCE_H__
+#define __IOT_CONNECTIVITY_LIBRARY_PRESENCE_H__
 
 #include <octypes.h>
 
@@ -35,4 +35,4 @@ typedef struct icl_presence_response {
 	iotcon_presence_trigger_e trigger;
 } icl_presence_response_s;
 
-#endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_PRESENCE_H__*/
+#endif /*__IOT_CONNECTIVITY_LIBRARY_PRESENCE_H__*/

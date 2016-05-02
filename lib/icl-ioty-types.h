@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_TYPES_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_TYPES_H__
+#ifndef __IOT_CONNECTIVITY_LIBRARY_IOTIVITY_TYPES_H__
+#define __IOT_CONNECTIVITY_LIBRARY_IOTIVITY_TYPES_H__
 
 #include "iotcon-types.h"
 #include "icl-ioty.h"
@@ -43,4 +43,4 @@ int icl_ioty_convert_representation(iotcon_representation_h repr,
 int icl_ioty_convert_header_options(iotcon_options_h options,
 		OCHeaderOption dest[], int dest_size);
 
-#endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_TYPES_H__*/
+#endif /*__IOT_CONNECTIVITY_LIBRARY_IOTIVITY_TYPES_H__*/

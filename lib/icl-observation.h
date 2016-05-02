@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_OBSERVATION_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_OBSERVATION_H__
+#ifndef __IOT_CONNECTIVITY_LIBRARY_OBSERVATION_H__
+#define __IOT_CONNECTIVITY_LIBRARY_OBSERVATION_H__
 
 #include <glib.h>
 #include "iotcon-types.h"
@@ -23,4 +23,4 @@ struct icl_observers {
 	GList *observers_list;
 };
 
-#endif /* __IOT_CONNECTIVITY_MANAGER_LIBRARY_OBSERVATION_H__ */
+#endif /* __IOT_CONNECTIVITY_LIBRARY_OBSERVATION_H__ */

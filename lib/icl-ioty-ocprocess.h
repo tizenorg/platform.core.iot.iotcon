@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_OCPROCESS_H__
-#define __IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_OCPROCESS_H__
+#ifndef __IOT_CONNECTIVITY_LIBRARY_IOTIVITY_OCPROCESS_H__
+#define __IOT_CONNECTIVITY_LIBRARY_IOTIVITY_OCPROCESS_H__
 
 #include <glib.h>
 
@@ -49,5 +49,5 @@ OCEntityHandlerResult icl_ioty_ocprocess_request_cb(OCEntityHandlerFlag flag,
 OCEntityHandlerResult icl_ioty_ocprocess_lite_request_cb(OCEntityHandlerFlag flag,
 		OCEntityHandlerRequest *request, void *user_data);
 
-#endif /*__IOT_CONNECTIVITY_MANAGER_LIBRARY_IOTIVITY_OCPROCESS_H__*/
+#endif /*__IOT_CONNECTIVITY_LIBRARY_IOTIVITY_OCPROCESS_H__*/
 

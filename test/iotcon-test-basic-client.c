@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ static void _on_response_post(iotcon_remote_resource_h resource,
 	INFO("POST request was successful");
 
 	ret = iotcon_response_get_representation(response, &recv_repr);
-		if (IOTCON_ERROR_NONE != ret) {
+	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_response_get_representation() Fail(%d)", ret);
 		return;
 	}
@@ -453,7 +453,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 	node = g_list_find_custom(device_id_list, resource_device_id, _device_id_compare);
 
 	if (node && TEST_STR_EQUAL == strncmp(DOOR_RESOURCE_URI_PREFIX, resource_uri_path,
-			strlen(DOOR_RESOURCE_URI_PREFIX))) {
+				strlen(DOOR_RESOURCE_URI_PREFIX))) {
 		DBG("uri_path \"%s\" already found. skip !", resource_uri_path);
 		return;
 	}
@@ -530,7 +530,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 	}
 
 	if (TEST_STR_EQUAL == strncmp(DOOR_RESOURCE_URI_PREFIX, resource_uri_path,
-			strlen(DOOR_RESOURCE_URI_PREFIX))) {
+				strlen(DOOR_RESOURCE_URI_PREFIX))) {
 		iotcon_query_h query;
 
 		ret = iotcon_remote_resource_clone(resource, &resource_clone);
