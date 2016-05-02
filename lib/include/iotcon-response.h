@@ -353,7 +353,8 @@ int iotcon_response_set_options(iotcon_response_h resp, iotcon_options_h options
  *
  * @since_tizen 3.0
  * @privlevel public
- * @privilege %http://tizen.org/privilege/internet
+ *
+ * @remarks %http://tizen.org/privilege/internet privilege is needed if you want use wifi.
  *
  * @param[in] resp The handle of the response to send
  *
