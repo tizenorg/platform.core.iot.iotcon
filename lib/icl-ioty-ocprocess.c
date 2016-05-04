@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <stdlib.h>
+#include <sys/prctl.h>
+
 #include <ocstack.h>
 #include <octypes.h>
 
@@ -50,16 +51,22 @@ void icl_ioty_ocprocess_start()
 	icl_ioty_alive = 1;
 }
 
-gpointer icl_ioty_ocprocess_thread(gpointer data)
+void* icl_ioty_ocprocess_thread(void *data)
 {
 	FN_CALL;
+	int ret;
 	OCStackResult result;
 	const struct timespec delay = {0, 10 * 1000 * 1000}; /* 10 ms */
 
+	/* For setting this thread name */
+	ret = prctl(PR_SET_NAME, "iotcon_ocprocess_thread");
+	if (0 != ret)
+		ERR("prctl(PR_SET_NAME) Fail(%d)", ret);
+
 	while (icl_ioty_alive) {
-		icl_ioty_csdk_lock();
+		ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 		result = OCProcess();
-		icl_ioty_csdk_unlock();
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 		if (OC_STACK_OK != result) {
 			ERR("OCProcess() Fail(%d)", result);
 			break;

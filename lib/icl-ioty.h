@@ -17,7 +17,7 @@
 #define __IOT_CONNECTIVITY_LIBRARY_IOTIVITY_H__
 
 #include <stdint.h>
-#include <glib.h>
+#include <pthread.h>
 #include <octypes.h>
 
 #include "iotcon-client.h"
@@ -39,11 +39,8 @@ typedef struct {
 	OCDoHandle handle;
 } icl_cb_s;
 
-void icl_ioty_csdk_lock();
-void icl_ioty_csdk_unlock();
-
-void icl_ioty_deinit(GThread *thread);
-int icl_ioty_init(GThread **out_thread);
+void icl_ioty_deinit(pthread_t thread);
+int icl_ioty_init(pthread_t *out_thread);
 
 int icl_ioty_set_device_info(const char *device_name);
 int icl_ioty_set_platform_info();
