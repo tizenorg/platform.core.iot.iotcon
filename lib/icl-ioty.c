@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include <glib.h>
 #include <octypes.h>
 #include <ocstack.h>
@@ -43,45 +44,37 @@
 #include "icl-ioty-types.h"
 #include "icl-ioty.h"
 
-static GMutex icl_csdk_mutex;
 static int icl_remote_resource_time_interval = IC_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
 static GHashTable *icl_monitoring_table;
 static GHashTable *icl_caching_table;
 
-void icl_ioty_csdk_lock()
-{
-	g_mutex_lock(&icl_csdk_mutex);
-}
 
-void icl_ioty_csdk_unlock()
-{
-	g_mutex_unlock(&icl_csdk_mutex);
-}
-
-void icl_ioty_deinit(GThread *thread)
+void icl_ioty_deinit(pthread_t thread)
 {
 	FN_CALL;
+	int ret;
 	OCStackResult result;
 
-	RET_IF(NULL == thread);
-
 	icl_ioty_ocprocess_stop();
-	g_thread_join(thread);
+	ret = pthread_join(thread, NULL);
+	if (0 != ret)
+		ERR("pthread_join() Fail(%d)", ret);
 
 	result = OCStop();
 	if (OC_STACK_OK != result)
 		ERR("OCStop() Fail(%d)", result);
 }
 
-int icl_ioty_init(GThread **out_thread)
+int icl_ioty_init(pthread_t *out_thread)
 {
 	FN_CALL;
-	GError *error;
-	GThread *thread;
+	int ret;
+	pthread_attr_t attr;
+	OCStackResult result;
 
 	RETV_IF(NULL == out_thread, IOTCON_ERROR_INVALID_PARAMETER);
 
-	OCStackResult result = OCInit(NULL, 0, OC_CLIENT_SERVER);
+	result = OCInit(NULL, 0, OC_CLIENT_SERVER);
 	if (OC_STACK_OK != result) {
 		ERR("OCInit() Fail(%d)", result);
 		return ic_ioty_parse_oic_error(result);
@@ -89,15 +82,22 @@ int icl_ioty_init(GThread **out_thread)
 
 	icl_ioty_ocprocess_start();
 
-	thread = g_thread_try_new("packet_receive_thread", icl_ioty_ocprocess_thread,
-			NULL, &error);
-	if (NULL == thread) {
-		ERR("g_thread_try_new() Fail(%s)", error->message);
-		g_error_free(error);
+	pthread_attr_init(&attr);
+
+#ifdef THREAD_STACK_SIZE
+	size_t stacksize = 0;
+	ret = pthread_attr_setstacksize(&attr, stacksize);
+	if (0 != ret)
+		ERR("pthread_attr_setstacksize() Fail(%d)", ret);
+#endif
+
+	ret = pthread_create(out_thread, &attr, icl_ioty_ocprocess_thread, NULL);
+	if (0 != ret) {
+		ERR("pthread_create() Fail(%d)", ret);
 		return IOTCON_ERROR_SYSTEM;
 	}
 
-	*out_thread = thread;
+	pthread_attr_destroy(&attr);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -131,9 +131,9 @@ static gboolean _icl_ioty_timeout(gpointer user_data)
 		}
 	}
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCCancel(cb_info->handle, OC_LOW_QOS, NULL, 0);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != ret) {
 		ERR("OCCancel() Fail(%d)", ret);
 		return G_SOURCE_REMOVE;
@@ -203,11 +203,11 @@ int icl_ioty_find_resource(const char *host_address,
 
 	oic_conn_type = ic_ioty_convert_connectivity_type(connectivity_type);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	// TODO: QoS is come from lib.
 	result = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	cb_data->handle = handle;
 
 	if (OC_STACK_OK != result) {
@@ -257,11 +257,11 @@ int icl_ioty_get_device_info(const char *host_address,
 
 	oic_conn_type = ic_ioty_convert_connectivity_type(connectivity_type);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	// TODO: QoS is come from lib. And user can set QoS to client structure.
 	result = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	cb_data->handle = handle;
 
 	if (OC_STACK_OK != result) {
@@ -311,11 +311,11 @@ int icl_ioty_get_platform_info(const char *host_address,
 
 	oic_conn_type = ic_ioty_convert_connectivity_type(connectivity_type);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	// TODO: QoS is come from lib. And user can set QoS to client structure.
 	result = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	cb_data->handle = handle;
 
 	if (OC_STACK_OK != result) {
@@ -343,9 +343,9 @@ int icl_ioty_set_device_info(const char *device_name)
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCSetDeviceInfo(device_info);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCSetDeviceInfo() Fail(%d)", ret);
@@ -368,9 +368,9 @@ int icl_ioty_set_platform_info()
 		return ret;
 	}
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCSetPlatformInfo(platform_info);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCSetPlatformInfo() Fail(%d)", ret);
@@ -426,10 +426,10 @@ int icl_ioty_add_presence_cb(const char *host_address,
 
 	oic_conn_type = ic_ioty_convert_connectivity_type(connectivity_type);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	result = OCDoResource(&handle, OC_REST_PRESENCE, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	presence->handle = handle;
 
 	if (OC_STACK_OK != result) {
@@ -449,9 +449,9 @@ int icl_ioty_remove_presence_cb(iotcon_presence_h presence)
 
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCCancel(presence->handle, OC_LOW_QOS, NULL, 0);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCCancel() Fail(%d)", ret);
@@ -593,11 +593,11 @@ static int _icl_ioty_remote_resource_observe(iotcon_remote_resource_h resource,
 	cbdata.cb = icl_ioty_ocprocess_observe_cb;
 	cbdata.cd = _icl_ioty_free_observe_container;
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	// TODO: QoS is come from lib. And user can set QoS to client structure.
 	ret = OCDoResource(&handle, method, uri, &dev_addr, NULL, oic_conn_type,
 			OC_HIGH_QOS, &cbdata, oic_options_ptr, options_size);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCDoResource(OBSERVE:%d) Fail(%d)", method, ret);
@@ -661,9 +661,9 @@ int icl_ioty_remote_resource_observe_cancel(iotcon_remote_resource_h resource,
 	}
 	handle = IC_INT64_TO_POINTER(observe_handle);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCCancel(handle, OC_HIGH_QOS, oic_options_ptr, options_size);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCCancel() Fail(%d)", ret);
@@ -811,10 +811,10 @@ static int _icl_ioty_remote_resource_crud(
 	cbdata.cb = icl_ioty_ocprocess_crud_cb;
 	cbdata.cd = _icl_ioty_free_response_container;
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCDoResource(NULL, method, uri, &dev_addr, payload, oic_conn_type,
 			OC_HIGH_QOS, &cbdata, oic_options_ptr, options_size);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCDoResource(CRUD:%d) Fail(%d)", method, ret);
@@ -1240,9 +1240,9 @@ int icl_ioty_start_presence(unsigned int time_to_live)
 
 	RETV_IF(IC_PRESENCE_TTL_SECONDS_MAX < time_to_live, IOTCON_ERROR_INVALID_PARAMETER);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCStartPresence(time_to_live);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCStartPresence() Fail(%d)", ret);
@@ -1256,9 +1256,9 @@ int icl_ioty_stop_presence()
 {
 	int ret;
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCStopPresence();
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != ret) {
 		ERR("OCStopPresence() Fail(%d)", ret);
 		return ic_ioty_parse_oic_error(ret);
@@ -1272,9 +1272,9 @@ static int _icl_ioty_resource_bind_type(OCResourceHandle handle,
 {
 	OCStackResult ret;
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCBindResourceTypeToResource(handle, resource_type);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCBindResourceTypeToResource() Fail(%d)", ret);
@@ -1289,9 +1289,9 @@ static int _icl_ioty_resource_bind_interface(OCResourceHandle handle,
 {
 	OCStackResult result;
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	result = OCBindResourceInterfaceToResource(handle, iface);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != result) {
 		ERR("OCBindResourceInterfaceToResource() Fail(%d)", result);
@@ -1338,10 +1338,10 @@ int icl_ioty_resource_create(const char *uri_path,
 
 	properties = ic_ioty_convert_properties(properties);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCCreateResource(&handle, res_types->type_list->data, ifaces->iface_list->data,
 			uri_path, icl_ioty_ocprocess_request_cb, resource, properties);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != ret) {
 		ERR("OCCreateResource() Fail(%d)", ret);
 		iotcon_resource_destroy(resource);
@@ -1443,9 +1443,9 @@ int icl_ioty_resource_bind_child_resource(iotcon_resource_h parent,
 	handle_parent = IC_INT64_TO_POINTER(parent->handle);
 	handle_child = IC_INT64_TO_POINTER(child->handle);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCBindResource(handle_parent, handle_child);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCBindResource() Fail(%d)", ret);
@@ -1468,9 +1468,9 @@ int icl_ioty_resource_unbind_child_resource(iotcon_resource_h parent,
 	handle_parent = IC_INT64_TO_POINTER(parent->handle);
 	handle_child = IC_INT64_TO_POINTER(child->handle);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCUnBindResource(handle_parent, handle_child);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCUnBindResource() Fail(%d)", ret);
@@ -1517,12 +1517,12 @@ int icl_ioty_resource_notify(iotcon_resource_h resource, iotcon_representation_h
 
 	handle = IC_INT64_TO_POINTER(resource->handle);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	if (payload)
 		ret = OCNotifyListOfObservers(handle, obs_ids, obs_length, payload, oc_qos);
 	else
 		ret = OCNotifyAllObservers(handle, oc_qos);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_NO_OBSERVERS == ret) {
 		WARN("No Observers. Stop Notifying");
@@ -1545,9 +1545,9 @@ int icl_ioty_resource_destroy(iotcon_resource_h resource)
 
 	handle = IC_INT64_TO_POINTER(resource->handle);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCDeleteResource(handle);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCDeleteResource() Fail(%d)", ret);
@@ -1596,10 +1596,10 @@ int icl_ioty_lite_resource_create(const char *uri_path,
 
 	properties = ic_ioty_convert_properties(properties);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCCreateResource(&handle, res_types->type_list->data, res_iface, uri_path,
 			icl_ioty_ocprocess_lite_request_cb, resource, properties);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != ret) {
 		ERR("OCCreateResource() Fail(%d)", ret);
 		icl_ioty_lite_resource_destroy(resource);
@@ -1628,9 +1628,9 @@ int icl_ioty_lite_resource_destroy(iotcon_lite_resource_h resource)
 
 	handle = IC_INT64_TO_POINTER(resource->handle);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCDeleteResource(handle);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCDeleteResource() Fail(%d)", ret);
@@ -1653,9 +1653,9 @@ int icl_ioty_lite_resource_notify(iotcon_lite_resource_h resource)
 
 	handle = IC_INT64_TO_POINTER(resource->handle);
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCNotifyAllObservers(handle, IOTCON_QOS_HIGH);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_NO_OBSERVERS == ret) {
 		WARN("No Observers. Stop Notifying");
@@ -1719,9 +1719,9 @@ int icl_ioty_response_send(iotcon_response_h response_handle)
 	/* related to block transfer */
 	response.persistentBufferFlag = 0;
 
-	icl_ioty_csdk_lock();
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCDoResponse(&response);
-	icl_ioty_csdk_unlock();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCDoResponse() Fail(%d)", ret);

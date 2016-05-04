@@ -35,6 +35,12 @@ static const char *IC_SYSTEM_INFO_MANUF_NAME = "http://tizen.org/system/manufact
 static const char *IC_SYSTEM_INFO_MODEL_NAME = "http://tizen.org/system/model_name";
 static const char *IC_SYSTEM_INFO_BUILD_STRING = "http://tizen.org/system/build.string";
 static const char *IC_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
+
+static pthread_mutex_t icl_utils_mutex_init = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t icl_utils_mutex_ioty = PTHREAD_MUTEX_INITIALIZER;
+static __thread int icl_utils_pthread_oldstate;
+static __thread int icl_utils_mutex_count;
+
 // TODO: Can't access in user side daemon
 /*
 #ifdef TZ_VER_3
@@ -172,3 +178,49 @@ bool ic_utils_check_permission()
 */
 }
 
+static inline pthread_mutex_t* _utils_mutex_get(int type)
+{
+	pthread_mutex_t *mutex;
+
+	switch (type) {
+	case IC_UTILS_MUTEX_INIT:
+		mutex = &icl_utils_mutex_init;
+		break;
+	case IC_UTILS_MUTEX_IOTY:
+		mutex = &icl_utils_mutex_ioty;
+		break;
+	default:
+		ERR("Invalid type(%d)", type);
+		mutex = NULL;
+	}
+
+	return mutex;
+}
+
+void ic_utils_mutex_lock(int type)
+{
+	int ret;
+
+	icl_utils_mutex_count++;
+	if (1 == icl_utils_mutex_count) {
+		ret = pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &icl_utils_pthread_oldstate);
+		WARN_IF(0 != ret, "pthread_setcancelstate() Fail(%d)", ret);
+	}
+
+	ret = pthread_mutex_lock(_utils_mutex_get(type));
+	WARN_IF(0 != ret, "pthread_mutex_lock() Fail(%d)", ret);
+}
+
+void ic_utils_mutex_unlock(int type)
+{
+	int ret;
+
+	icl_utils_mutex_count--;
+	if (0 == icl_utils_mutex_count) {
+		ret = pthread_setcancelstate(icl_utils_pthread_oldstate, NULL);
+		WARN_IF(0 != ret, "pthread_setcancelstate() Fail(%d)", ret);
+	}
+
+	ret = pthread_mutex_unlock(_utils_mutex_get(type));
+	WARN_IF(0 != ret, "pthread_mutex_unlock() Fail(%d)", ret);
+}

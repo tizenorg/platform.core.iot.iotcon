@@ -27,4 +27,13 @@ int ic_utils_get_platform_info(OCPlatformInfo *platform_info);
 void ic_utils_free_platform_info(OCPlatformInfo *platform_info);
 bool ic_utils_check_permission();
 
+void ic_utils_mutex_lock(int type);
+void ic_utils_mutex_unlock(int type);
+
+enum IC_UTILS_MUTEX {
+	IC_UTILS_MUTEX_INIT,
+	IC_UTILS_MUTEX_IOTY,
+	IC_UTILS_MUTEX_MAX
+};
+
 #endif /* __IOT_CONNECTIVITY_INTERNAL_COMMON_UTILITY_H__ */

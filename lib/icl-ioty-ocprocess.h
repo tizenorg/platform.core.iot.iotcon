@@ -17,12 +17,10 @@
 #ifndef __IOT_CONNECTIVITY_LIBRARY_IOTIVITY_OCPROCESS_H__
 #define __IOT_CONNECTIVITY_LIBRARY_IOTIVITY_OCPROCESS_H__
 
-#include <glib.h>
-
-
 void icl_ioty_ocprocess_stop();
 void icl_ioty_ocprocess_start();
-gpointer icl_ioty_ocprocess_thread(gpointer data);
+void* icl_ioty_ocprocess_thread(void *data);
+
 
 
 OCStackApplicationResult icl_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle,
