@@ -23,9 +23,9 @@
 #define ICL_TIMEOUT_DEFAULT 30 /* 30 sec */
 #define ICL_TIMEOUT_MAX 60*60 /* 60 min */
 
-static GThread *icl_thread;
+static pthread_t icl_thread;
 static int icl_timeout_seconds = ICL_TIMEOUT_DEFAULT;
-static int icl_connection_count;
+static int icl_init_count;
 
 API int iotcon_initialize()
 {
@@ -37,11 +37,14 @@ API int iotcon_initialize()
 #if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
 #endif
-	icl_connection_count++;
-	if (1 == icl_connection_count) {
+
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_INIT);
+	icl_init_count++;
+	if (1 == icl_init_count) {
 		ret = icl_ioty_init(&icl_thread);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_init() Fail(%d)", ret);
+			ic_utils_mutex_unlock(IC_UTILS_MUTEX_INIT);
 			return ret;
 		}
 
@@ -49,20 +52,26 @@ API int iotcon_initialize()
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_set_platform_info() Fail(%d)", ret);
 			icl_ioty_deinit(icl_thread);
+			ic_utils_mutex_unlock(IC_UTILS_MUTEX_INIT);
 			return ret;
 		}
 	}
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_INIT);
 
 	return IOTCON_ERROR_NONE;
 }
 
 API void iotcon_deinitialize(void)
 {
-	icl_connection_count--;
-	if (0 == icl_connection_count) {
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_INIT);
+
+	icl_init_count--;
+	if (0 == icl_init_count) {
 		icl_ioty_deinit(icl_thread);
 		icl_thread = 0;
 	}
+
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_INIT);
 }
 
 API int iotcon_get_timeout(int *timeout_seconds)
