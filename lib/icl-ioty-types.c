@@ -92,6 +92,7 @@ int icl_ioty_parse_oic_discovery_payload(OCDevAddr *dev_addr,
 		iotcon_resource_interfaces_h ifaces;
 		iotcon_resource_types_h types;
 		char host_addr[PATH_MAX] = {0};
+		char *device_name;
 		OCStringLL *node;
 
 		/* uri path */
@@ -177,6 +178,19 @@ int icl_ioty_parse_oic_discovery_payload(OCDevAddr *dev_addr,
 			_icl_ioty_free_resource_list(res_list, res_count);
 			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
+
+		if (payload->name)
+			device_name = strdup(payload->name);
+		else
+			device_name = strdup("");
+		if (NULL == device_name) {
+			ERR("strdup(device_name) Fail(%d)", errno);
+			_icl_ioty_free_resource_list(res_list, res_count);
+			return IOTCON_ERROR_OUT_OF_MEMORY;
+		}
+
+		res_list[i]->device_name = device_name;
+
 		iotcon_resource_interfaces_destroy(ifaces);
 		iotcon_resource_types_destroy(types);
 	}
@@ -200,7 +214,13 @@ int icl_ioty_parse_oic_device_payload(OCDevicePayload *payload,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	info->device_name = ic_utils_strdup(payload->deviceName);
+	if (payload->deviceName)
+		info->device_name = strdup(payload->deviceName);
+	else
+		info->device_name = strdup("");
+	if (NULL == info->device_name)
+		ERR("strdup(device_name) Fail(%d)", errno);
+
 	info->spec_ver = ic_utils_strdup(payload->specVersion);
 	info->data_model_ver = ic_utils_strdup(payload->dataModelVersion);
 	info->device_id = ic_utils_strdup(payload->sid);

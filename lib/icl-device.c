@@ -85,6 +85,22 @@ API int iotcon_get_device_info(const char *host_address,
 	return IOTCON_ERROR_NONE;
 }
 
+API int iotcon_set_device_name(const char *device_name)
+{
+	int ret;
+
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(NULL == device_name || '\0' == device_name[0], IOTCON_ERROR_INVALID_PARAMETER);
+
+	ret = icl_ioty_set_device_info(device_name);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_ioty_set_device_info() Fail(%d)", ret);
+		return ret;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
 API int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
 		iotcon_platform_info_e property, char **value)
 {

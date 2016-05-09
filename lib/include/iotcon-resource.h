@@ -218,7 +218,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
- * @remarks @a uri_path length must be less than or equal 36.\n
+ * @remarks @a uri_path length must be less than or equal to 36.\n
  * You must destroy @a resource by calling iotcon_resource_destroy()
  * if @a resource is no longer needed.
  *

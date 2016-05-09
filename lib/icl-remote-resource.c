@@ -127,6 +127,7 @@ static void _icl_remote_resource_destroy(iotcon_remote_resource_h resource)
 	free(resource->uri_path);
 	free(resource->host_address);
 	free(resource->device_id);
+	free(resource->device_name);
 	iotcon_resource_interfaces_destroy(resource->ifaces);
 	iotcon_resource_types_destroy(resource->types);
 
@@ -209,6 +210,7 @@ API int iotcon_remote_resource_clone(iotcon_remote_resource_h src,
 	resource->host_address = ic_utils_strdup(src->host_address);
 	resource->connectivity_type = src->connectivity_type;
 	resource->device_id = ic_utils_strdup(src->device_id);
+	resource->device_name = ic_utils_strdup(src->device_name);
 	resource->properties = src->properties;
 	resource->ref_count = 1;
 
@@ -300,6 +302,23 @@ API int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
 
 	return IOTCON_ERROR_NONE;
 }
+
+
+/* The content of the resource should not be freed by user. */
+API int iotcon_remote_resource_get_device_name(iotcon_remote_resource_h resource,
+		char **device_name)
+{
+	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == device_name, IOTCON_ERROR_INVALID_PARAMETER);
+	RETVM_IF(NULL == resource->device_name, IOTCON_ERROR_NO_DATA,
+			"If you want to get device name, you should call iotcon_find_resource().");
+
+	*device_name = resource->device_name;
+
+	return IOTCON_ERROR_NONE;
+}
+
 
 /* The content of the resource should not be freed by user. */
 API int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
