@@ -752,6 +752,14 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	/* set device name */
+	ret = iotcon_set_device_name("iotcon-test-iface-server");
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_set_device_name() Fail(%d)", ret);
+		iotcon_deinitialize();
+		return -1;
+	}
+
 	/* set resource */
 	ret = _set_room_resource(&room);
 	if (0 != ret) {

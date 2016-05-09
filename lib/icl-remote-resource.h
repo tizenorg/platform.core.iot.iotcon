@@ -29,6 +29,7 @@ struct icl_remote_resource {
 	char *uri_path;
 	char *host_address;
 	char *device_id;
+	char *device_name;
 	uint8_t policies;
 	iotcon_options_h header_options;
 	iotcon_resource_types_h types;
