@@ -612,7 +612,7 @@ OCEntityHandlerResult icl_ioty_ocprocess_request_cb(OCEntityHandlerFlag flag,
 
 	g_idle_add(_icl_ioty_ocprocess_request_idle_cb, req_container);
 
-	return OC_EH_OK;
+	return OC_EH_SLOW;
 }
 
 static int _icl_ioty_ocprocess_lite_resource_get_repr(
@@ -763,8 +763,7 @@ OCEntityHandlerResult icl_ioty_ocprocess_lite_request_cb(OCEntityHandlerFlag fla
 		break;
 	}
 
-
-	return OC_EH_OK;
+	return OC_EH_SLOW;
 }
 
 
