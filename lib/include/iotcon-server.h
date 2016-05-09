@@ -95,6 +95,28 @@ int iotcon_start_presence(unsigned int time_to_live);
  */
 int iotcon_stop_presence(void);
 
+/**
+ * @brief Sets device name.
+ * @details Use this function to set device name to own device.\n
+ * If a device name is set, clients can get the name using iotcon_device_info_get_property()
+ * or iotcon_remote_resource_get_device_name().
+ *
+ * @since_tizen 3.0
+ *
+ * @param[in] device_name The device name of own device
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
+ * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
+ * @retval #IOTCON_ERROR_IOTIVITY Iotivity errors
+ *
+ * @see iotcon_get_device_info()
+ * @see iotcon_device_info_get_property()
+ * @see iotcon_remote_resource_get_device_name()
+ */
+int iotcon_set_device_name(const char *device_name);
 
 /**
  * @}

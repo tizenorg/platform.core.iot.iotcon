@@ -570,6 +570,13 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	/* set device name */
+	ret = iotcon_set_device_name("iotcon-test-basic-server");
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_set_device_name() Fail(%d)", ret);
+		return -1;
+	}
+
 	/* set local door resource */
 	ret = _set_door_resource(&my_door);
 	if (0 != ret) {
