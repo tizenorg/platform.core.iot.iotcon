@@ -421,6 +421,7 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 	char *resource_host;
 	char *resource_uri_path;
 	char *resource_device_id;
+	char *resource_device_name;
 	iotcon_presence_h presence_handle;
 	iotcon_resource_types_h resource_types;
 	iotcon_resource_interfaces_h resource_interfaces;
@@ -449,6 +450,13 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 		return;
 	}
 	DBG("[%s] resource device id : %s", resource_uri_path, resource_device_id);
+
+	ret = iotcon_remote_resource_get_device_name(resource, &resource_device_name);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("iotcon_remote_resource_get_device_name() Fail(%d)", ret);
+		return;
+	}
+	DBG("[%s] resource device name : %s", resource_uri_path, resource_device_name);
 
 	node = g_list_find_custom(device_id_list, resource_device_id, _device_id_compare);
 
