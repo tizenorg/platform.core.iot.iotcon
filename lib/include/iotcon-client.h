@@ -430,6 +430,7 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  * @pre iotcon_initialize() should be called to initialize.
  * @post iotcon_device_info_cb() will be invoked.
  *
+ * @see iotcon_set_device_name()
  * @see iotcon_device_info_cb()
  * @see iotcon_device_info_get_property()
  * @see iotcon_set_timeout()
@@ -455,6 +456,7 @@ int iotcon_find_device_info(const char *host_address,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
+ * @see iotcon_set_device_name()
  * @see iotcon_device_info_cb()
  * @see iotcon_find_device_info()
  */
