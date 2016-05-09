@@ -567,6 +567,7 @@ int iotcon_remote_resource_stop_monitoring(iotcon_remote_resource_h resource);
  * @see iotcon_remote_resource_get_host_address()
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_device_name()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_get_properties()
@@ -592,6 +593,7 @@ int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_host_address()
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_device_name()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_get_properties()
@@ -618,6 +620,7 @@ int iotcon_remote_resource_get_connectivity_type(iotcon_remote_resource_h resour
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_uri_path()
  * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_device_name()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_get_properties()
@@ -645,6 +648,7 @@ int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_NO_DATA No data available
  *
  * @see iotcon_remote_resource_get_uri_path()
+ * @see iotcon_remote_resource_get_device_name()
  * @see iotcon_remote_resource_get_host_address()
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_types()
@@ -654,6 +658,38 @@ int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resource,
  */
 int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
 		char **device_id);
+
+/**
+ * @brief Gets a device name of the remote resource.
+ *
+ * @since_tizen 3.0
+ *
+ * @remarks @a device_name must not be released using free().\n
+ * If @a resource is created by calling iotcon_remote_resource_create(), you cannot get
+ * @a device_name. In this case, the return value of this function is #IOTCON_ERROR_NO_DATA.
+ *
+ * @param[in] resource The handle of the remote resource
+ * @param[out] device_name The device name of the remote resource
+ *
+ * @return 0 on success, otherwise a negative error value.
+ * @retval #IOTCON_ERROR_NONE  Successful
+ * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
+ * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
+ * @retval #IOTCON_ERROR_NO_DATA No data available
+ *
+ * @see iotcon_set_device_name()
+ * @see iotcon_remote_resource_get_uri_path()
+ * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_device_name()
+ * @see iotcon_remote_resource_get_host_address()
+ * @see iotcon_remote_resource_get_connectivity_type()
+ * @see iotcon_remote_resource_get_types()
+ * @see iotcon_remote_resource_get_interfaces()
+ * @see iotcon_remote_resource_get_properties()
+ * @see iotcon_remote_resource_set_options()
+ */
+int iotcon_remote_resource_get_device_name(iotcon_remote_resource_h resource,
+		char **device_name);
 
 /**
  * @brief Gets resource types of the remote resource.
@@ -674,6 +710,7 @@ int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_host_address()
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_device_name()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_get_properties()
  * @see iotcon_remote_resource_set_options()
@@ -700,6 +737,7 @@ int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_host_address()
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_device_name()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_properties()
  * @see iotcon_remote_resource_set_options()
@@ -726,6 +764,7 @@ int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_host_address()
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_device_name()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_set_options()
@@ -753,6 +792,7 @@ int iotcon_remote_resource_get_properties(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_host_address()
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_device_name()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_set_options()
@@ -778,6 +818,7 @@ int iotcon_remote_resource_get_options(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_host_address()
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
+ * @see iotcon_remote_resource_get_device_name()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_get_options()
