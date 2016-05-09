@@ -26,7 +26,7 @@
  *
  * @since_tizen 3.0
  */
-#define ICL_URI_PATH_LENGTH_MAX 36
+#define ICL_URI_PATH_LENGTH_MAX 64
 
 struct icl_notify_msg {
 	char *iface;
