@@ -50,15 +50,15 @@ extern "C" {
 
 /**
  * @brief Connects to the iotcon service.
- * @details Call this function to start Iotcon.
+ * @details Call this function to start IoTCon.
  *
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
- * @remarks You must free all resources of the Iotcon by calling iotcon_deinitialize()
- * if Iotcon API is no longer needed.
+ * @remarks You must free all resources of the IoTCon by calling iotcon_deinitialize()
+ * if IoTCon API is no longer needed.
  *
  * @return  0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE Successful
@@ -70,11 +70,11 @@ int iotcon_initialize();
 
 /**
  * @brief Disconnects from the iotcon service.
- * @details Frees the resources allocated to Iotcon.
+ * @details Frees the resources allocated to IoTCon.
  *
  * @since_tizen 3.0
  *
- * @remarks This function must be called if Iotcon API is no longer needed.
+ * @remarks This function must be called if IoTCon API is no longer needed.
  *
  * @return void
  *

@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_INTERFACES_MODULE Resource Interfaces
  *
- * @brief Iotcon Resource Interfaces provides API to manage resource interfaces.
+ * @brief IoTCon Resource Interfaces provides API to manage resource interfaces.
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_INTERFACES_MODULE_HEADER Required Header
  *  \#include <iotcon.h>

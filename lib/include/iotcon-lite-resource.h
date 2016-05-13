@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_SERVER_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_SERVER_LITE_RESOURCE_MODULE Lite Resource
  *
- * @brief Iotcon Lite Resource provides API to encapsulate resources.
+ * @brief IoTCon Lite Resource provides API to encapsulate resources.
  *
  * @section CAPI_IOT_CONNECTIVITY_SERVER_LITE_RESOURCE_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
@@ -168,7 +168,7 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
 /**
  * @brief Creates a lite resource handle and registers the resource in server.
  * @details Registers a resource specified by @a uri_path, @a res_types, @a state which have
- * @a properties in Iotcon server.\n
+ * @a properties in IoTCon server.\n
  * When client requests some operations, it send a response to client, automatically.\n
  * The @a properties can contain multiple properties like
  * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.
@@ -194,7 +194,7 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ * @retval #IOTCON_ERROR_IOTIVITY  IoTivity errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *

@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE State
  *
- * @brief Iotcon State provides API to manage state.
+ * @brief IoTCon State provides API to manage state.
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE_HEADER Required Header
  *  \#include <iotcon.h>

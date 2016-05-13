@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_QUERY_MODULE Query
  *
- * @brief Iotcon Query provides API to manage query.
+ * @brief IoTCon Query provides API to manage query.
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_QUERY_MODULE_HEADER Required Header
  *  \#include <iotcon.h>

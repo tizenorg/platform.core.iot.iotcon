@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_SERVER_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_SERVER_OBSERVERS_MODULE Observers
  *
- * @brief Iotcon Observers provides API to manage client observing a resource.
+ * @brief IoTCon Observers provides API to manage client observing a resource.
  *
  * @section CAPI_IOT_CONNECTIVITY_SERVER_OBSERVERS_MODULE_HEADER Required Header
  *  \#include <iotcon.h>

@@ -28,7 +28,7 @@
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
- * @brief Enumeration for Iotcon error code.
+ * @brief Enumeration for IoTCon error code.
  * @since_tizen 3.0
  *
  * @{
@@ -42,7 +42,7 @@ typedef enum {
 	IOTCON_ERROR_INVALID_PARAMETER = TIZEN_ERROR_INVALID_PARAMETER, /**< Invalid parameter */
 	IOTCON_ERROR_NO_DATA = TIZEN_ERROR_NO_DATA, /**< No data available */
 	IOTCON_ERROR_TIMEOUT = TIZEN_ERROR_TIMED_OUT, /**< Time out */
-	IOTCON_ERROR_IOTIVITY = TIZEN_ERROR_IOTCON | 0x01, /**< Iotivity errors */
+	IOTCON_ERROR_IOTIVITY = TIZEN_ERROR_IOTCON | 0x01, /**< IoTivity errors */
 	IOTCON_ERROR_REPRESENTATION = TIZEN_ERROR_IOTCON | 0x02, /**< Representation errors */
 	IOTCON_ERROR_INVALID_TYPE = TIZEN_ERROR_IOTCON | 0x03, /**< Invalid type */
 	IOTCON_ERROR_ALREADY = TIZEN_ERROR_IOTCON | 0x04, /**< Already */

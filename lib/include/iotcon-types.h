@@ -29,7 +29,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE Common
  *
- * @brief Iotcon Common API provides the set of definitions to use server and client API.
+ * @brief IoTCon Common API provides the set of definitions to use server and client API.
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_MODULE_HEADER Header
  *  \#include <iotcon.h>
@@ -101,7 +101,7 @@ typedef struct icl_resource_request* iotcon_request_h;
 /**
  * @brief The handle of remote resource.
  * @details When Client success to find out resource from remote server,
- * server's resource information is reorganized as @a iotcon_remote_resource_h by Iotcon.
+ * server's resource information is reorganized as @a iotcon_remote_resource_h by IoTCon.
  * Client can request CRUD to server by using this.
  * @a iotcon_remote_resource_h is an opaque data structure to have host_address, uri_path,
  * resource types, interfaces, options and device id.
