@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <stdlib.h>
+#include <errno.h>
 #include <glib.h>
 
 #include "iotcon-types.h"
@@ -37,7 +37,6 @@ iotcon_state_h icl_state_ref(iotcon_state_h state)
 
 API int iotcon_state_create(iotcon_state_h *ret_state)
 {
-	errno = 0;
 	iotcon_state_h state;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);

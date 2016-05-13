@@ -50,7 +50,6 @@ iotcon_representation_h icl_representation_ref(iotcon_representation_h repr)
 
 API int iotcon_representation_create(iotcon_representation_h *ret_repr)
 {
-	errno = 0;
 	iotcon_representation_h repr;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);

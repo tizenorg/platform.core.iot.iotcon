@@ -55,7 +55,6 @@ char* ic_utils_strdup(const char *src)
 
 	RETV_IF(NULL == src, NULL);
 
-	errno = 0;
 	dest = strdup(src);
 	if (NULL == dest) {
 		ERR("strdup() Fail(%d)", errno);

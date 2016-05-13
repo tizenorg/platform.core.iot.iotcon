@@ -13,22 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <glib.h>
-#include <gio/gio.h>
-
 #include "iotcon.h"
 #include "ic-utils.h"
 #include "icl.h"
-#include "icl-options.h"
-#include "icl-representation.h"
-#include "icl-response.h"
-#include "icl-remote-resource.h"
 #include "icl-ioty.h"
+#include "icl-options.h"
+#include "icl-response.h"
+#include "icl-representation.h"
+#include "icl-remote-resource.h"
 
 API int iotcon_remote_resource_get(iotcon_remote_resource_h resource,
 		iotcon_query_h query, iotcon_remote_resource_response_cb cb, void *user_data)
