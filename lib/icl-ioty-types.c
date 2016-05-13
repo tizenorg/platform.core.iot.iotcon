@@ -15,7 +15,7 @@
  */
 
 #include <stdlib.h>
-#include <stdint.h>
+#include <errno.h>
 #include <octypes.h>
 #include <ocstack.h>
 #include <ocpayload.h>

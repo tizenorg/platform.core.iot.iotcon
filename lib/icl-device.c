@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <inttypes.h>
-#include <errno.h>
-#include <glib.h>
 
 #include "iotcon.h"
 #include "ic-utils.h"
