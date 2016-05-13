@@ -19,15 +19,15 @@
 
 /**
  * @ingroup CAPI_NETWORK_FRAMEWORK
- * @defgroup CAPI_IOT_CONNECTIVITY_MODULE Iotcon
+ * @defgroup CAPI_IOT_CONNECTIVITY_MODULE IoTCon
  *
- * @brief The Iotcon API provides functions for IoT connectivity.
+ * @brief The IoTCon API provides functions for IoT connectivity.
  *
  * @section CAPI_IOT_CONNECTIVITY_MODULE_HEADER Required Header
  * \#include <iotcon.h>
  *
  * @section CAPI_IOT_CONNECTIVITY_MODULE_OVERVIEW Overview
- * The iotcon module provides various features based on Iotivity project.\n
+ * The iotcon module provides various features based on IoTivity project.\n
  * The IoTivity project is sponsored by the Open Interconnect Consortium
  * a group of industry leaders who will be developing a standard specification and
  * certification program to address these challenges.\n
@@ -39,7 +39,7 @@
  *
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_RESOURCE_REGISTRATION Resource registration
  * Registering a resource requires a URI and handler to process requests.\n
- * The URI path should be rooted. Iotcon will construct the fully qualified URI by adding
+ * The URI path should be rooted. IoTCon will construct the fully qualified URI by adding
  * the URI authority to the provided URI path.\n
  * For example, given a service running on port 54321 in a device at IP address 192.168.1.1,
  * if the application registers a resource with a URI path "/light/1",\n

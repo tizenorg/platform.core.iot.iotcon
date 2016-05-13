@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_RESPONSE_MODULE Response
  *
- * @brief Iotcon Response provides API to manage response.
+ * @brief IoTCon Response provides API to manage response.
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_RESPONSE_MODULE_HEADER Required Header
  *  \#include <iotcon.h>

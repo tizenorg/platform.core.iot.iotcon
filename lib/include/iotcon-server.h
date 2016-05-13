@@ -30,7 +30,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_SERVER_MODULE Server
  *
- * @brief Iotcon Server provides API for server side.
+ * @brief IoTCon Server provides API for server side.
  *
  * @section CAPI_IOT_CONNECTIVITY_SERVER_MODULE_HEADER Required Header
  *  \#include <iotcon.h>

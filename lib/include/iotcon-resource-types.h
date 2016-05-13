@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE Resource Types
  *
- * @brief Iotcon Resource Types provides API to manage resource types.
+ * @brief IoTCon Resource Types provides API to manage resource types.
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_RESOURCE_TYPES_MODULE_HEADER Required Header
  *  \#include <iotcon.h>

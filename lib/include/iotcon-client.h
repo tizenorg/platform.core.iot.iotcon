@@ -27,7 +27,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_CLIENT_MODULE Client
  *
- * @brief Iotcon Client provides API for client side.
+ * @brief IoTCon Client provides API for client side.
  *
  * @section CAPI_IOT_CONNECTIVITY_CLIENT_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
@@ -104,7 +104,7 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ * @retval #IOTCON_ERROR_IOTIVITY  IoTivity errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *

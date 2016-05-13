@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_SERVER_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_SERVER_RESOURCE_MODULE Resource
  *
- * @brief Iotcon Resource provides API to manage resource.
+ * @brief IoTCon Resource provides API to manage resource.
  *
  * @section CAPI_IOT_CONNECTIVITY_SERVER_RESOURCE_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
@@ -201,7 +201,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
 /**
  * @brief Creates a resource handle and registers the resource in server.
  * @details Registers a resource specified by @a uri_path, @a res_types, @a ifaces which have
- * @a properties in Iotcon server.\n
+ * @a properties in IoTCon server.\n
  * When client find the registered resource, iotcon_request_handler_cb() will be called automatically.\n
  * @a uri_path format would be relative URI path like '/a/light'\n
  * @a res_types is a list of resource types. Create a iotcon_resource_types_h handle and
@@ -234,7 +234,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ * @retval #IOTCON_ERROR_IOTIVITY  IoTivity errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *

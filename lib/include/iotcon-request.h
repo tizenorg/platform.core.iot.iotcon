@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_SERVER_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_SERVER_REQUEST_MODULE Request
  *
- * @brief Iotcon Request provides API to manage client's request.
+ * @brief IoTCon Request provides API to manage client's request.
  *
  * @section CAPI_IOT_CONNECTIVITY_SERVER_REQUEST_MODULE_HEADER Required Header
  *  \#include <iotcon.h>

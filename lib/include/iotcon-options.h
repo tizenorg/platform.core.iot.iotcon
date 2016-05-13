@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_OPTIONS_MODULE Options
  *
- * @brief Iotcon Options provides API to manage options.
+ * @brief IoTCon Options provides API to manage options.
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_OPTIONS_MODULE_HEADER Required Header
  *  \#include <iotcon.h>

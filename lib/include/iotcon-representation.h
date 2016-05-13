@@ -26,13 +26,13 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE Representation
  *
- * @brief Iotcon Representation provides API to manage representation.
+ * @brief IoTCon Representation provides API to manage representation.
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
  *
  * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE_OVERVIEW Overview
- * The Iotcon Representation API provides data type of resp_repr handling.\n
+ * The IoTCon Representation API provides data type of resp_repr handling.\n
  * A resp_repr is a payload of a request or a response.\n
  * It has uri_path, list of resource interfaces, list of resource types and its attributes.\n
  * Attributes have capabilities to store and retrieve integer, boolean, double, string,

@@ -26,7 +26,7 @@
  * @ingroup CAPI_IOT_CONNECTIVITY_CLIENT_MODULE
  * @defgroup CAPI_IOT_CONNECTIVITY_CLIENT_REMOTE_RESOURCE_MODULE Remote Resource
  *
- * @brief Iotcon Remote Resource provides API to manage remote resource.
+ * @brief IoTCon Remote Resource provides API to manage remote resource.
  *
  * @section CAPI_IOT_CONNECTIVITY_CLIENT_REMOTE_RESOURCE_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
@@ -132,7 +132,7 @@ static void _find_light_resource()
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ * @retval #IOTCON_ERROR_IOTIVITY  IoTivity errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
  * @see iotcon_remote_resource_destroy()
@@ -223,7 +223,7 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
+ * @retval #IOTCON_ERROR_IOTIVITY  IoTivity errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
