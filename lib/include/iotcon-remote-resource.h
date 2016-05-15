@@ -123,7 +123,7 @@ static void _find_light_resource()
  * @param[in] host_address The host address of the resource
  * @param[in] connectivity_type The connectivity type
  * @param[in] uri_path The URI path of the resource
- * @param[in] properties The properties of the resource\n Set of #iotcon_resource_property_e
+ * @param[in] properties The properties of the resource\n Set of #iotcon_resource_policy_e
  * @param[in] resource_types The resource types of the resource. For example, "core.light"
  * @param[in] resource_ifaces The resource interfaces of the resource.
  * @param[out] remote_resource Generated resource handle
@@ -724,7 +724,7 @@ int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource,
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of the resource
- * @param[out] properties The Properties of the resource\n Set of #iotcon_resource_property_e
+ * @param[out] properties The Properties of the resource\n Set of #iotcon_resource_policy_e
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
