@@ -225,7 +225,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @param[in] uri_path The URI path of the resource
  * @param[in] res_types The list of type of the resource
  * @param[in] ifaces The list of interface of the resource
- * @param[in] properties The properties of the resource\n Set of #iotcon_resource_property_e
+ * @param[in] properties The properties of the resource\n Set of #iotcon_resource_policy_e
  * @param[in] cb The request handler callback function
  * @param[in] user_data The user data to pass to the callback function
  * @param[out] resource_handle The handle of the resource
@@ -596,7 +596,7 @@ int iotcon_resource_get_interfaces(iotcon_resource_h resource,
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of the resource
- * @param[out] properties The properties of resource\n Set of #iotcon_resource_property_e
+ * @param[out] properties The properties of resource\n Set of #iotcon_resource_policy_e
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
