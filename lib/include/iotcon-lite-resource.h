@@ -184,7 +184,7 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
  *
  * @param[in] uri_path The URI path of the resource
  * @param[in] res_types The list of type of the resource
- * @param[in] properties The property of the resource\n Set of #iotcon_resource_property_e
+ * @param[in] properties The property of the resource\n Set of #iotcon_resource_policy_e
  * @param[in] state The state handle to set
  * @param[in] cb The callback function to add into callback list
  * @param[in] user_data The user data to pass to the callback function

@@ -121,7 +121,7 @@ typedef enum {
 } iotcon_connectivity_type_e;
 
 /**
- * @brief Enumeration for property which can be held in a resource.
+ * @brief Enumeration for policy which can be held in a resource.
  *
  * @since_tizen 3.0
  */
@@ -133,7 +133,7 @@ typedef enum {
 	IOTCON_RESOURCE_SLOW = (1 << 3), /**< Indicates resource which takes some delay to respond */
 	IOTCON_RESOURCE_SECURE = (1 << 4), /**< Indicates secure resource */
 	IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE = (1 << 5), /**< When this bit is set, the resource is allowed to be discovered only if discovery request contains an explicit querystring. */
-} iotcon_resource_property_e;
+} iotcon_resource_policy_e;
 
 /**
  * @brief Enumeration for type of request.
