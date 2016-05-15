@@ -386,7 +386,7 @@ int iotcon_find_resource(const char *host_address,
 		void *user_data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_get_device_info().
+ * @brief Specifies the type of function passed to iotcon_find_device_info().
  * @details The @a result could be one of #iotcon_error_e.
  *
  * @since_tizen 3.0
@@ -395,16 +395,16 @@ int iotcon_find_resource(const char *host_address,
  * @param[in] result The result code (0 on success, other wise a negative error value)
  * @param[in] user_data The user data to pass to the function
  *
- * @pre iotcon_get_device_info() will invoke this callback function.
+ * @pre iotcon_find_device_info() will invoke this callback function.
  *
- * @see iotcon_get_device_info()
+ * @see iotcon_find_device_info()
  * @see iotcon_device_info_get_property()
  */
 typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
 		iotcon_error_e result, void *user_data);
 
 /**
- * @brief Gets the device information of remote server, asynchronously.
+ * @brief Finds the device information of remote server, asynchronously.
  * @details Request device information to server and pass the information by calling
  * iotcon_device_info_cb().\n
  * @a host_address could be #IOTCON_MULTICAST_ADDRESS for multicast.\n
@@ -435,7 +435,7 @@ typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  * @see iotcon_device_info_get_property()
  * @see iotcon_set_timeout()
  */
-int iotcon_get_device_info(const char *host_address,
+int iotcon_find_device_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_device_info_cb cb,
 		void *user_data);
@@ -457,13 +457,13 @@ int iotcon_get_device_info(const char *host_address,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_device_info_cb()
- * @see iotcon_get_device_info()
+ * @see iotcon_find_device_info()
  */
 int iotcon_device_info_get_property(iotcon_device_info_h device_info,
 		iotcon_device_info_e property, char **value);
 
 /**
- * @brief Specifies the type of function passed to iotcon_get_platform_info().
+ * @brief Specifies the type of function passed to iotcon_find_platform_info().
  * @details The @a result could be one of #iotcon_error_e.
  *
  * @since_tizen 3.0
@@ -472,16 +472,16 @@ int iotcon_device_info_get_property(iotcon_device_info_h device_info,
  * @param[in] result The result code (0 on success, other wise a negative error value)
  * @param[in] user_data The user data to pass to the function
  *
- * @pre iotcon_get_platform_info() will invoke this callback function.
+ * @pre iotcon_find_platform_info() will invoke this callback function.
  *
- * @see iotcon_get_platform_info()
+ * @see iotcon_find_platform_info()
  * @see iotcon_platform_info_get_property()
  */
 typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
 		iotcon_error_e result, void *user_data);
 
 /**
- * @brief Gets the platform information of remote server, asynchronously.
+ * @brief Finds the platform information of remote server, asynchronously.
  * @details Request platform information to server and pass the information by calling
  * iotcon_platform_info_cb().\n
  * @a host_address could be #IOTCON_MULTICAST_ADDRESS for multicast.\n
@@ -514,7 +514,7 @@ typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  * @see iotcon_platform_info_get_property()
  * @see iotcon_set_timeout()
  */
-int iotcon_get_platform_info(const char *host_address,
+int iotcon_find_platform_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_platform_info_cb cb,
 		void *user_data);
@@ -536,7 +536,7 @@ int iotcon_get_platform_info(const char *host_address,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
  * @see iotcon_platform_info_cb()
- * @see iotcon_get_platform_info()
+ * @see iotcon_find_platform_info()
  */
 int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
 		iotcon_platform_info_e property, char **value);

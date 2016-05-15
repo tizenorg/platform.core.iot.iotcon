@@ -222,7 +222,7 @@ int icl_ioty_find_resource(const char *host_address,
 	return IOTCON_ERROR_NONE;
 }
 
-int icl_ioty_get_device_info(const char *host_address,
+int icl_ioty_find_device_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_device_info_cb cb,
 		void *user_data)
@@ -276,7 +276,7 @@ int icl_ioty_get_device_info(const char *host_address,
 	return IOTCON_ERROR_NONE;
 }
 
-int icl_ioty_get_platform_info(const char *host_address,
+int icl_ioty_find_platform_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_platform_info_cb cb,
 		void *user_data)
