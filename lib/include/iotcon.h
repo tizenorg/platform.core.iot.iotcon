@@ -49,7 +49,7 @@ extern "C" {
  */
 
 /**
- * @brief Connects to the iotcon service.
+ * @brief Initializes to the iotcon service.
  * @details Call this function to start IoTCon.
  *
  * @since_tizen 3.0
@@ -69,7 +69,7 @@ extern "C" {
 int iotcon_initialize();
 
 /**
- * @brief Disconnects from the iotcon service.
+ * @brief Deinitializes from the iotcon service.
  * @details Frees the resources allocated to IoTCon.
  *
  * @since_tizen 3.0
@@ -84,8 +84,8 @@ void iotcon_deinitialize(void);
 
 /**
  * @brief Gets the timeout seconds of asynchronous API.
- * @details This API get the timeout of iotcon_get_device_info(),
- * iotcon_get_platform_info(), iotcon_find_resource(),
+ * @details This API get the timeout of iotcon_find_device_info(),
+ * iotcon_find_platform_info(), iotcon_find_resource(),
  * iotcon_remote_resource_get(), iotcon_remote_resource_put(),
  * iotcon_remote_resource_post() and iotcon_remote_resource_delete().
  *
@@ -106,8 +106,8 @@ int iotcon_get_timeout(int *timeout_seconds);
 
 /**
  * @brief Sets the timeout seconds of asynchronous APIs.
- * @details This API set the timeout of iotcon_get_device_info(),
- * iotcon_get_platform_info(), iotcon_find_resource(),
+ * @details This API set the timeout of iotcon_find_device_info(),
+ * iotcon_find_platform_info(), iotcon_find_resource(),
  * iotcon_remote_resource_get(), iotcon_remote_resource_put(),
  * iotcon_remote_resource_post() and iotcon_remote_resource_delete().\n
  * Default timeout interval value is 30.

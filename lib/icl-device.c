@@ -52,7 +52,7 @@ API int iotcon_device_info_get_property(iotcon_device_info_h device_info,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_get_device_info(const char *host_address,
+API int iotcon_find_device_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_device_info_cb cb,
 		void *user_data)
@@ -67,9 +67,9 @@ API int iotcon_get_device_info(const char *host_address,
 	case IOTCON_CONNECTIVITY_IPV4:
 	case IOTCON_CONNECTIVITY_IPV6:
 	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_get_device_info(host_address, connectivity_type, cb, user_data);
+		ret = icl_ioty_find_device_info(host_address, connectivity_type, cb, user_data);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_get_device_info() Fail(%d)", ret);
+			ERR("icl_ioty_find_device_info() Fail(%d)", ret);
 			return ret;
 		}
 		break;
@@ -130,7 +130,7 @@ API int iotcon_platform_info_get_property(iotcon_platform_info_h platform_info,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_get_platform_info(const char *host_address,
+API int iotcon_find_platform_info(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		iotcon_platform_info_cb cb,
 		void *user_data)
@@ -145,9 +145,9 @@ API int iotcon_get_platform_info(const char *host_address,
 	case IOTCON_CONNECTIVITY_IPV4:
 	case IOTCON_CONNECTIVITY_IPV6:
 	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_get_platform_info(host_address, connectivity_type, cb, user_data);
+		ret = icl_ioty_find_platform_info(host_address, connectivity_type, cb, user_data);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_get_platform_info() Fail(%d)", ret);
+			ERR("icl_ioty_find_platform_info() Fail(%d)", ret);
 			return ret;
 		}
 		break;
