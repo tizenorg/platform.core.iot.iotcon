@@ -40,7 +40,7 @@
 #include "icl-resource-types.h"
 #include "icl-response.h"
 #include "icl-observation.h"
-#include "icl-state.h"
+#include "icl-attributes.h"
 #include "icl-lite-resource.h"
 #include "icl-ioty-ocprocess.h"
 #include "icl-ioty-types.h"
@@ -1608,7 +1608,7 @@ int icl_ioty_resource_destroy(iotcon_resource_h resource)
 int icl_ioty_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		uint8_t policies,
-		iotcon_state_h state,
+		iotcon_attributes_h attributes,
 		iotcon_lite_resource_post_request_cb cb,
 		void *user_data,
 		iotcon_lite_resource_h *resource_handle)
@@ -1634,8 +1634,9 @@ int icl_ioty_lite_resource_create(const char *uri_path,
 	}
 	resource->uri_path = strdup(uri_path);
 	resource->policies = policies;
-	resource->state = state;
-	icl_state_ref(resource->state);
+	resource->policies = policies;
+	resource->attributes = attributes;
+	icl_attributes_ref(resource->attributes);
 	resource->cb = cb;
 	resource->cb_data = user_data;
 
@@ -1715,20 +1716,20 @@ int icl_ioty_lite_resource_notify(iotcon_lite_resource_h resource)
 	return IOTCON_ERROR_NONE;
 }
 
-int icl_ioty_lite_resource_update_state(iotcon_lite_resource_h resource,
-		iotcon_state_h state)
+int icl_ioty_lite_resource_update_attributes(iotcon_lite_resource_h resource,
+		iotcon_attributes_h attributes)
 {
 	int ret;
 
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (state)
-		state = icl_state_ref(state);
+	if (attributes)
+		attributes = icl_attributes_ref(attributes);
 
-	if (resource->state)
-		iotcon_state_destroy(resource->state);
+	if (resource->attributes)
+		iotcon_attributes_destroy(resource->attributes);
 
-	resource->state = state;
+	resource->attributes = attributes;
 
 	ret = icl_ioty_lite_resource_notify(resource);
 	if (IOTCON_ERROR_NONE != ret)

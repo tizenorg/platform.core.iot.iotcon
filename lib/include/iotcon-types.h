@@ -40,8 +40,8 @@
  * @ref CAPI_IOT_CONNECTIVITY_COMMON_QUERY_MODULE,
  * @ref CAPI_IOT_CONNECTIVITY_COMMON_OPTIONS_MODULE,
  * @ref CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE,
- * @ref CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE,
- * @ref CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE,
+ * @ref CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_ATTRIBUTES_MODULE,
+ * @ref CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_ATTRIBUTES_LIST_MODULE,
  * @ref CAPI_IOT_CONNECTIVITY_COMMON_RESPONSE_MODULE.
  *
  * @{
@@ -206,16 +206,16 @@ typedef struct icl_representation_s* iotcon_representation_h;
 typedef struct icl_list_s* iotcon_list_h;
 
 /**
- * @brief The handle of state.
- * @details @a iotcon_state_h is an opaque data structure to have attribute value map.
+ * @brief The handle of attributes.
+ * @details @a iotcon_attributes_h is an opaque data structure to have attribute value map.
  * Attribute value map consists of a key and a value.
  * Datatype of the key is string and the value should be one of them #IOTCON_TYPE_INT,
  * #IOTCON_TYPE_BOOL, #IOTCON_TYPE_DOUBLE, #IOTCON_TYPE_STR, #IOTCON_TYPE_NULL,
- * #IOTCON_TYPE_LIST and #IOTCON_TYPE_STATE
+ * #IOTCON_TYPE_LIST and #IOTCON_TYPE_ATTRIBUTES
  *
  * @since_tizen 3.0
  */
-typedef struct icl_state_s* iotcon_state_h;
+typedef struct icl_attributes_s* iotcon_attributes_h;
 
 /**
  * @}
@@ -223,7 +223,7 @@ typedef struct icl_state_s* iotcon_state_h;
 
 #include <iotcon-list.h>
 #include <iotcon-query.h>
-#include <iotcon-state.h>
+#include <iotcon-attributes.h>
 #include <iotcon-options.h>
 #include <iotcon-representation.h>
 #include <iotcon-resource-types.h>

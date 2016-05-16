@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_STRUCT_STATE_H__
-#define __IOT_CONNECTIVITY_STRUCT_STATE_H__
+#ifndef __IOT_CONNECTIVITY_STRUCT_ATTRIBUTES_H__
+#define __IOT_CONNECTIVITY_STRUCT_ATTRIBUTES_H__
 
 #include <iotcon-types.h>
 
 /**
- * @file iotcon-state.h
+ * @file iotcon-attributes.h
  */
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_MODULE
- * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE State
+ * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_ATTRIBUTES_MODULE State
  *
- * @brief IoTCon State provides API to manage state.
+ * @brief IoTCon State provides API to manage attributes.
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE_HEADER Required Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_ATTRIBUTES_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE_OVERVIEW Overview
- * The iotcon state API provides string key based hash table.
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_ATTRIBUTES_MODULE_OVERVIEW Overview
+ * The iotcon attributes API provides string key based hash table.
  *
  * Example :
  * @code
@@ -51,7 +51,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 	if (IOTCON_REQUEST_GET & types) {
 		iotcon_response_h response = NULL;
 		iotcon_representation_h representation = NULL;
-		iotcon_state_h state = NULL;
+		iotcon_attributes_h attributes = NULL;
 
 		ret = iotcon_response_create(request, &response);
 		if (IOTCON_ERROR_NONE != ret)
@@ -65,32 +65,32 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 		...
 
-		ret = iotcon_state_create(&state);
+		ret = iotcon_attributes_create(&attributes);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
 		}
 
-		ret = iotcon_state_add_bool(state, "power", true);
+		ret = iotcon_attributes_add_bool(attributes, "power", true);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
 		}
 
-		ret = iotcon_state_add_int(state, "brightness", 75);
+		ret = itocon_attributes_add_int(attributes, "brightness", 75);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
 		}
 
-		ret = iotcon_representation_set_state(representation, state);
+		ret = iotcon_representation_set_attributes(representation, attributes);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
@@ -100,7 +100,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 		ret = iotcon_response_set_representation(response, representation);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
@@ -108,13 +108,13 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 		ret = iotcon_response_send(response);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
 		}
 
-		iotcon_state_destroy(state);
+		iotcon_attributes_destroy(attributes);
 		iotcon_representation_destroy(representation);
 		iotcon_response_destroy(resopnse);
 	}
@@ -122,7 +122,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 }
  * @endcode
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE_FEATURE Related Features
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_ATTRIBUTES_MODULE_FEATURE Related Features
  * This API is related with the following features:\n
  *  - http://tizen.org/feature/iot.ocf\n
  *
@@ -138,14 +138,14 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
  */
 
 /**
- * @brief Creates a new state handle.
+ * @brief Creates a new attributes handle.
  *
  * @since_tizen 3.0
  *
- * @remarks You must destroy @a state by calling iotcon_state_destroy()
- * if @a state is no longer needed.
+ * @remarks You must destroy @a attributes by calling iotcon_attributes_destroy()
+ * if @a attributes is no longer needed.
  *
- * @param[out] state A newly allocated state handle
+ * @param[out] attributes A newly allocated attributes handle
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -153,34 +153,34 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_state_destroy()
+ * @see iotcon_attributes_destroy()
  */
-int iotcon_state_create(iotcon_state_h *state);
+int iotcon_attributes_create(iotcon_attributes_h *attributes);
 
 /**
- * @brief Destroys a state.
- * @details Releases a @a state and its internal data.
+ * @brief Destroys a attributes.
+ * @details Releases a @a attributes and its internal data.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle to free
+ * @param[in] attributes The attributes handle to free
  *
  * @return void
  *
- * @see iotcon_state_create()
+ * @see iotcon_attributes_create()
  */
-void iotcon_state_destroy(iotcon_state_h state);
+void iotcon_attributes_destroy(iotcon_attributes_h attributes);
 
 /**
- * @brief Clones a state handle.
+ * @brief Clones a attributes handle.
  *
  * @since_tizen 3.0
  *
- * @remarks You must destroy @a state_clone by calling iotcon_state_destroy()
- * if @a state_clone is no longer needed.
+ * @remarks You must destroy @a attributes_clone by calling iotcon_attributes_destroy()
+ * if @a attributes_clone is no longer needed.
  *
- * @param[in] state The state handle
- * @param[out] state_clone The cloned state handle
+ * @param[in] attributes The attributes handle
+ * @param[out] attributes_clone The cloned attributes handle
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -188,18 +188,18 @@ void iotcon_state_destroy(iotcon_state_h state);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_state_create()
- * @see iotcon_state_destroy()
+ * @see iotcon_attributes_create()
+ * @see iotcon_attributes_destroy()
  */
-int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone);
+int iotcon_attributes_clone(iotcon_attributes_h attributes, iotcon_attributes_h *attributes_clone);
 
 /**
- * @brief Adds a new key and integer value into the state.
+ * @brief Adds a new key and integer value into the attributes.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[in] val The value
  *
@@ -209,15 +209,15 @@ int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_add_int(iotcon_state_h state, const char *key, int val);
+int iotcon_attributes_add_int(iotcon_attributes_h attributes, const char *key, int val);
 
 /**
- * @brief Adds a new key and boolean value into the state.
+ * @brief Adds a new key and boolean value into the attributes.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[in] val The value
  *
@@ -227,15 +227,15 @@ int iotcon_state_add_int(iotcon_state_h state, const char *key, int val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_add_bool(iotcon_state_h state, const char *key, bool val);
+int iotcon_attributes_add_bool(iotcon_attributes_h attributes, const char *key, bool val);
 
 /**
- * @brief Adds a new key and double value into the state.
+ * @brief Adds a new key and double value into the attributes.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[in] val The value
  *
@@ -245,15 +245,15 @@ int iotcon_state_add_bool(iotcon_state_h state, const char *key, bool val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_add_double(iotcon_state_h state, const char *key, double val);
+int iotcon_attributes_add_double(iotcon_attributes_h attributes, const char *key, double val);
 
 /**
- * @brief Adds a new key and string value into the state.
+ * @brief Adds a new key and string value into the attributes.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[in] val The value
  *
@@ -263,15 +263,15 @@ int iotcon_state_add_double(iotcon_state_h state, const char *key, double val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_add_str(iotcon_state_h state, const char *key, char *val);
+int iotcon_attributes_add_str(iotcon_attributes_h attributes, const char *key, char *val);
 
 /**
- * @brief Adds a new key and byte string value into the state.
+ * @brief Adds a new key and byte string value into the attributes.
  * @details If @a key is already exists, current value will be replaced with new @a val.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[in] val The value
  * @param[in] len The length of @a val
@@ -282,16 +282,16 @@ int iotcon_state_add_str(iotcon_state_h state, const char *key, char *val);
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_add_byte_str(iotcon_state_h state, const char *key, unsigned char *val,
+int iotcon_attributes_add_byte_str(iotcon_attributes_h attributes, const char *key, unsigned char *val,
 		int len);
 
 /**
- * @brief Adds a new key and list value into the state.
+ * @brief Adds a new key and list value into the attributes.
  * @details If @a key is already exists, current list will be replaced with new @a list.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[in] list The value
  *
@@ -301,17 +301,17 @@ int iotcon_state_add_byte_str(iotcon_state_h state, const char *key, unsigned ch
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_add_list(iotcon_state_h state, const char *key, iotcon_list_h list);
+int iotcon_attributes_add_list(iotcon_attributes_h attributes, const char *key, iotcon_list_h list);
 
 /**
- * @brief Adds a new key and state value into the state.
- * @details If @a key is already exists, current state will be replaced with new @a src.
+ * @brief Adds a new key and attributes value into the attributes.
+ * @details If @a key is already exists, current attributes will be replaced with new @a src.
  *
  * @since_tizen 3.0
  *
- * @param[in] dest The state handle
+ * @param[in] dest The attributes handle
  * @param[in] key The key
- * @param[in] src The state handle to set newly
+ * @param[in] src The attributes handle to set newly
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -319,15 +319,15 @@ int iotcon_state_add_list(iotcon_state_h state, const char *key, iotcon_list_h l
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_add_state(iotcon_state_h dest, const char *key, iotcon_state_h src);
+int iotcon_attributes_add_attributes(iotcon_attributes_h dest, const char *key, iotcon_attributes_h src);
 
 /**
- * @brief Adds a new key with NULL value into the state.
+ * @brief Adds a new key with NULL value into the attributes.
  * @details If @a key is already exists, current value will be replaced with NULL.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key to be set NULL
  *
  * @return 0 on success, otherwise a negative error value.
@@ -336,14 +336,14 @@ int iotcon_state_add_state(iotcon_state_h dest, const char *key, iotcon_state_h 
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_add_null(iotcon_state_h state, const char *key);
+int iotcon_attributes_add_null(iotcon_attributes_h attributes, const char *key);
 
 /**
  * @brief Gets the integer value from the given key.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[out] val The integer value
  *
@@ -354,14 +354,14 @@ int iotcon_state_add_null(iotcon_state_h state, const char *key);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_state_get_int(iotcon_state_h state, const char *key, int *val);
+int iotcon_attributes_get_int(iotcon_attributes_h attributes, const char *key, int *val);
 
 /**
  * @brief Gets the boolean value from the given key.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[out] val The boolean value
  *
@@ -372,14 +372,14 @@ int iotcon_state_get_int(iotcon_state_h state, const char *key, int *val);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_state_get_bool(iotcon_state_h state, const char *key, bool *val);
+int iotcon_attributes_get_bool(iotcon_attributes_h attributes, const char *key, bool *val);
 
 /**
  * @brief Gets the double value from the given key.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[out] val The double value
  *
@@ -390,7 +390,7 @@ int iotcon_state_get_bool(iotcon_state_h state, const char *key, bool *val);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_state_get_double(iotcon_state_h state, const char *key, double *val);
+int iotcon_attributes_get_double(iotcon_attributes_h attributes, const char *key, double *val);
 
 /**
  * @brief Gets the string value from the given key.
@@ -399,7 +399,7 @@ int iotcon_state_get_double(iotcon_state_h state, const char *key, double *val);
  *
  * @remarks @a val must not be released using free().
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[out] val The string value
  *
@@ -410,7 +410,7 @@ int iotcon_state_get_double(iotcon_state_h state, const char *key, double *val);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val);
+int iotcon_attributes_get_str(iotcon_attributes_h attributes, const char *key, char **val);
 
 /**
  * @brief Gets the byte string value from the given key.
@@ -419,7 +419,7 @@ int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val);
  *
  * @remarks @a val must not be released using free().
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[out] val The byte string value
  * @param[out] len The length of @a val
@@ -431,7 +431,7 @@ int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_state_get_byte_str(iotcon_state_h state, const char *key, unsigned char **val,
+int iotcon_attributes_get_byte_str(iotcon_attributes_h attributes, const char *key, unsigned char **val,
 		int *len);
 
 /**
@@ -441,7 +441,7 @@ int iotcon_state_get_byte_str(iotcon_state_h state, const char *key, unsigned ch
  *
  * @remarks @a list must not be released using iotcon_list_destroy().
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[out] list The list value
  *
@@ -452,18 +452,18 @@ int iotcon_state_get_byte_str(iotcon_state_h state, const char *key, unsigned ch
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_state_get_list(iotcon_state_h state, const char *key, iotcon_list_h *list);
+int iotcon_attributes_get_list(iotcon_attributes_h attributes, const char *key, iotcon_list_h *list);
 
 /**
- * @brief Gets the state value from the given key.
+ * @brief Gets the attributes value from the given key.
  *
  * @since_tizen 3.0
  *
- * @remarks @a state must not be released using iotcon_state_destroy().
+ * @remarks @a attributes must not be released using iotcon_attributes_destroy().
  *
- * @param[in] src The state handle
+ * @param[in] src The attributes handle
  * @param[in] key The key
- * @param[out] dest The state value at the key
+ * @param[out] dest The attributes value at the key
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -472,14 +472,14 @@ int iotcon_state_get_list(iotcon_state_h state, const char *key, iotcon_list_h *
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_state_get_state(iotcon_state_h src, const char *key, iotcon_state_h *dest);
+int iotcon_attributes_get_attributes(iotcon_attributes_h src, const char *key, iotcon_attributes_h *dest);
 
 /**
  * @brief Checks whether the value of given key is NULL or not.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[out] is_null true if the type of the given key is null, otherwise false
  *
@@ -488,14 +488,14 @@ int iotcon_state_get_state(iotcon_state_h src, const char *key, iotcon_state_h *
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null);
+int iotcon_attributes_is_null(iotcon_attributes_h attributes, const char *key, bool *is_null);
 
 /**
- * @brief Removes the key and its associated value from the state.
+ * @brief Removes the key and its associated value from the attributes.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  *
  * @return 0 on success, otherwise a negative error value.
@@ -504,18 +504,18 @@ int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
-int iotcon_state_remove(iotcon_state_h state, const char *key);
+int iotcon_attributes_remove(iotcon_attributes_h attributes, const char *key);
 
 /**
  * @brief Gets the type of a value at the given key.
- * @details It gets the data type of value related the @a key in @a state.
+ * @details It gets the data type of value related the @a key in @a attributes.
  * The data type could be one of #iotcon_type_e.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
- * @param[out] type The data type of value related the key in state handle.
+ * @param[out] type The data type of value related the key in attributes handle.
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -523,15 +523,15 @@ int iotcon_state_remove(iotcon_state_h state, const char *key);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  */
-int iotcon_state_get_type(iotcon_state_h state, const char *key,
+int iotcon_attributes_get_type(iotcon_attributes_h attributes, const char *key,
 		iotcon_type_e *type);
 
 /**
- * @brief Specifies the type of function passed to iotcon_state_foreach().
+ * @brief Specifies the type of function passed to iotcon_attributes_foreach().
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] key The key
  * @param[in] user_data The user data to pass to the function
  *
@@ -539,19 +539,19 @@ int iotcon_state_get_type(iotcon_state_h state, const char *key,
  * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
  * are more friendly values for the return.
  *
- * @pre iotcon_state_foreach() will invoke this callback function.
+ * @pre iotcon_attributes_foreach() will invoke this callback function.
  *
- * @see iotcon_state_foreach()
+ * @see iotcon_attributes_foreach()
  */
-typedef bool (*iotcon_state_cb)(iotcon_state_h state, const char *key, void *user_data);
+typedef bool (*iotcon_attributes_cb)(iotcon_attributes_h attributes, const char *key, void *user_data);
 
 /**
- * @brief Calls a function for each element of state.
- * @details iotcon_state_cb() will be called for each child.
+ * @brief Calls a function for each element of attributes.
+ * @details iotcon_attributes_cb() will be called for each child.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[in] cb The callback function to invoke
  * @param[in] user_data The user data to pass to the function
  *
@@ -560,18 +560,18 @@ typedef bool (*iotcon_state_cb)(iotcon_state_h state, const char *key, void *use
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @post iotcon_state_cb() will be called for each child.
+ * @post iotcon_attributes_cb() will be called for each child.
  *
- * @see iotcon_state_cb()
+ * @see iotcon_attributes_cb()
  */
-int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb, void *user_data);
+int iotcon_attributes_foreach(iotcon_attributes_h attributes, iotcon_attributes_cb cb, void *user_data);
 
 /**
- * @brief  Gets the number of keys in the state.
+ * @brief  Gets the number of keys in the attributes.
  *
  * @since_tizen 3.0
  *
- * @param[in] state The state handle
+ * @param[in] attributes The attributes handle
  * @param[out] count The number of keys
  *
  * @return 0 on success, otherwise a negative error value.
@@ -579,10 +579,10 @@ int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb, void *user_da
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_state_get_keys_count(iotcon_state_h state, unsigned int *count);
+int iotcon_attributes_get_keys_count(iotcon_attributes_h attributes, unsigned int *count);
 
 /**
  * @}
  */
 
-#endif /* __IOT_CONNECTIVITY_STRUCT_STATE_H__ */
+#endif /* __IOT_CONNECTIVITY_STRUCT_ATTRIBUTES_H__ */

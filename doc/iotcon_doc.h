@@ -86,16 +86,16 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 			return;
 		}
 
-		ret = iotcon_state_create(&state);
+		ret = iotcon_attributes_create(&attributes);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_representation_destroy(resp_repr);
 			iotcon_response_destroy(response);
 			return;
 		}
 
-		ret = iotcon_state_add_bool(resp_repr, "opened", true);
+		ret = iotcon_attributes_add_bool(resp_repr, "opened", true);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(resp_repr);
 			iotcon_response_destroy(response);
 			return;
@@ -103,7 +103,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 		ret = iotcon_response_set_representation(response, resp_repr);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(resp_repr);
 			iotcon_response_destroy(response);
 			return;
@@ -111,13 +111,13 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 		ret = iotcon_response_send(response);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(resp_repr);
 			iotcon_response_destroy(response);
 			return;
 		}
 
-		iotcon_state_destroy(state);
+		iotcon_attributes_destroy(attributes);
 		iotcon_representation_destroy(resp_repr);
 		iotcon_response_destroy(response);
 	}
