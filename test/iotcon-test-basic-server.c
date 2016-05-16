@@ -26,7 +26,7 @@
 
 /* Door Resource */
 typedef struct _door_resource_s {
-	bool state;
+	bool attributes;
 	char *uri_path;
 	char *type;
 	iotcon_resource_interfaces_h ifaces;
@@ -45,7 +45,7 @@ static int _set_door_resource(door_resource_s *door)
 {
 	int ret;
 
-	door->state = false;
+	door->attributes = false;
 
 	door->uri_path = strdup(DOOR_RESOURCE_URI);
 	if (NULL == door->uri_path) {
@@ -99,9 +99,9 @@ static void _free_door_resource(door_resource_s *door)
 	free(door->uri_path);
 }
 
-static void _check_door_state(door_resource_s door)
+static void _check_door_attributes(door_resource_s door)
 {
-	if (false == door.state)
+	if (false == door.attributes)
 		INFO("[Door] closed.");
 	else
 		INFO("[Door] opened.");
@@ -183,7 +183,7 @@ static int _send_response(iotcon_request_h request, iotcon_representation_h repr
 static iotcon_representation_h _get_door_representation(door_resource_s *door)
 {
 	int ret;
-	iotcon_state_h state;
+	iotcon_attributes_h attributes;
 	iotcon_representation_h repr;
 
 	/* create a door Representation */
@@ -193,10 +193,10 @@ static iotcon_representation_h _get_door_representation(door_resource_s *door)
 		return NULL;
 	}
 
-	/* create a door state */
-	ret = iotcon_state_create(&state);
+	/* create a door attributes */
+	ret = iotcon_attributes_create(&attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_create() Fail(%d)", ret);
+		ERR("iotcon_attributes_create() Fail(%d)", ret);
 		iotcon_representation_destroy(repr);
 		return NULL;
 	}
@@ -204,28 +204,28 @@ static iotcon_representation_h _get_door_representation(door_resource_s *door)
 	ret = iotcon_representation_set_uri_path(repr, door->uri_path);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_representation_set_uri_path() Fail(%d)", ret);
-		iotcon_state_destroy(state);
+		iotcon_attributes_destroy(attributes);
 		iotcon_representation_destroy(repr);
 		return NULL;
 	}
 
-	ret = iotcon_state_add_bool(state, "opened", door->state);
+	ret = iotcon_attributes_add_bool(attributes, "opened", door->attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_add_bool() Fail(%d)", ret);
-		iotcon_state_destroy(state);
+		ERR("iotcon_attributes_add_bool() Fail(%d)", ret);
+		iotcon_attributes_destroy(attributes);
 		iotcon_representation_destroy(repr);
 		return NULL;
 	}
 
-	ret = iotcon_representation_set_state(repr, state);
+	ret = iotcon_representation_set_attributes(repr, attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_set_state() Fail(%d)", ret);
-		iotcon_state_destroy(state);
+		ERR("iotcon_representation_set_attributes() Fail(%d)", ret);
+		iotcon_attributes_destroy(attributes);
 		iotcon_representation_destroy(repr);
 		return NULL;
 	}
 
-	iotcon_state_destroy(state);
+	iotcon_attributes_destroy(attributes);
 
 	return repr;
 }
@@ -259,21 +259,21 @@ static int _set_door_representation(door_resource_s *door,
 {
 	int ret;
 	bool bval;
-	iotcon_state_h state;
+	iotcon_attributes_h attributes;
 
-	ret = iotcon_representation_get_state(repr, &state);
+	ret = iotcon_representation_get_attributes(repr, &attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_get_state() Fail(%d)", ret);
+		ERR("iotcon_representation_get_attributes() Fail(%d)", ret);
 		return -1;
 	}
 
-	ret = iotcon_state_get_bool(state, "opened", &bval);
+	ret = iotcon_attributes_get_bool(attributes, "opened", &bval);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_get_bool() Fail(%d)", ret);
+		ERR("iotcon_attributes_get_bool() Fail(%d)", ret);
 		return -1;
 	}
 
-	door->state = bval;
+	door->attributes = bval;
 
 	return 0;
 }
@@ -296,7 +296,7 @@ static int _request_handler_put(door_resource_s *door, iotcon_request_h request)
 		return -1;
 	}
 
-	_check_door_state(*door);
+	_check_door_attributes(*door);
 
 	resp_repr = _get_door_representation(door);
 	if (NULL == resp_repr) {
@@ -321,7 +321,7 @@ static int _request_handler_put(door_resource_s *door, iotcon_request_h request)
 	return 0;
 }
 
-static gboolean _door_state_changer(gpointer user_data)
+static gboolean _door_attributes_changer(gpointer user_data)
 {
 	int ret;
 	static int i = 0;
@@ -331,11 +331,11 @@ static gboolean _door_state_changer(gpointer user_data)
 	if ((5 == i++) || NULL == door->observers)
 		return G_SOURCE_REMOVE;
 
-	if (false == door->state) {
-		door->state = true;
+	if (false == door->attributes) {
+		door->attributes = true;
 		INFO("[Door] closed -> opened");
 	} else {
-		door->state = false;
+		door->attributes = false;
 		INFO("[Door] opened -> closed");
 	}
 
@@ -361,7 +361,7 @@ static gboolean _door_state_changer(gpointer user_data)
 static int _request_handler_post(door_resource_s *door, iotcon_request_h request)
 {
 	int ret;
-	iotcon_state_h resp_state;
+	iotcon_attributes_h resp_attributes;
 	iotcon_representation_h resp_repr = NULL;
 	iotcon_resource_h new_door_handle;
 	INFO("POST request");
@@ -386,30 +386,30 @@ static int _request_handler_post(door_resource_s *door, iotcon_request_h request
 		return -1;
 	}
 
-	ret = iotcon_state_create(&resp_state);
+	ret = iotcon_attributes_create(&resp_attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_create() Fail(%d)", ret);
+		ERR("iotcon_attributes_create() Fail(%d)", ret);
 		iotcon_representation_destroy(resp_repr);
 		return -1;
 	}
 
-	ret = iotcon_state_add_str(resp_state, "createduripath", DOOR_RESOURCE_URI2);
+	ret = iotcon_attributes_add_str(resp_attributes, "createduripath", DOOR_RESOURCE_URI2);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_add_str() Fail(%d)", ret);
-		iotcon_state_destroy(resp_state);
+		ERR("iotcon_attributes_add_str() Fail(%d)", ret);
+		iotcon_attributes_destroy(resp_attributes);
 		iotcon_representation_destroy(resp_repr);
 		return -1;
 	}
 
-	ret = iotcon_representation_set_state(resp_repr, resp_state);
+	ret = iotcon_representation_set_attributes(resp_repr, resp_attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_set_state() Fail(%d)", ret);
-		iotcon_state_destroy(resp_state);
+		ERR("iotcon_representation_set_attributes() Fail(%d)", ret);
+		iotcon_attributes_destroy(resp_attributes);
 		iotcon_representation_destroy(resp_repr);
 		return -1;
 	}
 
-	iotcon_state_destroy(resp_state);
+	iotcon_attributes_destroy(resp_attributes);
 
 	ret = _send_response(request, resp_repr, IOTCON_RESPONSE_RESOURCE_CREATED);
 	if (0 != ret) {
@@ -602,10 +602,10 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	_check_door_state(my_door);
+	_check_door_attributes(my_door);
 
 	/* add observe */
-	g_timeout_add_seconds(5, _door_state_changer, &my_door);
+	g_timeout_add_seconds(5, _door_attributes_changer, &my_door);
 
 	g_main_loop_run(loop);
 	g_main_loop_unref(loop);

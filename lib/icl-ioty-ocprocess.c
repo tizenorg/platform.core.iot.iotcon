@@ -34,7 +34,7 @@
 #include "icl-options.h"
 #include "icl-representation.h"
 #include "icl-types.h"
-#include "icl-state.h"
+#include "icl-attributes.h"
 #include "icl-lite-resource.h"
 #include "icl-ioty.h"
 #include "icl-ioty-types.h"
@@ -646,9 +646,9 @@ static int _icl_ioty_ocprocess_lite_resource_get_repr(
 		return ret;
 	}
 
-	ret = iotcon_representation_set_state(repr, resource->state);
+	ret = iotcon_representation_set_attributes(repr, resource->attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_set_state() Fail(%d)", ret);
+		ERR("iotcon_representation_set_attributes() Fail(%d)", ret);
 		iotcon_representation_destroy(repr);
 		return ret;
 	}
@@ -748,15 +748,15 @@ OCEntityHandlerResult icl_ioty_ocprocess_lite_request_cb(OCEntityHandlerFlag fla
 		break;
 	case IOTCON_REQUEST_POST:
 		if (resource->cb) {
-			if (false == resource->cb(resource, repr->state, resource->cb_data)) {
+			if (false == resource->cb(resource, repr->attributes, resource->cb_data)) {
 				res->result = IOTCON_RESPONSE_ERROR;
 				g_idle_add(_icl_ioty_ocprocess_lite_resource_response_idle_cb, res);
 				break;
 			}
 		}
-		iotcon_state_destroy(resource->state);
-		resource->state = repr->state;
-		repr->state = NULL;
+		iotcon_attributes_destroy(resource->attributes);
+		resource->attributes = repr->attributes;
+		repr->attributes = NULL;
 		_icl_ioty_ocprocess_lite_resource_get_repr(resource, &(res->repr));
 		res->result = IOTCON_RESPONSE_OK;
 		g_idle_add(_icl_ioty_ocprocess_lite_resource_response_idle_cb, res);
