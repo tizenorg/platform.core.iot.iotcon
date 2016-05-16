@@ -38,9 +38,9 @@
  * @code
 #include <iotcon.h>
 
-static void _state_foreach(iotcon_state_h state, const char *key, void *user_data)
+static void _attributes_foreach(iotcon_attributes_h attributes, const char *key, void *user_data)
 {
-	// handle state
+	// handle attributes
 	...
 }
 
@@ -50,7 +50,7 @@ static void _on_get(iotcon_remote_resource_h resource, iotcon_error_e err,
 	int ret;
 	iotcon_response_result_e response_result;
 	iotcon_representation_h repr = NULL;
-	iotcon_state_h state = NULL;
+	iotcon_attributes_h attributes = NULL;
 
 	if (IOTCON_ERROR_NONE != err)
 		return;
@@ -66,11 +66,11 @@ static void _on_get(iotcon_remote_resource_h resource, iotcon_error_e err,
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 
-	ret = iotcon_representation_get_state(repr, &state);
+	ret = iotcon_representation_get_attributes(repr, &attributes);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 
-	ret = iotcon_state_foreach(state, _state_foreach, NULL);
+	ret = iotcon_attributes_foreach(attributes, _attributes_foreach, NULL);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 
@@ -91,15 +91,15 @@ static void _request_get(iotcon_remote_resource_h resource)
  * @code
 #include <iotcon.h>
 
-static iotcon_state_h _create_state()
+static iotcon_attributes_h _create_attributes()
 {
 	int ret;
-	iotcon_state_h state = NULL;
+	iotcon_attributes_h attributes = NULL;
 
-	// create & set state
+	// create & set attributes
 	...
 
-	return state;
+	return attributes;
 }
 
 static void _request_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data)
@@ -122,7 +122,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 	if (IOTCON_REQUEST_GET & types) {
 		iotcon_response_h response = NULL;
 		iotcon_representation_h repr = NULL;
-		iotcon_state_h state = NULL;
+		iotcon_attributes_h attributes = NULL;
 
 		ret = iotcon_response_create(request, &response);
 		if (IOTCON_ERROR_NONE != ret)
@@ -147,7 +147,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 			return;
 		}
 
-		ret = iotcon_representation_set_state(response, _create_state());
+		ret = iotcon_representation_set_attributes(response, _create_attributes());
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_representation_destroy(repr);
 			iotcon_response_destroy(response);

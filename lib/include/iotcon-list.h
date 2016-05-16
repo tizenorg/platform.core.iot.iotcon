@@ -23,16 +23,16 @@
  */
 
 /**
- * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_MODULE
- * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE List
+ * @ingroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_ATTRIBUTES_MODULE
+ * @defgroup CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_ATTRIBUTES_LIST_MODULE List
  *
  * @brief IoTCon List provides API to get data from list and set data to list.
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE_HEADER Required Header
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_ATTRIBUTES_LIST_MODULE_HEADER Required Header
  *  \#include <iotcon.h>
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE_OVERVIEW Overview
- * The iotcon list API provides list of bool, integer, double, string, byte string, list and state handle.
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_ATTRIBUTES_LIST_MODULE_OVERVIEW Overview
+ * The iotcon list API provides list of bool, integer, double, string, byte string, list and attributes handle.
  *
  * Example :
  * @code
@@ -49,7 +49,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 	if (IOTCON_REQUEST_GET & types) {
 		iotcon_response_h response = NULL;
 		iotcon_representation_h representation = NULL;
-		iotcon_state_h state = NULL;
+		iotcon_attributes_h attributes = NULL;
 		iotcon_list_h list = NULL;
 
 		ret = iotcon_response_create(request, &response);
@@ -64,7 +64,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 		...
 
-		ret = iotcon_state_create(&state);
+		ret = iotcon_attributes_create(&attributes);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
@@ -73,7 +73,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 		ret = iotcon_list_create(IOTCON_TYPE_INT, &list);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
@@ -82,7 +82,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		ret = iotcon_list_add_int(list, 1);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_list_destroy(list);
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
@@ -91,7 +91,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		ret = iotcon_list_add_int(list, 2);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_list_destroy(list);
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
@@ -100,25 +100,25 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		ret = iotcon_list_add_int(list, 10);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_list_destroy(list);
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
 		}
 
-		ret = itocon_state_set_list(state, "ids", list);
+		ret = itocon_attributes_set_list(attributes, "ids", list);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_list_destroy(list);
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
 		}
 
-		ret = iotcon_representation_set_state(representation, state);
+		ret = iotcon_representation_set_attributes(representation, attributes);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_list_destroy(list);
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
@@ -130,7 +130,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 				representation);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_list_destroy(list);
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
@@ -139,14 +139,14 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		ret = iotcon_response_send(response);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_list_destroy(list);
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(representation);
 			iotcon_response_destroy(resopnse);
 			return;
 		}
 
 		iotcon_list_destroy(list);
-		iotcon_state_destroy(state);
+		iotcon_attributes_destroy(attributes);
 		iotcon_representation_destroy(representation);
 		iotcon_response_destroy(resopnse);
 	}
@@ -154,7 +154,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 }
  * @endcode
  *
- * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_STATE_LIST_MODULE_FEATURE Related Features
+ * @section CAPI_IOT_CONNECTIVITY_COMMON_REPRESENTATION_ATTRIBUTES_LIST_MODULE_FEATURE Related Features
  * This API is related with the following features:\n
  *  - http://tizen.org/feature/iot.oic\n
  *
@@ -323,14 +323,14 @@ int iotcon_list_add_byte_str(iotcon_list_h list, unsigned char *val, int len, in
 int iotcon_list_add_list(iotcon_list_h list, iotcon_list_h val, int pos);
 
 /**
- * @brief Adds a new element state value into the list at the given position.
+ * @brief Adds a new element attributes value into the list at the given position.
  * @details If @a pos is negative, or is larger than the number of elements in the list,
  * the new value is added on to the end of the list.
  *
  * @since_tizen 3.0
  *
  * @param[in] list The list handle
- * @param[in] val The new state value
+ * @param[in] val The new attributes value
  * @param[in] pos The position to insert value
  *
  * @return 0 on success, otherwise a negative error value.
@@ -340,7 +340,7 @@ int iotcon_list_add_list(iotcon_list_h list, iotcon_list_h val, int pos);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_INVALID_TYPE  Invalid type
  */
-int iotcon_list_add_state(iotcon_list_h list, iotcon_state_h val, int pos);
+int iotcon_list_add_attributes(iotcon_list_h list, iotcon_attributes_h val, int pos);
 
 /**
  * @brief Gets the integer value at the given position.
@@ -465,16 +465,16 @@ int iotcon_list_get_nth_byte_str(iotcon_list_h list, int pos, unsigned char **va
 int iotcon_list_get_nth_list(iotcon_list_h src, int pos, iotcon_list_h *dest);
 
 /**
- * @brief Gets the state value at the given position.
+ * @brief Gets the attributes value at the given position.
  * @details Iterates over the list until it reaches the @a pos-1 position.
  *
  * @since_tizen 3.0
  *
- * @remarks @a state must not be released using iotcon_state_destroy().
+ * @remarks @a attributes must not be released using iotcon_attributes_destroy().
  *
  * @param[in] list The list handle
  * @param[in] pos The position
- * @param[out] state The state value to get
+ * @param[out] attributes The attributes value to get
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -483,7 +483,7 @@ int iotcon_list_get_nth_list(iotcon_list_h src, int pos, iotcon_list_h *dest);
  * @retval #IOTCON_ERROR_NO_DATA  No data available
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation errors
  */
-int iotcon_list_get_nth_state(iotcon_list_h list, int pos, iotcon_state_h *state);
+int iotcon_list_get_nth_attributes(iotcon_list_h list, int pos, iotcon_attributes_h *attributes);
 
 /**
  * @brief Removes the value at the given position.
@@ -504,7 +504,7 @@ int iotcon_list_remove_nth(iotcon_list_h list, int pos);
 
 /**
  * @brief Gets the type of the list.
- * @details It gets the data type of value related the @a key in @a state.
+ * @details It gets the data type of value related the @a key in @a attributes.
  * The data type could be one of #iotcon_type_e.
  *
  * @since_tizen 3.0
@@ -779,32 +779,32 @@ typedef bool (*iotcon_list_list_cb)(int pos, iotcon_list_h value, void *user_dat
 int iotcon_list_foreach_list(iotcon_list_h list, iotcon_list_list_cb cb, void *user_data);
 
 /**
- * @brief Specifies the type of function passed to iotcon_list_foreach_state().
+ * @brief Specifies the type of function passed to iotcon_list_foreach_attributes().
  *
  * @since_tizen 3.0
  *
- * @param[in] pos The number of the state value (0 being the first)
- * @param[in] value The state value
+ * @param[in] pos The number of the attributes value (0 being the first)
+ * @param[in] value The attributes value
  * @param[in] user_data The user data to pass to the function
  *
  * @return true to continue with the next iteration of the loop,
  * otherwise false to break out of the loop. #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP
  * are more friendly values for the return.
  *
- * @pre iotcon_list_foreach_state() will invoke this callback function.
+ * @pre iotcon_list_foreach_attributes() will invoke this callback function.
  *
- * @see iotcon_list_foreach_state()
+ * @see iotcon_list_foreach_attributes()
  */
-typedef bool (*iotcon_list_state_cb)(int pos, iotcon_state_h value, void *user_data);
+typedef bool (*iotcon_list_attributes_cb)(int pos, iotcon_attributes_h value, void *user_data);
 
 /**
- * @brief Gets all state of the given list by invoking the callback function.
- * @details iotcon_list_state_cb() will be called for each child.
+ * @brief Gets all attributes of the given list by invoking the callback function.
+ * @details iotcon_list_attributes_cb() will be called for each child.
  *
  * @since_tizen 3.0
  *
  * @param[in] list The handle to the list
- * @param[in] cb The callback function to get each state
+ * @param[in] cb The callback function to get each attributes
  * @param[in] user_data The user data to be passed to the callback function
  *
  * @return 0 on success, otherwise a negative error value.
@@ -812,11 +812,11 @@ typedef bool (*iotcon_list_state_cb)(int pos, iotcon_state_h value, void *user_d
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @post iotcon_list_state_cb() will be called for each item.
+ * @post iotcon_list_attributes_cb() will be called for each item.
  *
- * @see iotcon_list_state_cb()
+ * @see iotcon_list_attributes_cb()
  */
-int iotcon_list_foreach_state(iotcon_list_h list, iotcon_list_state_cb cb, void *user_data);
+int iotcon_list_foreach_attributes(iotcon_list_h list, iotcon_list_attributes_cb cb, void *user_data);
 
 /**
  * @}

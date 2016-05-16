@@ -21,7 +21,7 @@
 #include "ic-utils.h"
 #include "icl.h"
 #include "icl-representation.h"
-#include "icl-state.h"
+#include "icl-attributes.h"
 #include "icl-value.h"
 #include "icl-list.h"
 #include "icl-resource.h"
@@ -34,7 +34,7 @@
 API int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int properties,
-		iotcon_state_h state,
+		iotcon_attributes_h attributes,
 		iotcon_lite_resource_post_request_cb cb,
 		void *user_data,
 		iotcon_lite_resource_h *resource_handle)
@@ -49,7 +49,7 @@ API int iotcon_lite_resource_create(const char *uri_path,
 	RETV_IF(NULL == res_types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = icl_ioty_lite_resource_create(uri_path, res_types, properties, state, cb,
+	ret = icl_ioty_lite_resource_create(uri_path, res_types, properties, attributes, cb,
 			user_data, resource_handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icl_ioty_lite_resource_create() Fail(%d)", ret);
@@ -87,8 +87,8 @@ API int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource)
 }
 
 
-API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
-		iotcon_state_h state)
+API int iotcon_lite_resource_update_attributes(iotcon_lite_resource_h resource,
+		iotcon_attributes_h attributes)
 {
 	int ret, connectivity_type;
 
@@ -100,9 +100,9 @@ API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 
 	switch (connectivity_type) {
 	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_lite_resource_update_state(resource, state);
+		ret = icl_ioty_lite_resource_update_attributes(resource, attributes);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_lite_resource_update_state() Fail(%d)", ret);
+			ERR("icl_ioty_lite_resource_update_attributes() Fail(%d)", ret);
 			return ret;
 		}
 		break;
@@ -115,14 +115,14 @@ API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 }
 
 
-API int iotcon_lite_resource_get_state(iotcon_lite_resource_h resource,
-		iotcon_state_h *state)
+API int iotcon_lite_resource_get_attributes(iotcon_lite_resource_h resource,
+		iotcon_attributes_h *attributes)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*state = resource->state;
+	*attributes = resource->attributes;
 
 	return IOTCON_ERROR_NONE;
 }
