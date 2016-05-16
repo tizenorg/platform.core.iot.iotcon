@@ -35,7 +35,7 @@
  * This API provides that the users manages resources without request handler.
  * When client request by CRUD functions, internal default request handler will be invoked.
  * The default request handler will create response and send to client automatically.
- * When updated state by iotcon_lite_resource_update_state(), changes will notify to observers.
+ * When updated attributes by iotcon_lite_resource_update_attributes(), changes will notify to observers.
  *
  * Example :
  * @code
@@ -43,7 +43,7 @@
 ...
 static iotcon_lite_resource_h _resource;
 
-static bool _state_changed_cb(iotcon_lite_resource_h resource, iotcon_state_h state, void *user_data)
+static bool _attributes_changed_cb(iotcon_lite_resource_h resource, iotcon_attributes_h attributes, void *user_data)
 {
 	return true;
 }
@@ -53,7 +53,7 @@ static void _create_light_resource()
 	int ret;
 	iotcon_lite_resource_h resource = NULL;
 	iotcon_resource_types_h resource_types = NULL;
-	iotcon_state_h state = NULL;
+	iotcon_attributes_h attributes = NULL;
 
 	ret = iotcon_resource_types_create(&resource_types);
 	if (IOTCON_ERROR_NONE != ret)
@@ -65,36 +65,36 @@ static void _create_light_resource()
 		return;
 	}
 
-	ret = iotcon_state_create(&state);
+	ret = iotcon_attributes_create(&attributes);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(resource_types);
 		return;
 	}
 
-	ret = iotcon_state_add_bool(state, "power", true);
+	ret = iotcon_attributes_add_bool(attributes, "power", true);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_state_destroy(state);
+		iotcon_attributes_destroy(attributes);
 		iotcon_resource_types_destroy(resource_types);
 		return;
 	}
 
-	ret = iotcon_state_add_int(state, "brightness", 75);
+	ret = iotcon_attributes_add_int(attributes, "brightness", 75);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_state_destroy(state);
+		iotcon_attributes_destroy(attributes);
 		iotcon_resource_types_destroy(resource_types);
 		return;
 	}
 
 	ret = iotcon_lite_resource_create("/light/1", resource_types,
-			IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE, state,
-			_state_changed_cb, NULL, &resource);
+			IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE, attributes,
+			_attributes_changed_cb, NULL, &resource);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_state_destroy(state);
+		iotcon_attributes_destroy(attributes);
 		iotcon_resource_types_destroy(resource_types);
 		return;
 	}
 
-	iotcon_state_destroy(state);
+	iotcon_attributes_destroy(attributes);
 	iotcon_resource_types_destroy(resource_types);
 
 	_resource = resource;
@@ -103,30 +103,30 @@ static void _create_light_resource()
 static void _update_brightness(int brightness)
 {
 	int ret;
-	iotcon_state_h state = NULL;
-	iotcon_state_h state_clone = NULL;
+	iotcon_attributes_h attributes = NULL;
+	iotcon_attributes_h attributes_clone = NULL;
 
-	ret = iotcon_lite_resource_get_state(_resource, &state);
+	ret = iotcon_lite_resource_get_attributes(_resource, &attributes);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 
-	ret = iotcon_state_clone(state, &state_clone);
+	ret = iotcon_attributes_clone(attributes, &attributes_clone);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 
-	ret = iotcon_state_add_int(state_clone, "brightness", brightness);
+	ret = iotcon_attributes_add_int(attributes_clone, "brightness", brightness);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_state_destroy(state_clone);
+		iotcon_attributes_destroy(attributes_clone);
 		return;
 	}
 
-	ret = iotcon_lite_resource_update_state(_resource, state_clone);
+	ret = iotcon_lite_resource_update_attributes(_resource, attributes_clone);
 	if (IOTCON_ERROR_NONE != ret) {
-		iotcon_state_destroy(state_clone);
+		iotcon_attributes_destroy(attributes_clone);
 		return;
 	}
 
-	iotcon_state_destroy(state_clone);
+	iotcon_attributes_destroy(attributes_clone);
 }
 
  * @endcode
@@ -152,7 +152,7 @@ static void _update_brightness(int brightness)
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of the lite resource
- * @param[in] state The state of the lite resource
+ * @param[in] attributes The attributes of the lite resource
  * @param[in] user_data The user data to pass to the function
  *
  * @pre The callback must be registered using iotcon_lite_resource_create()
@@ -162,12 +162,12 @@ static void _update_brightness(int brightness)
  * @see iotcon_lite_resource_create()
  */
 typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h resource,
-		iotcon_state_h state, void *user_data);
+		iotcon_attributes_h attributes, void *user_data);
 
 
 /**
  * @brief Creates a lite resource handle and registers the resource in server.
- * @details Registers a resource specified by @a uri_path, @a res_types, @a state which have
+ * @details Registers a resource specified by @a uri_path, @a res_types, @a attributes which have
  * @a properties in IoTCon server.\n
  * When client requests some operations, it send a response to client, automatically.\n
  * The @a properties can contain multiple properties like
@@ -184,7 +184,7 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
  * @param[in] uri_path The URI path of the resource
  * @param[in] res_types The list of type of the resource
  * @param[in] properties The property of the resource\n Set of #iotcon_resource_policy_e
- * @param[in] state The state handle to set
+ * @param[in] attributes The attributes handle to set
  * @param[in] cb The callback function to add into callback list
  * @param[in] user_data The user data to pass to the callback function
  * @param[out] resource_handle The handle of the resource
@@ -204,7 +204,7 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
 int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int properties,
-		iotcon_state_h state,
+		iotcon_attributes_h attributes,
 		iotcon_lite_resource_post_request_cb cb,
 		void *user_data,
 		iotcon_lite_resource_h *resource_handle);
@@ -235,14 +235,14 @@ int iotcon_lite_resource_create(const char *uri_path,
 int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource);
 
 /**
- * @brief Updates state into the lite resource handle.
+ * @brief Updates attributes into the lite resource handle.
  *
  * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
  *
  * @param[in] resource The handle of the lite resource
- * @param[in] state The state handle to update
+ * @param[in] attributes The attributes handle to update
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -253,30 +253,30 @@ int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource);
  *
  * @pre iotcon_initialize() should be called to initialize.
  *
- * @see iotcon_lite_resource_get_state()
+ * @see iotcon_lite_resource_get_attributes()
  */
-int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
-		iotcon_state_h state);
+int iotcon_lite_resource_update_attributes(iotcon_lite_resource_h resource,
+		iotcon_attributes_h attributes);
 
 /**
- * @brief Gets state from the lite resource handle.
+ * @brief Gets attributes from the lite resource handle.
  *
  * @since_tizen 3.0
  *
- * @remarks @a state must not be released using iotcon_state_destroy().
+ * @remarks @a attributes must not be released using iotcon_attributes_destroy().
  *
  * @param[in] resource The handle of the lite resource
- * @param[out] state The state handle of the lite resource
+ * @param[out] attributes The attributes handle of the lite resource
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  *
- * @see iotcon_lite_resource_update_state()
+ * @see iotcon_lite_resource_update_attributes()
  */
-int iotcon_lite_resource_get_state(iotcon_lite_resource_h resource,
-		iotcon_state_h *state);
+int iotcon_lite_resource_get_attributes(iotcon_lite_resource_h resource,
+		iotcon_attributes_h *attributes);
 
 /**
  * @}

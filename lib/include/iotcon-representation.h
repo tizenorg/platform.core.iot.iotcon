@@ -89,35 +89,35 @@
 		return;
 	}
 
-	ret = iotcon_state_add_str(resp_repr, "type", "lamp");
+	ret = iotcon_attributes_add_str(resp_repr, "type", "lamp");
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(types);
 		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_state_add_str(resp_repr, "where", "desk");
+	ret = iotcon_attributes_add_str(resp_repr, "where", "desk");
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(types);
 		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_state_add_double(resp_repr, "default_bright", 200.0);
+	ret = iotcon_attributes_add_double(resp_repr, "default_bright", 200.0);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(types);
 		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_state_add_str(resp_repr, "unit", "lux");
+	ret = iotcon_attributes_add_str(resp_repr, "unit", "lux");
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(types);
 		iotcon_representation_destroy(resp_repr);
 		return;
 	}
 
-	ret = iotcon_state_add_bool(resp_repr, "bright_step", true);
+	ret = iotcon_attributes_add_bool(resp_repr, "bright_step", true);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_types_destroy(types);
 		iotcon_representation_destroy(resp_repr);
@@ -171,7 +171,7 @@
 		return;
 	}
 
-	ret = iotcon_state_add_list(resp_repr, "bright_step_list", bright_step_list);
+	ret = iotcon_attributes_add_list(resp_repr, "bright_step_list", bright_step_list);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_list_destroy(bright_step_list);
 		iotcon_resource_types_destroy(types);
@@ -363,12 +363,12 @@ int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr,
 		iotcon_resource_interfaces_h *ifaces);
 
 /**
- * @brief Sets a new state handle into the representation.
+ * @brief Sets a new attributes handle into the representation.
  *
  * @since_tizen 3.0
  *
  * @param[in] repr The representation handle
- * @param[in] state The state handle to set newly
+ * @param[in] attributes The attributes handle to set newly
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -376,24 +376,24 @@ int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr,
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_representation_set_state(iotcon_representation_h repr, iotcon_state_h state);
+int iotcon_representation_set_attributes(iotcon_representation_h repr, iotcon_attributes_h attributes);
 
 /**
- * @brief Gets a state handle in the representation.
+ * @brief Gets a attributes handle in the representation.
  *
  * @since_tizen 3.0
  *
- * @remarks @a state must not be released using iotcon_state_destroy().
+ * @remarks @a attributes must not be released using iotcon_attributes_destroy().
  *
  * @param[in] repr The representation handle
- * @param[in] state The state handle to get
+ * @param[in] attributes The attributes handle to get
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  */
-int iotcon_representation_get_state(iotcon_representation_h repr, iotcon_state_h *state);
+int iotcon_representation_get_attributes(iotcon_representation_h repr, iotcon_attributes_h *attributes);
 
 /**
  * @brief Adds a new child representation on to the end of the parent representation.

@@ -23,7 +23,7 @@
 #include "icl.h"
 #include "icl-representation.h"
 #include "icl-list.h"
-#include "icl-state.h"
+#include "icl-attributes.h"
 #include "icl-value.h"
 
 static iotcon_value_h _icl_value_create(int type)
@@ -44,8 +44,8 @@ static iotcon_value_h _icl_value_create(int type)
 	case IOTCON_TYPE_LIST:
 		ret_val = calloc(1, sizeof(icl_val_list_s));
 		break;
-	case IOTCON_TYPE_STATE:
-		ret_val = calloc(1, sizeof(icl_val_state_s));
+	case IOTCON_TYPE_ATTRIBUTES:
+		ret_val = calloc(1, sizeof(icl_val_attributes_s));
 		break;
 	default:
 		ERR("Invalid Type(%d)", type);
@@ -179,17 +179,17 @@ iotcon_value_h icl_value_create_list(iotcon_list_h val)
 	return (iotcon_value_h)value;
 }
 
-iotcon_value_h icl_value_create_state(iotcon_state_h val)
+iotcon_value_h icl_value_create_attributes(iotcon_attributes_h val)
 {
-	icl_val_state_s *value;
+	icl_val_attributes_s *value;
 
-	value = (icl_val_state_s*)_icl_value_create(IOTCON_TYPE_STATE);
+	value = (icl_val_attributes_s*)_icl_value_create(IOTCON_TYPE_ATTRIBUTES);
 	if (NULL == value) {
-		ERR("_icl_value_create(state) Fail");
+		ERR("_icl_value_create(attributes) Fail");
 		return NULL;
 	}
 
-	value->state = icl_state_ref(val);
+	value->attributes = icl_attributes_ref(val);
 
 	return (iotcon_value_h)value;
 }
@@ -275,15 +275,15 @@ int icl_value_get_list(iotcon_value_h value, iotcon_list_h *list)
 	return IOTCON_ERROR_NONE;
 }
 
-int icl_value_get_state(iotcon_value_h value, iotcon_state_h *state)
+int icl_value_get_attributes(iotcon_value_h value, iotcon_attributes_h *attributes)
 {
-	icl_val_state_s *real = (icl_val_state_s*)value;
+	icl_val_attributes_s *real = (icl_val_attributes_s*)value;
 
 	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
-	RETVM_IF(IOTCON_TYPE_STATE != real->type, IOTCON_ERROR_INVALID_PARAMETER,
+	RETVM_IF(IOTCON_TYPE_ATTRIBUTES != real->type, IOTCON_ERROR_INVALID_PARAMETER,
 			"Invalid Type(%d)", real->type);
 
-	*state = real->state;
+	*attributes = real->attributes;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -294,7 +294,7 @@ void icl_value_destroy(gpointer data)
 	int ret;
 	iotcon_value_h value;
 	iotcon_list_h list;
-	iotcon_state_h state;
+	iotcon_attributes_h attributes;
 
 	RET_IF(NULL == data);
 
@@ -320,13 +320,13 @@ void icl_value_destroy(gpointer data)
 		}
 		iotcon_list_destroy(list);
 		break;
-	case IOTCON_TYPE_STATE:
-		ret = icl_value_get_state(value, &state);
+	case IOTCON_TYPE_ATTRIBUTES:
+		ret = icl_value_get_attributes(value, &attributes);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_value_get_state() Fail(%d)", ret);
+			ERR("icl_value_get_attributes() Fail(%d)", ret);
 			break;
 		}
-		iotcon_state_destroy(state);
+		iotcon_attributes_destroy(attributes);
 		break;
 	default:
 		ERR("Invalid type(%d)", type);
@@ -366,8 +366,8 @@ iotcon_value_h icl_value_clone(iotcon_value_h src)
 	case IOTCON_TYPE_LIST:
 		dest = icl_value_create_list(((icl_val_list_s*)real)->list);
 		break;
-	case IOTCON_TYPE_STATE:
-		dest = icl_value_create_state(((icl_val_state_s*)real)->state);
+	case IOTCON_TYPE_ATTRIBUTES:
+		dest = icl_value_create_attributes(((icl_val_attributes_s*)real)->attributes);
 		break;
 	default:
 		ERR("Invalid type(%d)", src->type);

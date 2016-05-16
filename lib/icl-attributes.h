@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_LIBRARY_STATE_H__
-#define __IOT_CONNECTIVITY_LIBRARY_STATE_H__
+#ifndef __IOT_CONNECTIVITY_LIBRARY_ATTRIBUTES_H__
+#define __IOT_CONNECTIVITY_LIBRARY_ATTRIBUTES_H__
 
 #include "icl-value.h"
 #include "icl-representation.h"
 
-int icl_state_set_value(iotcon_state_h state, const char *key, iotcon_value_h value);
+int icl_attributes_set_value(iotcon_attributes_h attributes, const char *key,
+		iotcon_value_h value);
 
-void icl_state_clone_foreach(char *key, iotcon_value_h src_val,
-		iotcon_state_h dest_state);
+void icl_attributes_clone_foreach(char *key, iotcon_value_h src_val,
+		iotcon_attributes_h dest_attributes);
 
-iotcon_state_h icl_state_ref(iotcon_state_h state);
+iotcon_attributes_h icl_attributes_ref(iotcon_attributes_h attributes);
 
-#endif /* __IOT_CONNECTIVITY_LIBRARY_STATE_H__ */
+#endif /* __IOT_CONNECTIVITY_LIBRARY_ATTRIBUTES_H__ */
