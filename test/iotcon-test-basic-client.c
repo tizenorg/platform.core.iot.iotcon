@@ -35,7 +35,7 @@ static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
 	int ret;
 	bool opened;
 	static int i = 0;
-	iotcon_state_h state;
+	iotcon_attributes_h attributes;
 	iotcon_representation_h repr;
 	iotcon_response_result_e response_result;
 
@@ -58,15 +58,15 @@ static void _on_observe(iotcon_remote_resource_h resource, iotcon_error_e err,
 		return;
 	}
 
-	ret = iotcon_representation_get_state(repr, &state);
+	ret = iotcon_representation_get_attributes(repr, &attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_get_state() Fail(%d)", ret);
+		ERR("iotcon_representation_get_attributes() Fail(%d)", ret);
 		return;
 	}
 
-	ret = iotcon_state_get_bool(state, "opened", &opened);
+	ret = iotcon_attributes_get_bool(attributes, "opened", &opened);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_get_bool() Fail(%d)", ret);
+		ERR("iotcon_attributes_get_bool() Fail(%d)", ret);
 		return;
 	}
 
@@ -116,7 +116,7 @@ static void _on_response_post(iotcon_remote_resource_h resource,
 		iotcon_response_h response, void *user_data)
 {
 	int ret;
-	iotcon_state_h recv_state;
+	iotcon_attributes_h recv_attributes;
 	char *host, *created_uri_path;
 	iotcon_connectivity_type_e connectivity_type;
 	iotcon_response_result_e response_result;
@@ -144,15 +144,15 @@ static void _on_response_post(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	ret = iotcon_representation_get_state(recv_repr, &recv_state);
+	ret = iotcon_representation_get_attributes(recv_repr, &recv_attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_get_state() Fail(%d)", ret);
+		ERR("iotcon_representation_get_attributes() Fail(%d)", ret);
 		return;
 	}
 
-	ret = iotcon_state_get_str(recv_state, "createduripath", &created_uri_path);
+	ret = iotcon_attributes_get_str(recv_attributes, "createduripath", &created_uri_path);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_get_str() Fail(%d)", ret);
+		ERR("iotcon_attributes_get_str() Fail(%d)", ret);
 		return;
 	}
 	DBG("New resource created : %s", created_uri_path);
@@ -237,8 +237,8 @@ static void _on_response_get(iotcon_remote_resource_h resource,
 	iotcon_response_result_e response_result;
 	iotcon_representation_h send_repr;
 	iotcon_representation_h recv_repr;
-	iotcon_state_h send_state;
-	iotcon_state_h recv_state = NULL;
+	iotcon_attributes_h send_attributes;
+	iotcon_attributes_h recv_attributes = NULL;
 
 	ret = iotcon_response_get_result(response, &response_result);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -262,15 +262,15 @@ static void _on_response_get(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	ret = iotcon_representation_get_state(recv_repr, &recv_state);
+	ret = iotcon_representation_get_attributes(recv_repr, &recv_attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_get_state() Fail(%d)", ret);
+		ERR("iotcon_representation_get_attributes() Fail(%d)", ret);
 		return;
 	}
 
-	ret = iotcon_state_get_bool(recv_state, "opened", &opened);
+	ret = iotcon_attributes_get_bool(recv_attributes, "opened", &opened);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_get_bool() Fail(%d)", ret);
+		ERR("iotcon_attributes_get_bool() Fail(%d)", ret);
 		return;
 	}
 
@@ -280,30 +280,30 @@ static void _on_response_get(iotcon_remote_resource_h resource,
 		return;
 	}
 
-	ret = iotcon_state_create(&send_state);
+	ret = iotcon_attributes_create(&send_attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_create() Fail(%d)", ret);
+		ERR("iotcon_attributes_create() Fail(%d)", ret);
 		iotcon_representation_destroy(send_repr);
 		return;
 	}
 
-	ret = iotcon_state_add_bool(send_state, "opened", !opened);
+	ret = iotcon_attributes_add_bool(send_attributes, "opened", !opened);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_add_bool() Fail(%d)", ret);
-		iotcon_state_destroy(send_state);
+		ERR("iotcon_attributes_add_bool() Fail(%d)", ret);
+		iotcon_attributes_destroy(send_attributes);
 		iotcon_representation_destroy(send_repr);
 		return;
 	}
 
-	ret = iotcon_representation_set_state(send_repr, send_state);
+	ret = iotcon_representation_set_attributes(send_repr, send_attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_set_state() Fail(%d)", ret);
-		iotcon_state_destroy(send_state);
+		ERR("iotcon_representation_set_attributes() Fail(%d)", ret);
+		iotcon_attributes_destroy(send_attributes);
 		iotcon_representation_destroy(send_repr);
 		return;
 	}
 
-	iotcon_state_destroy(send_state);
+	iotcon_attributes_destroy(send_attributes);
 
 	/* send PUT request */
 	ret = iotcon_remote_resource_put(resource, send_repr, NULL, _on_response, NULL);

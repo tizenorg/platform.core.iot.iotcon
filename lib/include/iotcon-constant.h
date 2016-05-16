@@ -198,7 +198,7 @@ typedef enum {
 	IOTCON_TYPE_BYTE_STR, /**< Indicates for representation that have byte string type */
 	IOTCON_TYPE_NULL, /**< Indicates for representation that have null type */
 	IOTCON_TYPE_LIST, /**< Indicates for representation that have list type */
-	IOTCON_TYPE_STATE, /**< Indicates for representation that have another representation type */
+	IOTCON_TYPE_ATTRIBUTES, /**< Indicates for representation that have another representation type */
 } iotcon_type_e;
 
 /**
