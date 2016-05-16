@@ -106,7 +106,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 			return;
 		}
 
-		ret = itocon_state_set_list(state, "ids", list);
+		ret = iotcon_state_add_list(state, "ids", list);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_list_destroy(list);
 			iotcon_state_destroy(state);

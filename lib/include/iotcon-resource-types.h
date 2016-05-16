@@ -50,7 +50,7 @@ static void _create_light_resource()
 	int ret;
 	iotcon_resource_h resource = NULL;
 	iotcon_resource_interfaces_h resource_ifaces = NULL;
-	iotcon_resource_interfaces_h resource_types = NULL;
+	iotcon_resource_types_h resource_types = NULL;
 
 	ret = iotcon_resource_types_create(&resource_types);
 	if (IOTCON_ERROR_NONE != ret)

@@ -57,7 +57,7 @@ static void _create_resource()
 	int ret;
 	int properties;
 	iotcon_resource_interfaces_h resource_ifaces = NULL;
-	iotcon_resource_interfaces_h resource_types = NULL;
+	iotcon_resource_types_h resource_types = NULL;
 	iotcon_resource_h resource_door = NULL;
 
 	// 1. create room resource
@@ -379,7 +379,7 @@ int iotcon_resource_set_request_handler(iotcon_resource_h resource,
 		iotcon_request_handler_cb cb, void *user_data);
 
 /**
- * @brief Binds a child resource into the parent resource.
+ * @brief Sets a child resource into the parent resource.
  *
  * @since_tizen 3.0
  * @privlevel public

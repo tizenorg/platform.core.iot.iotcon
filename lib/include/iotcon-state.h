@@ -80,7 +80,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 			return;
 		}
 
-		ret = itocon_state_set_int(state, "brightness", 75);
+		ret = iotcon_state_add_int(state, "brightness", 75);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_state_destroy(state);
 			iotcon_representation_destroy(representation);

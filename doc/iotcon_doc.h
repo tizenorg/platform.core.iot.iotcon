@@ -34,7 +34,7 @@
  * See http://iotivity.org and http://openinterconnect.org for more information.
  *
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_RESOURCE Resource
- * A Resource is a component in a server that can be viewed and conrolled by another client.\n
+ * A Resource is a component in a server that can be viewed and controlled by another client.\n
  * There are different resource types, for example a temperature sensor, a light controller etc.\n
  *
  * @subsection CAPI_IOT_CONNECTIVITY_MODULE_RESOURCE_REGISTRATION Resource registration
