@@ -208,7 +208,6 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  *
  * @see iotcon_response_destroy()
- * @see iotcon_response_set()
  */
 int iotcon_response_create(iotcon_request_h request, iotcon_response_h *response);
 
@@ -220,7 +219,6 @@ int iotcon_response_create(iotcon_request_h request, iotcon_response_h *response
  * @param[in] resp The handle of the response
  *
  * @see iotcon_response_create()
- * @see iotcon_response_set()
  */
 void iotcon_response_destroy(iotcon_response_h resp);
 

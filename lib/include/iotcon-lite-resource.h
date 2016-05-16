@@ -35,7 +35,7 @@
  * This API provides that the users manages resources without request handler.
  * When client request by CRUD functions, internal default request handler will be invoked.
  * The default request handler will create response and send to client automatically.
- * When updated state by iotcon_lite_update_state(), changes will notify to observers.
+ * When updated state by iotcon_lite_resource_update_state(), changes will notify to observers.
  *
  * Example :
  * @code

@@ -106,7 +106,7 @@ typedef enum {
  */
 typedef enum {
 	IOTCON_OBSERVE_IGNORE_OUT_OF_ORDER = 0, /**< Indicates observation request for most up-to-date notifications only */
-	IOTCON_OBSERVE_ACCEPT_OUT_OF_ORDER = 1 /**< Indicates observation request for all notifications including stale notifications */
+	IOTCON_OBSERVE_ACCEPT_OUT_OF_ORDER = 1 /**< Indicates observation request for all notifications including state notifications */
 } iotcon_observe_policy_e;
 
 /**

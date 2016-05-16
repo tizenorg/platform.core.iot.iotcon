@@ -57,7 +57,7 @@ static void _create_resource()
 	int ret;
 	int properties;
 	iotcon_resource_interfaces_h resource_ifaces = NULL;
-	iotcon_resource_interfaces_h resource_types = NULL;
+	iotcon_resource_types_h resource_types = NULL;
 	iotcon_resource_h resource_door = NULL;
 
 	// 1. create room resource
@@ -350,7 +350,7 @@ int iotcon_resource_bind_type(iotcon_resource_h resource_handle,
 		const char *resource_type);
 
 /**
- * @brief Binds a request handler to the resource.
+ * @brief Sets a request handler to the resource.
  * @details When the resource receive CRUD request, iotcon_request_handler_cb() will be
  * called.
  *
