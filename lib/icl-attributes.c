@@ -22,72 +22,72 @@
 #include "icl-list.h"
 #include "icl-value.h"
 #include "icl-representation.h"
-#include "icl-state.h"
+#include "icl-attributes.h"
 
-iotcon_state_h icl_state_ref(iotcon_state_h state)
+iotcon_attributes_h icl_attributes_ref(iotcon_attributes_h attributes)
 {
-	RETV_IF(NULL == state, NULL);
-	RETV_IF(state->ref_count <= 0, NULL);
+	RETV_IF(NULL == attributes, NULL);
+	RETV_IF(attributes->ref_count <= 0, NULL);
 
-	state->ref_count++;
+	attributes->ref_count++;
 
-	return state;
+	return attributes;
 }
 
 
-API int iotcon_state_create(iotcon_state_h *ret_state)
+API int iotcon_attributes_create(iotcon_attributes_h *ret_attributes)
 {
-	iotcon_state_h state;
+	iotcon_attributes_h attributes;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == ret_state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == ret_attributes, IOTCON_ERROR_INVALID_PARAMETER);
 
-	state = calloc(1, sizeof(struct icl_state_s));
-	if (NULL == state) {
+	attributes = calloc(1, sizeof(struct icl_attributes_s));
+	if (NULL == attributes) {
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	state->hash_table = g_hash_table_new_full(g_str_hash, g_str_equal, free,
+	attributes->hash_table = g_hash_table_new_full(g_str_hash, g_str_equal, free,
 			icl_value_destroy);
-	state->ref_count = 1;
+	attributes->ref_count = 1;
 
-	*ret_state = state;
+	*ret_attributes = attributes;
 
 	return IOTCON_ERROR_NONE;
 }
 
 
-API void iotcon_state_destroy(iotcon_state_h state)
+API void iotcon_attributes_destroy(iotcon_attributes_h attributes)
 {
-	RET_IF(NULL == state);
+	RET_IF(NULL == attributes);
 
-	state->ref_count--;
+	attributes->ref_count--;
 
-	if (0 != state->ref_count)
+	if (0 != attributes->ref_count)
 		return;
 
-	g_hash_table_destroy(state->hash_table);
-	free(state);
+	g_hash_table_destroy(attributes->hash_table);
+	free(attributes);
 }
 
 
-API int iotcon_state_remove(iotcon_state_h state, const char *key)
+API int iotcon_attributes_remove(iotcon_attributes_h attributes, const char *key)
 {
 	gboolean ret = FALSE;
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = g_hash_table_lookup(state->hash_table, key);
+	value = g_hash_table_lookup(attributes->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup(%s) Fail", key);
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	ret = g_hash_table_remove(state->hash_table, key);
+	ret = g_hash_table_remove(attributes->hash_table, key);
 	if (FALSE == ret) {
 		ERR("g_hash_table_remove(%s) Fail", key);
 		return IOTCON_ERROR_NO_DATA;
@@ -97,16 +97,17 @@ API int iotcon_state_remove(iotcon_state_h state, const char *key)
 }
 
 
-API int iotcon_state_get_int(iotcon_state_h state, const char *key, int *val)
+API int iotcon_attributes_get_int(iotcon_attributes_h attributes, const char *key,
+		int *val)
 {
 	iotcon_value_h value;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = g_hash_table_lookup(state->hash_table, key);
+	value = g_hash_table_lookup(attributes->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
 		return IOTCON_ERROR_NO_DATA;
@@ -123,12 +124,13 @@ API int iotcon_state_get_int(iotcon_state_h state, const char *key, int *val)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_add_int(iotcon_state_h state, const char *key, int val)
+API int iotcon_attributes_add_int(iotcon_attributes_h attributes, const char *key,
+		int val)
 {
 	iotcon_value_h value;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = icl_value_create_int(val);
@@ -137,22 +139,23 @@ API int iotcon_state_add_int(iotcon_state_h state, const char *key, int val)
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
+	g_hash_table_replace(attributes->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_get_bool(iotcon_state_h state, const char *key, bool *val)
+API int iotcon_attributes_get_bool(iotcon_attributes_h attributes, const char *key,
+		bool *val)
 {
 	icl_basic_s *real = NULL;
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = g_hash_table_lookup(state->hash_table, key);
+	value = g_hash_table_lookup(attributes->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
 		return IOTCON_ERROR_NO_DATA;
@@ -169,12 +172,13 @@ API int iotcon_state_get_bool(iotcon_state_h state, const char *key, bool *val)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_add_bool(iotcon_state_h state, const char *key, bool val)
+API int iotcon_attributes_add_bool(iotcon_attributes_h attributes, const char *key,
+		bool val)
 {
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = icl_value_create_bool(val);
@@ -183,22 +187,23 @@ API int iotcon_state_add_bool(iotcon_state_h state, const char *key, bool val)
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
+	g_hash_table_replace(attributes->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_get_double(iotcon_state_h state, const char *key, double *val)
+API int iotcon_attributes_get_double(iotcon_attributes_h attributes,
+		const char *key, double *val)
 {
 	icl_basic_s *real = NULL;
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = g_hash_table_lookup(state->hash_table, key);
+	value = g_hash_table_lookup(attributes->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
 		return IOTCON_ERROR_NO_DATA;
@@ -215,12 +220,13 @@ API int iotcon_state_get_double(iotcon_state_h state, const char *key, double *v
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_add_double(iotcon_state_h state, const char *key, double val)
+API int iotcon_attributes_add_double(iotcon_attributes_h attributes,
+		const char *key, double val)
 {
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = icl_value_create_double(val);
@@ -229,22 +235,23 @@ API int iotcon_state_add_double(iotcon_state_h state, const char *key, double va
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
+	g_hash_table_replace(attributes->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val)
+API int iotcon_attributes_get_str(iotcon_attributes_h attributes, const char *key,
+		char **val)
 {
 	icl_basic_s *real = NULL;
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = g_hash_table_lookup(state->hash_table, key);
+	value = g_hash_table_lookup(attributes->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
 		return IOTCON_ERROR_NO_DATA;
@@ -261,12 +268,13 @@ API int iotcon_state_get_str(iotcon_state_h state, const char *key, char **val)
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_add_str(iotcon_state_h state, const char *key, char *val)
+API int iotcon_attributes_add_str(iotcon_attributes_h attributes, const char *key,
+		char *val)
 {
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -276,24 +284,24 @@ API int iotcon_state_add_str(iotcon_state_h state, const char *key, char *val)
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
+	g_hash_table_replace(attributes->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_get_byte_str(iotcon_state_h state, const char *key,
+API int iotcon_attributes_get_byte_str(iotcon_attributes_h attributes, const char *key,
 		unsigned char **val, int *len)
 {
 	iotcon_value_h value = NULL;
 	icl_val_byte_str_s *real = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == len, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = g_hash_table_lookup(state->hash_table, key);
+	value = g_hash_table_lookup(attributes->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
 		return IOTCON_ERROR_NO_DATA;
@@ -311,13 +319,13 @@ API int iotcon_state_get_byte_str(iotcon_state_h state, const char *key,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_add_byte_str(iotcon_state_h state, const char *key,
-		unsigned char *val, int len)
+API int iotcon_attributes_add_byte_str(iotcon_attributes_h attributes,
+		const char *key, unsigned char *val, int len)
 {
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(len <= 0, IOTCON_ERROR_INVALID_PARAMETER);
@@ -328,22 +336,23 @@ API int iotcon_state_add_byte_str(iotcon_state_h state, const char *key,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
+	g_hash_table_replace(attributes->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_null)
+API int iotcon_attributes_is_null(iotcon_attributes_h attributes, const char *key,
+		bool *is_null)
 {
 	icl_basic_s *real = NULL;
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == is_null, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = (iotcon_value_h) g_hash_table_lookup(state->hash_table, key);
+	value = (iotcon_value_h) g_hash_table_lookup(attributes->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
 		return IOTCON_ERROR_NO_DATA;
@@ -355,12 +364,12 @@ API int iotcon_state_is_null(iotcon_state_h state, const char *key, bool *is_nul
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_add_null(iotcon_state_h state, const char *key)
+API int iotcon_attributes_add_null(iotcon_attributes_h attributes, const char *key)
 {
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 
 	value = icl_value_create_null();
@@ -369,23 +378,23 @@ API int iotcon_state_add_null(iotcon_state_h state, const char *key)
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
+	g_hash_table_replace(attributes->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_get_list(iotcon_state_h state, const char *key,
+API int iotcon_attributes_get_list(iotcon_attributes_h attributes, const char *key,
 		iotcon_list_h *list)
 {
 	iotcon_value_h value = NULL;
 	icl_val_list_s *real = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = g_hash_table_lookup(state->hash_table, key);
+	value = g_hash_table_lookup(attributes->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
 		return IOTCON_ERROR_NO_DATA;
@@ -402,13 +411,13 @@ API int iotcon_state_get_list(iotcon_state_h state, const char *key,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_add_list(iotcon_state_h state, const char *key,
+API int iotcon_attributes_add_list(iotcon_attributes_h attributes, const char *key,
 		iotcon_list_h list)
 {
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == list, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -419,15 +428,15 @@ API int iotcon_state_add_list(iotcon_state_h state, const char *key,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
+	g_hash_table_replace(attributes->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_get_state(iotcon_state_h src, const char *key,
-		iotcon_state_h *dest)
+API int iotcon_attributes_get_attributes(iotcon_attributes_h src, const char *key,
+		iotcon_attributes_h *dest)
 {
-	icl_val_state_s *real = NULL;
+	icl_val_attributes_s *real = NULL;
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
@@ -441,49 +450,49 @@ API int iotcon_state_get_state(iotcon_state_h src, const char *key,
 		return IOTCON_ERROR_NO_DATA;
 	}
 
-	real = (icl_val_state_s*)value;
-	if (IOTCON_TYPE_STATE != real->type) {
+	real = (icl_val_attributes_s*)value;
+	if (IOTCON_TYPE_ATTRIBUTES != real->type) {
 		ERR("Invalid Type(%d)", real->type);
 		return IOTCON_ERROR_INVALID_TYPE;
 	}
 
-	*dest = real->state;
+	*dest = real->attributes;
 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_add_state(iotcon_state_h state, const char *key,
-		iotcon_state_h val)
+API int iotcon_attributes_add_attributes(iotcon_attributes_h attributes,
+		const char *key, iotcon_attributes_h val)
 {
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = icl_value_create_state(val);
+	value = icl_value_create_attributes(val);
 	if (NULL == value) {
-		ERR("icl_value_create_state(%p) Fail", val);
+		ERR("icl_value_create_attributes(%p) Fail", val);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
+	g_hash_table_replace(attributes->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_state_get_type(iotcon_state_h state, const char *key,
+API int iotcon_attributes_get_type(iotcon_attributes_h attributes, const char *key,
 		iotcon_type_e *type)
 {
 	iotcon_value_h value = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == type, IOTCON_ERROR_INVALID_PARAMETER);
 
-	value = g_hash_table_lookup(state->hash_table, key);
+	value = g_hash_table_lookup(attributes->hash_table, key);
 	if (NULL == value) {
 		ERR("g_hash_table_lookup() Fail");
 		return IOTCON_ERROR_NO_DATA;
@@ -493,59 +502,63 @@ API int iotcon_state_get_type(iotcon_state_h state, const char *key,
 	return IOTCON_ERROR_NONE;
 }
 
-int icl_state_set_value(iotcon_state_h state, const char *key, iotcon_value_h value)
+int icl_attributes_set_value(iotcon_attributes_h attributes, const char *key,
+		iotcon_value_h value)
 {
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == key, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == value, IOTCON_ERROR_INVALID_PARAMETER);
 
-	g_hash_table_replace(state->hash_table, ic_utils_strdup(key), value);
+	g_hash_table_replace(attributes->hash_table, ic_utils_strdup(key), value);
 
 	return IOTCON_ERROR_NONE;
 }
 
 
-API int iotcon_state_get_keys_count(iotcon_state_h state, unsigned int *count)
+API int iotcon_attributes_get_keys_count(iotcon_attributes_h attributes,
+		unsigned int *count)
 {
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == count, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == state->hash_table, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes->hash_table, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*count = g_hash_table_size(state->hash_table);
+	*count = g_hash_table_size(attributes->hash_table);
 
 	return IOTCON_ERROR_NONE;
 }
 
 
-API int iotcon_state_clone(iotcon_state_h state, iotcon_state_h *state_clone)
+API int iotcon_attributes_clone(iotcon_attributes_h attributes,
+		iotcon_attributes_h *attributes_clone)
 {
 	int ret;
 
-	iotcon_state_h temp = NULL;
+	iotcon_attributes_h temp = NULL;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == state_clone, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes_clone, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (state->hash_table) {
-		ret = iotcon_state_create(&temp);
+	if (attributes->hash_table) {
+		ret = iotcon_attributes_create(&temp);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_state_create() Fail(%d)", ret);
+			ERR("iotcon_attributes_create() Fail(%d)", ret);
 			return ret;
 		}
 
-		g_hash_table_foreach(state->hash_table, (GHFunc)icl_state_clone_foreach, temp);
+		g_hash_table_foreach(attributes->hash_table, (GHFunc)icl_attributes_clone_foreach,
+				temp);
 	}
 
-	*state_clone = temp;
+	*attributes_clone = temp;
 
 	return IOTCON_ERROR_NONE;
 }
 
 
-void icl_state_clone_foreach(char *key, iotcon_value_h src_val,
-		iotcon_state_h dest_state)
+void icl_attributes_clone_foreach(char *key, iotcon_value_h src_val,
+		iotcon_attributes_h dest_attributes)
 {
 	FN_CALL;
 	iotcon_value_h copied_val;
@@ -556,23 +569,23 @@ void icl_state_clone_foreach(char *key, iotcon_value_h src_val,
 		return;
 	}
 
-	icl_state_set_value(dest_state, key, copied_val);
+	icl_attributes_set_value(dest_attributes, key, copied_val);
 }
 
 
-API int iotcon_state_foreach(iotcon_state_h state, iotcon_state_cb cb,
-		void *user_data)
+API int iotcon_attributes_foreach(iotcon_attributes_h attributes,
+		iotcon_attributes_cb cb, void *user_data)
 {
 	GHashTableIter iter;
 	gpointer key;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	g_hash_table_iter_init(&iter, state->hash_table);
+	g_hash_table_iter_init(&iter, attributes->hash_table);
 	while (g_hash_table_iter_next(&iter, &key, NULL)) {
-		if (IOTCON_FUNC_STOP == cb(state, key, user_data))
+		if (IOTCON_FUNC_STOP == cb(attributes, key, user_data))
 			break;
 	}
 

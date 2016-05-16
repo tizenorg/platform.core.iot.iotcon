@@ -21,7 +21,7 @@
 #include "iotcon-types.h"
 #include "icl-value.h"
 
-struct icl_state_s {
+struct icl_attributes_s {
 	int ref_count;
 	GHashTable *hash_table;
 };
@@ -33,7 +33,7 @@ struct icl_representation_s {
 	GList *children;
 	iotcon_resource_types_h res_types;
 	iotcon_resource_interfaces_h interfaces;
-	struct icl_state_s *state;
+	struct icl_attributes_s *attributes;
 };
 
 iotcon_representation_h icl_representation_ref(iotcon_representation_h repr);
