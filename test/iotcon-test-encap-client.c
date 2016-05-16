@@ -70,19 +70,19 @@ static void _representation_changed_cb(iotcon_remote_resource_h resource,
 {
 	int ret;
 	bool opened;
-	iotcon_state_h state;
+	iotcon_attributes_h attributes;
 
 	INFO("Resource is cached");
 
-	ret = iotcon_representation_get_state(representation, &state);
+	ret = iotcon_representation_get_attributes(representation, &attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_get_state() Fail(%d)", ret);
+		ERR("iotcon_representation_get_attributes() Fail(%d)", ret);
 		return;
 	}
 
-	ret = iotcon_state_get_bool(state, "opened", &opened);
+	ret = iotcon_attributes_get_bool(attributes, "opened", &opened);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_get_bool() Fail(%d)", ret);
+		ERR("iotcon_attributes_get_bool() Fail(%d)", ret);
 		return;
 	}
 

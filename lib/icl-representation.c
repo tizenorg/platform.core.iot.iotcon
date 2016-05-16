@@ -30,12 +30,13 @@
 #include "icl-response.h"
 #include "icl-list.h"
 #include "icl-value.h"
-#include "icl-state.h"
+#include "icl-attributes.h"
 #include "icl-representation.h"
 
-static int _icl_repr_compare_state_value(struct icl_value_s *val1,
+static int _icl_repr_compare_attributes_value(struct icl_value_s *val1,
 		struct icl_value_s *val2);
-static int _icl_repr_compare_state(iotcon_state_h state1, iotcon_state_h state2);
+static int _icl_repr_compare_attributes(iotcon_attributes_h attributes1,
+		iotcon_attributes_h attributes2);
 
 iotcon_representation_h icl_representation_ref(iotcon_representation_h repr)
 {
@@ -93,8 +94,8 @@ API void iotcon_representation_destroy(iotcon_representation_h repr)
 		iotcon_resource_types_destroy(repr->res_types);
 
 	/* null COULD be allowed */
-	if (repr->state)
-		iotcon_state_destroy(repr->state);
+	if (repr->attributes)
+		iotcon_attributes_destroy(repr->attributes);
 
 	free(repr);
 }
@@ -162,8 +163,8 @@ API int iotcon_representation_set_resource_types(iotcon_representation_h repr,
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_representation_get_resource_interfaces(iotcon_representation_h repr,
-		iotcon_resource_interfaces_h *ifaces)
+API int iotcon_representation_get_resource_interfaces(
+		iotcon_representation_h repr, iotcon_resource_interfaces_h *ifaces)
 {
 	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
@@ -192,32 +193,32 @@ API int iotcon_representation_set_resource_interfaces(
 	return IOTCON_ERROR_NONE;
 }
 
-API int iotcon_representation_set_state(iotcon_representation_h repr,
-		iotcon_state_h state)
+API int iotcon_representation_set_attributes(iotcon_representation_h repr,
+		iotcon_attributes_h attributes)
 {
 	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 
-	if (state)
-		state = icl_state_ref(state);
+	if (attributes)
+		attributes = icl_attributes_ref(attributes);
 
-	if (repr->state)
-		iotcon_state_destroy(repr->state);
+	if (repr->attributes)
+		iotcon_attributes_destroy(repr->attributes);
 
-	repr->state = state;
+	repr->attributes = attributes;
 
 	return IOTCON_ERROR_NONE;
 }
 
 
-API int iotcon_representation_get_state(iotcon_representation_h repr,
-		iotcon_state_h *state)
+API int iotcon_representation_get_attributes(iotcon_representation_h repr,
+		iotcon_attributes_h *attributes)
 {
 	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*state = repr->state;
+	*attributes = repr->attributes;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -371,10 +372,10 @@ API int iotcon_representation_clone(const iotcon_representation_h src,
 		}
 	}
 
-	if (src->state) {
-		ret = iotcon_state_clone(src->state, &cloned_repr->state);
+	if (src->attributes) {
+		ret = iotcon_attributes_clone(src->attributes, &cloned_repr->attributes);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_state_clone() Fail(%d)", ret);
+			ERR("iotcon_attributes_clone() Fail(%d)", ret);
 			iotcon_representation_destroy(cloned_repr);
 			return ret;
 		}
@@ -431,15 +432,15 @@ static int _icl_repr_compare_resource_types(iotcon_resource_types_h types1,
 	return ret ;
 }
 
-static int _icl_repr_compare_state_value_custom(gconstpointer p1,
+static int _icl_repr_compare_attributes_value_custom(gconstpointer p1,
 		gconstpointer p2)
 {
 	struct icl_value_s *val1 = (struct icl_value_s *)p1;
 	struct icl_value_s *val2 = (struct icl_value_s *)p2;
-	return _icl_repr_compare_state_value(val1, val2);
+	return _icl_repr_compare_attributes_value(val1, val2);
 }
 
-static int _icl_repr_compare_state_list_value(struct icl_list_s *list1,
+static int _icl_repr_compare_attributes_list_value(struct icl_list_s *list1,
 		struct icl_list_s *list2)
 {
 	GList *c;
@@ -454,12 +455,12 @@ static int _icl_repr_compare_state_list_value(struct icl_list_s *list1,
 		return !!(list1->list - list2->list);
 
 	for (c = list1->list; c; c = c->next)
-		g_list_find_custom(list2->list, c->data, _icl_repr_compare_state_value_custom);
+		g_list_find_custom(list2->list, c->data, _icl_repr_compare_attributes_value_custom);
 
 	return IC_EQUAL;
 }
 
-static int _icl_repr_compare_state_value(struct icl_value_s *val1,
+static int _icl_repr_compare_attributes_value(struct icl_value_s *val1,
 		struct icl_value_s *val2)
 {
 	int i;
@@ -498,11 +499,11 @@ static int _icl_repr_compare_state_value(struct icl_value_s *val1,
 				return 1;
 		}
 		break;
-	case IOTCON_TYPE_STATE:
-		return _icl_repr_compare_state(((icl_val_state_s *)val1)->state,
-				((icl_val_state_s *)val2)->state);
+	case IOTCON_TYPE_ATTRIBUTES:
+		return _icl_repr_compare_attributes(((icl_val_attributes_s *)val1)->attributes,
+				((icl_val_attributes_s *)val2)->attributes);
 	case IOTCON_TYPE_LIST:
-		return _icl_repr_compare_state_list_value(((icl_val_list_s*)val1)->list,
+		return _icl_repr_compare_attributes_list_value(((icl_val_list_s*)val1)->list,
 				((icl_val_list_s*)val2)->list);
 	case IOTCON_TYPE_NULL:
 		return IC_EQUAL;
@@ -514,26 +515,27 @@ static int _icl_repr_compare_state_value(struct icl_value_s *val1,
 	return IC_EQUAL;
 }
 
-static int _icl_repr_compare_state(iotcon_state_h state1, iotcon_state_h state2)
+static int _icl_repr_compare_attributes(iotcon_attributes_h attributes1,
+		iotcon_attributes_h attributes2)
 {
 	int ret;
 	gpointer key, value1, value2;
 	GHashTableIter iter;
-	struct icl_value_s *state_val1, *state_val2;
+	struct icl_value_s *attributes_val1, *attributes_val2;
 
-	if (NULL == state1 || NULL == state2)
-		return !!(state1 - state2);
+	if (NULL == attributes1 || NULL == attributes2)
+		return !!(attributes1 - attributes2);
 
-	if (NULL == state1->hash_table || NULL == state2->hash_table)
-		return !!(IC_POINTER_TO_INT64(state1->hash_table) -
-				IC_POINTER_TO_INT64(state2->hash_table));
+	if (NULL == attributes1->hash_table || NULL == attributes2->hash_table)
+		return !!(IC_POINTER_TO_INT64(attributes1->hash_table) -
+				IC_POINTER_TO_INT64(attributes2->hash_table));
 
-	g_hash_table_iter_init(&iter, state1->hash_table);
+	g_hash_table_iter_init(&iter, attributes1->hash_table);
 	while (g_hash_table_iter_next(&iter, &key, &value1)) {
-		value2 = g_hash_table_lookup(state2->hash_table, key);
-		state_val1 = (struct icl_value_s *)value1;
-		state_val2 = (struct icl_value_s *)value2;
-		ret = _icl_repr_compare_state_value(state_val1, state_val2);
+		value2 = g_hash_table_lookup(attributes2->hash_table, key);
+		attributes_val1 = (struct icl_value_s *)value1;
+		attributes_val2 = (struct icl_value_s *)value2;
+		ret = _icl_repr_compare_attributes_value(attributes_val1, attributes_val2);
 		if (IC_EQUAL != ret)
 			return ret;
 	}
@@ -589,8 +591,8 @@ int icl_representation_compare(iotcon_representation_h repr1,
 	if (IC_EQUAL != ret)
 		return ret;
 
-	/* state */
-	ret = _icl_repr_compare_state(repr1->state, repr2->state);
+	/* attributes */
+	ret = _icl_repr_compare_attributes(repr1->attributes, repr2->attributes);
 	if (IC_EQUAL != ret)
 		return ret;
 

@@ -130,13 +130,13 @@ int icl_ioty_resource_destroy(iotcon_resource_h resource);
 int icl_ioty_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		int properties,
-		iotcon_state_h state,
+		iotcon_attributes_h attributes,
 		iotcon_lite_resource_post_request_cb cb,
 		void *user_data,
 		iotcon_lite_resource_h *resource_handle);
 int icl_ioty_lite_resource_destroy(iotcon_lite_resource_h resource);
-int icl_ioty_lite_resource_update_state(iotcon_lite_resource_h resource,
-		iotcon_state_h state);
+int icl_ioty_lite_resource_update_attributes(iotcon_lite_resource_h resource,
+		iotcon_attributes_h attributes);
 int icl_ioty_lite_resource_notify(iotcon_lite_resource_h resource);
 
 int icl_ioty_response_send(iotcon_response_h response);

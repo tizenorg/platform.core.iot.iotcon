@@ -47,8 +47,8 @@ typedef struct {
 
 typedef struct {
 	int type;
-	struct icl_state_s *state;
-} icl_val_state_s;
+	struct icl_attributes_s *attributes;
+} icl_val_attributes_s;
 
 /**
  * @ingroup CAPI_IOT_CONNECTIVITY_REPRESENTATION_MODULE
@@ -64,7 +64,7 @@ typedef struct {
  * #IOTCON_TYPE_NULL\n
  * #IOTCON_TYPE_BYTE_STR\n
  * #IOTCON_TYPE_LIST\n
- * #IOTCON_TYPE_STATE
+ * #IOTCON_TYPE_ATTRIBUTES
  *
  * @since_tizen 3.0
  */
@@ -77,7 +77,7 @@ iotcon_value_h icl_value_create_double(double val);
 iotcon_value_h icl_value_create_str(const char *val);
 iotcon_value_h icl_value_create_byte_str(const unsigned char *val, int len);
 iotcon_value_h icl_value_create_list(iotcon_list_h val);
-iotcon_value_h icl_value_create_state(iotcon_state_h val);
+iotcon_value_h icl_value_create_attributes(iotcon_attributes_h val);
 
 
 int icl_value_get_int(iotcon_value_h value, int *val);
@@ -86,7 +86,7 @@ int icl_value_get_double(iotcon_value_h value, double *val);
 int icl_value_get_str(iotcon_value_h value, char **val);
 int icl_value_get_byte_str(iotcon_value_h value, unsigned char **val, int *len);
 int icl_value_get_list(iotcon_value_h value, iotcon_list_h *list);
-int icl_value_get_state(iotcon_value_h value, iotcon_state_h *state);
+int icl_value_get_attributes(iotcon_value_h value, iotcon_attributes_h *attributes);
 
 void icl_value_destroy(gpointer data);
 

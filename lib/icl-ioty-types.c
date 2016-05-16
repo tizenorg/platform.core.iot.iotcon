@@ -36,16 +36,16 @@
 #include "icl-types.h"
 #include "icl-ioty-types.h"
 
-struct icl_state_list_s {
+struct icl_attributes_list_s {
 	OCRepPayloadPropType type;
 	size_t dimensions[MAX_REP_ARRAY_DEPTH];
 	GList *list;
 };
 
 static int _icl_ioty_parse_oic_rep_payload_value(OCRepPayloadValue *val,
-		iotcon_state_h *state);
+		iotcon_attributes_h *attributes);
 static int _icl_ioty_fill_oic_rep_payload_value(OCRepPayload *payload,
-		iotcon_state_h state);
+		iotcon_attributes_h attributes);
 
 static void _icl_ioty_free_resource_list(iotcon_remote_resource_h *resource_list,
 		int resource_count)
@@ -387,29 +387,29 @@ static int _icl_ioty_parse_oic_rep_payload_value_array_attr(
 		}
 		break;
 	case OCREP_PROP_OBJECT:
-		ret = iotcon_list_create(IOTCON_TYPE_STATE, &l);
+		ret = iotcon_list_create(IOTCON_TYPE_ATTRIBUTES, &l);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_list_create(IOTCON_TYPE_STATE) Fail(%d)", ret);
+			ERR("iotcon_list_create(IOTCON_TYPE_ATTRIBUTES) Fail(%d)", ret);
 			return ret;
 		}
 		for (i = 0; i < len; i++) {
-			iotcon_state_h state;
+			iotcon_attributes_h attributes;
 			ret = _icl_ioty_parse_oic_rep_payload_value(arr->objArray[index + i]->values,
-					&state);
+					&attributes);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("_icl_ioty_parse_oic_rep_payload_value(%d)", ret);
 				iotcon_list_destroy(l);
 				return ret;
 			}
 
-			ret = iotcon_list_add_state(l, state, -1);
+			ret = iotcon_list_add_attributes(l, attributes, -1);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_list_add_state() Fail(%d)", ret);
-				iotcon_state_destroy(state);
+				ERR("iotcon_list_add_attributes() Fail(%d)", ret);
+				iotcon_attributes_destroy(attributes);
 				iotcon_list_destroy(l);
 				return ret;
 			}
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 		}
 		break;
 	case OCREP_PROP_ARRAY:
@@ -476,70 +476,70 @@ static int _icl_ioty_parse_oic_rep_payload_value_array(
 }
 
 static int _icl_ioty_parse_oic_rep_payload_value(OCRepPayloadValue *val,
-		iotcon_state_h *state)
+		iotcon_attributes_h *attributes)
 {
 	int ret, total_len;
-	iotcon_state_h s;
+	iotcon_attributes_h s;
 	iotcon_list_h list;
-	iotcon_state_h s_obj;
+	iotcon_attributes_h s_obj;
 
 	RETV_IF(NULL == val, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = iotcon_state_create(&s);
+	ret = iotcon_attributes_create(&s);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_create() Fail(%d)", ret);
+		ERR("iotcon_attributes_create() Fail(%d)", ret);
 		return ret;
 	}
 
 	while (val) {
 		switch (val->type) {
 		case OCREP_PROP_INT:
-			ret = iotcon_state_add_int(s, val->name, val->i);
+			ret = iotcon_attributes_add_int(s, val->name, val->i);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_state_add_int() Fail(%d)", ret);
-				iotcon_state_destroy(s);
+				ERR("iotcon_attributes_add_int() Fail(%d)", ret);
+				iotcon_attributes_destroy(s);
 				return ret;
 			}
 			break;
 		case OCREP_PROP_BOOL:
-			ret = iotcon_state_add_bool(s, val->name, val->b);
+			ret = iotcon_attributes_add_bool(s, val->name, val->b);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_state_add_bool() Fail(%d)", ret);
-				iotcon_state_destroy(s);
+				ERR("iotcon_attributes_add_bool() Fail(%d)", ret);
+				iotcon_attributes_destroy(s);
 				return ret;
 			}
 			break;
 		case OCREP_PROP_DOUBLE:
-			ret = iotcon_state_add_double(s, val->name, val->d);
+			ret = iotcon_attributes_add_double(s, val->name, val->d);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_state_add_double() Fail(%d)", ret);
-				iotcon_state_destroy(s);
+				ERR("iotcon_attributes_add_double() Fail(%d)", ret);
+				iotcon_attributes_destroy(s);
 				return ret;
 			}
 			break;
 		case OCREP_PROP_STRING:
-			ret = iotcon_state_add_str(s, val->name, val->str);
+			ret = iotcon_attributes_add_str(s, val->name, val->str);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_state_add_str() Fail(%d)", ret);
-				iotcon_state_destroy(s);
+				ERR("iotcon_attributes_add_str() Fail(%d)", ret);
+				iotcon_attributes_destroy(s);
 				return ret;
 			}
 			break;
 		case OCREP_PROP_BYTE_STRING:
-			ret = iotcon_state_add_byte_str(s, val->name, val->ocByteStr.bytes,
+			ret = iotcon_attributes_add_byte_str(s, val->name, val->ocByteStr.bytes,
 					val->ocByteStr.len);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_state_add_byte_str() Fail(%d)", ret);
-				iotcon_state_destroy(s);
+				ERR("iotcon_attributes_add_byte_str() Fail(%d)", ret);
+				iotcon_attributes_destroy(s);
 				return ret;
 			}
 			break;
 		case OCREP_PROP_NULL:
-			ret = iotcon_state_add_null(s, val->name);
+			ret = iotcon_attributes_add_null(s, val->name);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_state_add_null() Fail(%d)", ret);
-				iotcon_state_destroy(s);
+				ERR("iotcon_attributes_add_null() Fail(%d)", ret);
+				iotcon_attributes_destroy(s);
 				return ret;
 			}
 			break;
@@ -549,14 +549,14 @@ static int _icl_ioty_parse_oic_rep_payload_value(OCRepPayloadValue *val,
 					&list);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("_icl_ioty_parse_oic_rep_payload_value_array() Fail(%d)", ret);
-				iotcon_state_destroy(s);
+				iotcon_attributes_destroy(s);
 				return ret;
 			}
-			ret = iotcon_state_add_list(s, val->name, list);
+			ret = iotcon_attributes_add_list(s, val->name, list);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_state_add_list() Fail(%d)", ret);
+				ERR("iotcon_attributes_add_list() Fail(%d)", ret);
 				iotcon_list_destroy(list);
-				iotcon_state_destroy(s);
+				iotcon_attributes_destroy(s);
 				return ret;
 			}
 			iotcon_list_destroy(list);
@@ -565,17 +565,17 @@ static int _icl_ioty_parse_oic_rep_payload_value(OCRepPayloadValue *val,
 			ret = _icl_ioty_parse_oic_rep_payload_value(val->obj->values, &s_obj);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("_icl_ioty_parse_oic_rep_payload_value() Fail(%d)", ret);
-				iotcon_state_destroy(s);
+				iotcon_attributes_destroy(s);
 				return ret;
 			}
-			ret = iotcon_state_add_state(s, val->name, s_obj);
+			ret = iotcon_attributes_add_attributes(s, val->name, s_obj);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_state_add_state() Fail(%d)", ret);
-				iotcon_state_destroy(s_obj);
-				iotcon_state_destroy(s);
+				ERR("iotcon_attributes_add_attributes() Fail(%d)", ret);
+				iotcon_attributes_destroy(s_obj);
+				iotcon_attributes_destroy(s);
 				return ret;
 			}
-			iotcon_state_destroy(s_obj);
+			iotcon_attributes_destroy(s_obj);
 			break;
 		default:
 			ERR("Invalid Type(%d)", val->type);
@@ -583,7 +583,7 @@ static int _icl_ioty_parse_oic_rep_payload_value(OCRepPayloadValue *val,
 		val = val->next;
 	}
 
-	*state = s;
+	*attributes = s;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -596,7 +596,7 @@ int icl_ioty_parse_oic_rep_payload(OCRepPayload *payload, bool is_parent,
 	OCRepPayload *child_node;
 	iotcon_resource_interfaces_h ifaces;
 	iotcon_representation_h repr;
-	iotcon_state_h state = NULL;
+	iotcon_attributes_h attributes = NULL;
 	iotcon_resource_types_h types = NULL;
 
 	RETV_IF(NULL == payload, IOTCON_ERROR_INVALID_PARAMETER);
@@ -666,22 +666,22 @@ int icl_ioty_parse_oic_rep_payload(OCRepPayload *payload, bool is_parent,
 	}
 	iotcon_resource_interfaces_destroy(ifaces);
 
-	/* state */
+	/* attributes */
 	if (payload->values) {
-		ret = _icl_ioty_parse_oic_rep_payload_value(payload->values, &state);
+		ret = _icl_ioty_parse_oic_rep_payload_value(payload->values, &attributes);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_representation_set_resource_types() Fail(%d)", ret);
 			iotcon_representation_destroy(repr);
 			return ret;
 		}
-		ret = iotcon_representation_set_state(repr, state);
+		ret = iotcon_representation_set_attributes(repr, attributes);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_representation_set_state() Fail(%d)", ret);
-			iotcon_state_destroy(state);
+			ERR("iotcon_representation_set_attributes() Fail(%d)", ret);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(repr);
 			return ret;
 		}
-		iotcon_state_destroy(state);
+		iotcon_attributes_destroy(attributes);
 	}
 
 	/* children */
@@ -715,7 +715,7 @@ int icl_ioty_parse_oic_rep_payload(OCRepPayload *payload, bool is_parent,
 }
 
 static int _icl_ioty_fill_oic_rep_payload_value_array(OCRepPayload *payload,
-		const char *key, struct icl_state_list_s *list)
+		const char *key, struct icl_attributes_list_s *list)
 {
 	int i, j, len, ret;
 	bool *b_arr;
@@ -723,7 +723,7 @@ static int _icl_ioty_fill_oic_rep_payload_value_array(OCRepPayload *payload,
 	char **str_arr;
 	int64_t *i_arr;
 	OCByteString *byte_arr;
-	struct OCRepPayload **state_arr;
+	struct OCRepPayload **attributes_arr;
 	GList *node;
 
 	RETV_IF(NULL == payload, IOTCON_ERROR_INVALID_PARAMETER);
@@ -794,29 +794,29 @@ static int _icl_ioty_fill_oic_rep_payload_value_array(OCRepPayload *payload,
 		free(byte_arr);
 		break;
 	case OCREP_PROP_OBJECT:
-		state_arr = calloc(len, sizeof(struct OCRepPayload *));
-		if (NULL == state_arr) {
+		attributes_arr = calloc(len, sizeof(struct OCRepPayload *));
+		if (NULL == attributes_arr) {
 			ERR("calloc() Fail(%d)", errno);
 			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
 		for (node = list->list, i = 0; node; node = node->next, i++) {
-			state_arr[i] = OCRepPayloadCreate();
-			if (NULL == state_arr[i]) {
+			attributes_arr[i] = OCRepPayloadCreate();
+			if (NULL == attributes_arr[i]) {
 				ERR("OCRepPayloadCreate() Fail");
-				free(state_arr);
+				free(attributes_arr);
 				return ret;
 			}
-			ret = _icl_ioty_fill_oic_rep_payload_value(state_arr[i],
-					((icl_val_state_s*)node->data)->state);
+			ret = _icl_ioty_fill_oic_rep_payload_value(attributes_arr[i],
+					((icl_val_attributes_s*)node->data)->attributes);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("_icl_ioty_fill_oic_rep_payload_value() Fail(%d)", ret);
 				for (j = 0; j <= i; j++)
-					OCRepPayloadDestroy(state_arr[j]);
-				free(state_arr);
+					OCRepPayloadDestroy(attributes_arr[j]);
+				free(attributes_arr);
 				return ret;
 			}
 		}
-		OCRepPayloadSetPropObjectArrayAsOwner(payload, key, state_arr, list->dimensions);
+		OCRepPayloadSetPropObjectArrayAsOwner(payload, key, attributes_arr, list->dimensions);
 		break;
 	case OCREP_PROP_ARRAY:
 	case OCREP_PROP_NULL:
@@ -828,8 +828,8 @@ static int _icl_ioty_fill_oic_rep_payload_value_array(OCRepPayload *payload,
 }
 
 
-static int _icl_ioty_state_list_to_value_list(iotcon_list_h list,
-		struct icl_state_list_s *value_list, int depth)
+static int _icl_ioty_attributes_list_to_value_list(iotcon_list_h list,
+		struct icl_attributes_list_s *value_list, int depth)
 {
 	int ret;
 	GList *c;
@@ -865,16 +865,17 @@ static int _icl_ioty_state_list_to_value_list(iotcon_list_h list,
 		for (c = list->list; c; c = c->next)
 			value_list->list = g_list_append(value_list->list, c->data);
 		break;
-	case IOTCON_TYPE_STATE:
+	case IOTCON_TYPE_ATTRIBUTES:
 		value_list->type = OCREP_PROP_OBJECT;
 		for (c = list->list; c; c = c->next)
 			value_list->list = g_list_append(value_list->list, c->data);
 		break;
 	case IOTCON_TYPE_LIST:
 		for (c = list->list; c; c = c->next) {
-			ret = _icl_ioty_state_list_to_value_list(((icl_val_list_s *)c->data)->list, value_list, depth + 1);
+			ret = _icl_ioty_attributes_list_to_value_list(((icl_val_list_s *)c->data)->list,
+					value_list, depth + 1);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("_icl_ioty_state_list_to_value_list() Fail(%d)", ret);
+				ERR("_icl_ioty_attributes_list_to_value_list() Fail(%d)", ret);
 				return ret;
 			}
 		}
@@ -889,7 +890,7 @@ static int _icl_ioty_state_list_to_value_list(iotcon_list_h list,
 }
 
 static int _icl_ioty_fill_oic_rep_payload_value(OCRepPayload *payload,
-		iotcon_state_h state)
+		iotcon_attributes_h attributes)
 {
 	FN_CALL;
 	int ret;
@@ -897,46 +898,46 @@ static int _icl_ioty_fill_oic_rep_payload_value(OCRepPayload *payload,
 	gpointer key, value;
 	OCRepPayload *repr_payload;
 	OCByteString byte_string;
-	struct icl_value_s *state_value;
-	struct icl_state_list_s value_list = {0};
+	struct icl_value_s *attributes_value;
+	struct icl_attributes_list_s value_list = {0};
 
-	RETV_IF(NULL == state, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == attributes, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == payload, IOTCON_ERROR_INVALID_PARAMETER);
 
-	g_hash_table_iter_init(&iter, state->hash_table);
+	g_hash_table_iter_init(&iter, attributes->hash_table);
 	while (g_hash_table_iter_next(&iter, &key, &value)) {
-		state_value = (struct icl_value_s *)value;
-		if (NULL == state_value) {
-			ERR("state_value(%s) is NULL", key);
+		attributes_value = (struct icl_value_s *)value;
+		if (NULL == attributes_value) {
+			ERR("attributes_value(%s) is NULL", key);
 			continue;
 		}
 
-		switch (state_value->type) {
+		switch (attributes_value->type) {
 		case IOTCON_TYPE_BOOL:
-			OCRepPayloadSetPropBool(payload, key, ((icl_basic_s*)state_value)->val.b);
+			OCRepPayloadSetPropBool(payload, key, ((icl_basic_s*)attributes_value)->val.b);
 			break;
 		case IOTCON_TYPE_INT:
-			OCRepPayloadSetPropInt(payload, key, ((icl_basic_s*)state_value)->val.i);
+			OCRepPayloadSetPropInt(payload, key, ((icl_basic_s*)attributes_value)->val.i);
 			break;
 		case IOTCON_TYPE_DOUBLE:
-			OCRepPayloadSetPropDouble(payload, key, ((icl_basic_s*)state_value)->val.d);
+			OCRepPayloadSetPropDouble(payload, key, ((icl_basic_s*)attributes_value)->val.d);
 			break;
 		case IOTCON_TYPE_STR:
-			OCRepPayloadSetPropString(payload, key, ((icl_basic_s*)state_value)->val.s);
+			OCRepPayloadSetPropString(payload, key, ((icl_basic_s*)attributes_value)->val.s);
 			break;
 		case IOTCON_TYPE_NULL:
 			OCRepPayloadSetNull(payload, key);
 			break;
 		case IOTCON_TYPE_BYTE_STR:
-			byte_string.bytes = ((icl_val_byte_str_s*)state_value)->s;
-			byte_string.len = ((icl_val_byte_str_s*)state_value)->len;
+			byte_string.bytes = ((icl_val_byte_str_s*)attributes_value)->s;
+			byte_string.len = ((icl_val_byte_str_s*)attributes_value)->len;
 			OCRepPayloadSetPropByteString(payload, key, byte_string);
 			break;
 		case IOTCON_TYPE_LIST:
-			ret = _icl_ioty_state_list_to_value_list(((icl_val_list_s*)state_value)->list,
+			ret = _icl_ioty_attributes_list_to_value_list(((icl_val_list_s*)attributes_value)->list,
 					&value_list, 0);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("_icl_ioty_state_list_to_value_list() Fail(%d)", ret);
+				ERR("_icl_ioty_attributes_list_to_value_list() Fail(%d)", ret);
 				return ret;
 			}
 			ret = _icl_ioty_fill_oic_rep_payload_value_array(payload, key, &value_list);
@@ -948,10 +949,10 @@ static int _icl_ioty_fill_oic_rep_payload_value(OCRepPayload *payload,
 			g_list_free(value_list.list);
 			value_list.list = NULL;
 			break;
-		case IOTCON_TYPE_STATE:
+		case IOTCON_TYPE_ATTRIBUTES:
 			repr_payload = OCRepPayloadCreate();
 			ret = _icl_ioty_fill_oic_rep_payload_value(repr_payload,
-					((icl_val_state_s*)state_value)->state);
+					((icl_val_attributes_s*)attributes_value)->attributes);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("_icl_ioty_fill_oic_rep_payload_value() Fail(%d)", ret);
 				OCRepPayloadDestroy(repr_payload);
@@ -961,7 +962,7 @@ static int _icl_ioty_fill_oic_rep_payload_value(OCRepPayload *payload,
 			break;
 		case IOTCON_TYPE_NONE:
 		default:
-			ERR("Invalid Type(%d)", state_value->type);
+			ERR("Invalid Type(%d)", attributes_value->type);
 			return IOTCON_ERROR_INVALID_PARAMETER;
 		}
 	}
@@ -1003,9 +1004,9 @@ int icl_ioty_convert_representation(iotcon_representation_h repr,
 			OCRepPayloadAddResourceType(repr_payload, c->data);
 	}
 
-	/* state */
-	if (repr->state) {
-		ret = _icl_ioty_fill_oic_rep_payload_value(repr_payload, repr->state);
+	/* attributes */
+	if (repr->attributes) {
+		ret = _icl_ioty_fill_oic_rep_payload_value(repr_payload, repr->attributes);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("_icl_ioty_fill_oic_rep_payload_value() Fail(%d)", ret);
 			OCRepPayloadDestroy(repr_payload);

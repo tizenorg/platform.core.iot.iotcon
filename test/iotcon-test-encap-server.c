@@ -60,7 +60,7 @@ static void _free_door_resource(door_resource_s *door)
 	free(door->uri_path);
 }
 
-static void _check_door_state(door_resource_s door)
+static void _check_door_attributes(door_resource_s door)
 {
 	if (false == door.state)
 		INFO("[Door] closed.");
@@ -68,21 +68,21 @@ static void _check_door_state(door_resource_s door)
 		INFO("[Door] opened.");
 }
 
-static gboolean _door_state_changer(gpointer user_data)
+static gboolean _door_attributes_changer(gpointer user_data)
 {
 	int ret;
 	door_resource_s *door = user_data;
-	iotcon_state_h recv_state, send_state;
+	iotcon_attributes_h recv_attributes, send_attributes;
 
-	ret = iotcon_lite_resource_get_state(door->handle, &recv_state);
+	ret = iotcon_lite_resource_get_attributes(door->handle, &recv_attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_lite_resource_get_state() Fail(%d)", ret);
+		ERR("iotcon_lite_resource_get_attributes() Fail(%d)", ret);
 		return G_SOURCE_CONTINUE;
 	}
 
-	ret = iotcon_state_get_bool(recv_state, "opened", &(door->state));
+	ret = iotcon_attributes_get_bool(recv_attributes, "opened", &(door->state));
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_get_bool() Fail(%d)", ret);
+		ERR("iotcon_attributes_get_bool() Fail(%d)", ret);
 		return G_SOURCE_CONTINUE;
 	}
 
@@ -91,43 +91,43 @@ static gboolean _door_state_changer(gpointer user_data)
 	else
 		door->state = true;
 
-	ret = iotcon_state_create(&send_state);
+	ret = iotcon_attributes_create(&send_attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_create() Fail(%d)", ret);
+		ERR("iotcon_attributes_create() Fail(%d)", ret);
 		return G_SOURCE_CONTINUE;
 	}
 
-	ret = iotcon_state_add_bool(send_state, "opened", door->state);
+	ret = iotcon_attributes_add_bool(send_attributes, "opened", door->state);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_add_bool() Fail(%d)", ret);
-		iotcon_state_destroy(send_state);
+		ERR("iotcon_attributes_add_bool() Fail(%d)", ret);
+		iotcon_attributes_destroy(send_attributes);
 		return G_SOURCE_CONTINUE;
 	}
 
-	ret = iotcon_lite_resource_update_state(door->handle, send_state);
+	ret = iotcon_lite_resource_update_attributes(door->handle, send_attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_lite_resource_update_state() Fail(%d)", ret);
-		iotcon_state_destroy(send_state);
+		ERR("iotcon_lite_resource_update_attributes() Fail(%d)", ret);
+		iotcon_attributes_destroy(send_attributes);
 		return G_SOURCE_CONTINUE;
 	}
 
-	iotcon_state_destroy(send_state);
+	iotcon_attributes_destroy(send_attributes);
 
-	_check_door_state(*door);
+	_check_door_attributes(*door);
 
 	return G_SOURCE_CONTINUE;
 }
 
-static bool _door_state_changed(iotcon_lite_resource_h resource,
-		iotcon_state_h state, void *user_data)
+static bool _door_attributes_changed(iotcon_lite_resource_h resource,
+		iotcon_attributes_h attributes, void *user_data)
 {
 	FN_CALL;
 	bool opened;
 	int ret;
 
-	ret = iotcon_state_get_bool(state, "opened", &opened);
+	ret = iotcon_attributes_get_bool(attributes, "opened", &opened);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_get_bool() Fail(%d)", ret);
+		ERR("iotcon_attributes_get_bool() Fail(%d)", ret);
 		return false;
 	}
 	DBG("opened: %d", opened);
@@ -139,7 +139,7 @@ static iotcon_lite_resource_h _create_door_resource(char *uri_path, char *type,
 		int properties, void *user_data)
 {
 	int ret;
-	iotcon_state_h state;
+	iotcon_attributes_h attributes;
 	iotcon_lite_resource_h handle;
 	iotcon_resource_types_h resource_types;
 
@@ -156,32 +156,32 @@ static iotcon_lite_resource_h _create_door_resource(char *uri_path, char *type,
 		return NULL;
 	}
 
-	ret = iotcon_state_create(&state);
+	ret = iotcon_attributes_create(&attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_create() Fail(%d)", ret);
+		ERR("iotcon_attributes_create() Fail(%d)", ret);
 		iotcon_resource_types_destroy(resource_types);
 		return NULL;
 	}
 
-	ret = iotcon_state_add_bool(state, "opened", false);
+	ret = iotcon_attributes_add_bool(attributes, "opened", false);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_add_bool() Fail(%d)", ret);
-		iotcon_state_destroy(state);
+		ERR("iotcon_attributes_add_bool() Fail(%d)", ret);
+		iotcon_attributes_destroy(attributes);
 		iotcon_resource_types_destroy(resource_types);
 		return NULL;
 	}
 
 	/* register door resource */
-	ret = iotcon_lite_resource_create(uri_path, resource_types, properties, state,
-			_door_state_changed, NULL, &handle);
+	ret = iotcon_lite_resource_create(uri_path, resource_types, properties, attributes,
+			_door_attributes_changed, NULL, &handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_lite_resource_create() Fail");
-		iotcon_state_destroy(state);
+		iotcon_attributes_destroy(attributes);
 		iotcon_resource_types_destroy(resource_types);
 		return NULL;
 	}
 
-	iotcon_state_destroy(state);
+	iotcon_attributes_destroy(attributes);
 	iotcon_resource_types_destroy(resource_types);
 
 	return handle;
@@ -232,9 +232,9 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	_check_door_state(my_door);
+	_check_door_attributes(my_door);
 
-	g_timeout_add_seconds(7, _door_state_changer, &my_door);
+	g_timeout_add_seconds(7, _door_attributes_changer, &my_door);
 
 	g_main_loop_run(loop);
 	g_main_loop_unref(loop);
