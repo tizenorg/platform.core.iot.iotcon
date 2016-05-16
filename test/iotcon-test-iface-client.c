@@ -42,7 +42,7 @@ static void _print_repr(iotcon_representation_h recv_repr)
 	char *uri_path, *str_val;
 	iotcon_list_h list_val;
 	iotcon_representation_h child_repr;
-	iotcon_state_h recv_state, child_state;
+	iotcon_attributes_h recv_attributes, child_attributes;
 	unsigned int key_count, children_count;
 
 	INFO("GET request was successful");
@@ -55,29 +55,29 @@ static void _print_repr(iotcon_representation_h recv_repr)
 	}
 	DBG("uri_path : %s", uri_path);
 
-	ret = iotcon_representation_get_state(recv_repr, &recv_state);
+	ret = iotcon_representation_get_attributes(recv_repr, &recv_attributes);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_representation_get_state() Fail(%d)", ret);
+		ERR("iotcon_representation_get_attributes() Fail(%d)", ret);
 		return;
 	}
 
-	ret = iotcon_state_get_keys_count(recv_state, &key_count);
+	ret = iotcon_attributes_get_keys_count(recv_attributes, &key_count);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("iotcon_state_get_keys_count() Fail(%d)", ret);
+		ERR("iotcon_attributes_get_keys_count() Fail(%d)", ret);
 		return;
 	}
 
 	if (key_count) {
-		ret = iotcon_state_get_str(recv_state, "name", &str_val);
+		ret = iotcon_attributes_get_str(recv_attributes, "name", &str_val);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_state_get_str() Fail(%d)", ret);
+			ERR("iotcon_attributes_get_str() Fail(%d)", ret);
 			return;
 		}
 		DBG("name : %s", str_val);
 
-		ret = iotcon_state_get_list(recv_state, "today_temp", &list_val);
+		ret = iotcon_attributes_get_list(recv_attributes, "today_temp", &list_val);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_state_get_list() Fail(%d)", ret);
+			ERR("iotcon_attributes_get_list() Fail(%d)", ret);
 			return;
 		}
 
@@ -88,9 +88,9 @@ static void _print_repr(iotcon_representation_h recv_repr)
 			return;
 		}
 
-		ret = iotcon_state_is_null(recv_state, "null value", &is_null);
+		ret = iotcon_attributes_is_null(recv_attributes, "null value", &is_null);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_state_is_null() Fail(%d)", ret);
+			ERR("iotcon_attributes_is_null() Fail(%d)", ret);
 			return;
 		}
 
@@ -120,39 +120,39 @@ static void _print_repr(iotcon_representation_h recv_repr)
 		}
 		DBG("uri_path : %s", uri_path);
 
-		ret = iotcon_representation_get_state(child_repr, &child_state);
+		ret = iotcon_representation_get_attributes(child_repr, &child_attributes);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_representation_get_state() Fail(%d)", ret);
+			ERR("iotcon_representation_get_attributes() Fail(%d)", ret);
 			continue;
 		}
 
 		if (TEST_STR_EQUAL == strncmp(LIGHT_RESOURCE_URI_PREFIX, uri_path,
 					strlen(LIGHT_RESOURCE_URI_PREFIX))) {
-			ret = iotcon_state_get_keys_count(child_state, &key_count);
+			ret = iotcon_attributes_get_keys_count(child_attributes, &key_count);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_state_get_keys_count() Fail(%d)", ret);
+				ERR("iotcon_attributes_get_keys_count() Fail(%d)", ret);
 				continue;
 			}
 
 			if (key_count) {
-				ret = iotcon_state_get_int(child_state, "brightness", &int_val);
+				ret = iotcon_attributes_get_int(child_attributes, "brightness", &int_val);
 				if (IOTCON_ERROR_NONE != ret) {
-					ERR("iotcon_state_get_int() Fail(%d)", ret);
+					ERR("iotcon_attributes_get_int() Fail(%d)", ret);
 					continue;
 				}
 				DBG("brightness : %d", int_val);
 			}
 		} else if (TEST_STR_EQUAL == strncmp(FAN_RESOURCE_URI_PREFIX, uri_path,
 					strlen(FAN_RESOURCE_URI_PREFIX))) {
-			ret = iotcon_state_get_keys_count(child_state, &key_count);
+			ret = iotcon_attributes_get_keys_count(child_attributes, &key_count);
 			if (IOTCON_ERROR_NONE != ret) {
-				ERR("iotcon_state_get_keys_count() Fail(%d)", ret);
+				ERR("iotcon_attributes_get_keys_count() Fail(%d)", ret);
 				continue;
 			}
 			if (key_count) {
-				ret = iotcon_state_get_bool(child_state, "state", &bool_val);
+				ret = iotcon_attributes_get_bool(child_attributes, "state", &bool_val);
 				if (IOTCON_ERROR_NONE != ret) {
-					ERR("iotcon_state_get_bool() Fail(%d)", ret);
+					ERR("iotcon_attributes_get_bool() Fail(%d)", ret);
 					continue;
 				}
 				DBG("state : %d", bool_val);

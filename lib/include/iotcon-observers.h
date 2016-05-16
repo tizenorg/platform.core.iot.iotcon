@@ -53,7 +53,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 	...
 
 	if (IOTCON_REQUEST_PUT & types) {
-		iotcon_state_h state = NULL;
+		iotcon_attributes_h attributes = NULL;
 		iotcon_representation_h repr = NULL;
 		...
 
@@ -61,7 +61,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		if (IOTCON_ERROR_NONE != ret)
 			return;
 
-		ret = iotcon_state_create(&state);
+		ret = iotcon_attributes_create(&attributes);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_representation_destroy(repr);
 			return;
@@ -69,12 +69,12 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		...
 		ret = iotcon_resource_notify(resource, repr, _observers, IOTCON_QOS_HIGH);
 		if (IOTCON_ERROR_NONE != ret) {
-			iotcon_state_destroy(state);
+			iotcon_attributes_destroy(attributes);
 			iotcon_representation_destroy(repr);
 			return;
 		}
 
-		iotcon_state_destroy(state);
+		iotcon_attributes_destroy(attributes);
 		iotcon_representation_destroy(repr);
 	}
 
