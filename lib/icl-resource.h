@@ -42,7 +42,6 @@ struct icl_resource {
 	void *user_data;
 	int64_t handle;
 	iotcon_observers_h observers;
-	iotcon_connectivity_type_e connectivity_type;
 	GList *children;
 };
 
