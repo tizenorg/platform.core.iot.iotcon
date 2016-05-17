@@ -55,7 +55,6 @@ API int iotcon_lite_resource_create(const char *uri_path,
 		ERR("icl_ioty_lite_resource_create() Fail(%d)", ret);
 		return ret;
 	}
-	(*resource_handle)->connectivity_type = IOTCON_CONNECTIVITY_ALL;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -63,26 +62,18 @@ API int iotcon_lite_resource_create(const char *uri_path,
 
 API int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource)
 {
-	int ret, connectivity_type;
+	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	connectivity_type = resource->connectivity_type;
-
-	switch (connectivity_type) {
-	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_lite_resource_destroy(resource);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_lite_resource_destroy() Fail(%d)", ret);
-			return ret;
-		}
-		break;
-	default:
-		ERR("Invalid Connectivity Type(%d)", connectivity_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+	ret = icl_ioty_lite_resource_destroy(resource);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_ioty_lite_resource_destroy() Fail(%d)", ret);
+		return ret;
 	}
+
 	return IOTCON_ERROR_NONE;
 }
 
@@ -90,25 +81,16 @@ API int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource)
 API int iotcon_lite_resource_update_state(iotcon_lite_resource_h resource,
 		iotcon_state_h state)
 {
-	int ret, connectivity_type;
+	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	connectivity_type = resource->connectivity_type;
-
-	switch (connectivity_type) {
-	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_lite_resource_update_state(resource, state);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_lite_resource_update_state() Fail(%d)", ret);
-			return ret;
-		}
-		break;
-	default:
-		ERR("Invalid Connectivity Type(%d)", connectivity_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+	ret = icl_ioty_lite_resource_update_state(resource, state);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_ioty_lite_resource_update_state() Fail(%d)", ret);
+		return ret;
 	}
 
 	return IOTCON_ERROR_NONE;

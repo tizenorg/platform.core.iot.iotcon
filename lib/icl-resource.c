@@ -129,7 +129,6 @@ API int iotcon_resource_create(const char *uri_path,
 		ERR("icl_ioty_resource_create() Fail(%d)", ret);
 		return ret;
 	}
-	(*resource_handle)->connectivity_type = IOTCON_CONNECTIVITY_ALL;
 
 	return IOTCON_ERROR_NONE;
 }
@@ -138,25 +137,16 @@ API int iotcon_resource_create(const char *uri_path,
 API int iotcon_resource_destroy(iotcon_resource_h resource)
 {
 	FN_CALL;
-	int ret, connectivity_type;
+	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	connectivity_type = resource->connectivity_type;
-
-	switch (connectivity_type) {
-	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_resource_destroy(resource);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_resource_destroy() Fail(%d)", ret);
-			return ret;
-		}
-		break;
-	default:
-		ERR("Invalid Connectivity Type(%d)", connectivity_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+	ret = icl_ioty_resource_destroy(resource);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_ioty_resource_destroy() Fail(%d)", ret);
+		return ret;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -167,26 +157,17 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource,
 		const char *iface)
 {
 	FN_CALL;
-	int ret, connectivity_type;
+	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
 
-	connectivity_type = resource->connectivity_type;
-
-	switch (connectivity_type) {
-	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_resource_bind_interface(resource, iface);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_resource_bind_interface() Fail(%d)", ret);
-			return ret;
-		}
-		break;
-	default:
-		ERR("Invalid Connectivity Type(%d)", connectivity_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+	ret = icl_ioty_resource_bind_interface(resource, iface);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_ioty_resource_bind_interface() Fail(%d)", ret);
+		return ret;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -197,26 +178,17 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource,
 		const char *resource_type)
 {
 	FN_CALL;
-	int ret, connectivity_type;
+	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
 
-	connectivity_type = resource->connectivity_type;
-
-	switch (connectivity_type) {
-	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_resource_bind_type(resource, resource_type);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_resource_bind_type() Fail(%d)", ret);
-			return ret;
-		}
-		break;
-	default:
-		ERR("Invalid Connectivity Type(%d)", connectivity_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+	ret = icl_ioty_resource_bind_type(resource, resource_type);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_ioty_resource_bind_type() Fail(%d)", ret);
+		return ret;
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -386,25 +358,16 @@ API int iotcon_resource_get_properties(iotcon_resource_h resource, int *properti
 API int iotcon_resource_notify(iotcon_resource_h resource,
 		iotcon_representation_h repr, iotcon_observers_h observers, iotcon_qos_e qos)
 {
-	int ret, connectivity_type;
+	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature_supported(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(), IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
-	connectivity_type = resource->connectivity_type;
-
-	switch (connectivity_type) {
-	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_resource_notify(resource, repr, observers, qos);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_resource_notify() Fail(%d)", ret);
-			return ret;
-		}
-		break;
-	default:
-		ERR("Invalid Connectivity Type(%d)", connectivity_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+	ret = icl_ioty_resource_notify(resource, repr, observers, qos);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_ioty_resource_notify() Fail(%d)", ret);
+		return ret;
 	}
 
 	return IOTCON_ERROR_NONE;
