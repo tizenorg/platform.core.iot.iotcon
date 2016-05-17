@@ -48,7 +48,6 @@ API int iotcon_response_create(iotcon_request_h request,
 
 	resp->oic_request_h = request->oic_request_h;
 	resp->oic_resource_h = request->oic_resource_h;
-	resp->connectivity_type = request->connectivity_type;
 
 	*response = resp;
 
@@ -166,28 +165,17 @@ API int iotcon_response_set_options(iotcon_response_h resp,
 API int iotcon_response_send(iotcon_response_h resp)
 {
 	FN_CALL;
-	int ret, connectivity_type;
+	int ret;
 
 	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 
-	connectivity_type = resp->connectivity_type;
-
-	switch (connectivity_type) {
-	case IOTCON_CONNECTIVITY_IPV4:
-	case IOTCON_CONNECTIVITY_IPV6:
-	case IOTCON_CONNECTIVITY_ALL:
-		ret = icl_ioty_response_send(resp);
-		if (IOTCON_ERROR_NONE != ret) {
-			ERR("icl_ioty_response_send() Fail(%d)", ret);
-			return ret;
-		}
-		break;
-	default:
-		ERR("Invalid Connectivity Type(%d)", connectivity_type);
-		return IOTCON_ERROR_INVALID_PARAMETER;
+	ret = icl_ioty_response_send(resp);
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("icl_ioty_response_send() Fail(%d)", ret);
+		return ret;
 	}
 
 	return IOTCON_ERROR_NONE;
