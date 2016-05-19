@@ -267,7 +267,7 @@ static iotcon_resource_h _create_resource(char *uri_path,
 }
 
 static int _send_response(iotcon_request_h request, iotcon_representation_h repr,
-		const char *iface, iotcon_response_result_e result)
+		iotcon_response_result_e result)
 {
 	int ret;
 	iotcon_response_h response;
@@ -278,7 +278,7 @@ static int _send_response(iotcon_request_h request, iotcon_representation_h repr
 		return -1;
 	}
 
-	ret = iotcon_response_set_representation(response, iface, repr);
+	ret = iotcon_response_set_representation(response, repr);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_response_set_representation() Fail(%d)", ret);
 		iotcon_response_destroy(response);
@@ -369,7 +369,7 @@ static int _light_request_handler_get(light_resource_s *light,
 		return -1;
 	}
 
-	ret = _send_response(request, repr, IOTCON_INTERFACE_DEFAULT, IOTCON_RESPONSE_OK);
+	ret = _send_response(request, repr, IOTCON_RESPONSE_OK);
 	if (0 != ret) {
 		ERR("_send_response() Fail(%d)", ret);
 		iotcon_representation_destroy(repr);
@@ -445,8 +445,7 @@ static int _fan_request_handler_get(fan_resource_s *fan, iotcon_request_h reques
 		return -1;
 	}
 
-	ret = _send_response(request, repr, IOTCON_INTERFACE_DEFAULT,
-			IOTCON_RESPONSE_OK);
+	ret = _send_response(request, repr, IOTCON_RESPONSE_OK);
 	if (0 != ret) {
 		ERR("_send_response() Fail(%d)", ret);
 		iotcon_representation_destroy(repr);
@@ -622,7 +621,6 @@ static int _room_request_handler_get(room_resource_s *room,
 	int ret;
 	iotcon_query_h query;
 	iotcon_representation_h repr;
-	char *iface = IOTCON_INTERFACE_DEFAULT;
 
 	INFO("GET request - Room");
 
@@ -639,18 +637,7 @@ static int _room_request_handler_get(room_resource_s *room,
 		return -1;
 	}
 
-	if (query) {
-		ret = iotcon_query_get_interface(query, &iface);
-		if (IOTCON_ERROR_NO_DATA == ret) {
-			iface = IOTCON_INTERFACE_DEFAULT;
-		} else if (IOTCON_ERROR_NONE != ret) {
-			ERR("iotcon_query_get_interface() Fail(%d)", ret);
-			iotcon_representation_destroy(repr);
-			return -1;
-		}
-	}
-
-	ret = _send_response(request, repr, iface, IOTCON_RESPONSE_OK);
+	ret = _send_response(request, repr, IOTCON_RESPONSE_OK);
 	if (0 != ret) {
 		ERR("_send_response() Fail(%d)", ret);
 		iotcon_representation_destroy(repr);
@@ -668,23 +655,22 @@ static void _light_request_handler(iotcon_resource_h resource,
 	int ret;
 	iotcon_request_type_e type;
 	light_resource_s *light = user_data;
-	char *iface = IOTCON_INTERFACE_DEFAULT;
 
 	RET_IF(NULL == request);
 
 	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_request_type() Fail(%d)", ret);
-		_send_response(request, NULL, iface, IOTCON_RESPONSE_ERROR);
+		_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 		return;
 	}
 
 	if (IOTCON_REQUEST_GET == type) {
 		ret = _light_request_handler_get(light, request);
 		if (0 != ret)
-			_send_response(request, NULL, iface, IOTCON_RESPONSE_ERROR);
+			_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 	} else {
-		_send_response(request, NULL, iface, IOTCON_RESPONSE_FORBIDDEN);
+		_send_response(request, NULL, IOTCON_RESPONSE_FORBIDDEN);
 	}
 }
 
@@ -694,23 +680,22 @@ static void _fan_request_handler(iotcon_resource_h resource,
 	int ret;
 	iotcon_request_type_e type;
 	fan_resource_s *fan = user_data;
-	char *iface = IOTCON_INTERFACE_DEFAULT;
 
 	RET_IF(NULL == request);
 
 	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_request_type() Fail(%d)", ret);
-		_send_response(request, NULL, iface, IOTCON_RESPONSE_ERROR);
+		_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 		return;
 	}
 
 	if (IOTCON_REQUEST_GET == type) {
 		ret = _fan_request_handler_get(fan, request);
 		if (0 != ret)
-			_send_response(request, NULL, iface, IOTCON_RESPONSE_ERROR);
+			_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 	} else {
-		_send_response(request, NULL, iface, IOTCON_RESPONSE_FORBIDDEN);
+		_send_response(request, NULL, IOTCON_RESPONSE_FORBIDDEN);
 	}
 }
 
@@ -722,14 +707,13 @@ static void _room_request_handler(iotcon_resource_h resource,
 	iotcon_request_type_e type;
 	char *host_address;
 	room_resource_s *room = user_data;
-	char *iface = IOTCON_INTERFACE_DEFAULT;
 
 	RET_IF(NULL == request);
 
 	ret = iotcon_request_get_host_address(request, &host_address);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_host_address() Fail(%d)", ret);
-		_send_response(request, NULL, iface, IOTCON_RESPONSE_ERROR);
+		_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 		return;
 	}
 	INFO("host address : %s", host_address);
@@ -737,16 +721,16 @@ static void _room_request_handler(iotcon_resource_h resource,
 	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_request_get_request_type() Fail(%d)", ret);
-		_send_response(request, NULL, iface, IOTCON_RESPONSE_ERROR);
+		_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 		return;
 	}
 
 	if (IOTCON_REQUEST_GET == type) {
 		ret = _room_request_handler_get(room, request);
 		if (0 != ret)
-			_send_response(request, NULL, iface, IOTCON_RESPONSE_ERROR);
+			_send_response(request, NULL, IOTCON_RESPONSE_ERROR);
 	} else {
-		_send_response(request, NULL, iface, IOTCON_RESPONSE_FORBIDDEN);
+		_send_response(request, NULL, IOTCON_RESPONSE_FORBIDDEN);
 	}
 }
 
