@@ -64,8 +64,6 @@ API void iotcon_response_destroy(iotcon_response_h resp)
 		iotcon_representation_destroy(resp->repr);
 	if (resp->header_options)
 		iotcon_options_destroy(resp->header_options);
-	if (resp->iface)
-		free(resp->iface);
 	free(resp);
 }
 
@@ -125,14 +123,10 @@ API int iotcon_response_set_result(iotcon_response_h resp,
 
 
 API int iotcon_response_set_representation(iotcon_response_h resp,
-		const char *iface, iotcon_representation_h repr)
+		iotcon_representation_h repr)
 {
 	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
-
-	free(resp->iface);
-	resp->iface = strdup(iface);
 
 	if (repr)
 		repr = icl_representation_ref(repr);

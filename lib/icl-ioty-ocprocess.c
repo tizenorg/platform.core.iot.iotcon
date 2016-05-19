@@ -808,7 +808,6 @@ OCEntityHandlerResult icl_ioty_ocprocess_lite_request_cb(OCEntityHandlerFlag fla
 	}
 	res->oic_request_h = IC_POINTER_TO_INT64(request->requestHandle);
 	res->oic_resource_h = IC_POINTER_TO_INT64(request->resource);
-	res->iface = strdup(IOTCON_INTERFACE_DEFAULT);
 
 	switch (req_type) {
 	case IOTCON_REQUEST_GET:
