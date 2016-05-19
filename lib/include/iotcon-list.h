@@ -126,8 +126,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 
 		...
 
-		ret = iotcon_response_set_representation(response, IOTCON_INTERFACE_DEFAULT,
-				representation);
+		ret = iotcon_response_set_representation(response, representation);
 		if (IOTCON_ERROR_NONE != ret) {
 			iotcon_list_destroy(list);
 			iotcon_state_destroy(state);
