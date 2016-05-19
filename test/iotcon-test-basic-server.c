@@ -160,7 +160,7 @@ static int _send_response(iotcon_request_h request, iotcon_representation_h repr
 		return -1;
 	}
 
-	ret = iotcon_response_set_representation(response, IOTCON_INTERFACE_DEFAULT, repr);
+	ret = iotcon_response_set_representation(response, repr);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_response_set_representation() Fail(%d)", ret);
 		iotcon_response_destroy(response);
