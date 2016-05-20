@@ -871,7 +871,7 @@ static int _icl_ioty_state_list_to_value_list(iotcon_list_h list,
 		break;
 	case IOTCON_TYPE_LIST:
 		for (c = list->list; c; c = c->next) {
-			ret = _icl_ioty_state_list_to_value_list(c->data, value_list, depth + 1);
+			ret = _icl_ioty_state_list_to_value_list(((icl_val_list_s *)c->data)->list, value_list, depth + 1);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("_icl_ioty_state_list_to_value_list() Fail(%d)", ret);
 				return ret;
