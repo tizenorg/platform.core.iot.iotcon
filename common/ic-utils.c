@@ -20,6 +20,8 @@
 #include <glib.h>
 #include <system_info.h>
 #include <system_settings.h>
+#include <cynara-client.h>
+#include <cynara-error.h>
 
 #include "iotcon-types.h"
 #include "ic-common.h"
@@ -39,6 +41,11 @@ static const char *IC_PRIV_FILE_INTERNET = "/usr/share/iotcon/iotcon-internet";
 #endif
 #endif
 
+// TODO: Temporary code (need guide from security team)
+#define SMACK_LABEL_LEN 255
+static const char *IC_PRIVILEGE_INTERNET = "http://tizen.org/privilege/internet";
+static const char *IC_PRIVILEGE_NETWORK_GET = "http://tizen.org/privilege/network.get";
+
 static const char *IC_SYSTEM_INFO_PLATFORM_VERSION = "http://tizen.org/feature/platform.version";
 static const char *IC_SYSTEM_INFO_MANUF_NAME = "http://tizen.org/system/manufacturer";
 static const char *IC_SYSTEM_INFO_MODEL_NAME = "http://tizen.org/system/model_name";
@@ -49,8 +56,6 @@ static pthread_mutex_t icl_utils_mutex_init = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t icl_utils_mutex_ioty = PTHREAD_MUTEX_INITIALIZER;
 static __thread int icl_utils_pthread_oldstate;
 static __thread int icl_utils_mutex_count;
-
-
 
 char* ic_utils_strdup(const char *src)
 {
@@ -69,46 +74,64 @@ char* ic_utils_strdup(const char *src)
 
 bool ic_utils_check_permission(int permssion)
 {
-	return true;
-// TODO: Can't access file in user side daemon
-#if 0
-	int ret;
+	// TODO: Temporary code (need guide from security team)
+
 	static int has_network_permission = -1;
 	static int has_internet_permission = -1;
 
-	/* check network.get privilege */
-	if (IC_PERMISSION_NETWORK_GET & permssion) {
-		if (-1 == has_network_permission) {
-			ret = access(IC_PRIV_FILE_NETWORK_GET, R_OK);
-			if (0 != ret) {
-				ERR("Don't have http://tizen.org/privilege/network.get");
-				has_network_permission = 0;
-				return false;
-			}
-			has_network_permission = 1;
-		} else if (0 == has_network_permission) {
-			ERR("Don't have http://tizen.org/privilege/network.get");
-			return false;
+	if (-1 == has_internet_permission) {
+		int ret;
+		char smack_label[SMACK_LABEL_LEN + 1] = {0};
+		char uid[10];
+		FILE *fd;
+		cynara *cynara_h;
+
+		ret = cynara_initialize(&cynara_h, NULL);
+		if (CYNARA_API_SUCCESS != ret) {
+			 ERR("cynara_initialize() Fail(%d)", ret);
+			 return false;
 		}
+
+		fd = fopen("/proc/self/attr/current", "r");
+		if (NULL == fd) {
+			 ERR("fopen() Fail(%d)", errno);
+			 return false;
+		}
+
+		ret = fread(smack_label, sizeof(smack_label), 1, fd);
+		fclose(fd);
+		if (ret < 0) {
+			 ERR("fread() Fail(%d)", ret);
+			 return 0;
+		}
+
+		snprintf(uid, sizeof(uid), "%d", getuid());
+
+		ret = cynara_check(cynara_h, smack_label, "", uid, IC_PRIVILEGE_INTERNET);
+		if (CYNARA_API_ACCESS_ALLOWED == ret)
+			has_internet_permission = 1;
+		else
+			has_internet_permission = 0;
+
+		ret = cynara_check(cynara_h, smack_label, "", uid, IC_PRIVILEGE_NETWORK_GET);
+		if (CYNARA_API_ACCESS_ALLOWED == ret)
+			has_network_permission = 1;
+		else
+			has_network_permission = 0;
+
+		cynara_finish(cynara_h);
 	}
 
-	/* check internet privilege */
-	if (IC_PERMISSION_INTERNET & permssion) {
-		if (-1 == has_internet_permission) {
-			ret = access(IC_PRIV_FILE_INTERNET, R_OK);
-			if (0 != ret) {
-				ERR("Don't have http://tizen.org/privilege/internet");
-				has_internet_permission = 0;
-				return false;
-			}
-			has_internet_permission = 1;
-		} else if (0 == has_internet_permission) {
-			ERR("Don't have http://tizen.org/privilege/internet");
-			return false;
-		}
+	if ((IC_PERMISSION_NETWORK_GET & permssion) && (1 != has_network_permission)) {
+		ERR("Don't have http://tizen.org/privilege/network.get");
+		return false;
 	}
+	if ((IC_PERMISSION_INTERNET & permssion) && (1 != has_internet_permission)) {
+		ERR("Don't have http://tizen.org/privilege/internet");
+		return false;
+	}
+
 	return true;
-#endif
 }
 
 bool ic_utils_check_oic_feature_supported()

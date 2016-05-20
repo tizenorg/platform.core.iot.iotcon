@@ -20,6 +20,7 @@ BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(capi-system-system-settings)
 BuildRequires:  pkgconfig(iotivity)
 BuildRequires:  pkgconfig(uuid)
+BuildRequires:  pkgconfig(cynara-client)
 
 %if "%{tizen}" == "2.3"
 BuildRequires:  python-xml
