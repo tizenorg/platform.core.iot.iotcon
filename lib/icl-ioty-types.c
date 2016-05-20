@@ -774,11 +774,11 @@ static int _icl_ioty_fill_oic_rep_payload_value_array(OCRepPayload *payload,
 			ERR("calloc() Fail(%d)", errno);
 			return IOTCON_ERROR_OUT_OF_MEMORY;
 		}
-		for (node = list->list, i = 0; node; node = node->next, i++) {
+		for (node = list->list, i = 0; node; node = node->next, i++)
 			str_arr[i] = ((icl_basic_s*)node->data)->val.s;
-			((icl_basic_s*)node->data)->val.s = NULL;
-		}
-		OCRepPayloadSetStringArrayAsOwner(payload, key, str_arr, list->dimensions);
+
+		OCRepPayloadSetStringArray(payload, key, (const char **)str_arr, list->dimensions);
+		free(str_arr);
 		break;
 	case OCREP_PROP_BYTE_STRING:
 		byte_arr = calloc(len, sizeof(OCByteString));
@@ -791,6 +791,7 @@ static int _icl_ioty_fill_oic_rep_payload_value_array(OCRepPayload *payload,
 			byte_arr[i].len = ((icl_val_byte_str_s*)node->data)->len;
 		}
 		OCRepPayloadSetByteStringArray(payload, key, byte_arr, list->dimensions);
+		free(byte_arr);
 		break;
 	case OCREP_PROP_OBJECT:
 		state_arr = calloc(len, sizeof(struct OCRepPayload *));
@@ -871,7 +872,7 @@ static int _icl_ioty_state_list_to_value_list(iotcon_list_h list,
 		break;
 	case IOTCON_TYPE_LIST:
 		for (c = list->list; c; c = c->next) {
-			ret = _icl_ioty_state_list_to_value_list(c->data, value_list, depth + 1);
+			ret = _icl_ioty_state_list_to_value_list(((icl_val_list_s *)c->data)->list, value_list, depth + 1);
 			if (IOTCON_ERROR_NONE != ret) {
 				ERR("_icl_ioty_state_list_to_value_list() Fail(%d)", ret);
 				return ret;
