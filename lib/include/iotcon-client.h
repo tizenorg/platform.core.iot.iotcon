@@ -107,6 +107,7 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
+ * @pre iotcon_initialize() should be called to initialize.
  * @post When the resource receive presence, iotcon_presence_cb() will be called.
  *
  * @see iotcon_start_presence()
@@ -137,6 +138,8 @@ int iotcon_add_presence_cb(const char *host_address,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @pre iotcon_initialize() should be called to initialize.
  *
  * @see iotcon_start_presence()
  * @see iotcon_stop_presence()

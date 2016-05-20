@@ -197,6 +197,8 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
+ * @pre iotcon_initialize() should be called to initialize.
+ *
  * @see iotcon_lite_resource_destroy()
  */
 int iotcon_lite_resource_create(const char *uri_path,
@@ -226,6 +228,8 @@ int iotcon_lite_resource_create(const char *uri_path,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
+ * @pre iotcon_initialize() should be called to initialize.
+ *
  * @see iotcon_lite_resource_create()
  */
 int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource);
@@ -246,6 +250,8 @@ int iotcon_lite_resource_destroy(iotcon_lite_resource_h resource);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @pre iotcon_initialize() should be called to initialize.
  *
  * @see iotcon_lite_resource_get_state()
  */

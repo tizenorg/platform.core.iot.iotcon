@@ -78,6 +78,8 @@ int iotcon_initialize();
  *
  * @return void
  *
+ * @pre iotcon_initialize() should be called to initialize.
+ *
  * @see iotcon_initialize()
  */
 void iotcon_deinitialize(void);
