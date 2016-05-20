@@ -355,6 +355,8 @@ int iotcon_response_set_options(iotcon_response_h resp, iotcon_options_h options
  *
  * @param[in] resp The handle of the response to send
  *
+ * @pre iotcon_initialize() should be called to initialize.
+ *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported

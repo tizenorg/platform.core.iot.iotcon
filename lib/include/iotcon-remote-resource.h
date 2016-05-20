@@ -226,6 +226,7 @@ typedef void (*iotcon_remote_resource_observe_cb)(iotcon_remote_resource_h resou
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
+ * @pre iotcon_initialize() should be called to initialize.
  * @post When the @a resource receive notification message, iotcon_remote_resource_observe_cb() will be called.
  *
  * @see iotcon_remote_resource_observe_cb()
@@ -253,6 +254,8 @@ int iotcon_remote_resource_observe_register(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @pre iotcon_initialize() should be called to initialize.
  *
  * @see iotcon_remote_resource_observe_cb()
  * @see iotcon_remote_resource_observe_register()
@@ -310,6 +313,7 @@ typedef void (*iotcon_remote_resource_response_cb)(iotcon_remote_resource_h reso
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
+ * @pre iotcon_initialize() should be called to initialize.
  * @post When the client receive get response, iotcon_remote_resource_response_cb() will be called.
  *
  * @see iotcon_remote_resource_response_cb()
@@ -339,6 +343,7 @@ int iotcon_remote_resource_get(iotcon_remote_resource_h resource, iotcon_query_h
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
+ * @pre iotcon_initialize() should be called to initialize.
  * @post When the client receive put response, iotcon_remote_resource_response_cb() will be called.
  *
  * @see iotcon_remote_resource_response_cb()
@@ -371,6 +376,7 @@ int iotcon_remote_resource_put(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
+ * @pre iotcon_initialize() should be called to initialize.
  * @post When the client receive post response, iotcon_remote_resource_response_cb() will be called.
  *
  * @see iotcon_remote_resource_response_cb()
@@ -401,6 +407,7 @@ int iotcon_remote_resource_post(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
+ * @pre iotcon_initialize() should be called to initialize.
  * @post When the client receive delete response, iotcon_remote_resource_response_cb() will be called.
  *
  * @see iotcon_remote_resource_response_cb()
@@ -453,6 +460,8 @@ typedef void (*iotcon_remote_resource_cached_representation_changed_cb)(
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
+ * @pre iotcon_initialize() should be called to initialize.
+ *
  * @see iotcon_remote_resource_stop_caching()
  * @see iotcon_remote_resource_cached_representation_changed_cb()
  */
@@ -475,6 +484,8 @@ int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @pre iotcon_initialize() should be called to initialize.
  *
  * @see iotcon_remote_resource_start_caching()
  * @see iotcon_remote_resource_cached_representation_changed_cb()
@@ -521,6 +532,8 @@ typedef void (*iotcon_remote_resource_state_changed_cb)(iotcon_remote_resource_h
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
  *
+ * @pre iotcon_initialize() should be called to initialize.
+ *
  * @see iotcon_remote_resource_stop_monitoring()
  * @see iotcon_remote_resource_state_changed_cb()
  */
@@ -543,6 +556,8 @@ int iotcon_remote_resource_start_monitoring(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ *
+ * @pre iotcon_initialize() should be called to initialize.
  *
  * @see iotcon_remote_resource_start_monitoring()
  * @see iotcon_remote_resource_state_changed_cb()
