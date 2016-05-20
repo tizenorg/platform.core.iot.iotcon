@@ -1156,7 +1156,9 @@ static void _icl_ioty_caching_get_cb(iotcon_remote_resource_h resource,
 		resource->cached_repr = repr;
 		if (response)
 			response->repr = NULL;
-		cb_container->cb(resource, resource->cached_repr, cb_container->user_data);
+
+		if (cb_container->cb)
+			cb_container->cb(resource, resource->cached_repr, cb_container->user_data);
 	}
 }
 
