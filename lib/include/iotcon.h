@@ -40,9 +40,9 @@ extern "C" {
  *
  * It is recommended to design feature related codes in your application for reliability.\n
  *
- * If the feature(http://tizen.org/feature/iot.oic.security) for OIC security architecture
+ * If the feature(http://tizen.org/feature/iot.ocf.security) for OCF security architecture
  * is applied, you MUST call iotcon_secure_initialize() instead of iotcon_initialize().
- * Then applications communicate with each other based on OIC security architecture.
+ * Then applications communicate with each other based on OCF security architecture.
  *
  * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
  *
@@ -55,7 +55,7 @@ extern "C" {
 
 /**
  * @brief Initializes IoTCon with secure mode.
- * @details Call this function to start IoTCon above OIC security architecture.
+ * @details Call this function to start IoTCon above OCF security architecture.
  *
  * @since_tizen 3.0
  * @privlevel public

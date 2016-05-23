@@ -209,7 +209,7 @@ typedef enum {
 typedef enum {
 	IOTCON_DEVICE_INFO_NAME = 0, /**< Indicates human friendly name for device */
 	IOTCON_DEVICE_INFO_SPEC_VER, /**< Indicates spec version of the core specification */
-	IOTCON_DEVICE_INFO_ID, /**< Indicates unique identifier for OIC device */
+	IOTCON_DEVICE_INFO_ID, /**< Indicates unique identifier for OCF device */
 	IOTCON_DEVICE_INFO_DATA_MODEL_VER, /**< Indicates version of the specs this device data model is implemented to */
 } iotcon_device_info_e;
 
