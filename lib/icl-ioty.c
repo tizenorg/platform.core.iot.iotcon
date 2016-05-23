@@ -1214,6 +1214,8 @@ int icl_ioty_remote_resource_start_caching(iotcon_remote_resource_h resource,
 	}
 	cb_container->observe_handle = IC_POINTER_TO_INT64(handle);
 
+	_icl_ioty_caching_idle_cb(cb_container);
+
 	_icl_ioty_remote_resource_caching_table_insert(resource, cb_container);
 
 	return IOTCON_ERROR_NONE;
