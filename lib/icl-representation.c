@@ -528,6 +528,9 @@ static int _icl_repr_compare_state(iotcon_state_h state1, iotcon_state_h state2)
 		return !!(IC_POINTER_TO_INT64(state1->hash_table) -
 				IC_POINTER_TO_INT64(state2->hash_table));
 
+	if (g_hash_table_size(state1->hash_table) != g_hash_table_size(state2->hash_table))
+		return 1;
+
 	g_hash_table_iter_init(&iter, state1->hash_table);
 	while (g_hash_table_iter_next(&iter, &key, &value1)) {
 		value2 = g_hash_table_lookup(state2->hash_table, key);
@@ -567,6 +570,18 @@ static int _icl_repr_compare_children(GList *children1, GList *children2)
 	return IC_EQUAL;
 }
 
+static int _icl_repr_compare_resource_interfaces(iotcon_resource_interfaces_h iface1,
+		iotcon_resource_interfaces_h iface2)
+{
+	int ret;
+
+	if (NULL == iface1 || NULL == iface2)
+		return !!(iface1 - iface2);
+
+	ret = _icl_repr_compare_string_list(iface1->iface_list, iface2->iface_list);
+	return ret;
+}
+
 int icl_representation_compare(iotcon_representation_h repr1,
 		iotcon_representation_h repr2)
 {
@@ -576,8 +591,9 @@ int icl_representation_compare(iotcon_representation_h repr1,
 		return !!(repr1 - repr2);
 
 	/* interfaces */
-	if (repr1->interfaces != repr2->interfaces)
-		return 1;
+	ret = _icl_repr_compare_resource_interfaces(repr1->interfaces, repr2->interfaces);
+	if (IC_EQUAL != ret)
+		return ret;
 
 	/* uri path */
 	ret = _icl_repr_compare_string(repr1->uri_path, repr2->uri_path);
