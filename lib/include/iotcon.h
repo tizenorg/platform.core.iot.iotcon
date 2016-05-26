@@ -35,8 +35,8 @@ extern "C" {
  *
  * @section CAPI_IOT_CONNECTIVITY_MODULE_FEATURE Related Features
  * This API is related with the following features:\n
- * - http://tizen.org/feature/iot.oic\n
- * - http://tizen.org/feature/iot.oic.security\n
+ * - http://tizen.org/feature/iot.ocf\n
+ * - http://tizen.org/feature/iot.ocf.security\n
  *
  * It is recommended to design feature related codes in your application for reliability.\n
  *
@@ -62,7 +62,7 @@ extern "C" {
  * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
- * @remarks If the device has the feature("http://tizen.org/feature/iot.oic.security"),
+ * @remarks If the device has the feature("http://tizen.org/feature/iot.ocf.security"),
  * you must call this function instead of iotcon_initialize().\n
  * @a file_path point to a file for handling secure virtual resources.
  * The file that is CBOR(Concise Binary Object Representation)-format must already exist

@@ -133,7 +133,7 @@ static void _update_brightness(int brightness)
  *
  * @section CAPI_IOT_CONNECTIVITY_SERVER_LITE_RESOURCE_MODULE_FEATURE Related Features
  * This API is related with the following features:\n
- *  - http://tizen.org/feature/iot.oic\n
+ *  - http://tizen.org/feature/iot.ocf\n
  *
  * It is recommended to design feature related codes in your application for reliability.\n
  *
