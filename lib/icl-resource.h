@@ -35,7 +35,7 @@ struct icl_notify_msg {
 
 struct icl_resource {
 	char *uri_path;
-	int properties;
+	int policies;
 	iotcon_resource_types_h types;
 	iotcon_resource_interfaces_h ifaces;
 	iotcon_request_handler_cb cb;

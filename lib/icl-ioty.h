@@ -111,7 +111,7 @@ int icl_ioty_stop_presence();
 int icl_ioty_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		iotcon_resource_interfaces_h ifaces,
-		int properties,
+		int policies,
 		iotcon_request_handler_cb cb,
 		void *user_data,
 		iotcon_resource_h *resource_handle);
@@ -129,7 +129,7 @@ int icl_ioty_resource_destroy(iotcon_resource_h resource);
 
 int icl_ioty_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
-		int properties,
+		int policies,
 		iotcon_state_h state,
 		iotcon_lite_resource_post_request_cb cb,
 		void *user_data,

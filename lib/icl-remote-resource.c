@@ -72,7 +72,7 @@ API int iotcon_find_resource(const char *host_address,
 API int iotcon_remote_resource_create(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		const char *uri_path,
-		int properties,
+		int policies,
 		iotcon_resource_types_h resource_types,
 		iotcon_resource_interfaces_h resource_ifaces,
 		iotcon_remote_resource_h *resource_handle)
@@ -98,7 +98,7 @@ API int iotcon_remote_resource_create(const char *host_address,
 	resource->host_address = ic_utils_strdup(host_address);
 	resource->connectivity_type = connectivity_type;
 	resource->uri_path = ic_utils_strdup(uri_path);
-	resource->properties = properties;
+	resource->policies = policies;
 	resource->types = icl_resource_types_ref(resource_types);
 	resource->ifaces = icl_resource_interfaces_ref(resource_ifaces);
 	resource->ref_count = 1;
@@ -207,7 +207,7 @@ API int iotcon_remote_resource_clone(iotcon_remote_resource_h src,
 	resource->host_address = ic_utils_strdup(src->host_address);
 	resource->connectivity_type = src->connectivity_type;
 	resource->device_id = ic_utils_strdup(src->device_id);
-	resource->properties = src->properties;
+	resource->policies = src->policies;
 	resource->ref_count = 1;
 
 	if (src->header_options) {
@@ -327,14 +327,14 @@ API int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource,
 }
 
 
-API int iotcon_remote_resource_get_properties(iotcon_remote_resource_h resource,
-		int *properties)
+API int iotcon_remote_resource_get_policies(iotcon_remote_resource_h resource,
+		int *policies)
 {
 	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == properties, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == policies, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*properties = resource->properties;
+	*policies = resource->policies;
 
 	return IOTCON_ERROR_NONE;
 }

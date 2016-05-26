@@ -24,7 +24,7 @@ iotcon_connectivity_type_e ic_ioty_parse_oic_transport(OCTransportAdapter adapte
 		OCTransportFlags flag);
 iotcon_request_type_e ic_ioty_parse_oic_method(OCMethod method);
 iotcon_response_result_e ic_ioty_parse_oic_response_result(OCStackResult result);
-int ic_ioty_parse_oic_properties(int properties);
+int ic_ioty_parse_oic_properties(int policies);
 iotcon_error_e ic_ioty_parse_oic_error(OCStackResult ret);
 iotcon_presence_trigger_e ic_ioty_parse_oic_trigger(OCPresenceTrigger src);
 iotcon_observe_type_e ic_ioty_parse_oic_action(OCObserveAction oic_action);
@@ -39,6 +39,6 @@ OCEntityHandlerResult ic_ioty_convert_response_result(iotcon_response_result_e r
 OCQualityOfService ic_ioty_convert_qos(iotcon_qos_e qos);
 int ic_ioty_convert_connectivity(const char *host_address, int conn_type,
 		OCDevAddr *dev_addr);
-int ic_ioty_convert_properties(int properties);
+int ic_ioty_convert_policies(int policies);
 
 #endif /*__IOT_CONNECTIVITY_COMMON_IOTIVITY_TYPES_H__*/

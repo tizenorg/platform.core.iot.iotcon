@@ -106,7 +106,7 @@ bool icl_resource_check_interface(const char *iface)
 API int iotcon_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		iotcon_resource_interfaces_h ifaces,
-		int properties,
+		int policies,
 		iotcon_request_handler_cb cb,
 		void *user_data,
 		iotcon_resource_h *resource_handle)
@@ -124,7 +124,7 @@ API int iotcon_resource_create(const char *uri_path,
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = icl_ioty_resource_create(uri_path, res_types, ifaces, properties, cb,
+	ret = icl_ioty_resource_create(uri_path, res_types, ifaces, policies, cb,
 			user_data, resource_handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icl_ioty_resource_create() Fail(%d)", ret);
@@ -350,13 +350,13 @@ API int iotcon_resource_get_interfaces(iotcon_resource_h resource,
 }
 
 
-API int iotcon_resource_get_properties(iotcon_resource_h resource, int *properties)
+API int iotcon_resource_get_policies(iotcon_resource_h resource, int *policies)
 {
 	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == properties, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == policies, IOTCON_ERROR_INVALID_PARAMETER);
 
-	*properties = resource->properties;
+	*policies = resource->policies;
 
 	return IOTCON_ERROR_NONE;
 }
