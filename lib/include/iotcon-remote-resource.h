@@ -112,7 +112,7 @@ static void _find_light_resource()
  * To use this API, you should provide all of the details required to correctly contact and
  * observe the object.\n
  * If not, you should discover the resource object manually.\n
- * The @a properties can contain multiple properties like
+ * The @a policies can contain multiple policies like
  * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.\n
  *
  * @since_tizen 3.0
@@ -123,7 +123,7 @@ static void _find_light_resource()
  * @param[in] host_address The host address of the resource
  * @param[in] connectivity_type The connectivity type
  * @param[in] uri_path The URI path of the resource
- * @param[in] properties The properties of the resource\n Set of #iotcon_resource_policy_e
+ * @param[in] policies The policies of the resource\n Set of #iotcon_resource_policy_e
  * @param[in] resource_types The resource types of the resource. For example, "core.light"
  * @param[in] resource_ifaces The resource interfaces of the resource.
  * @param[out] remote_resource Generated resource handle
@@ -141,7 +141,7 @@ static void _find_light_resource()
 int iotcon_remote_resource_create(const char *host_address,
 		iotcon_connectivity_type_e connectivity_type,
 		const char *uri_path,
-		int properties,
+		int policies,
 		iotcon_resource_types_h resource_types,
 		iotcon_resource_interfaces_h resource_ifaces,
 		iotcon_remote_resource_h *remote_resource);
@@ -584,7 +584,7 @@ int iotcon_remote_resource_stop_monitoring(iotcon_remote_resource_h resource);
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
- * @see iotcon_remote_resource_get_properties()
+ * @see iotcon_remote_resource_get_policies()
  * @see iotcon_remote_resource_set_options()
  */
 int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource,
@@ -609,7 +609,7 @@ int iotcon_remote_resource_get_uri_path(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
- * @see iotcon_remote_resource_get_properties()
+ * @see iotcon_remote_resource_get_policies()
  * @see iotcon_remote_resource_set_options()
  */
 int iotcon_remote_resource_get_connectivity_type(iotcon_remote_resource_h resource,
@@ -635,7 +635,7 @@ int iotcon_remote_resource_get_connectivity_type(iotcon_remote_resource_h resour
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
- * @see iotcon_remote_resource_get_properties()
+ * @see iotcon_remote_resource_get_policies()
  * @see iotcon_remote_resource_set_options()
  */
 int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resource,
@@ -664,7 +664,7 @@ int iotcon_remote_resource_get_host_address(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
- * @see iotcon_remote_resource_get_properties()
+ * @see iotcon_remote_resource_get_policies()
  * @see iotcon_remote_resource_set_options()
  */
 int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
@@ -690,7 +690,7 @@ int iotcon_remote_resource_get_device_id(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_interfaces()
- * @see iotcon_remote_resource_get_properties()
+ * @see iotcon_remote_resource_get_policies()
  * @see iotcon_remote_resource_set_options()
  */
 int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
@@ -716,7 +716,7 @@ int iotcon_remote_resource_get_types(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_connectivity_type()
  * @see iotcon_remote_resource_get_device_id()
  * @see iotcon_remote_resource_get_types()
- * @see iotcon_remote_resource_get_properties()
+ * @see iotcon_remote_resource_get_policies()
  * @see iotcon_remote_resource_set_options()
  */
 int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource,
@@ -725,12 +725,12 @@ int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource,
 /**
  * @brief Checks whether the remote resource is observable or not.
  *
- * @details The @a properties can contain multiple properties like
+ * @details The @a policies can contain multiple policies like
  * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of the resource
- * @param[out] properties The Properties of the resource\n Set of #iotcon_resource_policy_e
+ * @param[out] policies The policies of the resource\n Set of #iotcon_resource_policy_e
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -745,8 +745,8 @@ int iotcon_remote_resource_get_interfaces(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_set_options()
  */
-int iotcon_remote_resource_get_properties(iotcon_remote_resource_h resource,
-		int *properties);
+int iotcon_remote_resource_get_policies(iotcon_remote_resource_h resource,
+		int *policies);
 
 
 /**
@@ -771,7 +771,7 @@ int iotcon_remote_resource_get_properties(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_set_options()
- * @see iotcon_remote_resource_get_properties()
+ * @see iotcon_remote_resource_get_policies()
  */
 int iotcon_remote_resource_get_options(iotcon_remote_resource_h resource,
 		iotcon_options_h *options);
@@ -796,7 +796,7 @@ int iotcon_remote_resource_get_options(iotcon_remote_resource_h resource,
  * @see iotcon_remote_resource_get_types()
  * @see iotcon_remote_resource_get_interfaces()
  * @see iotcon_remote_resource_get_options()
- * @see iotcon_remote_resource_get_properties()
+ * @see iotcon_remote_resource_get_policies()
  */
 int iotcon_remote_resource_set_options(iotcon_remote_resource_h resource,
 		iotcon_options_h options);

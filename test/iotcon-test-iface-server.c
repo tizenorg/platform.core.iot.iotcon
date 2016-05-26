@@ -33,7 +33,7 @@ typedef struct _light_resource_s {
 	char *uri_path;
 	char *type;
 	iotcon_resource_interfaces_h ifaces;
-	int properties;
+	int policies;
 	iotcon_resource_h handle;
 } light_resource_s;
 
@@ -43,7 +43,7 @@ typedef struct _fan_resource_s {
 	char *uri_path;
 	char *type;
 	iotcon_resource_interfaces_h ifaces;
-	int properties;
+	int policies;
 	iotcon_resource_h handle;
 } fan_resource_s;
 
@@ -54,7 +54,7 @@ typedef struct _room_resource_s {
 	char *uri_path;
 	char *type;
 	iotcon_resource_interfaces_h ifaces;
-	int properties;
+	int policies;
 	iotcon_resource_h handle;
 	light_resource_s *child_light;
 	fan_resource_s *child_fan;
@@ -120,7 +120,7 @@ static int _set_room_resource(room_resource_s *room)
 		return -1;
 	}
 
-	room->properties = IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE;
+	room->policies = IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE;
 
 	return 0;
 }
@@ -169,7 +169,7 @@ static int _set_light_resource(light_resource_s *light)
 		return -1;
 	}
 
-	light->properties = IOTCON_RESOURCE_NO_PROPERTY;
+	light->policies = IOTCON_RESOURCE_NO_POLICY;
 
 	return 0;
 }
@@ -217,7 +217,7 @@ static int _set_fan_resource(fan_resource_s *fan)
 		return -1;
 	}
 
-	fan->properties = IOTCON_RESOURCE_NO_PROPERTY;
+	fan->policies = IOTCON_RESOURCE_NO_POLICY;
 
 	return 0;
 }
@@ -232,7 +232,7 @@ static void _free_fan_resource(fan_resource_s *fan)
 static iotcon_resource_h _create_resource(char *uri_path,
 		char *type,
 		iotcon_resource_interfaces_h ifaces,
-		int properties,
+		int policies,
 		iotcon_request_handler_cb cb,
 		void *user_data)
 {
@@ -253,7 +253,7 @@ static iotcon_resource_h _create_resource(char *uri_path,
 		return NULL;
 	}
 
-	ret = iotcon_resource_create(uri_path, resource_types, ifaces, properties, cb,
+	ret = iotcon_resource_create(uri_path, resource_types, ifaces, policies, cb,
 			user_data, &handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_response_create() Fail(%d)", ret);
@@ -797,7 +797,7 @@ int main(int argc, char **argv)
 	room.child_fan = &fan;
 
 	/* register room resource */
-	room.handle = _create_resource(room.uri_path, room.type, room.ifaces, room.properties,
+	room.handle = _create_resource(room.uri_path, room.type, room.ifaces, room.policies,
 			_room_request_handler, &room);
 	if (NULL == room.handle) {
 		ERR("_create_resource() Fail");
@@ -810,7 +810,7 @@ int main(int argc, char **argv)
 
 	/* register light resource */
 	light.handle = _create_resource(light.uri_path, light.type, light.ifaces,
-			light.properties, _light_request_handler, &light);
+			light.policies, _light_request_handler, &light);
 	if (NULL == light.handle) {
 		ERR("_create_resource() Fail");
 		iotcon_resource_destroy(room.handle);
@@ -834,7 +834,7 @@ int main(int argc, char **argv)
 	}
 
 	/* register fan resource */
-	fan.handle = _create_resource(fan.uri_path, fan.type, fan.ifaces, fan.properties,
+	fan.handle = _create_resource(fan.uri_path, fan.type, fan.ifaces, fan.policies,
 			_fan_request_handler, &fan);
 	if (NULL == fan.handle) {
 		ERR("_create_resource() Fail");

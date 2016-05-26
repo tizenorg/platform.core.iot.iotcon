@@ -170,7 +170,7 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
  * @details Registers a resource specified by @a uri_path, @a res_types, @a state which have
  * @a properties in IoTCon server.\n
  * When client requests some operations, it send a response to client, automatically.\n
- * The @a properties can contain multiple properties like
+ * The @a policies can contain multiple policies like
  * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.
  *
  * @since_tizen 3.0
@@ -183,7 +183,7 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
  *
  * @param[in] uri_path The URI path of the resource
  * @param[in] res_types The list of type of the resource
- * @param[in] properties The property of the resource\n Set of #iotcon_resource_policy_e
+ * @param[in] policies The policies of the resource\n Set of #iotcon_resource_policy_e
  * @param[in] state The state handle to set
  * @param[in] cb The callback function to add into callback list
  * @param[in] user_data The user data to pass to the callback function
@@ -203,7 +203,7 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
  */
 int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
-		int properties,
+		int policies,
 		iotcon_state_h state,
 		iotcon_lite_resource_post_request_cb cb,
 		void *user_data,

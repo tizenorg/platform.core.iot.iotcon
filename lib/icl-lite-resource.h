@@ -24,7 +24,7 @@ struct icl_lite_resource {
 	char *uri_path;
 	iotcon_state_h state;
 	int64_t handle;
-	int properties;
+	int policies;
 	iotcon_lite_resource_post_request_cb cb;
 	void *cb_data;
 };

@@ -602,7 +602,7 @@ static int _icl_ioty_remote_resource_observe(iotcon_remote_resource_h resource,
 		return ret;
 	}
 
-	if (IOTCON_RESOURCE_SECURE & resource->properties)
+	if (IOTCON_RESOURCE_SECURE & resource->policies)
 		dev_addr.flags |= OC_FLAG_SECURE;
 
 	/* options */
@@ -807,7 +807,7 @@ static int _icl_ioty_remote_resource_crud(
 		return ret;
 	}
 
-	if (IOTCON_RESOURCE_SECURE & resource->properties)
+	if (IOTCON_RESOURCE_SECURE & resource->policies)
 		dev_addr.flags |= OC_FLAG_SECURE;
 
 	/* representation */
@@ -1351,7 +1351,7 @@ static int _icl_ioty_resource_bind_interface(OCResourceHandle handle,
 int icl_ioty_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		iotcon_resource_interfaces_h ifaces,
-		int properties,
+		int policies,
 		iotcon_request_handler_cb cb,
 		void *user_data,
 		iotcon_resource_h *resource_handle)
@@ -1376,18 +1376,18 @@ int icl_ioty_resource_create(const char *uri_path,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 	resource->uri_path = strdup(uri_path);
-	resource->properties = properties;
+	resource->policies = policies;
 	resource->types = icl_resource_types_ref(res_types);
 	resource->ifaces = icl_resource_interfaces_ref(ifaces);
 
 	resource->cb = cb;
 	resource->user_data = user_data;
 
-	properties = ic_ioty_convert_properties(properties);
+	policies = ic_ioty_convert_policies(policies);
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCCreateResource(&handle, res_types->type_list->data, ifaces->iface_list->data,
-			uri_path, icl_ioty_ocprocess_request_cb, resource, properties);
+			uri_path, icl_ioty_ocprocess_request_cb, resource, policies);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != ret) {
 		ERR("OCCreateResource() Fail(%d)", ret);
@@ -1607,7 +1607,7 @@ int icl_ioty_resource_destroy(iotcon_resource_h resource)
 
 int icl_ioty_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
-		int properties,
+		int policies,
 		iotcon_state_h state,
 		iotcon_lite_resource_post_request_cb cb,
 		void *user_data,
@@ -1633,7 +1633,7 @@ int icl_ioty_lite_resource_create(const char *uri_path,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 	resource->uri_path = strdup(uri_path);
-	resource->properties = properties;
+	resource->policies = policies;
 	resource->state = state;
 	icl_state_ref(resource->state);
 	resource->cb = cb;
@@ -1641,11 +1641,11 @@ int icl_ioty_lite_resource_create(const char *uri_path,
 
 	res_iface = IOTCON_INTERFACE_DEFAULT;
 
-	properties = ic_ioty_convert_properties(properties);
+	policies = ic_ioty_convert_policies(policies);
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCCreateResource(&handle, res_types->type_list->data, res_iface, uri_path,
-			icl_ioty_ocprocess_lite_request_cb, resource, properties);
+			icl_ioty_ocprocess_lite_request_cb, resource, policies);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != ret) {
 		ERR("OCCreateResource() Fail(%d)", ret);

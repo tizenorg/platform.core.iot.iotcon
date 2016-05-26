@@ -158,27 +158,27 @@ int ic_ioty_parse_oic_dev_address(OCDevAddr *dev_addr, char **host_address,
 
 int ic_ioty_parse_oic_properties(int oic_properties)
 {
-	int prop = IOTCON_RESOURCE_NO_PROPERTY;
+	int policies = IOTCON_RESOURCE_NO_POLICY;
 
 	if (OC_DISCOVERABLE & oic_properties)
-		prop |= IOTCON_RESOURCE_DISCOVERABLE;
+		policies |= IOTCON_RESOURCE_DISCOVERABLE;
 
 	if (OC_OBSERVABLE & oic_properties)
-		prop |= IOTCON_RESOURCE_OBSERVABLE;
+		policies |= IOTCON_RESOURCE_OBSERVABLE;
 
 	if (OC_ACTIVE & oic_properties)
-		prop |= IOTCON_RESOURCE_ACTIVE;
+		policies |= IOTCON_RESOURCE_ACTIVE;
 
 	if (OC_SLOW & oic_properties)
-		prop |= IOTCON_RESOURCE_SLOW;
+		policies |= IOTCON_RESOURCE_SLOW;
 
 	if (OC_SECURE & oic_properties)
-		prop |= IOTCON_RESOURCE_SECURE;
+		policies |= IOTCON_RESOURCE_SECURE;
 
 	if (OC_EXPLICIT_DISCOVERABLE & oic_properties)
-		prop |= IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE;
+		policies |= IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE;
 
-	return prop;
+	return policies;
 }
 
 iotcon_error_e ic_ioty_parse_oic_error(OCStackResult ret)
@@ -309,26 +309,26 @@ OCQualityOfService ic_ioty_convert_qos(iotcon_qos_e qos)
 	return OC_NA_QOS;
 }
 
-int ic_ioty_convert_properties(int properties)
+int ic_ioty_convert_policies(int policies)
 {
 	int prop = OC_RES_PROP_NONE;
 
-	if (IOTCON_RESOURCE_DISCOVERABLE & properties)
+	if (IOTCON_RESOURCE_DISCOVERABLE & policies)
 		prop |= OC_DISCOVERABLE;
 
-	if (IOTCON_RESOURCE_OBSERVABLE & properties)
+	if (IOTCON_RESOURCE_OBSERVABLE & policies)
 		prop |= OC_OBSERVABLE;
 
-	if (IOTCON_RESOURCE_ACTIVE & properties)
+	if (IOTCON_RESOURCE_ACTIVE & policies)
 		prop |= OC_ACTIVE;
 
-	if (IOTCON_RESOURCE_SLOW & properties)
+	if (IOTCON_RESOURCE_SLOW & policies)
 		prop |= OC_SLOW;
 
-	if (IOTCON_RESOURCE_SECURE & properties)
+	if (IOTCON_RESOURCE_SECURE & policies)
 		prop |= OC_SECURE;
 
-	if (IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE & properties)
+	if (IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE & policies)
 		prop |= OC_EXPLICIT_DISCOVERABLE;
 
 	return prop;
