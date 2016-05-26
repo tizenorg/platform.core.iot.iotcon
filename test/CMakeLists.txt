@@ -19,7 +19,7 @@ SET(IOTCON_TEST_ENCAP_SERVER "iotcon-test-encap-server")
 SET(IOTCON_TEST_ENCAP_CLIENT_SRCS "iotcon-test-encap-client.c")
 SET(IOTCON_TEST_ENCAP_SERVER_SRCS "iotcon-test-encap-server.c")
 
-pkg_check_modules(test_pkgs REQUIRED dlog glib-2.0)
+pkg_check_modules(test_pkgs REQUIRED dlog glib-2.0 capi-network-wifi)
 INCLUDE_DIRECTORIES(${test_pkgs_INCLUDE_DIRS})
 LINK_DIRECTORIES(${test_pkgs_LIBRARY_DIRS})
 

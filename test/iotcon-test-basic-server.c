@@ -16,6 +16,7 @@
 
 #include <stdlib.h>
 #include <glib.h>
+#include <wifi.h>
 
 #include <iotcon.h>
 #include "test.h"
@@ -554,6 +555,75 @@ static gboolean _presence_timer(gpointer user_data)
 	return G_SOURCE_CONTINUE;
 }
 
+static void _check_wifi_state()
+{
+	int ret;
+	wifi_ap_h ap;
+	wifi_connection_state_e connection_state;
+	bool activated;
+	char *essid;
+
+	ret = wifi_initialize();
+	if (WIFI_ERROR_NONE != ret) {
+		ERR("wifi_initialize() Fail(%d)", ret);
+		return;
+	}
+
+	ret = wifi_is_activated(&activated);
+	if (WIFI_ERROR_NONE != ret) {
+		ERR("wifi_is_activated() Fail(%d)", ret);
+		wifi_deinitialize();
+		return;
+	} else if (false == activated) {
+		ERR("wifi is not activated");
+		wifi_deinitialize();
+		return;
+	}
+
+	ret = wifi_get_connection_state(&connection_state);
+	if (WIFI_ERROR_NONE != ret) {
+		ERR("wifi_get_connection_state() Fail(%d)", ret);
+		wifi_deinitialize();
+		return;
+	}
+
+	switch (connection_state) {
+	case WIFI_CONNECTION_STATE_CONNECTED:
+		INFO("WIFI_CONNECTION_STATE_CONNECTED");
+		ret = wifi_get_connected_ap(&ap);
+		if (WIFI_ERROR_NONE != ret) {
+			ERR("wifi_get_connected_ap() Fail(%d)", ret);
+			break;
+		}
+		ret = wifi_ap_get_essid(ap, &essid);
+		if (WIFI_ERROR_NONE != ret) {
+			ERR("wifi_ap_get_essid() Fail(%d)", ret);
+			wifi_ap_destroy(ap);
+			break;
+		}
+		SECURE_DBG("essid: %s", essid);
+		free(essid);
+		wifi_ap_destroy(ap);
+		break;
+	case WIFI_CONNECTION_STATE_FAILURE:
+		ERR("WIFI_CONNECTION_STATE_FAILURE");
+		break;
+	case WIFI_CONNECTION_STATE_DISCONNECTED:
+		ERR("WIFI_CONNECTION_STATE_DISCONNECTED");
+		break;
+	case WIFI_CONNECTION_STATE_ASSOCIATION:
+		ERR("WIFI_CONNECTION_STATE_ASSOCIATION");
+		break;
+	case WIFI_CONNECTION_STATE_CONFIGURATION:
+		ERR("WIFI_CONNECTION_STATE_CONFIGURATION");
+		break;
+	default:
+		ERR("Invalid connection state(%d)", connection_state);
+	}
+
+	wifi_deinitialize();
+}
+
 int main(int argc, char **argv)
 {
 	FN_CALL;
@@ -562,6 +632,9 @@ int main(int argc, char **argv)
 	door_resource_s my_door = {0};
 
 	loop = g_main_loop_new(NULL, FALSE);
+
+	/* check wifi state */
+	_check_wifi_state();
 
 	/* initialize iotcon */
 	ret = iotcon_initialize();
