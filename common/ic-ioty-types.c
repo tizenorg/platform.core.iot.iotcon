@@ -156,29 +156,29 @@ int ic_ioty_parse_oic_dev_address(OCDevAddr *dev_addr, char **host_address,
 }
 
 
-int ic_ioty_parse_oic_properties(int oic_properties)
+uint8_t ic_ioty_parse_oic_policies(uint8_t oic_policies)
 {
-	int prop = IOTCON_RESOURCE_NO_PROPERTY;
+	uint8_t policies = IOTCON_RESOURCE_NO_POLICY;
 
-	if (OC_DISCOVERABLE & oic_properties)
-		prop |= IOTCON_RESOURCE_DISCOVERABLE;
+	if (OC_DISCOVERABLE & oic_policies)
+		policies |= IOTCON_RESOURCE_DISCOVERABLE;
 
-	if (OC_OBSERVABLE & oic_properties)
-		prop |= IOTCON_RESOURCE_OBSERVABLE;
+	if (OC_OBSERVABLE & oic_policies)
+		policies |= IOTCON_RESOURCE_OBSERVABLE;
 
-	if (OC_ACTIVE & oic_properties)
-		prop |= IOTCON_RESOURCE_ACTIVE;
+	if (OC_ACTIVE & oic_policies)
+		policies |= IOTCON_RESOURCE_ACTIVE;
 
-	if (OC_SLOW & oic_properties)
-		prop |= IOTCON_RESOURCE_SLOW;
+	if (OC_SLOW & oic_policies)
+		policies |= IOTCON_RESOURCE_SLOW;
 
-	if (OC_SECURE & oic_properties)
-		prop |= IOTCON_RESOURCE_SECURE;
+	if (OC_SECURE & oic_policies)
+		policies |= IOTCON_RESOURCE_SECURE;
 
-	if (OC_EXPLICIT_DISCOVERABLE & oic_properties)
-		prop |= IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE;
+	if (OC_EXPLICIT_DISCOVERABLE & oic_policies)
+		policies |= IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE;
 
-	return prop;
+	return policies;
 }
 
 iotcon_error_e ic_ioty_parse_oic_error(OCStackResult ret)
@@ -309,28 +309,28 @@ OCQualityOfService ic_ioty_convert_qos(iotcon_qos_e qos)
 	return OC_NA_QOS;
 }
 
-int ic_ioty_convert_properties(int properties)
+uint8_t ic_ioty_convert_policies(uint8_t policies)
 {
-	int prop = OC_RES_PROP_NONE;
+	uint8_t oic_policies = OC_RES_PROP_NONE;
 
-	if (IOTCON_RESOURCE_DISCOVERABLE & properties)
-		prop |= OC_DISCOVERABLE;
+	if (IOTCON_RESOURCE_DISCOVERABLE & policies)
+		oic_policies |= OC_DISCOVERABLE;
 
-	if (IOTCON_RESOURCE_OBSERVABLE & properties)
-		prop |= OC_OBSERVABLE;
+	if (IOTCON_RESOURCE_OBSERVABLE & policies)
+		oic_policies |= OC_OBSERVABLE;
 
-	if (IOTCON_RESOURCE_ACTIVE & properties)
-		prop |= OC_ACTIVE;
+	if (IOTCON_RESOURCE_ACTIVE & policies)
+		oic_policies |= OC_ACTIVE;
 
-	if (IOTCON_RESOURCE_SLOW & properties)
-		prop |= OC_SLOW;
+	if (IOTCON_RESOURCE_SLOW & policies)
+		oic_policies |= OC_SLOW;
 
-	if (IOTCON_RESOURCE_SECURE & properties)
-		prop |= OC_SECURE;
+	if (IOTCON_RESOURCE_SECURE & policies)
+		oic_policies |= OC_SECURE;
 
-	if (IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE & properties)
-		prop |= OC_EXPLICIT_DISCOVERABLE;
+	if (IOTCON_RESOURCE_EXPLICIT_DISCOVERABLE & policies)
+		oic_policies |= OC_EXPLICIT_DISCOVERABLE;
 
-	return prop;
+	return oic_policies;
 }
 

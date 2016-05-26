@@ -126,7 +126,7 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_RESOURCE_NO_PROPERTY = 0, /**< Indicates resource uninitialized */
+	IOTCON_RESOURCE_NO_POLICY = 0, /**< Indicates resource uninitialized */
 	IOTCON_RESOURCE_DISCOVERABLE = (1 << 0), /**< Indicates resource that is allowed to be discovered */
 	IOTCON_RESOURCE_OBSERVABLE = (1 << 1), /**< Indicates resource that is allowed to be observed */
 	IOTCON_RESOURCE_ACTIVE = (1 << 2), /**< Indicates resource initialized and activated */

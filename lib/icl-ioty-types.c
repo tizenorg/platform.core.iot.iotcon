@@ -88,7 +88,8 @@ int icl_ioty_parse_oic_discovery_payload(OCDevAddr *dev_addr,
 	}
 
 	for (i = 0; res_payload; i++, res_payload = res_payload->next) {
-		int port, properties, conn_type;
+		int port, conn_type;
+		uint8_t policies;
 		iotcon_resource_interfaces_h ifaces;
 		iotcon_resource_types_h types;
 		char host_addr[PATH_MAX] = {0};
@@ -138,10 +139,10 @@ int icl_ioty_parse_oic_discovery_payload(OCDevAddr *dev_addr,
 		for (; node; node = node->next)
 			iotcon_resource_interfaces_add(ifaces, node->value);
 
-		/* Resource Properties */
-		properties = ic_ioty_parse_oic_properties(res_payload->bitmap);
+		/* Resource Policies */
+		policies = ic_ioty_parse_oic_policies(res_payload->bitmap);
 		if (res_payload->secure)
-			properties |= IOTCON_RESOURCE_SECURE;
+			policies |= IOTCON_RESOURCE_SECURE;
 
 		/* port */
 		port = (res_payload->port) ? res_payload->port : dev_addr->port;
@@ -162,7 +163,7 @@ int icl_ioty_parse_oic_discovery_payload(OCDevAddr *dev_addr,
 		}
 
 		ret = iotcon_remote_resource_create(host_addr, conn_type, res_payload->uri,
-				properties, types, ifaces, &(res_list[i]));
+				policies, types, ifaces, &(res_list[i]));
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("iotcon_remote_resource_create() Fail(%d)", ret);
 			iotcon_resource_interfaces_destroy(ifaces);

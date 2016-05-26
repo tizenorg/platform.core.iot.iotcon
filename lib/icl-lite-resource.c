@@ -33,7 +33,7 @@
 /* The length of uri_path should be less than or equal to 36. */
 API int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
-		int properties,
+		uint8_t policies,
 		iotcon_state_h state,
 		iotcon_lite_resource_post_request_cb cb,
 		void *user_data,
@@ -50,7 +50,7 @@ API int iotcon_lite_resource_create(const char *uri_path,
 	RETV_IF(NULL == res_types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = icl_ioty_lite_resource_create(uri_path, res_types, properties, state, cb,
+	ret = icl_ioty_lite_resource_create(uri_path, res_types, policies, state, cb,
 			user_data, resource_handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icl_ioty_lite_resource_create() Fail(%d)", ret);
