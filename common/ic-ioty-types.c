@@ -184,10 +184,14 @@ uint8_t ic_ioty_parse_oic_policies(uint8_t oic_policies)
 iotcon_error_e ic_ioty_parse_oic_error(OCStackResult ret)
 {
 	switch (ret) {
+	case OC_STACK_OK:
+		return IOTCON_ERROR_NONE;
 	case OC_STACK_NO_MEMORY:
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	case OC_STACK_NO_RESOURCE:
 		return IOTCON_ERROR_NO_DATA;
+	case OC_STACK_AUTHENTICATION_FAILURE:
+		return IOTCON_ERROR_AUTHENTICATION_FAILURE;
 	default:
 		WARN("Unknown result(%d)", ret);
 	}
