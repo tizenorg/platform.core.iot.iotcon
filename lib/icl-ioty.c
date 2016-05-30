@@ -24,6 +24,7 @@
 #include <ocstack.h>
 #include <ocpayload.h>
 #include <system_settings.h>
+#include <pinoxmcommon.h>
 
 #include "iotcon.h"
 #include "ic-utils.h"
@@ -102,6 +103,22 @@ int icl_ioty_set_persistent_storage(const char *file_path)
 	return IOTCON_ERROR_NONE;
 }
 
+void show_pin(char *pin, size_t length)
+{
+	FN_CALL;
+
+	INFO("PIN : %s", pin);
+}
+
+int icl_ioty_set_generate_pin_cb()
+{
+	FN_CALL;
+
+	SetGeneratePinCB(&show_pin);
+
+	return IOTCON_ERROR_NONE;
+}
+
 int icl_ioty_init(pthread_t *out_thread)
 {
 	FN_CALL;
@@ -116,6 +133,9 @@ int icl_ioty_init(pthread_t *out_thread)
 		ERR("OCInit() Fail(%d)", result);
 		return ic_ioty_parse_oic_error(result);
 	}
+
+	// TODO: temp code
+	icl_ioty_set_generate_pin_cb();
 
 	icl_ioty_ocprocess_start();
 
