@@ -24,6 +24,7 @@ extern "C" {
 #include <iotcon-errors.h>
 #include <iotcon-server.h>
 #include <iotcon-client.h>
+#include <iotcon-provisioning.h>
 
 /**
  * @file iotcon.h
