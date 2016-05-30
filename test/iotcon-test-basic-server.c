@@ -564,7 +564,7 @@ int main(int argc, char **argv)
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* initialize iotcon */
-	ret = iotcon_initialize();
+	ret = iotcon_secure_initialize("/usr/bin/iotcon-test-svr-db-server.dat");
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
@@ -597,8 +597,8 @@ int main(int argc, char **argv)
 	my_door.policies |= IOTCON_RESOURCE_OBSERVABLE;
 
 	/* add presence */
-	g_timeout_add_seconds(10, _presence_timer, NULL);
-	iotcon_start_presence(10);
+//	g_timeout_add_seconds(10, _presence_timer, NULL);
+//	iotcon_start_presence(10);
 
 	/* create new door resource */
 	my_door.handle = _create_door_resource(my_door.uri_path, my_door.type, my_door.ifaces,
@@ -613,7 +613,7 @@ int main(int argc, char **argv)
 	_check_door_attributes(my_door);
 
 	/* add observe */
-	g_timeout_add_seconds(5, _door_attributes_changer, &my_door);
+//	g_timeout_add_seconds(5, _door_attributes_changer, &my_door);
 
 	g_main_loop_run(loop);
 	g_main_loop_unref(loop);
