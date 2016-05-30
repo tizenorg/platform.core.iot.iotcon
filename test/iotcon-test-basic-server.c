@@ -564,11 +564,13 @@ int main(int argc, char **argv)
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* initialize iotcon */
-	ret = iotcon_initialize(NULL);
+	ret = iotcon_initialize("/usr/bin/iotcon-test-svr-db-server.dat");
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
 	}
+
+	system("read");
 
 	/* set device name */
 	ret = iotcon_set_device_name("iotcon-test-basic-server");
@@ -613,7 +615,7 @@ int main(int argc, char **argv)
 	_check_door_attributes(my_door);
 
 	/* add observe */
-	g_timeout_add_seconds(5, _door_attributes_changer, &my_door);
+//	g_timeout_add_seconds(5, _door_attributes_changer, &my_door);
 
 	g_main_loop_run(loop);
 	g_main_loop_unref(loop);
