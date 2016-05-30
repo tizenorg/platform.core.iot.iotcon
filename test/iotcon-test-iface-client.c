@@ -404,7 +404,7 @@ int main(int argc, char **argv)
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* initialize iotcon */
-	ret = iotcon_initialize(NULL);
+	ret = iotcon_initialize("/usr/bin/iotcon-test-svr-db-client.dat");
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
@@ -412,7 +412,7 @@ int main(int argc, char **argv)
 
 	/* find room typed resources */
 	ret = iotcon_find_resource(IOTCON_MULTICAST_ADDRESS, IOTCON_CONNECTIVITY_ALL,
-			ROOM_RESOURCE_TYPE, false, _found_resource, NULL);
+			ROOM_RESOURCE_TYPE, true, _found_resource, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_find_resource() Fail(%d)", ret);
 		iotcon_deinitialize();

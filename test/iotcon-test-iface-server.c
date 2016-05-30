@@ -120,7 +120,8 @@ static int _set_room_resource(room_resource_s *room)
 		return -1;
 	}
 
-	room->policies = IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE;
+	room->policies = IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE
+		| IOTCON_RESOURCE_SECURE;
 
 	return 0;
 }
@@ -169,7 +170,7 @@ static int _set_light_resource(light_resource_s *light)
 		return -1;
 	}
 
-	light->policies = IOTCON_RESOURCE_NO_POLICY;
+	light->policies = IOTCON_RESOURCE_SECURE;
 
 	return 0;
 }
@@ -217,7 +218,7 @@ static int _set_fan_resource(fan_resource_s *fan)
 		return -1;
 	}
 
-	fan->policies = IOTCON_RESOURCE_NO_POLICY;
+	fan->policies = IOTCON_RESOURCE_SECURE;
 
 	return 0;
 }
@@ -746,7 +747,7 @@ int main(int argc, char **argv)
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* initialize iotcon */
-	ret = iotcon_initialize(NULL);
+	ret = iotcon_initialize("/usr/bin/iotcon-test-svr-db-server.dat");
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
