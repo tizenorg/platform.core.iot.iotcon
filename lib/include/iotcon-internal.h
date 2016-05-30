@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOT_CONNECTIVITY_LIBRARY_H__
-#define __IOT_CONNECTIVITY_LIBRARY_H__
+#ifndef __IOT_CONNECTIVITY_INTERNAL_H__
+#define __IOT_CONNECTIVITY_INTERNAL_H__
 
-#include "iotcon.h"
-#include "ic-common.h"
-#include "ic-log.h"
-
-#ifdef API
-#undef API
+#ifdef __cplusplus
+extern "C" {
 #endif
-#define API __attribute__((visibility("default")))
 
-int icl_initialize(const char *file_path, bool is_pt);
+#include <iotcon-provisioning.h>
 
-#endif /* __IOT_CONNECTIVITY_LIBRARY_H__ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __IOT_CONNECTIVITY_INTERNAL_H__ */
