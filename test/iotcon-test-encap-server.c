@@ -49,7 +49,8 @@ static int _set_door_resource(door_resource_s *door)
 		return -1;
 	}
 
-	door->policies = IOTCON_RESOURCE_DISCOVERABLE;
+	door->policies = IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE
+		| IOTCON_RESOURCE_SECURE;
 
 	return 0;
 }
@@ -197,7 +198,7 @@ int main(int argc, char **argv)
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* initialize iotcon */
-	ret = iotcon_initialize(NULL);
+	ret = iotcon_initialize("/usr/bin/iotcon-test-svr-db-server.dat");
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
@@ -217,9 +218,6 @@ int main(int argc, char **argv)
 		iotcon_deinitialize();
 		return -1;
 	}
-
-	/* add resource options */
-	my_door.policies |= IOTCON_RESOURCE_OBSERVABLE;
 
 	/* create new door resource */
 	my_door.handle = _create_door_resource(my_door.uri_path, my_door.type,
