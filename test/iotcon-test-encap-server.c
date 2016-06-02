@@ -28,7 +28,7 @@ typedef struct _door_resource_s {
 	bool state;
 	char *uri_path;
 	char *type;
-	int properties;
+	uint8_t policies;
 	iotcon_lite_resource_h handle;
 } door_resource_s;
 
@@ -49,7 +49,7 @@ static int _set_door_resource(door_resource_s *door)
 		return -1;
 	}
 
-	door->properties = IOTCON_RESOURCE_DISCOVERABLE;
+	door->policies = IOTCON_RESOURCE_DISCOVERABLE;
 
 	return 0;
 }
@@ -136,7 +136,7 @@ static bool _door_state_changed(iotcon_lite_resource_h resource,
 }
 
 static iotcon_lite_resource_h _create_door_resource(char *uri_path, char *type,
-		int properties, void *user_data)
+		uint8_t policies, void *user_data)
 {
 	int ret;
 	iotcon_state_h state;
@@ -172,7 +172,7 @@ static iotcon_lite_resource_h _create_door_resource(char *uri_path, char *type,
 	}
 
 	/* register door resource */
-	ret = iotcon_lite_resource_create(uri_path, resource_types, properties, state,
+	ret = iotcon_lite_resource_create(uri_path, resource_types, policies, state,
 			_door_state_changed, NULL, &handle);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_lite_resource_create() Fail");
@@ -219,11 +219,11 @@ int main(int argc, char **argv)
 	}
 
 	/* add resource options */
-	my_door.properties |= IOTCON_RESOURCE_OBSERVABLE;
+	my_door.policies |= IOTCON_RESOURCE_OBSERVABLE;
 
 	/* create new door resource */
 	my_door.handle = _create_door_resource(my_door.uri_path, my_door.type,
-			my_door.properties, &my_door);
+			my_door.policies, &my_door);
 	if (NULL == my_door.handle) {
 		ERR("_create_door_resource() Fail");
 		_free_door_resource(&my_door);

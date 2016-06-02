@@ -16,6 +16,7 @@
 #ifndef __IOT_CONNECTIVITY_SERVER_RESOURCE_H__
 #define __IOT_CONNECTIVITY_SERVER_RESOURCE_H__
 
+#include <stdint.h>
 #include <iotcon-types.h>
 
 /**
@@ -55,13 +56,13 @@ static void _door_request_handler(iotcon_resource_h resource, iotcon_request_h r
 static void _create_resource()
 {
 	int ret;
-	int properties;
+	uint8_t policies;
 	iotcon_resource_interfaces_h resource_ifaces = NULL;
 	iotcon_resource_types_h resource_types = NULL;
 	iotcon_resource_h resource_door = NULL;
 
 	// 1. create room resource
-	properties = IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE;
+	policies = IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE;
 
 	ret = iotcon_resource_types_create(&resource_types);
 	if (IOTCON_ERROR_NONE != ret)
@@ -100,7 +101,7 @@ static void _create_resource()
 	}
 
 	ret = iotcon_resource_create("/room/1", resource_types, resource_ifaces,
-			properties, _room_request_handler, NULL, &_resource_room);
+			policies, _room_request_handler, NULL, &_resource_room);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_interfaces_destroy(resource_ifaces);
 		iotcon_resource_types_destroy(resource_types);
@@ -110,7 +111,7 @@ static void _create_resource()
 	iotcon_resource_types_destroy(resource_types);
 
 	// 2. create door resource
-	properties = IOTCON_RESOURCE_OBSERVABLE;
+	policies = IOTCON_RESOURCE_OBSERVABLE;
 
 	ret = iotcon_resource_types_create(&resource_types);
 	if (IOTCON_ERROR_NONE != ret) {
@@ -142,7 +143,7 @@ static void _create_resource()
 	}
 
 	ret = iotcon_resource_create("/door/1", resource_types, resource_ifaces,
-			properties, _door_request_handler, NULL, &resource_door);
+			policies, _door_request_handler, NULL, &resource_door);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_resource_interfaces_destroy(resource_ifaces);
 		iotcon_resource_types_destroy(resource_types);
@@ -208,7 +209,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * add types string to it.\n
  * @a ifaces is a list of resource interfaces. Create a iotcon_resource_interfaces_h handle and
  * add interfaces string to it.\n
- * @a properties also can contain multiple properties like
+ * @a policies also can contain multiple policies like
  * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.\n
  * iotcon_request_handler_cb() will be called when receive CRUD request to the registered
  * resource.
@@ -224,7 +225,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @param[in] uri_path The URI path of the resource
  * @param[in] res_types The list of type of the resource
  * @param[in] ifaces The list of interface of the resource
- * @param[in] properties The properties of the resource\n Set of #iotcon_resource_policy_e
+ * @param[in] policies The policies of the resource\n Set of #iotcon_resource_policy_e
  * @param[in] cb The request handler callback function
  * @param[in] user_data The user data to pass to the callback function
  * @param[out] resource_handle The handle of the resource
@@ -251,7 +252,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
 int iotcon_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		iotcon_resource_interfaces_h ifaces,
-		int properties,
+		uint8_t policies,
 		iotcon_request_handler_cb cb,
 		void *user_data,
 		iotcon_resource_h *resource_handle);
@@ -493,7 +494,7 @@ int iotcon_resource_notify(iotcon_resource_h resource, iotcon_representation_h r
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
- * @see iotcon_resource_get_properties()
+ * @see iotcon_resource_get_policies()
  */
 int iotcon_resource_get_child_count(iotcon_resource_h resource,
 		unsigned int *count);
@@ -519,7 +520,7 @@ int iotcon_resource_get_child_count(iotcon_resource_h resource,
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
- * @see iotcon_resource_get_properties()
+ * @see iotcon_resource_get_policies()
  */
 int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
 		iotcon_resource_h *child);
@@ -543,7 +544,7 @@ int iotcon_resource_get_nth_child(iotcon_resource_h parent, int index,
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
- * @see iotcon_resource_get_properties()
+ * @see iotcon_resource_get_policies()
  */
 int iotcon_resource_get_uri_path(iotcon_resource_h resource, char **uri_path);
 
@@ -566,7 +567,7 @@ int iotcon_resource_get_uri_path(iotcon_resource_h resource, char **uri_path);
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_interfaces()
- * @see iotcon_resource_get_properties()
+ * @see iotcon_resource_get_policies()
  */
 int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_h *types);
 
@@ -589,20 +590,20 @@ int iotcon_resource_get_types(iotcon_resource_h resource, iotcon_resource_types_
  * @see iotcon_resource_get_nth_child()
  * @see iotcon_resource_get_uri_path()
  * @see iotcon_resource_get_types()
- * @see iotcon_resource_get_properties()
+ * @see iotcon_resource_get_policies()
  */
 int iotcon_resource_get_interfaces(iotcon_resource_h resource,
 		iotcon_resource_interfaces_h *ifaces);
 
 /**
- * @brief Gets the properties in the resource.
- * @details @a properties can contain multiple properties like
+ * @brief Gets the policies in the resource.
+ * @details @a policies can contain multiple policies like
  * IOTCON_RESOURCE_DISCOVERABLE | IOTCON_RESOURCE_OBSERVABLE.
  *
  * @since_tizen 3.0
  *
  * @param[in] resource The handle of the resource
- * @param[out] properties The properties of resource\n Set of #iotcon_resource_policy_e
+ * @param[out] policies The policies of resource\n Set of #iotcon_resource_policy_e
  *
  * @return 0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE  Successful
@@ -615,7 +616,7 @@ int iotcon_resource_get_interfaces(iotcon_resource_h resource,
  * @see iotcon_resource_get_types()
  * @see iotcon_resource_get_interfaces()
  */
-int iotcon_resource_get_properties(iotcon_resource_h resource, int *properties);
+int iotcon_resource_get_policies(iotcon_resource_h resource, uint8_t *policies);
 
 /**
  * @}
