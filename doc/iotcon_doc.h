@@ -181,7 +181,7 @@ static void _on_response_get(iotcon_remote_resource_h resource, iotcon_error_e e
 	// handle get from response
 }
 ...
-static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e result,
+static bool _found_resource(iotcon_remote_resource_h resource, iotcon_error_e result,
 		void *user_data)
 {
 	int ret;
@@ -194,49 +194,50 @@ static void _found_resource(iotcon_remote_resource_h resource, iotcon_error_e re
 	iotcon_remote_resource_h resource_clone = NULL;
 
 	if (IOTCON_ERROR_NONE != result)
-		return;
+		return IOTCON_FUNC_STOP;
 
 	ret = iotcon_remote_resource_get_uri_path(resource, &resource_uri_path);
 	if (IOTCON_ERROR_NONE != ret)
-		return;
+		return IOTCON_FUNC_CONTINUE;
 
 	ret = iotcon_remote_resource_get_device_id(resource, &device_id);
 	if (IOTCON_ERROR_NONE != ret)
-		return;
+		return IOTCON_FUNC_CONTINUE;
 
 	ret = iotcon_remote_resource_get_host_address(resource, &resource_host);
 	if (IOTCON_ERROR_NONE != ret)
-		return;
+		return IOTCON_FUNC_CONTINUE;
 
 	ret = iotcon_remote_resource_get_interfaces(resource, &resource_interfaces);
 	if (IOTCON_ERROR_NONE != ret)
-		return;
+		return IOTCON_FUNC_CONTINUE;
 
 	ret = iotcon_remote_resource_get_types(resource, &resource_types);
 	if (IOTCON_ERROR_NONE != ret)
-		return;
+		return IOTCON_FUNC_CONTINUE;
 
 	ret = iotcon_query_create(&query);
 	if (IOTCON_ERROR_NONE != ret)
-		return;
+		return IOTCON_FUNC_CONTINUE;
 
 	ret = iotcon_query_add(query, "key", "value");
 	if (IOTCON_ERROR_NONE != ret)
-		return;
+		return IOTCON_FUNC_CONTINUE;
 
 	ret = iotcon_remote_resource_clone(resource, &resource_clone);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_query_destroy(query);
-		return;
+		return IOTCON_FUNC_CONTINUE;
 	}
 
 	ret = iotcon_remote_resource_get(resource_clone, query, _on_response_get, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_query_destroy(query);
-		return;
+		return IOTCON_FUNC_CONTINUE;
 	}
 
 	iotcon_query_destroy(query);
+	return IOTCON_FUNC_CONTINUE;
 }
 ...
 {
