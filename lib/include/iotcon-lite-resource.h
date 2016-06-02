@@ -178,7 +178,7 @@ typedef bool (*iotcon_lite_resource_post_request_cb)(iotcon_lite_resource_h reso
  * @privlevel public
  * @privilege %http://tizen.org/privilege/internet
  *
- * @remarks @a uri_path length must be less than 64.\n
+ * @remarks @a uri_path length must be less than 128.\n
  * You must destroy @a resource_handle by calling iotcon_lite_resource_destroy()
  * if @a remote_handle is no longer needed.
  *

@@ -30,7 +30,7 @@
 #include "icl-ioty.h"
 
 
-/* The length of uri_path should be less than 64. */
+/* The length of uri_path should be less than 128. */
 API int iotcon_lite_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		uint8_t policies,

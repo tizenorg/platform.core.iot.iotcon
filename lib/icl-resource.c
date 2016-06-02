@@ -102,7 +102,7 @@ bool icl_resource_check_interface(const char *iface)
 }
 
 
-/* The length of uri_path should be less than 64. */
+/* The length of uri_path should be less than 128. */
 API int iotcon_resource_create(const char *uri_path,
 		iotcon_resource_types_h res_types,
 		iotcon_resource_interfaces_h ifaces,
