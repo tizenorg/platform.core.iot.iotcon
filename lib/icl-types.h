@@ -22,21 +22,18 @@
 #include "icl-ioty.h"
 
 typedef struct {
-	iotcon_found_resource_cb cb;
-	void *user_data;
+	icl_cb_s *cb_data;
 	iotcon_remote_resource_h *resource_list;
 	int resource_count;
 } icl_find_cb_s;
 
 typedef struct {
-	iotcon_platform_info_cb cb;
-	void *user_data;
+	icl_cb_s *cb_data;
 	iotcon_platform_info_h platform_info;
 } icl_platform_cb_s;
 
 typedef struct {
-	iotcon_device_info_cb cb;
-	void *user_data;
+	icl_cb_s *cb_data;
 	iotcon_device_info_h device_info;
 } icl_device_cb_s;
 
