@@ -336,11 +336,14 @@ int iotcon_presence_response_get_resource_type(iotcon_presence_response_h respon
  * @param[in] result The result code (Lesser than 0 on fail, otherwise a response result value)
  * @param[in] user_data The user data to pass to the function
  *
+ * @return true to continue to find resource, otherwise false to stop. \n
+ * #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP are more friendly values for the return.
+ *
  * @pre The callback must be registered using iotcon_find_resource()
  *
  * @see iotcon_find_resource()
  */
-typedef void (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
+typedef bool (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
 		iotcon_error_e result, void *user_data);
 
 /**
@@ -395,12 +398,15 @@ int iotcon_find_resource(const char *host_address,
  * @param[in] result The result code (0 on success, other wise a negative error value)
  * @param[in] user_data The user data to pass to the function
  *
+ * @return true to continue to find device information, otherwise false to stop. \n
+ * #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP are more friendly values for the return.
+ *
  * @pre iotcon_find_device_info() will invoke this callback function.
  *
  * @see iotcon_find_device_info()
  * @see iotcon_device_info_get_property()
  */
-typedef void (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
+typedef bool (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
 		iotcon_error_e result, void *user_data);
 
 /**
@@ -471,12 +477,15 @@ int iotcon_device_info_get_property(iotcon_device_info_h device_info,
  * @param[in] result The result code (0 on success, other wise a negative error value)
  * @param[in] user_data The user data to pass to the function
  *
+ * @return true to continue to find platform information, otherwise false to stop. \n
+ * #IOTCON_FUNC_CONTINUE and #IOTCON_FUNC_STOP are more friendly values for the return.
+ *
  * @pre iotcon_find_platform_info() will invoke this callback function.
  *
  * @see iotcon_find_platform_info()
  * @see iotcon_platform_info_get_property()
  */
-typedef void (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
+typedef bool (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
 		iotcon_error_e result, void *user_data);
 
 /**
