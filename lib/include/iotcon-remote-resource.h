@@ -48,31 +48,33 @@ static void _on_get(iotcon_remote_resource_h resource, iotcon_error_e err,
 	...
 }
 
-static void _on_find(iotcon_remote_resource_h resource, iotcon_error_e result,
+static bool _on_find(iotcon_remote_resource_h resource, iotcon_error_e result,
 		void *user_data)
 {
 	int ret;
 	iotcon_remote_resource_h resource_clone = NULL;
 
 	if (IOTCON_ERROR_NONE != result)
-		return;
+		return IOTCON_FUNC_STOP;
 
 	if (NULL == resource)
-		return;
+		return IOTCON_FUNC_CONTINUE;
 
 	// clone handle
 	ret = iotcon_remote_resource_clone(resource, &resource_clone);
 	if (IOTCON_ERROR_NONE != ret)
-		return;
+		return IOTCON_FUNC_CONTINUE;
 
 	// request get
 	ret = iotcon_remote_resource_get(resource_clone, NULL, _on_get, NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		iotcon_remote_resource_destroy(resource_clone);
-		return;
+		return IOTCON_FUNC_CONTINUE;
 	}
 
 	...
+
+	return IOTCON_FUNC_CONTINUE;
 }
 
 static void _find_light_resource()
