@@ -133,25 +133,63 @@ void* icl_ioty_ocprocess_thread(void *data)
 	return NULL;
 }
 
-
 static gboolean _icl_ioty_ocprocess_find_idle_cb(gpointer p)
 {
 	int i;
-	icl_find_cb_s *cb_data = p;
+	icl_cb_s *cb_data;
+	icl_find_cb_s *find_cb_data = p;
+	iotcon_found_resource_cb cb;
+
+	RETV_IF(NULL == find_cb_data, G_SOURCE_REMOVE);
+	cb_data = find_cb_data->cb_data;
+
+	if (cb_data && cb_data->cb) {
+		for (i = 0; i < find_cb_data->resource_count; i++) {
+			find_cb_data->resource_list[i]->is_found = true;
+			cb = (iotcon_found_resource_cb)cb_data->cb;
+			if (IOTCON_FUNC_STOP == cb(find_cb_data->resource_list[i], IOTCON_ERROR_NONE,
+						cb_data->user_data)) { /* Stop */
+				INFO("Stop the callback");
+				cb_data->cb = NULL;
+
+				ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+				OCCancel(cb_data->handle, OC_LOW_QOS, NULL, 0);
+				ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+
+				break;
+			}
+		}
+	}
+	icl_destroy_find_cb_data(find_cb_data);
+	return G_SOURCE_REMOVE;
+}
+
+static gboolean _icl_ioty_ocprocess_fail_idle_cb(gpointer p)
+{
+	FN_CALL;
+	icl_cb_s *cb_data = p;
 
 	RETV_IF(NULL == cb_data, G_SOURCE_REMOVE);
 
 	if (cb_data->cb) {
-		for (i = 0; i < cb_data->resource_count; i++) {
-			cb_data->resource_list[i]->is_found = true;
-			cb_data->cb(cb_data->resource_list[i], IOTCON_ERROR_NONE, cb_data->user_data);
+		switch (cb_data->op) {
+		case ICL_FIND_RESOURCE:
+			((iotcon_found_resource_cb)cb_data->cb)(NULL, cb_data->result, cb_data->user_data);
+			break;
+		case ICL_GET_DEVICE_INFO:
+			((iotcon_device_info_cb)cb_data->cb)(NULL, cb_data->result, cb_data->user_data);
+			break;
+		case ICL_GET_PLATFORM_INFO:
+			((iotcon_platform_info_cb)cb_data->cb)(NULL, cb_data->result, cb_data->user_data);
+			break;
+		default:
+			ERR("Invalid operation(%d)", cb_data->op);
+			return G_SOURCE_REMOVE;
 		}
 	}
-
-	icl_destroy_find_cb_data(cb_data);
-
 	return G_SOURCE_REMOVE;
 }
+
 
 OCStackApplicationResult icl_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle,
 		OCClientResponse *resp)
@@ -173,17 +211,16 @@ OCStackApplicationResult icl_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 			(OCDiscoveryPayload*)resp->payload, &resource_list, &resource_count);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("_icl_ioty_ocprocess_parse_find_payload() Fail(%d)", ret);
-		if (cb_data->cb)
-			((iotcon_found_resource_cb)cb_data->cb)(NULL, ret, cb_data->user_data);
+		cb_data->result = ret;
+		g_idle_add(_icl_ioty_ocprocess_fail_idle_cb, cb_data);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
-	cb_data->found = true;
 
 	ret = icl_create_find_cb_data(cb_data, resource_list, resource_count, &find_cb_data);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icl_create_find_cb_data() Fail(%d)", ret);
-		if (cb_data->cb)
-			((iotcon_found_resource_cb)cb_data->cb)(NULL, ret, cb_data->user_data);
+		cb_data->result = ret;
+		g_idle_add(_icl_ioty_ocprocess_fail_idle_cb, cb_data);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
 
@@ -196,15 +233,26 @@ OCStackApplicationResult icl_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 
 static gboolean _icl_ioty_ocprocess_device_info_idle_cb(gpointer p)
 {
-	icl_device_cb_s *cb_data = p;
+	icl_cb_s *cb_data;
+	icl_device_cb_s *device_cb_data = p;
+	iotcon_device_info_cb cb;
 
-	RETV_IF(NULL == cb_data, G_SOURCE_REMOVE);
+	RETV_IF(NULL == device_cb_data, G_SOURCE_REMOVE);
+	cb_data = device_cb_data->cb_data;
 
-	if (cb_data->cb)
-		cb_data->cb(cb_data->device_info, IOTCON_ERROR_NONE, cb_data->user_data);
+	if (cb_data && cb_data->cb) {
+		cb = (iotcon_device_info_cb)cb_data->cb;
+		if (IOTCON_FUNC_STOP == cb(device_cb_data->device_info, IOTCON_ERROR_NONE,
+					cb_data->user_data)) { /* Stop */
+			cb_data->cb = NULL;
 
-	icl_destroy_device_cb_data(cb_data);
+			ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+			OCCancel(cb_data->handle, OC_LOW_QOS, NULL, 0);
+			ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		}
+	}
 
+	icl_destroy_device_cb_data(device_cb_data);
 	return G_SOURCE_REMOVE;
 }
 
@@ -232,17 +280,16 @@ OCStackApplicationResult icl_ioty_ocprocess_device_info_cb(void *ctx,
 			&info);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icl_ioty_parse_oic_device_payload() Fail(%d)", ret);
-		if (cb_data->cb)
-			((iotcon_device_info_cb)cb_data->cb)(NULL, ret, cb_data->user_data);
+		cb_data->result = ret;
+		g_idle_add(_icl_ioty_ocprocess_fail_idle_cb, cb_data);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
-	cb_data->found = true;
 
 	ret = icl_create_device_cb_data(cb_data, info, &device_cb_data);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icl_create_device_cb_data() Fail(%d)", ret);
-		if (cb_data->cb)
-			((iotcon_device_info_cb)cb_data->cb)(NULL, ret, cb_data->user_data);
+		cb_data->result = ret;
+		g_idle_add(_icl_ioty_ocprocess_fail_idle_cb, cb_data);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
 
@@ -255,15 +302,26 @@ OCStackApplicationResult icl_ioty_ocprocess_device_info_cb(void *ctx,
 
 static gboolean _icl_ioty_ocprocess_platform_info_idle_cb(gpointer p)
 {
-	icl_platform_cb_s *cb_data = p;
+	icl_cb_s *cb_data;
+	icl_platform_cb_s *platform_cb_data = p;
+	iotcon_platform_info_cb cb;
 
-	RETV_IF(NULL == cb_data, G_SOURCE_REMOVE);
+	RETV_IF(NULL == platform_cb_data, G_SOURCE_REMOVE);
+	cb_data = platform_cb_data->cb_data;
 
-	if (cb_data->cb)
-		cb_data->cb(cb_data->platform_info, IOTCON_ERROR_NONE, cb_data->user_data);
+	if (cb_data && cb_data->cb) {
+		cb = (iotcon_platform_info_cb)cb_data->cb;
+		if (IOTCON_FUNC_STOP == cb(platform_cb_data->platform_info, IOTCON_ERROR_NONE,
+					cb_data->user_data)) { /* Stop */
+			cb_data->cb = NULL;
 
-	icl_destroy_platform_cb_data(cb_data);
+			ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+			OCCancel(cb_data->handle, OC_LOW_QOS, NULL, 0);
+			ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		}
+	}
 
+	icl_destroy_platform_cb_data(platform_cb_data);
 	return G_SOURCE_REMOVE;
 }
 
@@ -291,17 +349,16 @@ OCStackApplicationResult icl_ioty_ocprocess_platform_info_cb(void *ctx,
 			&info);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icl_ioty_parse_oic_platform_payload() Fail(%d)", ret);
-		if (cb_data->cb)
-			((iotcon_platform_info_cb)cb_data->cb)(NULL, ret, cb_data->user_data);
+		cb_data->result = ret;
+		g_idle_add(_icl_ioty_ocprocess_fail_idle_cb, cb_data);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
-	cb_data->found = true;
 
 	ret = icl_create_platform_cb_data(cb_data, info, &platform_cb_data);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("icl_create_platform_cb_data() Fail(%d)", ret);
-		if (cb_data->cb)
-			((iotcon_platform_info_cb)cb_data->cb)(NULL, ret, cb_data->user_data);
+		cb_data->result = ret;
+		g_idle_add(_icl_ioty_ocprocess_fail_idle_cb, cb_data);
 		return OC_STACK_KEEP_TRANSACTION;
 	}
 

@@ -55,8 +55,7 @@ int icl_create_find_cb_data(icl_cb_s *cb_data,
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	cd->cb = (iotcon_found_resource_cb)cb_data->cb;
-	cd->user_data = cb_data->user_data;
+	cd->cb_data = cb_data;
 	cd->resource_list = resource_list;
 	cd->resource_count = resource_count;
 
@@ -94,8 +93,7 @@ int icl_create_device_cb_data(icl_cb_s *cb_data,
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
-	cd->cb = (iotcon_device_info_cb)cb_data->cb;
-	cd->user_data = cb_data->user_data;
+	cd->cb_data = cb_data;
 	cd->device_info = device_info;
 
 	*dev_cb_data = cd;
@@ -139,8 +137,7 @@ int icl_create_platform_cb_data(icl_cb_s *cb_data,
 		ERR("calloc() Fail(%d)", errno);
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
-	cd->cb = (iotcon_platform_info_cb)cb_data->cb;
-	cd->user_data = cb_data->user_data;
+	cd->cb_data = cb_data;
 	cd->platform_info = platform_info;
 
 	*platform_cb_data = cd;
