@@ -34,7 +34,6 @@ typedef struct {
 	icl_operation_e op;
 	void *cb;
 	void *user_data;
-	bool found;
 	int timeout;
 	OCDoHandle handle;
 } icl_cb_s;
