@@ -149,7 +149,7 @@ static gboolean _icl_ioty_timeout(gpointer user_data)
 	RETV_IF(NULL == cb_info, G_SOURCE_REMOVE);
 	cb_info->timeout = 0;
 
-	if (false == cb_info->found && cb_info->cb) {
+	if (cb_info->cb) {
 		switch (cb_info->op) {
 		case ICL_FIND_RESOURCE:
 			((iotcon_found_resource_cb)cb_info->cb)(NULL, IOTCON_ERROR_TIMEOUT,
@@ -172,6 +172,7 @@ static gboolean _icl_ioty_timeout(gpointer user_data)
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCCancel(cb_info->handle, OC_LOW_QOS, NULL, 0);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+
 	if (OC_STACK_OK != ret) {
 		ERR("OCCancel() Fail(%d)", ret);
 		return G_SOURCE_REMOVE;
@@ -180,15 +181,23 @@ static gboolean _icl_ioty_timeout(gpointer user_data)
 	return G_SOURCE_REMOVE;
 }
 
+static gboolean _icl_ioty_free_cb_data_idle_cb(gpointer p)
+{
+	icl_cb_s *cb_info = p;
+	free(cb_info);
+	return G_SOURCE_REMOVE;
+}
+
 static void _icl_ioty_free_cb_data(void *data)
 {
 	icl_cb_s *cb_info = data;
 	RET_IF(NULL == cb_info);
 
-	if (cb_info->timeout)
+	if (cb_info->timeout) {
 		g_source_remove(cb_info->timeout);
-
-	free(cb_info);
+		cb_info->timeout = 0;
+	}
+	g_idle_add(_icl_ioty_free_cb_data_idle_cb, cb_info);
 }
 
 int icl_ioty_find_resource(const char *host_address,
