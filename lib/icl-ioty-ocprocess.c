@@ -58,7 +58,7 @@ void icl_ioty_ocprocess_start()
 
 API int iotcon_polling_get_interval(int *interval)
 {
-	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == interval, IOTCON_ERROR_INVALID_PARAMETER);
 
 	*interval = icl_ioty_polling_interval;
@@ -69,7 +69,7 @@ API int iotcon_polling_get_interval(int *interval)
 
 API int iotcon_polling_set_interval(int interval)
 {
-	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(interval <= ICL_IOTY_TIME_INTERVAL_MIN, IOTCON_ERROR_INVALID_PARAMETER);
 
 	icl_ioty_polling_interval = interval;
@@ -84,7 +84,7 @@ API int iotcon_polling_set_interval(int interval)
 
 API int iotcon_polling_invoke(void)
 {
-	RETV_IF(false == ic_utils_check_oic_feature(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_POLLING);
 	ic_utils_cond_signal(IC_UTILS_COND_POLLING);
