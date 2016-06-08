@@ -99,6 +99,7 @@ void* icl_ioty_ocprocess_thread(void *data)
 	FN_CALL;
 	int ret;
 	OCStackResult result;
+	const struct timespec delay = {0, 10 * 1000 * 1000}; /* 10 msec */
 
 	// TODO: Current '100ms' is not proven sleep time. Revise the time after test.
 	// TODO: Or recommend changes to event driven architecture
@@ -123,8 +124,10 @@ void* icl_ioty_ocprocess_thread(void *data)
 			break;
 		}
 
-		ic_utils_cond_timedwait(IC_UTILS_COND_POLLING, IC_UTILS_MUTEX_POLLING,
-				icl_ioty_polling_interval);
+		// TODO: Fixme
+		nanosleep(&delay, NULL);
+		//ic_utils_cond_timedwait(IC_UTILS_COND_POLLING, IC_UTILS_MUTEX_POLLING,
+		//		icl_ioty_polling_interval);
 	}
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_POLLING);
 
