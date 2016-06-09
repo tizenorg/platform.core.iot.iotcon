@@ -93,7 +93,6 @@ API int iotcon_polling_invoke(void)
 	return IOTCON_ERROR_NONE;
 }
 
-
 void* icl_ioty_ocprocess_thread(void *data)
 {
 	FN_CALL;

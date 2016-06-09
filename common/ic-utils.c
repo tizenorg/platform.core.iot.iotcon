@@ -352,9 +352,9 @@ void ic_utils_cond_timedwait(int cond_type, int mutex_type, int polling_interval
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 
 	/* ts.tv_nsec exists between 0 and 1000000000 */
-	nsec = (polling_interval % 1000) * 1000000;
-	ts.tv_sec = (polling_interval / 1000) + (nsec / 1000000000);
-	ts.tv_nsec = nsec % 1000000000;
+	nsec = (polling_interval % 1000) * 1000000 + ts.tv_nsec;
+	ts.tv_sec += (polling_interval / 1000) + (nsec / 1,000,000,000);
+	ts.tv_nsec = nsec % 1000,000,000;
 
 	ret = pthread_cond_timedwait(_utils_cond_get(cond_type), _utils_mutex_get(mutex_type),
 			&ts);
