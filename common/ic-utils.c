@@ -340,8 +340,14 @@ void ic_utils_cond_signal(int type)
 {
 	int ret;
 
+	ret = pthread_mutex_lock(_utils_mutex_get(IC_UTILS_MUTEX_POLLING));
+	WARN_IF(0 != ret, "pthread_mutex_lock() Fail(%d)", ret);
+
 	ret = pthread_cond_signal(_utils_cond_get(type));
 	WARN_IF(0 != ret, "pthread_cond_signal() Fail(%d)", ret);
+
+	ret = pthread_mutex_unlock(_utils_mutex_get(IC_UTILS_MUTEX_POLLING));
+	WARN_IF(0 != ret, "pthread_mutex_unlock() Fail(%d)", ret);
 }
 
 void ic_utils_cond_timedwait(int cond_type, int mutex_type, int polling_interval)

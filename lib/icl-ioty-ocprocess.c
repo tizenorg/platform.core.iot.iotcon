@@ -74,9 +74,7 @@ API int iotcon_polling_set_interval(int interval)
 
 	icl_ioty_polling_interval = interval;
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_POLLING);
 	ic_utils_cond_signal(IC_UTILS_COND_POLLING);
-	ic_utils_mutex_unlock(IC_UTILS_MUTEX_POLLING);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -86,9 +84,7 @@ API int iotcon_polling_invoke(void)
 {
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_POLLING);
 	ic_utils_cond_signal(IC_UTILS_COND_POLLING);
-	ic_utils_mutex_unlock(IC_UTILS_MUTEX_POLLING);
 
 	return IOTCON_ERROR_NONE;
 }

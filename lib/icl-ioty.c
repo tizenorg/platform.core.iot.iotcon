@@ -60,6 +60,7 @@ void icl_ioty_deinit(pthread_t thread)
 	OCStackResult result;
 
 	icl_ioty_ocprocess_stop();
+	ic_utils_cond_signal(IC_UTILS_COND_POLLING);
 	ret = pthread_join(thread, NULL);
 	if (0 != ret)
 		ERR("pthread_join() Fail(%d)", ret);
