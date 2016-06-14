@@ -474,12 +474,13 @@ OCStackApplicationResult icl_ioty_ocprocess_crud_cb(void *ctx,
 {
 	FN_CALL;
 	int ret;
-	iotcon_response_result_e response_result;
+	GSource *idle_src;
 	iotcon_options_h options;
-	icl_response_container_s *cb_container = ctx;
 	iotcon_response_h response;
 	iotcon_representation_h repr;
 	icl_response_cb_s *response_cb_data;
+	iotcon_response_result_e response_result;
+	icl_response_container_s *cb_container = ctx;
 
 	RETV_IF(NULL == ctx, OC_STACK_DELETE_TRANSACTION);
 	RETV_IF(NULL == resp, OC_STACK_DELETE_TRANSACTION);
@@ -549,7 +550,12 @@ OCStackApplicationResult icl_ioty_ocprocess_crud_cb(void *ctx,
 		return OC_STACK_DELETE_TRANSACTION;
 	}
 
-	g_idle_add(_icl_ioty_ocprocess_crud_idle_cb, response_cb_data);
+	idle_src = g_idle_source_new();
+	g_source_set_priority(idle_src, G_PRIORITY_DEFAULT);
+	g_source_set_callback(idle_src, _icl_ioty_ocprocess_crud_idle_cb, response_cb_data,
+			NULL);
+	g_source_attach(idle_src, cb_container->thread_context);
+	g_source_unref(idle_src);
 
 	/* DO NOT FREE ctx(cb_container). It MUST be freed in the ocstack */
 	/* DO NOT FREE cb_data. It MUST be freed in the idle */

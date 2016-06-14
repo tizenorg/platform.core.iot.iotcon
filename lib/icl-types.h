@@ -18,6 +18,7 @@
 #define __IOT_CONNECTIVITY_LIBRARY_TYPES_H__
 
 #include <stdint.h>
+#include <glib.h>
 #include "iotcon-types.h"
 #include "icl-ioty.h"
 
@@ -65,6 +66,7 @@ typedef struct {
 	int timeout;
 	iotcon_remote_resource_h resource;
 	iotcon_request_type_e req_type;
+	GMainContext *thread_context;
 } icl_response_container_s;
 
 typedef struct {
