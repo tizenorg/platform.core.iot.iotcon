@@ -744,6 +744,8 @@ static void _icl_ioty_free_response_container(void *data)
 	}
 
 	icl_remote_resource_unref(cb_container->resource);
+	g_main_context_unref(cb_container->thread_context);
+
 	free(cb_container);
 }
 
@@ -850,6 +852,7 @@ static int _icl_ioty_remote_resource_crud(
 	cb_container->req_type = req_type;
 	cb_container->cb = cb;
 	cb_container->user_data = user_data;
+	cb_container->thread_context = g_main_context_ref_thread_default();
 
 	cbdata.context = cb_container;
 	cbdata.cb = icl_ioty_ocprocess_crud_cb;
