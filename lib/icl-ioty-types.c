@@ -998,9 +998,14 @@ int icl_ioty_convert_representation(iotcon_representation_h repr,
 	GList *c;
 	OCRepPayload *repr_payload, *cur;
 
+	RETV_IF(NULL == repr, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == payload, IOTCON_ERROR_INVALID_PARAMETER);
 
 	repr_payload = OCRepPayloadCreate();
+	if (NULL == repr_payload) {
+		ERR("OCRepPayloadCreate() Fail");
+		return IOTCON_ERROR_OUT_OF_MEMORY;
+	}
 
 	if (NULL == repr) {
 		*payload = (OCPayload *)repr_payload;
