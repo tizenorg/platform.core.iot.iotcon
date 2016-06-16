@@ -33,9 +33,6 @@
 #ifdef TZ_VER_3
 static int _ic_ocf_feature = -1;
 static const char *IC_FEATURE_OCF = "http://tizen.org/feature/iot.ocf";
-
-static int _ic_ocf_security_feature = -1;
-static const char *IC_FEATURE_OCF_SECURITY = "http://tizen.org/feature/iot.ocf.security";
 #endif
 
 // TODO: Can't access in user side daemon
@@ -81,8 +78,6 @@ char* ic_utils_strdup(const char *src)
 
 bool ic_utils_check_permission(int permssion)
 {
-	// TODO: Temporary code (need guide from security team)
-
 	static int has_network_permission = -1;
 	static int has_internet_permission = -1;
 
@@ -150,20 +145,6 @@ bool ic_utils_check_ocf_feature()
 		_ic_ocf_feature = feature_supported ? 1 : 0;
 	}
 	return _ic_ocf_feature;
-#else
-	return true;
-#endif
-}
-
-bool ic_utils_check_ocf_security_feature()
-{
-#ifdef TZ_VER_3
-	if (_ic_ocf_security_feature < 0) {
-		bool feature_supported = false;
-		system_info_get_platform_bool(IC_FEATURE_OCF_SECURITY, &feature_supported);
-		_ic_ocf_security_feature = feature_supported ? 1 : 0;
-	}
-	return _ic_ocf_security_feature;
 #else
 	return true;
 #endif
