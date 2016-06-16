@@ -36,13 +36,8 @@ extern "C" {
  * @section CAPI_IOT_CONNECTIVITY_MODULE_FEATURE Related Features
  * This API is related with the following features:\n
  * - http://tizen.org/feature/iot.ocf\n
- * - http://tizen.org/feature/iot.ocf.security\n
  *
  * It is recommended to design feature related codes in your application for reliability.\n
- *
- * If the feature(http://tizen.org/feature/iot.ocf.security) for OCF security architecture
- * is applied, you MUST call iotcon_secure_initialize() instead of iotcon_initialize().
- * Then applications communicate with each other based on OCF security architecture.
  *
  * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
  *
@@ -54,36 +49,6 @@ extern "C" {
  */
 
 /**
- * @brief Initializes IoTCon with secure mode.
- * @details Call this function to start IoTCon above OCF security architecture.
- *
- * @since_tizen 3.0
- * @privlevel public
- * @privilege %http://tizen.org/privilege/network.get
- * @privilege %http://tizen.org/privilege/internet
- *
- * @remarks If the device has the feature("http://tizen.org/feature/iot.ocf.security"),
- * you must call this function instead of iotcon_initialize().\n
- * @a file_path point to a file for handling secure virtual resources.
- * The file that is CBOR(Concise Binary Object Representation)-format must already exist
- * in @a file_path. We recommend to use application-local file for @a file_path.\n
- * You must call iotcon_deinitialize() if IoTCon API is no longer needed.
- *
- * @param[in] file_path The file path to point to storage for handling secure virtual resources.
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval #IOTCON_ERROR_NONE Successful
- * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
- * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
- * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
- * @retval #IOTCON_ERROR_IOTIVITY  Iotivity errors
- *
- * @see iotcon_deinitialize()
- * @see system_info_get_platform_bool()
- */
-int iotcon_secure_initialize(const char *file_path);
-
-/**
  * @brief Initializes IoTCon.
  * @details Call this function to start IoTCon.
  *
@@ -92,7 +57,10 @@ int iotcon_secure_initialize(const char *file_path);
  * @privilege %http://tizen.org/privilege/network.get
  * @privilege %http://tizen.org/privilege/internet
  *
- * @remarks You must call iotcon_deinitialize() if IoTCon API is no longer needed.
+ * @a file_path point to a file for handling secure virtual resources.
+ * The file that is CBOR(Concise Binary Object Representation)-format must already exist
+ * in @a file_path. We recommend to use application-local file for @a file_path.\n
+ * You must call iotcon_deinitialize() if IoTCon API is no longer needed.
  *
  * @return  0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE Successful
@@ -101,7 +69,7 @@ int iotcon_secure_initialize(const char *file_path);
  *
  * @see iotcon_deinitialize()
  */
-int iotcon_initialize(void);
+int iotcon_initialize(const char *file_path);
 
 /**
  * @brief Deinitializes IoTCon.
@@ -116,7 +84,6 @@ int iotcon_initialize(void);
  * @pre iotcon_initialize() should be called to initialize.
  *
  * @see iotcon_initialize()
- * @see iotcon_secure_initialize()
  */
 void iotcon_deinitialize(void);
 
