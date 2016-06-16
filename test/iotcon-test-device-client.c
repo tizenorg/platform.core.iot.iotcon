@@ -180,7 +180,7 @@ int main(int argc, char **argv)
 	loop = g_main_loop_new(NULL, FALSE);
 
 	/* initialize iotcon */
-	ret = iotcon_initialize();
+	ret = iotcon_initialize(NULL);
 	if (IOTCON_ERROR_NONE != ret) {
 		ERR("iotcon_initialize() Fail(%d)", ret);
 		return -1;
