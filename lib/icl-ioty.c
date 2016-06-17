@@ -45,6 +45,7 @@
 #include "icl-ioty-ocprocess.h"
 #include "icl-ioty-types.h"
 #include "icl-ioty.h"
+#include "icl-cbor.h"
 
 static int icl_remote_resource_time_interval = IC_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
 static GHashTable *icl_monitoring_table;
@@ -78,9 +79,18 @@ static FILE* _icl_ioty_ps_fopen(const char *path, const char *mode)
 int icl_ioty_set_persistent_storage(const char *file_path)
 {
 	FN_CALL;
+	int ret;
 	OCStackResult result;
 
-	if (-1 == access(file_path, R_OK | W_OK)) {
+	RETV_IF(NULL == file_path, IOTCON_ERROR_INVALID_PARAMETER);
+
+	if (-1 == access(file_path, F_OK)) {
+		ret = icl_cbor_create_svr_db(file_path);
+		if (IOTCON_ERROR_NONE != ret) {
+			ERR("icl_cbor_create_svr_db() Fail(%d)", ret);
+			return ret;
+		}
+	} else if (-1 == access(file_path, R_OK | W_OK)) {
 		ERR("access() Fail(%d)", errno);
 		return IOTCON_ERROR_PERMISSION_DENIED;
 	}
