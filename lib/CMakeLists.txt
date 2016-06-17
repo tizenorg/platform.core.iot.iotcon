@@ -4,7 +4,7 @@ INCLUDE_DIRECTORIES(include)
 FILE(GLOB CLIENT_SRCS *.c ${CMAKE_SOURCE_DIR}/common/*.c)
 
 pkg_check_modules(client_pkgs REQUIRED glib-2.0 dlog capi-base-common gio-2.0
-	capi-system-info capi-system-system-settings gio-unix-2.0 iotivity cynara-client)
+	capi-system-info capi-system-system-settings gio-unix-2.0 iotivity cynara-client uuid)
 
 FOREACH(flag ${client_pkgs_CFLAGS_OTHER})
 	IF(${flag} MATCHES "\\-D+")
