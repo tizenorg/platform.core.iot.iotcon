@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,19 @@ static iotcon_provisioning_devices_h icl_unowned_devices;
 
 static void* _provisioning_remove_device_thread(void *user_data);
 
+static iotcon_error_e _provisioning_parse_oic_error(OCStackResult ret)
+{
+	switch (ret) {
+	case OC_STACK_RESOURCE_CREATED:
+	case OC_STACK_RESOURCE_DELETED:
+		return IOTCON_ERROR_NONE;
+	case OC_STACK_AUTHENTICATION_FAILURE:
+		return IOTCON_ERROR_AUTHENTICATION_FAILURE;
+	default:
+		return ic_ioty_parse_oic_error(ret);
+	}
+}
+
 static void _provisioning_set_justworks()
 {
 	icl_justworks_otmcb.loadSecretCB = LoadSecretJustWorksCallback;
@@ -159,14 +172,14 @@ API int iotcon_provisioning_initialize(const char *file_path, const char *db_pat
 	result = OCInitPM(db_path);
 	if (OC_STACK_OK != result) {
 		ERR("OCInitPM() Fail(%d)", result);
-		return ic_ioty_parse_oic_error(result);
+		return _provisioning_parse_oic_error(result);
 	}
 
 	_provisioning_set_justworks();
 	result = OCSetOwnerTransferCallbackData(OIC_JUST_WORKS, &icl_justworks_otmcb);
 	if (OC_STACK_OK != result) {
 		ERR("OCSetOwnerTransferCallbackData() Fail(%d)", result);
-		return ic_ioty_parse_oic_error(result);
+		return _provisioning_parse_oic_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -205,7 +218,7 @@ API int iotcon_provisioning_set_randompins(iotcon_provisioning_randompins_cb cb,
 	result = OCSetOwnerTransferCallbackData(OIC_RANDOM_DEVICE_PIN, &icl_pinbased_otmcb);
 	if (OC_STACK_OK != result) {
 		ERR("OCSetOwnerTransferCallbackData() Fail(%d)", result);
-		return ic_ioty_parse_oic_error(result);
+		return _provisioning_parse_oic_error(result);
 	}
 
 	icl_randompins_cb_container.cb = cb;
@@ -607,7 +620,7 @@ static int _provisioning_ownership_transfer_get_result(
 	for (i = 0; i < count; i++) {
 		if (true == icl_provisioning_compare_oic_uuid(&oic_device->doxm->deviceID,
 					(OicUuid_t*)&result_list[i].deviceId))
-			return ic_ioty_parse_oic_error(result_list[i].res);
+			return _provisioning_parse_oic_error(result_list[i].res);
 	}
 
 	return IOTCON_ERROR_IOTIVITY;
@@ -722,7 +735,7 @@ API int iotcon_provisioning_register_unowned_devices(
 	if (OC_STACK_OK != result) {
 		ERR("OCDoOwnershipTransfer() Fail(%d)", result);
 		_provisioning_ownership_transfer_cb_container_destroy(container);
-		return ic_ioty_parse_oic_error(result);
+		return _provisioning_parse_oic_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -768,7 +781,7 @@ API int iotcon_provisioning_register_unowned_device(
 	if (OC_STACK_OK != result) {
 		ERR("OCDoOwnershipTransfer() Fail(%d)", result);
 		_provisioning_ownership_transfer_cb_container_destroy(container);
-		return ic_ioty_parse_oic_error(result);
+		return _provisioning_parse_oic_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -823,7 +836,7 @@ static void _provisioning_provision_cred_cb(void *ctx, int n_of_res,
 	for (i = 0; i < n_of_res; i++) {
 		DBG("arr[%d].res : %d", i, arr[i].res);
 		if (OC_STACK_OK != arr[i].res)
-			container->result = ic_ioty_parse_oic_error(arr[i].res);
+			container->result = _provisioning_parse_oic_error(arr[i].res);
 	}
 	g_idle_add(_provisioning_provision_cred_idle_cb, container);
 }
@@ -879,7 +892,7 @@ API int iotcon_provisioning_provision_cred(iotcon_provisioning_device_h device1,
 	if (OC_STACK_OK != result) {
 		ERR("OCProvisionCredentails() Fail(%d)", result);
 		_provisioning_provision_cred_cb_container_destroy(container);
-		return ic_ioty_parse_oic_error(result);
+		return _provisioning_parse_oic_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -1004,7 +1017,7 @@ static void _provisioning_provision_acl_cb(void *ctx, int n_of_res,
 	for (i = 0; i < n_of_res; i++) {
 		DBG("arr[%d].res : %d", i, arr[i].res);
 		if (OC_STACK_OK != arr[i].res)
-			container->result = ic_ioty_parse_oic_error(arr[i].res);
+			container->result = _provisioning_parse_oic_error(arr[i].res);
 	}
 	g_idle_add(_provisioning_provision_acl_idle_cb, container);
 }
@@ -1060,7 +1073,7 @@ API int iotcon_provisioning_provision_acl(iotcon_provisioning_device_h device,
 	if (OC_STACK_OK != result) {
 		ERR("OCProvisionACL() Fail(%d)", result);
 		_provisioning_provision_acl_cb_container_destroy(container);
-		return ic_ioty_parse_oic_error(result);
+		return _provisioning_parse_oic_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -1123,7 +1136,7 @@ static void _provisioning_pairwise_devices_cb(void *ctx, int n_of_res,
 	for (i = 0; i < n_of_res; i++) {
 		DBG("arr[%d].res : %d", i, arr[i].res);
 		if (OC_STACK_OK != arr[i].res)
-			container->result = ic_ioty_parse_oic_error(arr[i].res);
+			container->result = _provisioning_parse_oic_error(arr[i].res);
 	}
 	g_idle_add(_provisioning_pairwise_devices_idle_cb, container);
 }
@@ -1209,7 +1222,7 @@ API int iotcon_provisioning_pairwise_devices(iotcon_provisioning_device_h device
 	if (OC_STACK_OK != result) {
 		ERR("OCProvisionPairwiseDevces() Fail(%d)", result);
 		_provisioning_pairwise_devices_cb_container_destroy(container);
-		return ic_ioty_parse_oic_error(result);
+		return _provisioning_parse_oic_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -1260,7 +1273,7 @@ static void _provisioning_unlink_pairwise_cb(void *ctx, int n_of_res,
 	for (i = 0; i < n_of_res; i++) {
 		DBG("arr[%d].res : %d", i, arr[i].res);
 		if (OC_STACK_OK != arr[i].res)
-			container->result = ic_ioty_parse_oic_error(arr[i].res);
+			container->result = _provisioning_parse_oic_error(arr[i].res);
 	}
 
 	g_idle_add(_provisioning_unlink_pairwise_idle_cb, container);
@@ -1314,7 +1327,7 @@ API int iotcon_provisioning_unlink_pairwise(iotcon_provisioning_device_h device1
 	if (OC_STACK_OK != result) {
 		ERR("OCUnlinkDevices() Fail(%d)", result);
 		_provisioning_unlink_pairwise_cb_container_destroy(container);
-		return ic_ioty_parse_oic_error(result);
+		return _provisioning_parse_oic_error(result);
 	}
 
 	return IOTCON_ERROR_NONE;
