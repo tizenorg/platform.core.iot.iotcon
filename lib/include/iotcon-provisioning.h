@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2016 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 #ifndef __IOT_CONNECTIVITY_PROVISIONING_H__
 #define __IOT_CONNECTIVITY_PROVISIONING_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <iotcon-errors.h>
 
-// -> iotcon-types.h
+#define IOTCON_ERROR_AUTHENTICATION_FAILURE (TIZEN_ERROR_IOTCON | 0xF001)
+
 typedef struct icl_provisioning_devices* iotcon_provisioning_devices_h;
 typedef struct icl_provisioning_device* iotcon_provisioning_device_h;
 typedef struct icl_provisioning_acl* iotcon_provisioning_acl_h;
 
-// -> iotcon-constant.h
 typedef enum {
 	IOTCON_PERMISSION_CREATE = (1 << 0),
 	IOTCON_PERMISSION_READ = (1 << 1),
@@ -179,9 +177,5 @@ int iotcon_provisioning_acl_add_resource(iotcon_provisioning_acl_h acl,
 int iotcon_provisioning_acl_set_permission(iotcon_provisioning_acl_h acl,
 		int permission);
 int iotcon_provisioning_acl_destroy(iotcon_provisioning_acl_h acl);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* __IOT_CONNECTIVITY_PROVISIONING_H__ */
