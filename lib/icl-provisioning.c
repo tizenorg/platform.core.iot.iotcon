@@ -222,6 +222,9 @@ API int iotcon_provisioning_get_devices(iotcon_provisioning_devices_h *owned_dev
 {
 	FN_CALL;
 
+	RETV_IF(NULL == owned_devices && NULL == unowned_devices,
+			IOTCON_ERROR_INVALID_PARAMETER);
+
 	if (owned_devices)
 		*owned_devices = icl_owned_devices;
 

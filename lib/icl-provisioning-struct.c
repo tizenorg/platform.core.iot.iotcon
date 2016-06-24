@@ -76,6 +76,8 @@ static OCProvisionDev_t* _provisioning_device_clone(OCProvisionDev_t *src)
 
 	OCProvisionDev_t *clone;
 
+	RETV_IF(NULL == src, NULL);
+
 	clone = PMCloneOCProvisionDev(src);
 	if (NULL == clone) {
 		ERR("PMCloneOCProvisionDev() Fail");
@@ -604,9 +606,13 @@ API int iotcon_provisioning_devices_add_device(iotcon_provisioning_devices_h dev
 {
 	FN_CALL;
 	OCProvisionDev_t *current;
-	OCProvisionDev_t *dev_list = devices->dev_list;
+	OCProvisionDev_t *dev_list;
 
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(NULL == devices, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == device, IOTCON_ERROR_INVALID_PARAMETER);
+
+	dev_list = devices->dev_list;
 
 	current = icl_provisioning_devices_get_devices(devices);
 	for (; current; current = current->next) {
@@ -623,10 +629,13 @@ API int iotcon_provisioning_devices_add_device(iotcon_provisioning_devices_h dev
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	while (dev_list->next)
-		dev_list = dev_list->next;
-
-	dev_list->next = current;
+	if (NULL == dev_list)
+		dev_list = current;
+	else {
+		while (dev_list->next)
+			dev_list = dev_list->next;
+		dev_list->next = current;
+	}
 
 	return IOTCON_ERROR_NONE;
 }
