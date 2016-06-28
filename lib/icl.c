@@ -34,21 +34,20 @@ int icl_initialize(const char *file_path, bool is_pt)
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission((IC_PERMISSION_INTERNET|IC_PERMISSION_NETWORK_GET)),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(NULL == file_path, IOTCON_ERROR_INVALID_PARAMETER);
 
 #if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
 #endif
 
-	if (file_path && *file_path) {
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_INIT);
+	if (0 == icl_init_count) {
 		ret = icl_ioty_set_persistent_storage(file_path, is_pt);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_set_persistent_storage() Fail(%d)", ret);
 			return ret;
 		}
-	}
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_INIT);
-	if (0 == icl_init_count) {
 		ret = icl_ioty_init(&icl_thread);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_init() Fail(%d)", ret);
