@@ -22,6 +22,7 @@
 
 #include "iotcon-client.h"
 #include "iotcon-types.h"
+#include "ic-utils.h"
 
 typedef enum {
 	ICL_FIND_RESOURCE,
@@ -39,6 +40,8 @@ typedef struct {
 	OCDoHandle handle;
 } icl_cb_s;
 
+int icl_ioty_mutex_lock();
+static inline void icl_ioty_mutex_unlock() { return ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY); }
 void icl_ioty_deinit(pthread_t thread);
 int icl_ioty_init(pthread_t *out_thread);
 

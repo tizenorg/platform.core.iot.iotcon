@@ -94,7 +94,6 @@ void* icl_ioty_ocprocess_thread(void *data)
 {
 	FN_CALL;
 	int ret;
-	OCStackResult result;
 
 	// TODO: Current '100ms' is not proven sleep time. Revise the time after test.
 	// TODO: Or recommend changes to event driven architecture
@@ -108,10 +107,10 @@ void* icl_ioty_ocprocess_thread(void *data)
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_POLLING);
 	while (icl_ioty_alive) {
 		ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
-		result = OCProcess();
+		ret = OCProcess();
 		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
-		if (OC_STACK_OK != result) {
-			ERR("OCProcess() Fail(%d)", result);
+		if (OC_STACK_OK != ret) {
+			ERR("OCProcess() Fail(%d)", ret);
 			break;
 		}
 
@@ -125,7 +124,7 @@ void* icl_ioty_ocprocess_thread(void *data)
 
 static gboolean _icl_ioty_ocprocess_find_idle_cb(gpointer p)
 {
-	int i;
+	int i, ret;
 	icl_cb_s *cb_data;
 	icl_find_cb_s *find_cb_data = p;
 	iotcon_found_resource_cb cb;
@@ -142,9 +141,14 @@ static gboolean _icl_ioty_ocprocess_find_idle_cb(gpointer p)
 				INFO("Stop the callback");
 				cb_data->cb = NULL;
 
-				ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+				ret = icl_ioty_mutex_lock();
+				if (IOTCON_ERROR_NONE != ret) {
+					ERR("IoTCon is not initialized");
+					return G_SOURCE_REMOVE;
+				}
+
 				OCCancel(cb_data->handle, OC_LOW_QOS, NULL, 0);
-				ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+				icl_ioty_mutex_unlock();
 
 				break;
 			}
@@ -223,6 +227,7 @@ OCStackApplicationResult icl_ioty_ocprocess_find_cb(void *ctx, OCDoHandle handle
 
 static gboolean _icl_ioty_ocprocess_device_info_idle_cb(gpointer p)
 {
+	int ret;
 	icl_cb_s *cb_data;
 	icl_device_cb_s *device_cb_data = p;
 	iotcon_device_info_cb cb;
@@ -236,9 +241,14 @@ static gboolean _icl_ioty_ocprocess_device_info_idle_cb(gpointer p)
 					cb_data->user_data)) { /* Stop */
 			cb_data->cb = NULL;
 
-			ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+			ret = icl_ioty_mutex_lock();
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("IoTCon is not initialized");
+				return G_SOURCE_REMOVE;
+			}
+
 			OCCancel(cb_data->handle, OC_LOW_QOS, NULL, 0);
-			ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+			icl_ioty_mutex_unlock();
 		}
 	}
 
@@ -292,6 +302,7 @@ OCStackApplicationResult icl_ioty_ocprocess_device_info_cb(void *ctx,
 
 static gboolean _icl_ioty_ocprocess_platform_info_idle_cb(gpointer p)
 {
+	int ret;
 	icl_cb_s *cb_data;
 	icl_platform_cb_s *platform_cb_data = p;
 	iotcon_platform_info_cb cb;
@@ -305,9 +316,14 @@ static gboolean _icl_ioty_ocprocess_platform_info_idle_cb(gpointer p)
 					cb_data->user_data)) { /* Stop */
 			cb_data->cb = NULL;
 
-			ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+			ret = icl_ioty_mutex_lock();
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("IoTCon is not initialized");
+				return G_SOURCE_REMOVE;
+			}
+
 			OCCancel(cb_data->handle, OC_LOW_QOS, NULL, 0);
-			ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+			icl_ioty_mutex_unlock();
 		}
 	}
 
