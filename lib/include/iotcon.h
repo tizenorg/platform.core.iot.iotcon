@@ -60,13 +60,16 @@ extern "C" {
  * @remarks The @a file_path point to a file for handling secure virtual resources.
  * The file that is CBOR(Concise Binary Object Representation)-format must already exist
  * in @a file_path. We recommend to use application-local file for @a file_path.\n
- * You must call iotcon_deinitialize() if IoTCon API is no longer needed.
+ * You must call iotcon_deinitialize() if IoTCon API is no longer needed.\n
+ * If iotcon_initialize() is not called, or if it returns an error, all further operations
+ * of the IoTCon should fail, generally with a #IOTCON_ERROR_NOT_INITIALIZED error.
  *
  * @return  0 on success, otherwise a negative error value.
  * @retval #IOTCON_ERROR_NONE Successful
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER Invalid parameter
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @see iotcon_deinitialize()
  */

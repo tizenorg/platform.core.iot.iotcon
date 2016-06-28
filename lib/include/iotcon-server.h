@@ -65,6 +65,7 @@
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  *
@@ -88,6 +89,7 @@ int iotcon_start_presence(unsigned int time_to_live);
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  *

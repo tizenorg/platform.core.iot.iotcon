@@ -106,6 +106,7 @@ typedef void (*iotcon_presence_cb)(iotcon_presence_h presence, iotcon_error_e er
  * @retval #IOTCON_ERROR_IOTIVITY  IoTivity errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  * @post When the resource receive presence, iotcon_presence_cb() will be called.
@@ -138,6 +139,7 @@ int iotcon_add_presence_cb(const char *host_address,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  *
@@ -374,6 +376,7 @@ typedef bool (*iotcon_found_resource_cb)(iotcon_remote_resource_h resource,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  * @post iotcon_found_resource_cb() will be invoked.
@@ -432,6 +435,7 @@ typedef bool (*iotcon_device_info_cb)(iotcon_device_info_h device_info,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  * @post iotcon_device_info_cb() will be invoked.
@@ -515,6 +519,7 @@ typedef bool (*iotcon_platform_info_cb)(iotcon_platform_info_h platform_info,
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  * @post iotcon_platform_info_cb() will be invoked.

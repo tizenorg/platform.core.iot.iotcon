@@ -360,6 +360,7 @@ int iotcon_response_set_options(iotcon_response_h resp, iotcon_options_h options
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  */
 int iotcon_response_send(iotcon_response_h resp);
 

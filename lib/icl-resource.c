@@ -116,6 +116,7 @@ API int iotcon_resource_create(const char *uri_path,
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == uri_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(false == icl_resource_check_uri_path(uri_path),
 			IOTCON_ERROR_INVALID_PARAMETER);
@@ -143,6 +144,7 @@ API int iotcon_resource_destroy(iotcon_resource_h resource)
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = icl_ioty_resource_destroy(resource);
@@ -164,6 +166,7 @@ API int iotcon_resource_bind_interface(iotcon_resource_h resource,
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == iface, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -186,6 +189,7 @@ API int iotcon_resource_bind_type(iotcon_resource_h resource,
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_type, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -221,6 +225,7 @@ API int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(parent == child, IOTCON_ERROR_INVALID_PARAMETER);
@@ -249,6 +254,7 @@ API int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -369,6 +375,7 @@ API int iotcon_resource_notify(iotcon_resource_h resource,
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = icl_ioty_resource_notify(resource, repr, observers, qos);

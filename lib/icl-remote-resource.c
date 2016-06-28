@@ -45,6 +45,7 @@ API int iotcon_find_resource(const char *host_address,
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(resource_type && (false == icl_resource_check_type(resource_type)),
 			IOTCON_ERROR_INVALID_PARAMETER);

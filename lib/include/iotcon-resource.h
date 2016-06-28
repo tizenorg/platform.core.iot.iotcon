@@ -237,6 +237,7 @@ typedef void (*iotcon_request_handler_cb)(iotcon_resource_h resource,
  * @retval #IOTCON_ERROR_IOTIVITY  IoTivity errors
  * @retval #IOTCON_ERROR_OUT_OF_MEMORY  Out of memory
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  * @post When the resource receive CRUD request, iotcon_request_handler_cb() will be called.
@@ -275,6 +276,7 @@ int iotcon_resource_create(const char *uri_path,
  * @retval #IOTCON_ERROR_NOT_SUPPORTED  Not supported
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  *
@@ -306,6 +308,7 @@ int iotcon_resource_destroy(iotcon_resource_h resource_handle);
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  *
@@ -339,6 +342,7 @@ int iotcon_resource_bind_interface(iotcon_resource_h resource, const char *iface
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  *
@@ -399,6 +403,7 @@ int iotcon_resource_set_request_handler(iotcon_resource_h resource,
  * @retval #IOTCON_ERROR_ALREADY  Already done
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  *
@@ -429,6 +434,7 @@ int iotcon_resource_bind_child_resource(iotcon_resource_h parent,
  * @retval #IOTCON_ERROR_INVALID_PARAMETER  Invalid parameter
  * @retval #IOTCON_ERROR_SYSTEM System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  *
@@ -463,6 +469,7 @@ int iotcon_resource_unbind_child_resource(iotcon_resource_h parent,
  * @retval #IOTCON_ERROR_REPRESENTATION  Representation error
  * @retval #IOTCON_ERROR_SYSTEM  System error
  * @retval #IOTCON_ERROR_PERMISSION_DENIED Permission denied
+ * @retval #IOTCON_ERROR_NOT_INITIALIZED Not initialized
  *
  * @pre iotcon_initialize() should be called to initialize.
  *

@@ -164,6 +164,7 @@ API int iotcon_response_send(iotcon_response_h resp)
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == resp, IOTCON_ERROR_INVALID_PARAMETER);
 
 	ret = icl_ioty_response_send(resp);

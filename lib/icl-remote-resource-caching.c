@@ -34,6 +34,7 @@ API int iotcon_remote_resource_start_caching(iotcon_remote_resource_h resource,
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	if (true == resource->is_found) {
@@ -70,6 +71,7 @@ API int iotcon_remote_resource_stop_caching(iotcon_remote_resource_h resource)
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == resource, IOTCON_ERROR_INVALID_PARAMETER);
 
 	INFO("Stop Caching");

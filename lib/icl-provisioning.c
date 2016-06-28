@@ -154,6 +154,7 @@ API int iotcon_provisioning_initialize(const char *file_path, const char *db_pat
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(false == ic_utils_check_permission((IC_PERMISSION_INTERNET
 					|IC_PERMISSION_NETWORK_GET)), IOTCON_ERROR_PERMISSION_DENIED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(NULL == file_path, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == db_path, IOTCON_ERROR_INVALID_PARAMETER);
 
