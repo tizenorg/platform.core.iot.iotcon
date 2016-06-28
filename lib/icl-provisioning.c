@@ -727,7 +727,7 @@ API int iotcon_provisioning_register_unowned_devices(
 	container->cb = cb;
 	container->user_data = user_data;
 
-	dev_list = icl_provisioning_devices_get_devices(devices);
+	dev_list = icl_provisioning_devices_get_devices(container->devices);
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	result = OCDoOwnershipTransfer(container, dev_list, _provisioning_ownership_transfer_cb);
