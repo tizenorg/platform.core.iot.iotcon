@@ -143,6 +143,12 @@ static gboolean _icl_ioty_ocprocess_find_idle_cb(gpointer p)
 				cb_data->cb = NULL;
 
 				ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+				if (false == icl_check_init()) {
+					ERR("IoTCon is not initialized");
+					ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+					return G_SOURCE_REMOVE;
+				}
+
 				OCCancel(cb_data->handle, OC_LOW_QOS, NULL, 0);
 				ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -237,6 +243,12 @@ static gboolean _icl_ioty_ocprocess_device_info_idle_cb(gpointer p)
 			cb_data->cb = NULL;
 
 			ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+			if (false == icl_check_init()) {
+				ERR("IoTCon is not initialized");
+				ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+				return G_SOURCE_REMOVE;
+			}
+
 			OCCancel(cb_data->handle, OC_LOW_QOS, NULL, 0);
 			ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 		}
@@ -306,6 +318,12 @@ static gboolean _icl_ioty_ocprocess_platform_info_idle_cb(gpointer p)
 			cb_data->cb = NULL;
 
 			ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+			if (false == icl_check_init()) {
+				ERR("IoTCon is not initialized");
+				ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+				return G_SOURCE_REMOVE;
+			}
+
 			OCCancel(cb_data->handle, OC_LOW_QOS, NULL, 0);
 			ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 		}

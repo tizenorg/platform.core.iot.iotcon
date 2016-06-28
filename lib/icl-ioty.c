@@ -72,7 +72,9 @@ void icl_ioty_deinit(pthread_t thread)
 
 	ic_utils_cond_polling_destroy();
 
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	result = OCStop();
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != result)
 		ERR("OCStop() Fail(%d)", result);
 }
@@ -118,7 +120,9 @@ int icl_ioty_set_persistent_storage(const char *file_path, bool is_pt)
 	icl_ioty_ps.close = fclose;
 	icl_ioty_ps.unlink = unlink;
 
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	result = OCRegisterPersistentStorageHandler(&icl_ioty_ps);
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != result) {
 		ERR("OCRegisterPersistentStorageHandler() Fail(%d)", result);
 		return IOTCON_ERROR_IOTIVITY;
@@ -298,6 +302,13 @@ int icl_ioty_find_resource(const char *host_address,
 	oic_conn_type = ic_ioty_convert_connectivity_type(connectivity_type);
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		_icl_ioty_free_cb_data(cb_data);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	// TODO: QoS is come from lib.
 	result = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);

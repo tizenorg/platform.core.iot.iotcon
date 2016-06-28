@@ -169,16 +169,37 @@ API int iotcon_provisioning_initialize(const char *file_path, const char *db_pat
 	else
 		DBG("No provisioning DB File, creating new.");
 
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		iotcon_deinitialize();
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	result = OCInitPM(db_path);
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != result) {
 		ERR("OCInitPM() Fail(%d)", result);
+		iotcon_deinitialize();
 		return _provisioning_parse_oic_error(result);
 	}
 
 	_provisioning_set_justworks();
+
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		iotcon_deinitialize();
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	result = OCSetOwnerTransferCallbackData(OIC_JUST_WORKS, &icl_justworks_otmcb);
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != result) {
 		ERR("OCSetOwnerTransferCallbackData() Fail(%d)", result);
+		iotcon_deinitialize();
 		return _provisioning_parse_oic_error(result);
 	}
 
@@ -215,7 +236,16 @@ API int iotcon_provisioning_set_randompins(iotcon_provisioning_randompins_cb cb,
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
 	_provisioning_set_randompins();
+
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	result = OCSetOwnerTransferCallbackData(OIC_RANDOM_DEVICE_PIN, &icl_pinbased_otmcb);
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != result) {
 		ERR("OCSetOwnerTransferCallbackData() Fail(%d)", result);
 		return _provisioning_parse_oic_error(result);
@@ -304,6 +334,12 @@ static void* _provisioning_discover_all_thread(void *user_data)
 	struct icl_provisioning_discover_cb_container *container = user_data;
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		return NULL;
+	}
+
 	result = OCGetDevInfoFromNetwork(container->timeout, &owned_list, &unowned_list);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != result) {
@@ -372,6 +408,12 @@ static void* _provisioning_discover_unowned_thread(void *user_data)
 	struct icl_provisioning_discover_cb_container *container = user_data;
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		return NULL;
+	}
+
 	result = OCDiscoverUnownedDevices(container->timeout, &unowned_list);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != result) {
@@ -418,6 +460,12 @@ static void* _provisioning_discover_owned_thread(void *user_data)
 	struct icl_provisioning_discover_cb_container *container = user_data;
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		return NULL;
+	}
+
 	result = OCDiscoverOwnedDevices(container->timeout, &owned_list);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != result) {
@@ -730,6 +778,13 @@ API int iotcon_provisioning_register_unowned_devices(
 	dev_list = icl_provisioning_devices_get_devices(container->devices);
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		_provisioning_ownership_transfer_cb_container_destroy(container);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	result = OCDoOwnershipTransfer(container, dev_list, _provisioning_ownership_transfer_cb);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != result) {
@@ -776,6 +831,13 @@ API int iotcon_provisioning_register_unowned_device(
 	}
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		_provisioning_ownership_transfer_cb_container_destroy(container);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	result = OCDoOwnershipTransfer(container, cloned_list, _provisioning_ownership_transfer_cb);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != result) {
@@ -882,6 +944,13 @@ API int iotcon_provisioning_provision_cred(iotcon_provisioning_device_h device1,
 	container->user_data = user_data;
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		_provisioning_provision_cred_cb_container_destroy(container);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	result = OCProvisionCredentials(container,
 			SYMMETRIC_PAIR_WISE_KEY,
 			key_size,
@@ -1065,6 +1134,13 @@ API int iotcon_provisioning_provision_acl(iotcon_provisioning_device_h device,
 	oic_acl = _provisioning_convert_acl(device, acl);
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		_provisioning_provision_acl_cb_container_destroy(container);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	result = OCProvisionACL(container,
 			icl_provisioning_device_get_device(container->device),
 			oic_acl,
@@ -1210,6 +1286,13 @@ API int iotcon_provisioning_pairwise_devices(iotcon_provisioning_device_h device
 	container->user_data = user_data;
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		_provisioning_pairwise_devices_cb_container_destroy(container);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	result = OCProvisionPairwiseDevices(container,
 			SYMMETRIC_PAIR_WISE_KEY,
 			key_size,
@@ -1319,6 +1402,13 @@ API int iotcon_provisioning_unlink_pairwise(iotcon_provisioning_device_h device1
 	container->user_data = user_data;
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		_provisioning_unlink_pairwise_cb_container_destroy(container);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	result = OCUnlinkDevices(container,
 			icl_provisioning_device_get_device(container->device1),
 			icl_provisioning_device_get_device(container->device2),
@@ -1384,6 +1474,13 @@ static void* _provisioning_remove_device_thread(void *user_data)
 	struct icl_provisioning_remove_device_cb_container *container = user_data;
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	if (false == icl_check_init()) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		_provisioning_remove_cb_container_destroy(container);
+		return NULL;
+	}
+
 	result = OCRemoveDevice(container,
 			container->timeout,
 			icl_provisioning_device_get_device(container->device),
