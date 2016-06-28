@@ -48,6 +48,7 @@
 #include "icl-ioty.h"
 #include "icl-cbor.h"
 
+static bool icl_state;
 static int icl_remote_resource_time_interval = IC_REMOTE_RESOURCE_DEFAULT_TIME_INTERVAL;
 static GHashTable *icl_monitoring_table;
 static GHashTable *icl_caching_table;
@@ -59,7 +60,6 @@ void icl_ioty_deinit(pthread_t thread)
 {
 	FN_CALL;
 	int ret;
-	OCStackResult result;
 
 	icl_ioty_ocprocess_stop();
 	ic_utils_cond_signal(IC_UTILS_COND_POLLING);
@@ -72,9 +72,15 @@ void icl_ioty_deinit(pthread_t thread)
 
 	ic_utils_cond_polling_destroy();
 
-	result = OCStop();
-	if (OC_STACK_OK != result)
-		ERR("OCStop() Fail(%d)", result);
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = OCStop();
+	if (OC_STACK_OK != ret) {
+		ERR("OCStop() Fail(%d)", ret);
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		return;
+	}
+	icl_state = false;
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 }
 
 static FILE* _icl_ioty_ps_fopen(const char *path, const char *mode)
@@ -86,7 +92,6 @@ int icl_ioty_set_persistent_storage(const char *file_path, bool is_pt)
 {
 	FN_CALL;
 	int ret;
-	OCStackResult result;
 
 	RETV_IF(NULL == file_path, IOTCON_ERROR_INVALID_PARAMETER);
 
@@ -118,11 +123,15 @@ int icl_ioty_set_persistent_storage(const char *file_path, bool is_pt)
 	icl_ioty_ps.close = fclose;
 	icl_ioty_ps.unlink = unlink;
 
-	result = OCRegisterPersistentStorageHandler(&icl_ioty_ps);
-	if (OC_STACK_OK != result) {
-		ERR("OCRegisterPersistentStorageHandler() Fail(%d)", result);
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = OCRegisterPersistentStorageHandler(&icl_ioty_ps);
+	if (OC_STACK_OK != ret) {
+		ERR("OCRegisterPersistentStorageHandler() Fail(%d)", ret);
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 		return IOTCON_ERROR_IOTIVITY;
 	}
+	icl_state = true;
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	return IOTCON_ERROR_NONE;
 }
@@ -143,19 +152,37 @@ int icl_ioty_set_generate_pin_cb()
 	return IOTCON_ERROR_NONE;
 }
 
+int icl_ioty_mutex_lock()
+{
+	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+
+	if (false == icl_state) {
+		ERR("IoTCon is not initialized");
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
+	return IOTCON_ERROR_NONE;
+}
+
 int icl_ioty_init(pthread_t *out_thread)
 {
 	FN_CALL;
 	int ret;
 	pthread_attr_t attr;
-	OCStackResult result;
 
 	RETV_IF(NULL == out_thread, IOTCON_ERROR_INVALID_PARAMETER);
 
-	result = OCInit(NULL, 0, OC_CLIENT_SERVER);
-	if (OC_STACK_OK != result) {
-		ERR("OCInit() Fail(%d)", result);
-		return ic_ioty_parse_oic_error(result);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
+	ret = OCInit(NULL, 0, OC_CLIENT_SERVER);
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
+	if (OC_STACK_OK != ret) {
+		ERR("OCInit() Fail(%d)", ret);
+		return ic_ioty_parse_oic_error(ret);
 	}
 
 	// TODO: temp code
@@ -218,12 +245,13 @@ static gboolean _icl_ioty_timeout(gpointer user_data)
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
 	ret = OCCancel(cb_info->handle, OC_LOW_QOS, NULL, 0);
-	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	if (OC_STACK_OK != ret) {
 		ERR("OCCancel() Fail(%d)", ret);
+		ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 		return G_SOURCE_REMOVE;
 	}
+	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
 	return G_SOURCE_REMOVE;
 }
@@ -255,12 +283,11 @@ int icl_ioty_find_resource(const char *host_address,
 		void *user_data)
 {
 	FN_CALL;
-	int len, timeout;
+	int ret, len, timeout;
 	char *coap_str;
 	char uri[PATH_MAX] = {0};
 	icl_cb_s *cb_data;
 	OCDoHandle handle;
-	OCStackResult result;
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
 
@@ -297,17 +324,23 @@ int icl_ioty_find_resource(const char *host_address,
 
 	oic_conn_type = ic_ioty_convert_connectivity_type(connectivity_type);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		_icl_ioty_free_cb_data(cb_data);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+
 	// TODO: QoS is come from lib.
-	result = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
+	ret = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	cb_data->handle = handle;
 
-	if (OC_STACK_OK != result) {
-		ERR("OCDoResource(DISCOVER) Fail(%d)", result);
+	if (OC_STACK_OK != ret) {
+		ERR("OCDoResource(DISCOVER) Fail(%d)", ret);
 		_icl_ioty_free_cb_data(cb_data);
-		return ic_ioty_parse_oic_error(result);
+		return ic_ioty_parse_oic_error(ret);
 	}
 
 	iotcon_get_timeout(&timeout);
@@ -321,11 +354,10 @@ int icl_ioty_find_device_info(const char *host_address,
 		iotcon_device_info_cb cb,
 		void *user_data)
 {
-	int timeout;
+	int ret, timeout;
 	char uri[PATH_MAX] = {0};
 	icl_cb_s *cb_data = NULL;
 	OCDoHandle handle;
-	OCStackResult result;
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
 
@@ -351,17 +383,22 @@ int icl_ioty_find_device_info(const char *host_address,
 
 	oic_conn_type = ic_ioty_convert_connectivity_type(connectivity_type);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		_icl_ioty_free_cb_data(cb_data);
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	// TODO: QoS is come from lib. And user can set QoS to client structure.
-	result = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
+	ret = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	cb_data->handle = handle;
 
-	if (OC_STACK_OK != result) {
-		ERR("OCDoResource(DISCOVER) Fail(%d)", result);
+	if (OC_STACK_OK != ret) {
+		ERR("OCDoResource(DISCOVER) Fail(%d)", ret);
 		_icl_ioty_free_cb_data(cb_data);
-		return ic_ioty_parse_oic_error(result);
+		return ic_ioty_parse_oic_error(ret);
 	}
 
 	iotcon_get_timeout(&timeout);
@@ -375,11 +412,10 @@ int icl_ioty_find_platform_info(const char *host_address,
 		iotcon_platform_info_cb cb,
 		void *user_data)
 {
-	int timeout;
+	int ret, timeout;
 	char uri[PATH_MAX] = {0};
 	icl_cb_s *cb_data = NULL;
 	OCDoHandle handle;
-	OCStackResult result;
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
 
@@ -405,17 +441,22 @@ int icl_ioty_find_platform_info(const char *host_address,
 
 	oic_conn_type = ic_ioty_convert_connectivity_type(connectivity_type);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		_icl_ioty_free_cb_data(cb_data);
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	// TODO: QoS is come from lib. And user can set QoS to client structure.
-	result = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
+	ret = OCDoResource(&handle, OC_REST_DISCOVER, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	cb_data->handle = handle;
 
-	if (OC_STACK_OK != result) {
-		ERR("OCDoResource(DISCOVER) Fail(%d)", result);
+	if (OC_STACK_OK != ret) {
+		ERR("OCDoResource(DISCOVER) Fail(%d)", ret);
 		_icl_ioty_free_cb_data(cb_data);
-		return ic_ioty_parse_oic_error(result);
+		return ic_ioty_parse_oic_error(ret);
 	}
 
 	iotcon_get_timeout(&timeout);
@@ -437,7 +478,12 @@ int icl_ioty_set_device_info(const char *device_name)
 		return IOTCON_ERROR_OUT_OF_MEMORY;
 	}
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		free(device_info.deviceName);
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCSetDeviceInfo(device_info);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -462,7 +508,12 @@ int icl_ioty_set_platform_info()
 		return ret;
 	}
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		ic_utils_free_platform_info(&platform_info);
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCSetPlatformInfo(platform_info);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -483,9 +534,9 @@ int icl_ioty_add_presence_cb(const char *host_address,
 		void *user_data,
 		iotcon_presence_h *presence_handle)
 {
+	int ret;
 	OCDoHandle handle;
 	const char *address;
-	OCStackResult result;
 	char uri[PATH_MAX] = {0};
 	OCCallbackData cbdata = {0};
 	OCConnectivityType oic_conn_type;
@@ -520,14 +571,19 @@ int icl_ioty_add_presence_cb(const char *host_address,
 
 	oic_conn_type = ic_ioty_convert_connectivity_type(connectivity_type);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
-	result = OCDoResource(&handle, OC_REST_PRESENCE, uri, NULL, NULL, oic_conn_type,
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		icl_destroy_presence(presence);
+		return IOTCON_ERROR_IOTIVITY;
+	}
+	ret = OCDoResource(&handle, OC_REST_PRESENCE, uri, NULL, NULL, oic_conn_type,
 			OC_LOW_QOS, &cbdata, NULL, 0);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	presence->handle = handle;
 
-	if (OC_STACK_OK != result) {
-		ERR("OCDoResource(PRESENCE) Fail(%d)", result);
+	if (OC_STACK_OK != ret) {
+		ERR("OCDoResource(PRESENCE) Fail(%d)", ret);
 		icl_destroy_presence(presence);
 		return IOTCON_ERROR_IOTIVITY;
 	}
@@ -543,7 +599,11 @@ int icl_ioty_remove_presence_cb(iotcon_presence_h presence)
 
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCCancel(presence->handle, OC_LOW_QOS, NULL, 0);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -690,7 +750,12 @@ static int _icl_ioty_remote_resource_observe(iotcon_remote_resource_h resource,
 	cbdata.cb = icl_ioty_ocprocess_observe_cb;
 	cbdata.cd = _icl_ioty_free_observe_container;
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		_icl_ioty_free_observe_container(cb_container);
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	// TODO: QoS is come from lib. And user can set QoS to client structure.
 	ret = OCDoResource(&handle, method, uri, &dev_addr, NULL, oic_conn_type,
 			OC_HIGH_QOS, &cbdata, oic_options_ptr, options_size);
@@ -758,7 +823,11 @@ int icl_ioty_remote_resource_observe_cancel(iotcon_remote_resource_h resource,
 	}
 	handle = IC_INT64_TO_POINTER(observe_handle);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCCancel(handle, OC_HIGH_QOS, oic_options_ptr, options_size);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -914,7 +983,12 @@ static int _icl_ioty_remote_resource_crud(
 	cbdata.cb = icl_ioty_ocprocess_crud_cb;
 	cbdata.cd = _icl_ioty_free_response_container;
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		_icl_ioty_free_response_container(cb_container);
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCDoResource(NULL, method, uri, &dev_addr, payload, oic_conn_type,
 			OC_HIGH_QOS, &cbdata, oic_options_ptr, options_size);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
@@ -1347,7 +1421,11 @@ int icl_ioty_start_presence(unsigned int time_to_live)
 
 	RETV_IF(IC_PRESENCE_TTL_SECONDS_MAX < time_to_live, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCStartPresence(time_to_live);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -1363,7 +1441,11 @@ int icl_ioty_stop_presence()
 {
 	int ret;
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCStopPresence();
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 	if (OC_STACK_OK != ret) {
@@ -1377,9 +1459,13 @@ int icl_ioty_stop_presence()
 static int _icl_ioty_resource_bind_type(OCResourceHandle handle,
 		const char *resource_type)
 {
-	OCStackResult ret;
+	int ret;
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCBindResourceTypeToResource(handle, resource_type);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -1394,15 +1480,19 @@ static int _icl_ioty_resource_bind_type(OCResourceHandle handle,
 static int _icl_ioty_resource_bind_interface(OCResourceHandle handle,
 		const char *iface)
 {
-	OCStackResult result;
+	int ret;
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
-	result = OCBindResourceInterfaceToResource(handle, iface);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
+	ret = OCBindResourceInterfaceToResource(handle, iface);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
-	if (OC_STACK_OK != result) {
-		ERR("OCBindResourceInterfaceToResource() Fail(%d)", result);
-		return ic_ioty_parse_oic_error(result);
+	if (OC_STACK_OK != ret) {
+		ERR("OCBindResourceInterfaceToResource() Fail(%d)", ret);
+		return ic_ioty_parse_oic_error(ret);
 	}
 
 	return IOTCON_ERROR_NONE;
@@ -1445,7 +1535,11 @@ int icl_ioty_resource_create(const char *uri_path,
 
 	policies = ic_ioty_convert_policies(policies);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCCreateResource(&handle, res_types->type_list->data, ifaces->iface_list->data,
 			uri_path, icl_ioty_ocprocess_request_cb, resource, policies);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
@@ -1540,7 +1634,7 @@ int icl_ioty_resource_bind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
 	FN_CALL;
-	OCStackResult ret;
+	int ret;
 	OCResourceHandle handle_parent, handle_child;
 
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
@@ -1550,7 +1644,11 @@ int icl_ioty_resource_bind_child_resource(iotcon_resource_h parent,
 	handle_parent = IC_INT64_TO_POINTER(parent->handle);
 	handle_child = IC_INT64_TO_POINTER(child->handle);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCBindResource(handle_parent, handle_child);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -1566,7 +1664,7 @@ int icl_ioty_resource_unbind_child_resource(iotcon_resource_h parent,
 		iotcon_resource_h child)
 {
 	FN_CALL;
-	OCStackResult ret;
+	int ret;
 	OCResourceHandle handle_parent, handle_child;
 
 	RETV_IF(NULL == parent, IOTCON_ERROR_INVALID_PARAMETER);
@@ -1575,7 +1673,11 @@ int icl_ioty_resource_unbind_child_resource(iotcon_resource_h parent,
 	handle_parent = IC_INT64_TO_POINTER(parent->handle);
 	handle_child = IC_INT64_TO_POINTER(child->handle);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCUnBindResource(handle_parent, handle_child);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -1624,7 +1726,11 @@ int icl_ioty_resource_notify(iotcon_resource_h resource, iotcon_representation_h
 
 	handle = IC_INT64_TO_POINTER(resource->handle);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	if (payload)
 		ret = OCNotifyListOfObservers(handle, obs_ids, obs_length, payload, oc_qos);
 	else
@@ -1652,7 +1758,11 @@ int icl_ioty_resource_destroy(iotcon_resource_h resource)
 
 	handle = IC_INT64_TO_POINTER(resource->handle);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCDeleteResource(handle);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -1704,7 +1814,12 @@ int icl_ioty_lite_resource_create(const char *uri_path,
 
 	policies = ic_ioty_convert_policies(policies);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		icl_ioty_lite_resource_destroy(resource);
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCCreateResource(&handle, res_types->type_list->data, res_iface, uri_path,
 			icl_ioty_ocprocess_lite_request_cb, resource, policies);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
@@ -1736,7 +1851,11 @@ int icl_ioty_lite_resource_destroy(iotcon_lite_resource_h resource)
 
 	handle = IC_INT64_TO_POINTER(resource->handle);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCDeleteResource(handle);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -1761,7 +1880,11 @@ int icl_ioty_lite_resource_notify(iotcon_lite_resource_h resource)
 
 	handle = IC_INT64_TO_POINTER(resource->handle);
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCNotifyAllObservers(handle, IOTCON_QOS_HIGH);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 
@@ -1827,7 +1950,11 @@ int icl_ioty_response_send(iotcon_response_h response_handle)
 	/* related to block transfer */
 	response.persistentBufferFlag = 0;
 
-	ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
+	ret = icl_ioty_mutex_lock();
+	if (IOTCON_ERROR_NONE != ret) {
+		ERR("IoTCon is not initialized");
+		return IOTCON_ERROR_IOTIVITY;
+	}
 	ret = OCDoResponse(&response);
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_IOTY);
 

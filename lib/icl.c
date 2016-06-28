@@ -48,8 +48,7 @@ int icl_initialize(const char *file_path, bool is_pt)
 	}
 
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_INIT);
-	icl_init_count++;
-	if (1 == icl_init_count) {
+	if (0 == icl_init_count) {
 		ret = icl_ioty_init(&icl_thread);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_init() Fail(%d)", ret);
@@ -65,6 +64,7 @@ int icl_initialize(const char *file_path, bool is_pt)
 			return ret;
 		}
 	}
+	icl_init_count++;
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_INIT);
 
 	return IOTCON_ERROR_NONE;

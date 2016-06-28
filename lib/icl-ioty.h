@@ -39,6 +39,7 @@ typedef struct {
 	OCDoHandle handle;
 } icl_cb_s;
 
+int icl_ioty_mutex_lock();
 void icl_ioty_deinit(pthread_t thread);
 int icl_ioty_init(pthread_t *out_thread);
 
