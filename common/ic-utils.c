@@ -29,7 +29,6 @@
 #include "ic-log.h"
 #include "ic-utils.h"
 
-
 #ifdef TZ_VER_3
 static int _ic_ocf_feature = -1;
 static const char *IC_FEATURE_OCF = "http://tizen.org/feature/iot.ocf";
@@ -169,17 +168,26 @@ void ic_utils_free_platform_info(OCPlatformInfo *platform_info)
 int ic_utils_get_platform_info(OCPlatformInfo *platform_info)
 {
 	int ret;
+	char *tizen_id = NULL;
+	char *device_name = NULL;
+	char platform_id[1024];
 
 	RETV_IF(NULL == platform_info, IOTCON_ERROR_INVALID_PARAMETER);
 
+	ret = system_settings_get_value_string(SYSTEM_SETTINGS_KEY_DEVICE_NAME, &device_name);
+	WARN_IF(SYSTEM_SETTINGS_ERROR_NONE != ret,
+			"system_settings_get_value_string() Fail(%d)", ret);
+	ret = system_info_get_platform_string(IC_SYSTEM_INFO_TIZEN_ID, &tizen_id);
+	WARN_IF(SYSTEM_INFO_ERROR_NONE != ret, "system_info_get_platform_string() Fail(%d)",
+			ret);
+	snprintf(platform_id, sizeof(platform_id), "%s(%s)", IC_SAFE_STR(device_name),
+			IC_SAFE_STR(tizen_id));
+	free(device_name);
+	free(tizen_id);
+	SECURE_DBG("platform_id: %s", platform_id);
+
 	/* Mandatory (oic.wk.p) */
-	ret = system_info_get_platform_string(IC_SYSTEM_INFO_TIZEN_ID,
-			&platform_info->platformID);
-	if (SYSTEM_INFO_ERROR_NONE != ret) {
-		ERR("system_info_get_platform_string(tizen_id) Fail(%d)", ret);
-		ic_utils_free_platform_info(platform_info);
-		return IOTCON_ERROR_SYSTEM;
-	}
+	platform_info->platformID = strdup(platform_id);
 
 	/* Mandatory (oic.wk.p) */
 	ret = system_info_get_platform_string(IC_SYSTEM_INFO_MANUF_NAME,

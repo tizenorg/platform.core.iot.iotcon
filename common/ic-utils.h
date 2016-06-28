@@ -20,6 +20,7 @@
 #include "iotcon-types.h"
 
 #define IC_EQUAL 0
+#define IC_SAFE_STR(str) ((str)?str:"")
 
 enum {
 	IC_PERMISSION_NETWORK_GET = (1 << 0),
