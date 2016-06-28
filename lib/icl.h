@@ -26,5 +26,6 @@
 #define API __attribute__((visibility("default")))
 
 int icl_initialize(const char *file_path, bool is_pt);
+bool icl_check_init();
 
 #endif /* __IOT_CONNECTIVITY_LIBRARY_H__ */

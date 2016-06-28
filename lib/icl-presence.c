@@ -31,6 +31,7 @@ API int iotcon_start_presence(unsigned int time_to_live)
 	int ret;
 
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
 
@@ -55,6 +56,7 @@ API int iotcon_stop_presence(void)
 	int ret;
 
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
 
@@ -79,6 +81,7 @@ API int iotcon_add_presence_cb(const char *host_address,
 	int ret;
 
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
@@ -119,6 +122,7 @@ API int iotcon_remove_presence_cb(iotcon_presence_h presence)
 	int ret, connectivity_type;
 
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(false == icl_check_init(), IOTCON_ERROR_NOT_INITIALIZED);
 	RETV_IF(false == ic_utils_check_permission(IC_PERMISSION_INTERNET),
 			IOTCON_ERROR_PERMISSION_DENIED);
 	RETV_IF(NULL == presence, IOTCON_ERROR_INVALID_PARAMETER);
