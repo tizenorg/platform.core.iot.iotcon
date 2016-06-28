@@ -63,9 +63,12 @@ void icl_ioty_deinit(pthread_t thread)
 
 	icl_ioty_ocprocess_stop();
 	ic_utils_cond_signal(IC_UTILS_COND_POLLING);
+
 	ret = pthread_join(thread, NULL);
 	if (0 != ret)
 		ERR("pthread_join() Fail(%d)", ret);
+
+	INFO("pthread_join finished");
 
 	result = OCStop();
 	if (OC_STACK_OK != result)
@@ -166,6 +169,10 @@ int icl_ioty_init(pthread_t *out_thread)
 	if (0 != ret)
 		ERR("pthread_attr_setstacksize() Fail(%d)", ret);
 #endif
+
+	ret = ic_utils_cond_polling_init();
+	if (IOTCON_ERROR_NONE != ret)
+		ERR("ic_utils_cond_polling_init() Fail(%d)", ret);
 
 	ret = pthread_create(out_thread, &attr, icl_ioty_ocprocess_thread, NULL);
 	if (0 != ret) {

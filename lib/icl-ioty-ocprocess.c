@@ -105,10 +105,6 @@ void* icl_ioty_ocprocess_thread(void *data)
 	if (0 != ret)
 		ERR("prctl(PR_SET_NAME) Fail(%d)", ret);
 
-	ret = ic_utils_cond_polling_init();
-	if (IOTCON_ERROR_NONE != ret)
-		ERR("ic_utils_cond_polling_init() Fail(%d)", ret);
-
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_POLLING);
 	while (icl_ioty_alive) {
 		ic_utils_mutex_lock(IC_UTILS_MUTEX_IOTY);
