@@ -1,0 +1,77 @@
+ Provisioning Tool
+
+If you want to use secure resources for your application, you should need a process
+using provisioning tool. If you install the "iotivity test package", you can use sample
+provisioning tool.
+
+  $ /usr/bin/provisioning/provisioningclient
+
+
+If you execute the program, you can see the menu as follows.
+
+	*************************************************************
+	************No provisioning DB file, creating new************
+	*************************************************************
+
+	************************************************************
+	****** OIC Provisioning Client with using C-level API ******
+	************************************************************
+
+	** [A] DISCOVER DEVICES ON NETWORK
+	** 10. Discover All Un/Owned Devices on Network
+	** 11. Discover Only Unowned Devices on Network
+	** 12. Discover Only Owned Devices on Network
+
+	** [B] REGISTER/OWN ALL DISCOVERED UNOWNED DEVICES
+	** 20. Register/Own All Discovered Unowned Devices
+
+	** [C] PROVISION/LINK PAIRWISE THINGS
+	** 30. Provision/Link Pairwise Things
+	** 31. Provision Credentials for Pairwise Things
+	** 32. Provision the Selected Access Control List(ACL)
+	** 33. Provision Direct-Pairing Configuration
+	** 34. Check Linked Status of the Selected Device on PRVN DB
+
+	** [D] UNLINK PAIRWISE THINGS
+	** 40. Unlink Pairwise Things
+
+	** [E] REMOVE THE SELECTED DEVICE
+	** 50. Remove the Selected Device
+
+	** [F] EXIT PROVISIONING CLIENT
+	** 99. Exit Provisionong Client
+
+	************************************************************
+
+	>> Enter Menu Number:
+
+
+[A] DISCOVER DEVICES ON NETWORK
+
+ - First of all, you can find your devices using this menu. Owned devices are already
+ registered by provisioning tools, and unowned devices are not registered yet. If you find
+ unowned devices, you can register the devices using [B].
+
+[B] REGISTER/OWN ALL DISCOVERED UNOWNED DEVICES
+
+ - After you find your unowned devices, you can register the devices using this menu.
+ After you complete this procedure, you can check the result by calling [A] one more.
+
+[C] PROVISION/LINK PAIRWISE THINGS
+
+ - In this menu, there are two kinds of functions. One of them is "provision credentials".
+ credential is information for secure communication. i.e., if you want to communicate
+ securely between two devices, you should provision credentials to related devices.
+ Other one is "provision ACL". ACL is information for access control. Provisioning ACL,
+ you can control access for resources.
+
+[D] UNLINK PAIRWISE THINGS
+
+ - If you use this menu, you can unlink pairwise things. Because credentials between devices
+ is removed, it is impossible to communicate securely between the devices.
+
+[E] REMOVE THE SELECTED DEVICE
+
+ - If you don't use a device, you can remove the device using this menu. After it is operated,
+ credentials related to the device is removed from all devices in subnet.
+
