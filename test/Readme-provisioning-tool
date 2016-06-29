@@ -1,0 +1,213 @@
+ Provisioning Tool
+
+If you want to use secure resources for your application, you should need a process
+using provisioning tool. If you install the "iotivity-test package", you can use sample
+provisioning tool.
+
+  $ /usr/bin/provisioning/provisioningclient
+
+
+If you execute the program, you can see the menu as follows.
+
+	*************************************************************
+	************No provisioning DB file, creating new************
+	*************************************************************
+
+	************************************************************
+	****** OIC Provisioning Client with using C-level API ******
+	************************************************************
+
+	** [A] DISCOVER DEVICES ON NETWORK
+	** 10. Discover All Un/Owned Devices on Network
+	** 11. Discover Only Unowned Devices on Network
+	** 12. Discover Only Owned Devices on Network
+
+	** [B] REGISTER/OWN ALL DISCOVERED UNOWNED DEVICES
+	** 20. Register/Own All Discovered Unowned Devices
+
+	** [C] PROVISION/LINK PAIRWISE THINGS
+	** 30. Provision/Link Pairwise Things
+	** 31. Provision Credentials for Pairwise Things
+	** 32. Provision the Selected Access Control List(ACL)
+	** 33. Provision Direct-Pairing Configuration
+	** 34. Check Linked Status of the Selected Device on PRVN DB
+
+	** [D] UNLINK PAIRWISE THINGS
+	** 40. Unlink Pairwise Things
+
+	** [E] REMOVE THE SELECTED DEVICE
+	** 50. Remove the Selected Device
+
+	** [F] EXIT PROVISIONING CLIENT
+	** 99. Exit Provisionong Client
+
+	************************************************************
+
+	>> Enter Menu Number:
+
+
+[A] DISCOVER DEVICES ON NETWORK
+
+ - First of all, you can find your devices using this menu. Owned devices are already
+ registered by provisioning tools, and unowned devices are not registered yet. If you find
+ unowned devices, you can register the devices using [B].
+
+   => Enter 10. Then you can check the all devices on network.
+
+      >> Enter Menu Number: 10
+
+         Discovering All Un/Owned Devices on Network..
+         > Discovered Owned Devices
+           [1] 61646D69-6E44-6576-6963-655575696430
+
+         > Discovered Unowned Devices
+           [1] D987BEFD-B4EB-40FD-A829-B5D1D2174AD8
+           [2] 17B2B332-520B-4FA6-B7A4-C9A755F1E3E8
+
+
+
+[B] REGISTER/OWN ALL DISCOVERED UNOWNED DEVICES
+
+ - After you find your unowned devices, you can register the devices using this menu.
+ After you complete this procedure, you can check the result by calling [A] one more.
+
+   => Enter 20. Then all unowned devices found by [A] is registered.
+
+      >> Enter Menu Number: 20
+
+         Registering All Discovered Unowned Devices..
+       > Registered Discovered Unowned Devices
+       > Please Discover Owned Devices for the Registered Result, with [10|12] Menu
+
+   => Enter 10. Then you can check the result.
+
+      >> Enter Menu Number: 10
+
+         Discovering All Un/Owned Devices on Network..
+         > Discovered Owned Devices
+           [1] D987BEFD-B4EB-40FD-A829-B5D1D2174AD8
+           [2] 17B2B332-520B-4FA6-B7A4-C9A755F1E3E8
+           [3] 61646D69-6E44-6576-6963-655575696430
+
+         > Discovered Unowned Devices
+           Device List is Empty..
+
+
+
+[C] PROVISION/LINK PAIRWISE THINGS
+
+ - In this menu, there are two kinds of functions. One of them is "provision credentials".
+ credential is information for secure communication. i.e., if you want to communicate
+ securely between two devices, you should provision credentials to related devices.
+ Other one is "provision ACL". ACL is information for access control. Provisioning ACL,
+ you can control access for resources.
+
+   => Enter 31. Then two devices selected by you is linked.
+
+      >> Enter Menu Number: 31
+
+         > Enter Device[1] Number, for Linking CRED(s): 1
+         > Enter Device[2] Number, for Linking CRED(s): 2
+
+         Select PSK length..
+         1 - 128bit(Default)
+         2 - 256bit
+      1
+         Provisioning Selected Pairwise Credentials..
+         > Provisioned Selected Pairwise Crendentials
+         > Please Check Device's Status for the Linked Result, with [33] Menu
+
+   => Enter 34. Then you can check linked status of the selected device.
+
+      >> Enter Menu Number: 34
+
+         > Enter Device Number, for Checking Linked Status on PRVN DB: 1
+         Checking Selected Link Status on PRVN DB..
+         > Checked Selected Link Status on PRVN DB
+           [1] 17B2B332-520B-4FA6-B7A4-C9A755F1E3E8
+
+
+      >> Enter Menu Number: 34
+
+         > Enter Device Number, for Checking Linked Status on PRVN DB: 2
+         Checking Selected Link Status on PRVN DB..
+         > Checked Selected Link Status on PRVN DB
+           [1] D987BEFD-B4EB-40FD-A829-B5D1D2174AD8
+
+   => Enter 32. Then you can control accesses for your resources.
+
+      >> Enter Menu Number: 32
+
+         > Enter Device Number, for Provisioning ACL: 1
+         **** Create ACL for the Selected Device[1]
+         > [A] Enter Subject Device Number: 2
+         > [B] Enter Number of Accessed Resources (under 16): 1
+               Enter Each Accessed Resource Name (each under 128 char)
+               Enter Accessed Resource[1] Name: /door/1
+         > [C] Enter Permission for This Access
+               Enter CREATE Permission (y/n): y
+               Enter READ Permission (y/n): y
+               Enter WRITE Permission (y/n): y
+               Enter DELETE Permission (y/n): y
+               Enter NOTIFY Permission (y/n): y
+         > [D] Enter Owner Device Number: 1
+
+         Provisioning Selected ACL..
+         > Provisioned Selected ACL
+
+ - You can execute above 2 functions simultaneously using number [30].
+
+
+
+[D] UNLINK PAIRWISE THINGS
+
+ - If you use this menu, you can unlink pairwise things. Because credentials between devices
+ is removed, it is impossible to communicate securely between the devices.
+
+   => Enter 40. Then you can unlink devices linked by number [31].
+
+      >> Enter Menu Number: 40
+
+         > Enter Device[1] Number, for Unlinking Devices: 1
+         > Enter Device[2] Number, for Unlinking Devices: 2
+
+         Unlinking Selected Pairwise Devices..
+         > Unlinked Selected Pairwise Devices
+         > Please Check Device's Status for the Unlinked Result, with [33] Menu
+
+   => Enter 34. Then you can check linked status of the selected device.
+
+      >> Enter Menu Number: 34
+
+         > Enter Device Number, for Checking Linked Status on PRVN DB: 1
+         Checking Selected Link Status on PRVN DB..
+         > Checked Selected Link Status on PRVN DB
+           Linked Device List is Empty..
+
+
+      >> Enter Menu Number: 34
+
+         > Enter Device Number, for Checking Linked Status on PRVN DB: 2
+         Checking Selected Link Status on PRVN DB..
+         > Checked Selected Link Status on PRVN DB
+           Linked Device List is Empty..
+
+
+
+[E] REMOVE THE SELECTED DEVICE
+
+ - If you don't use a device, you can remove the device using this menu. After it is operated,
+ credentials related to the device is removed from all devices in subnet.
+
+   => Enter 50. Then credentials related to selected device is removed from all devices.
+
+      >> Enter Menu Number: 50
+
+         > Enter Device Number, for Removing Device: 1
+         Removing Selected Owned Device..
+         > Removed Selected Owned Device
+         > Please Discover Owned Devices for the Registered Result, with [10|12] Menu
+
+
+You can find details below page.
+- https://wiki.iotivity.org/provisioning#sample_application
