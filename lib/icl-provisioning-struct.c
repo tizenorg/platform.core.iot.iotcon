@@ -371,6 +371,31 @@ API int iotcon_provisioning_device_get_oxm(iotcon_provisioning_device_h device,
 }
 
 
+API int iotcon_provisioning_device_is_owned(iotcon_provisioning_device_h device,
+		bool *is_owned)
+{
+	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
+	RETV_IF(NULL == device, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == device->device, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == device->device->doxm, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == is_owned, IOTCON_ERROR_INVALID_PARAMETER);
+
+	*is_owned = device->device->doxm->owned;
+
+	return IOTCON_ERROR_NONE;
+}
+
+
+void icl_provisioning_device_set_owned(iotcon_provisioning_device_h device)
+{
+	RET_IF(NULL == device);
+	RET_IF(NULL == device->device);
+	RET_IF(NULL == device->device->doxm);
+
+	device->device->doxm->owned = true;
+}
+
+
 int icl_provisioning_devices_create(OCProvisionDev_t *dev_list,
 		iotcon_provisioning_devices_h *devices)
 {
