@@ -152,6 +152,8 @@ int iotcon_provisioning_device_get_id(iotcon_provisioning_device_h device,
 		char **device_id);
 int iotcon_provisioning_device_get_oxm(iotcon_provisioning_device_h device,
 		iotcon_provisioning_oxm_e *oxm);
+int iotcon_provisioning_device_is_owned(iotcon_provisioning_device_h device,
+		bool *is_owned);
 
 int iotcon_provisioning_devices_create(iotcon_provisioning_devices_h *devices);
 int iotcon_provisioning_devices_destroy(iotcon_provisioning_devices_h devices);

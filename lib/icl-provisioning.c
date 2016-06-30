@@ -677,6 +677,8 @@ static bool _provisioning_ownership_transfer_foreach_cb(
 
 	icl_provisioning_device_set_found(device);
 
+	icl_provisioning_device_set_owned(device);
+
 	if (container->cb)
 		container->cb(device, result, container->user_data);
 
