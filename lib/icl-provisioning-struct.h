@@ -33,7 +33,7 @@ int icl_provisioning_devices_create(OCProvisionDev_t *dev_list,
 OCProvisionDev_t* icl_provisioning_devices_get_devices(
 		iotcon_provisioning_devices_h devices);
 
-int icl_provisioning_devices_move_device(OicUuid_t *a,
+void icl_provisioning_devices_move_device(OicUuid_t *a,
 		iotcon_provisioning_devices_h unowned_devices,
 		iotcon_provisioning_devices_h owned_devices);
 

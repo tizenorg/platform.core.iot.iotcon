@@ -572,7 +572,7 @@ bool icl_provisioning_compare_oic_uuid(OicUuid_t *a, OicUuid_t *b)
 }
 
 
-int icl_provisioning_devices_move_device(OicUuid_t *a,
+void icl_provisioning_devices_move_device(OicUuid_t *a,
 		iotcon_provisioning_devices_h unowned_devices,
 		iotcon_provisioning_devices_h owned_devices)
 {
@@ -595,9 +595,9 @@ int icl_provisioning_devices_move_device(OicUuid_t *a,
 
 		current->next = owned_dev_list;
 		owned_devices->dev_list = current;
-	}
 
-	return IOTCON_ERROR_NONE;
+		return;
+	}
 }
 
 

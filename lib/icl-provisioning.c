@@ -643,15 +643,21 @@ static void _provisioning_ownership_transfer_cb_container_destroy(
 static int _provisioning_ownership_transfer_get_result(
 		iotcon_provisioning_device_h device, OCProvisionResult_t *result_list, int count)
 {
-	int i;
+	int i, ret;
 	OCProvisionDev_t *oic_device;
 
 	oic_device = icl_provisioning_device_get_device(device);
 
 	for (i = 0; i < count; i++) {
 		if (true == icl_provisioning_compare_oic_uuid(&oic_device->doxm->deviceID,
-					(OicUuid_t*)&result_list[i].deviceId))
-			return _provisioning_parse_oic_error(result_list[i].res);
+					(OicUuid_t*)&result_list[i].deviceId)) {
+			ret = _provisioning_parse_oic_error(result_list[i].res);
+			if (IOTCON_ERROR_NONE == ret) {
+				icl_provisioning_devices_move_device((OicUuid_t*)&result_list[i].deviceId,
+						icl_unowned_devices, icl_owned_devices);
+			}
+			return ret;
+		}
 	}
 
 	return IOTCON_ERROR_IOTIVITY;
