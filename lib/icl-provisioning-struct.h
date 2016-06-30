@@ -20,6 +20,7 @@
 
 void icl_provisioning_device_set_found(iotcon_provisioning_device_h device);
 void icl_provisioning_device_unset_found(iotcon_provisioning_device_h device);
+void icl_provisioning_device_set_owned(iotcon_provisioning_device_h device);
 
 OCProvisionDev_t* icl_provisioning_device_get_device(
 		iotcon_provisioning_device_h devices);
