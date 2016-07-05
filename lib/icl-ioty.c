@@ -55,7 +55,6 @@ static GHashTable *icl_caching_table;
 static char icl_svr_db_file[PATH_MAX];
 static OCPersistentStorage icl_ioty_ps;
 
-
 void icl_ioty_deinit(pthread_t thread)
 {
 	FN_CALL;
