@@ -655,7 +655,7 @@ API int iotcon_provisioning_devices_add_device(iotcon_provisioning_devices_h dev
 	}
 
 	if (NULL == dev_list)
-		dev_list = current;
+		devices->dev_list = current;
 	else {
 		while (dev_list->next)
 			dev_list = dev_list->next;
