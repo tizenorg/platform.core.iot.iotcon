@@ -42,9 +42,9 @@ typedef enum {
 /* initialize */
 int iotcon_provisioning_initialize(const char *file_path, const char *db_path);
 
-typedef char* (*iotcon_provisioning_randompins_cb)(void *user_data);
+typedef char* (*iotcon_provisioning_randompin_cb)(void *user_data);
 
-int iotcon_provisioning_set_randompins(iotcon_provisioning_randompins_cb cb,
+int iotcon_provisioning_set_randompin_cb(iotcon_provisioning_randompin_cb cb,
 		void *user_data);
 
 /* discover */

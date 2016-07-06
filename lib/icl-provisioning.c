@@ -42,8 +42,8 @@ typedef enum {
 	ICL_PROVISIONING_REMOVE_DEVICE,
 } icl_provisioning_discover_e;
 
-struct icl_provisioning_randompins_cb_container {
-	iotcon_provisioning_randompins_cb cb;
+struct icl_provisioning_randompin_cb_container {
+	iotcon_provisioning_randompin_cb cb;
 	void *user_data;
 };
 
@@ -107,7 +107,7 @@ struct icl_provisioning_remove_device_cb_container {
 
 static OTMCallbackData_t icl_justworks_otmcb;
 static OTMCallbackData_t icl_pinbased_otmcb;
-static struct icl_provisioning_randompins_cb_container icl_randompins_cb_container;
+static struct icl_provisioning_randompin_cb_container icl_randompin_cb_container;
 
 static iotcon_provisioning_devices_h icl_owned_devices;
 static iotcon_provisioning_devices_h icl_unowned_devices;
@@ -136,7 +136,7 @@ static void _provisioning_set_justworks()
 }
 
 
-static void _provisioning_set_randompins()
+static void _provisioning_set_randompin()
 {
 	icl_pinbased_otmcb.loadSecretCB = InputPinCodeCallback;
 	icl_pinbased_otmcb.createSecureSessionCB = CreateSecureSessionRandomPinCallback;
@@ -202,11 +202,11 @@ static void _provisioning_input_pin_cb(char *pin, size_t len)
 	FN_CALL;
 	char *temp;
 
-	RET_IF(NULL == icl_randompins_cb_container.cb);
+	RET_IF(NULL == icl_randompin_cb_container.cb);
 	RET_IF(NULL == pin);
 	RET_IF(len <= OXM_RANDOM_PIN_SIZE);
 
-	temp = icl_randompins_cb_container.cb(icl_randompins_cb_container.user_data);
+	temp = icl_randompin_cb_container.cb(icl_randompin_cb_container.user_data);
 	if ((NULL == temp) || (len <= strlen(temp))) {
 		ERR("Invalid Pin Number");
 		return;
@@ -216,7 +216,7 @@ static void _provisioning_input_pin_cb(char *pin, size_t len)
 }
 
 
-API int iotcon_provisioning_set_randompins(iotcon_provisioning_randompins_cb cb,
+API int iotcon_provisioning_set_randompin_cb(iotcon_provisioning_randompin_cb cb,
 		void *user_data)
 {
 	FN_CALL;
@@ -225,7 +225,7 @@ API int iotcon_provisioning_set_randompins(iotcon_provisioning_randompins_cb cb,
 	RETV_IF(false == ic_utils_check_ocf_feature(), IOTCON_ERROR_NOT_SUPPORTED);
 	RETV_IF(NULL == cb, IOTCON_ERROR_INVALID_PARAMETER);
 
-	_provisioning_set_randompins();
+	_provisioning_set_randompin();
 
 	ret = icl_ioty_mutex_lock();
 	if (IOTCON_ERROR_NONE != ret) {
@@ -240,8 +240,8 @@ API int iotcon_provisioning_set_randompins(iotcon_provisioning_randompins_cb cb,
 		return _provisioning_parse_oic_error(ret);
 	}
 
-	icl_randompins_cb_container.cb = cb;
-	icl_randompins_cb_container.user_data = user_data;
+	icl_randompin_cb_container.cb = cb;
+	icl_randompin_cb_container.user_data = user_data;
 
 	SetInputPinCB(_provisioning_input_pin_cb);
 
