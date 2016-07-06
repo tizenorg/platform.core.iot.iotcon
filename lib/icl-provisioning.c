@@ -216,7 +216,7 @@ static void _provisioning_input_pin_cb(char *pin, size_t len)
 }
 
 
-API int iotcon_provisioning_set_randompins(iotcon_provisioning_randompins_cb cb,
+API int iotcon_provisioning_set_randompins_cb(iotcon_provisioning_randompins_cb cb,
 		void *user_data)
 {
 	FN_CALL;

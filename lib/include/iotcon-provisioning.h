@@ -44,7 +44,7 @@ int iotcon_provisioning_initialize(const char *file_path, const char *db_path);
 
 typedef char* (*iotcon_provisioning_randompins_cb)(void *user_data);
 
-int iotcon_provisioning_set_randompins(iotcon_provisioning_randompins_cb cb,
+int iotcon_provisioning_set_randompins_cb(iotcon_provisioning_randompins_cb cb,
 		void *user_data);
 
 /* discover */
