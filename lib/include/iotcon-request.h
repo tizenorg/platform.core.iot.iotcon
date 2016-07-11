@@ -41,7 +41,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		void *user_data)
 {
 	int ret, observe_id;
-	iotcon_request_type_e types;
+	iotcon_request_type_e type;
 	iotcon_observe_type_e observe_type;
 	iotcon_options_h options = NULL;
 	iotcon_query_h query = NULL;
@@ -59,29 +59,29 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		...
 	}
 
-	ret = iotcon_request_get_types(request, &types);
+	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 
-	if (IOTCON_REQUEST_GET & types) {
+	if (IOTCON_REQUEST_GET == type) {
 		// handle get
 		...
 	}
-	if (IOTCON_REQUEST_PUT & types) {
+	if (IOTCON_REQUEST_PUT == type) {
 		// handle put
 		ret = iotcon_request_get_representation(request, &repr);
 		if (IOTCON_ERROR_NONE != ret)
 			return;
 		...
 	}
-	if (IOTCON_REQUEST_POST & types) {
+	if (IOTCON_REQUEST_POST == type) {
 		// handle post
 		ret = iotcon_request_get_representation(request, &repr);
 		if (IOTCON_ERROR_NONE != ret)
 			return;
 		...
 	}
-	if (IOTCON_REQUEST_DELETE & types) {
+	if (IOTCON_REQUEST_DELETE == type) {
 		// handle delete
 		ret = iotcon_request_get_representation(request, &repr);
 		if (IOTCON_ERROR_NONE != ret)

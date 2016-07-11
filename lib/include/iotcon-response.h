@@ -105,10 +105,10 @@ static iotcon_attributes_h _create_attributes()
 static void _request_handler(iotcon_resource_h resource, iotcon_request_h request, void *user_data)
 {
 	int ret;
-	int types;
+	iotcon_request_type_e type;
 	iotcon_query_h query = NULL;
 
-	ret = iotcon_request_get_types(request, &types);
+	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 
@@ -119,7 +119,7 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 			return;
 	}
 
-	if (IOTCON_REQUEST_GET & types) {
+	if (IOTCON_REQUEST_GET == type) {
 		iotcon_response_h response = NULL;
 		iotcon_representation_h repr = NULL;
 		iotcon_attributes_h attributes = NULL;
