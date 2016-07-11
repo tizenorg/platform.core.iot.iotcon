@@ -40,9 +40,9 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		void *user_data)
 {
 	int ret;
-	iot types;
+	iotcon_request_type_e types;
 
-	ret = iotcon_request_get_types(request, &types);
+	ret = iotcon_request_get_request_type(request, &types);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 
