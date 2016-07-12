@@ -621,6 +621,8 @@ void icl_provisioning_devices_move_device(OicUuid_t *a,
 		current->next = owned_dev_list;
 		owned_devices->dev_list = current;
 
+		current->doxm->owned = true;
+
 		return;
 	}
 }
