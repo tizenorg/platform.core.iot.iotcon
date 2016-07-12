@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <time.h>
+#include <pthread.h>
 #include <glib.h>
 #include <system_info.h>
 #include <system_settings.h>
@@ -54,7 +55,7 @@ static const char *IC_SYSTEM_INFO_BUILD_STRING = "http://tizen.org/system/build.
 static const char *IC_SYSTEM_INFO_TIZEN_ID = "http://tizen.org/system/tizenid";
 
 static pthread_mutex_t ic_utils_mutex_init = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t ic_utils_mutex_ioty = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t ic_utils_mutex_ioty;
 static pthread_mutex_t ic_utils_mutex_polling = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t ic_utils_cond_polling;
 static __thread int ic_utils_pthread_oldstate;
@@ -272,6 +273,41 @@ void ic_utils_mutex_unlock(int type)
 
 	ret = pthread_mutex_unlock(_utils_mutex_get(type));
 	WARN_IF(0 != ret, "pthread_mutex_unlock() Fail(%d)", ret);
+}
+
+int ic_utils_mutex_ioty_init()
+{
+	int ret;
+	pthread_mutexattr_t attr;
+
+	ret = pthread_mutexattr_init(&attr);
+	if (0 != ret) {
+		ERR("pthread_mutexattr_init() Fail(%d)", ret);
+		return IOTCON_ERROR_SYSTEM;
+	}
+
+	ret = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+	if (0 != ret) {
+		ERR("pthread_mutexattr_settype() Fail(%d)", ret);
+		pthread_mutexattr_destroy(&attr);
+		return IOTCON_ERROR_SYSTEM;
+	}
+
+	ret = pthread_mutex_init(&ic_utils_mutex_ioty, &attr);
+	if (0 != ret) {
+		ERR("pthread_mutex_init() Fail(%d)", ret);
+		pthread_mutexattr_destroy(&attr);
+		return IOTCON_ERROR_SYSTEM;
+	}
+
+	pthread_mutexattr_destroy(&attr);
+
+	return IOTCON_ERROR_NONE;
+}
+
+void ic_utils_mutex_ioty_destroy()
+{
+	pthread_mutex_destroy(&ic_utils_mutex_ioty);
 }
 
 int ic_utils_cond_polling_init()
