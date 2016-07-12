@@ -16,8 +16,6 @@
 #ifndef __IOT_CONNECTIVITY_CONSTANT_H__
 #define __IOT_CONNECTIVITY_CONSTANT_H__
 
-#include <iotcon-types.h>
-
 /**
  * @file iotcon-constant.h
  */
