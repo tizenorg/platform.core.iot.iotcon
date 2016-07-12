@@ -36,6 +36,9 @@ void ic_utils_free_platform_info(OCPlatformInfo *platform_info);
 void ic_utils_mutex_lock(int type);
 void ic_utils_mutex_unlock(int type);
 
+int ic_utils_mutex_ioty_init();
+void ic_utils_mutex_ioty_destroy();
+
 int ic_utils_cond_polling_init();
 void ic_utils_cond_polling_destroy();
 
