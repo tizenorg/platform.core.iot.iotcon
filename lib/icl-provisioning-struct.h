@@ -18,12 +18,19 @@
 
 #include <ocprovisioningmanager.h>
 
+char* icl_provisioning_parse_uuid(OicUuid_t *uuid);
+
+int icl_provisioning_device_create(OCProvisionDev_t *device,
+		iotcon_provisioning_device_h *ret_device);
+
 void icl_provisioning_device_set_found(iotcon_provisioning_device_h device);
 void icl_provisioning_device_unset_found(iotcon_provisioning_device_h device);
 void icl_provisioning_device_set_owned(iotcon_provisioning_device_h device);
 
 OCProvisionDev_t* icl_provisioning_device_get_device(
 		iotcon_provisioning_device_h devices);
+
+void icl_provisioning_device_print(iotcon_provisioning_device_h device);
 
 void icl_provisioning_devices_set_found(iotcon_provisioning_devices_h devices);
 void icl_provisioning_devices_unset_found(iotcon_provisioning_devices_h devices);

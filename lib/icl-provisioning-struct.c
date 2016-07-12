@@ -55,7 +55,7 @@ struct icl_provisioning_acl {
 };
 
 
-static char* _provisioning_parse_uuid(OicUuid_t *uuid)
+char* icl_provisioning_parse_uuid(OicUuid_t *uuid)
 {
 	char uuid_string[256] = {0};
 
@@ -65,6 +65,8 @@ static char* _provisioning_parse_uuid(OicUuid_t *uuid)
 			(*uuid).id[4], (*uuid).id[5], (*uuid).id[6], (*uuid).id[7],
 			(*uuid).id[8], (*uuid).id[9], (*uuid).id[10], (*uuid).id[11],
 			(*uuid).id[12], (*uuid).id[13], (*uuid).id[14], (*uuid).id[15]);
+
+	DBG("uuid : %s", uuid_string);
 
 	return strdup(uuid_string);
 }
@@ -169,7 +171,7 @@ static int _provisioning_device_get_host_address(OCProvisionDev_t *device,
 }
 
 
-static int _provisioning_device_create(OCProvisionDev_t *device,
+int icl_provisioning_device_create(OCProvisionDev_t *device,
 		iotcon_provisioning_device_h *ret_device)
 {
 	FN_CALL;
@@ -200,7 +202,7 @@ static int _provisioning_device_create(OCProvisionDev_t *device,
 		return ret;
 	}
 
-	temp->device_id = _provisioning_parse_uuid(&device->doxm->deviceID);
+	temp->device_id = icl_provisioning_parse_uuid(&device->doxm->deviceID);
 
 	*ret_device = temp;
 
@@ -219,9 +221,9 @@ API int iotcon_provisioning_device_clone(iotcon_provisioning_device_h device,
 	RETV_IF(NULL == device, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cloned_device, IOTCON_ERROR_INVALID_PARAMETER);
 
-	ret = _provisioning_device_create(device->device, &temp);
+	ret = icl_provisioning_device_create(device->device, &temp);
 	if (IOTCON_ERROR_NONE != ret) {
-		ERR("_provisioning_device_create() Fail(%d)", ret);
+		ERR("icl_provisioning_device_create() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -396,6 +398,19 @@ void icl_provisioning_device_set_owned(iotcon_provisioning_device_h device)
 }
 
 
+void icl_provisioning_device_print(iotcon_provisioning_device_h device)
+{
+	RET_IF(NULL == device);
+
+	INFO("Device Information");
+	INFO("host address : %s", device->host_address);
+	INFO("device ID : %s", device->device_id);
+
+	if (device->device && device->device->secVer)
+		INFO("security version : %s", device->device->secVer);
+}
+
+
 int icl_provisioning_devices_create(OCProvisionDev_t *dev_list,
 		iotcon_provisioning_devices_h *devices)
 {
@@ -550,9 +565,9 @@ API int iotcon_provisioning_devices_foreach(iotcon_provisioning_devices_h device
 	current = devices->dev_list;
 
 	for (; current; current = current->next) {
-		ret = _provisioning_device_create(current, &device);
+		ret = icl_provisioning_device_create(current, &device);
 		if (IOTCON_ERROR_NONE != ret) {
-			ERR("_provisioning_device_create() Fail(%d)", ret);
+			ERR("icl_provisioning_device_create() Fail(%d)", ret);
 			return ret;
 		}
 
@@ -602,14 +617,22 @@ void icl_provisioning_devices_move_device(OicUuid_t *a,
 		iotcon_provisioning_devices_h owned_devices)
 {
 	FN_CALL;
-	OCProvisionDev_t *owned_dev_list = owned_devices->dev_list;
+	int ret;
+	OCProvisionDev_t *owned_dev_list;
 	OCProvisionDev_t *previous;
 	OCProvisionDev_t *current;
 
-	previous = NULL;
+	if (NULL == unowned_devices)
+		return;
+
+	if (owned_devices)
+		owned_dev_list = owned_devices->dev_list;
+	else
+		owned_dev_list = NULL;
+
 	current = icl_provisioning_devices_get_devices(unowned_devices);
 
-	for (; current; previous = current, current = current->next) {
+	for (previous = NULL; current; previous = current, current = current->next) {
 		if (false == icl_provisioning_compare_oic_uuid(a, &current->doxm->deviceID))
 			continue;
 
@@ -619,7 +642,16 @@ void icl_provisioning_devices_move_device(OicUuid_t *a,
 			unowned_devices->dev_list = current->next;
 
 		current->next = owned_dev_list;
-		owned_devices->dev_list = current;
+
+		if (owned_devices) {
+			owned_devices->dev_list = current;
+		} else {
+			ret = icl_provisioning_devices_create(current, &owned_devices);
+			if (IOTCON_ERROR_NONE != ret) {
+				ERR("icl_provisioning_devices_create() Fail(%d)", ret);
+				return;
+			}
+		}
 
 		return;
 	}

@@ -25,6 +25,12 @@ typedef struct icl_provisioning_device* iotcon_provisioning_device_h;
 typedef struct icl_provisioning_acl* iotcon_provisioning_acl_h;
 
 typedef enum {
+	IOTCON_PROVISIONING_FIND_OWNED,
+	IOTCON_PROVISIONING_FIND_UNOWNED,
+	IOTCON_PROVISIONING_FIND_ALL,
+} iotcon_provisioning_find_e;
+
+typedef enum {
 	IOTCON_PERMISSION_CREATE = (1 << 0),
 	IOTCON_PERMISSION_READ = (1 << 1),
 	IOTCON_PERMISSION_WRITE = (1 << 2),
@@ -48,22 +54,12 @@ int iotcon_provisioning_set_randompin_cb(iotcon_provisioning_randompin_cb cb,
 		void *user_data);
 
 /* discover */
-int iotcon_provisioning_get_devices(iotcon_provisioning_devices_h *owned_devices,
-		iotcon_provisioning_devices_h *unowned_devices);
+typedef bool (*iotcon_provisioning_found_device_cb)(iotcon_provisioning_device_h device,
+		int result, void *user_data);
 
-typedef void (*iotcon_provisioning_found_devices_cb)(
-		iotcon_provisioning_devices_h owned_devices,
-		iotcon_provisioning_devices_h unowned_devices,
-		void *user_data);
+int iotcon_provisioning_find_device(iotcon_provisioning_find_e owned,
+		iotcon_provisioning_found_device_cb cb, void *user_data);
 
-int iotcon_provisioning_find_all_devices(int timeout,
-		iotcon_provisioning_found_devices_cb cb, void *user_data);
-
-int iotcon_provisioning_find_unowned_devices(int timeout,
-		iotcon_provisioning_found_devices_cb cb, void *user_data);
-
-int iotcon_provisioning_find_owned_devices(int timeout,
-		iotcon_provisioning_found_devices_cb cb, void *user_data);
 
 /* register */
 typedef void (*iotcon_provisioning_ownership_transfer_cb)(
