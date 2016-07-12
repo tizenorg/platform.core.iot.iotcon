@@ -18,32 +18,30 @@
 
 #include <ocprovisioningmanager.h>
 
+char* icl_provisioning_parse_uuid(OicUuid_t *uuid);
+
+iotcon_provisioning_device_h icl_provisioning_device_ref(
+		iotcon_provisioning_device_h device);
+OCProvisionDev_t* icl_provisioning_device_clone(OCProvisionDev_t *src);
+int icl_provisioning_device_create(OCProvisionDev_t *device,
+		iotcon_provisioning_device_h *ret_device);
+iotcon_provisioning_device_h icl_provisioning_device_ref(
+		iotcon_provisioning_device_h device);
+
 void icl_provisioning_device_set_found(iotcon_provisioning_device_h device);
 void icl_provisioning_device_unset_found(iotcon_provisioning_device_h device);
+bool icl_provisioning_device_is_found(iotcon_provisioning_device_h device);
 void icl_provisioning_device_set_owned(iotcon_provisioning_device_h device);
 
 OCProvisionDev_t* icl_provisioning_device_get_device(
-		iotcon_provisioning_device_h devices);
+		iotcon_provisioning_device_h device);
 
-void icl_provisioning_devices_set_found(iotcon_provisioning_devices_h devices);
-void icl_provisioning_devices_unset_found(iotcon_provisioning_devices_h devices);
-
-int icl_provisioning_devices_create(OCProvisionDev_t *dev_list,
-		iotcon_provisioning_devices_h *devices);
-
-OCProvisionDev_t* icl_provisioning_devices_get_devices(
-		iotcon_provisioning_devices_h devices);
-
-void icl_provisioning_devices_move_device(OicUuid_t *a,
-		iotcon_provisioning_devices_h unowned_devices,
-		iotcon_provisioning_devices_h owned_devices);
-
-OCProvisionDev_t* icl_provisioning_devices_clone(OCProvisionDev_t *src);
+void icl_provisioning_device_print(iotcon_provisioning_device_h device);
 
 void icl_provisioning_device_print_uuid(iotcon_provisioning_device_h device);
-void icl_provisioning_devices_print_uuid(iotcon_provisioning_devices_h devices);
 bool icl_provisioning_compare_oic_uuid(OicUuid_t *a, OicUuid_t *b);
 
+iotcon_provisioning_acl_h icl_provisioning_acl_ref(iotcon_provisioning_acl_h acl);
 int icl_provisioning_acl_clone(iotcon_provisioning_acl_h acl,
 		iotcon_provisioning_acl_h *cloned_acl);
 OCProvisionDev_t* icl_provisioning_acl_get_subject(
