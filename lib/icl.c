@@ -40,11 +40,14 @@ int icl_initialize(const char *file_path, bool is_pt)
 	g_type_init();
 #endif
 
+	ic_utils_mutex_ioty_init();
+
 	ic_utils_mutex_lock(IC_UTILS_MUTEX_INIT);
 	if (0 == icl_init_count) {
 		ret = icl_ioty_set_persistent_storage(file_path, is_pt);
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_set_persistent_storage() Fail(%d)", ret);
+			ic_utils_mutex_ioty_destroy();
 			return ret;
 		}
 
@@ -52,6 +55,7 @@ int icl_initialize(const char *file_path, bool is_pt)
 		if (IOTCON_ERROR_NONE != ret) {
 			ERR("icl_ioty_init() Fail(%d)", ret);
 			ic_utils_mutex_unlock(IC_UTILS_MUTEX_INIT);
+			ic_utils_mutex_ioty_destroy();
 			return ret;
 		}
 
@@ -60,6 +64,7 @@ int icl_initialize(const char *file_path, bool is_pt)
 			ERR("icl_ioty_set_platform_info() Fail(%d)", ret);
 			icl_ioty_deinit(icl_thread);
 			ic_utils_mutex_unlock(IC_UTILS_MUTEX_INIT);
+			ic_utils_mutex_ioty_destroy();
 			return ret;
 		}
 	}
@@ -82,6 +87,7 @@ API void iotcon_deinitialize(void)
 	if (0 == icl_init_count) {
 		icl_ioty_deinit(icl_thread);
 		icl_thread = 0;
+		ic_utils_mutex_ioty_destroy();
 	}
 
 	ic_utils_mutex_unlock(IC_UTILS_MUTEX_INIT);
