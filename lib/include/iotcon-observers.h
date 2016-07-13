@@ -42,17 +42,17 @@ static void _request_handler(iotcon_resource_h resource, iotcon_request_h reques
 		void *user_data)
 {
 	int ret, observe_id;
-	iotcon_request_type_e types;
+	iotcon_request_type_e type;
 	iotcon_observe_type_e observe_type;
 	iotcon_representation_h repr = NULL;
 
 	...
-	ret = iotcon_request_get_types(request, &types);
+	ret = iotcon_request_get_request_type(request, &type);
 	if (IOTCON_ERROR_NONE != ret)
 		return;
 	...
 
-	if (IOTCON_REQUEST_PUT & types) {
+	if (IOTCON_REQUEST_PUT == type) {
 		iotcon_attributes_h attributes = NULL;
 		iotcon_representation_h repr = NULL;
 		...
