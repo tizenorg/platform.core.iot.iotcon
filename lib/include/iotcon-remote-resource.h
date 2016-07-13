@@ -124,7 +124,10 @@ static void _find_light_resource()
  * if @a remote_resource is no longer needed.
  *
  * @param[in] host_address The host address of the resource
- * @param[in] connectivity_type The connectivity type
+ * @param[in] connectivity_type The connectivity type. Can not use @a IOTCON_CONNECTIVITY_ALL. \n
+ * Connectivity type of specific remote resource(It has specific host address, not @a IOTCON_MULTICAST_ADDRESS) is already decided. \n
+ * Use specific connectivity type of the remote resource. \n
+ * You can refer to the @a iotcon_remote_resource_get_connectivity_type().
  * @param[in] uri_path The URI path of the resource
  * @param[in] policies The policies of the resource\n Set of #iotcon_resource_policy_e
  * @param[in] resource_types The resource types of the resource. For example, "core.light"
