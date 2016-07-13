@@ -113,7 +113,7 @@ typedef enum {
  * @since_tizen 3.0
  */
 typedef enum {
-	IOTCON_CONNECTIVITY_ALL = 0, /**< Indicates all connectivities */
+	IOTCON_CONNECTIVITY_ALL = 0, /**< Indicates all connectivities. This type only related to @a IOTCON_MULTICAST_ADDRESS. If it is related to specific host address then connectivity type should be its connectivity type */
 	IOTCON_CONNECTIVITY_IPV4, /**< Indicates Internet Protocol version 4 connectivity */
 	IOTCON_CONNECTIVITY_IPV6, /**< Indicates Internet Protocol version 6 connectivity */
 } iotcon_connectivity_type_e;
