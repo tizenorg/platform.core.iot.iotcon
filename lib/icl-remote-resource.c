@@ -88,6 +88,7 @@ API int iotcon_remote_resource_create(const char *host_address,
 	RETV_IF(NULL == resource_types, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_ifaces, IOTCON_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == resource_handle, IOTCON_ERROR_INVALID_PARAMETER);
+	RETV_IF(IOTCON_CONNECTIVITY_ALL == connectivity_type, IOTCON_ERROR_INVALID_PARAMETER);
 
 	resource = calloc(1, sizeof(struct icl_remote_resource));
 	if (NULL == resource) {
