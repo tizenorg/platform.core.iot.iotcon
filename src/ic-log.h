@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __IOTCON_TEST_H__
-#define __IOTCON_TEST_H__
+#ifndef __IOTCON_INTERNAL_LOG_H__
+#define __IOTCON_INTERNAL_LOG_H__
 
-/* for strcmp() */
-#define TEST_STR_EQUAL 0
-
-#define ICTEST_LOGRED "\033[0;31m"
-#define ICTEST_LOGGREEN "\033[0;32m"
-#define ICTEST_LOGBROWN "\033[0;33m"
-#define ICTEST_LOGBLUE "\033[0;34m"
-#define ICTEST_LOGEND "\033[0;m"
+#define IC_LOG_RED "\033[0;31m"
+#define IC_LOG_GREEN "\033[0;32m"
+#define IC_LOG_BROWN "\033[0;33m"
+#define IC_LOG_BLUE "\033[0;34m"
+#define IC_LOG_END "\033[0;m"
 
 #undef _DBG
 #undef _INFO
@@ -36,40 +33,56 @@
 #undef ERR
 
 #define TIZEN_DEBUG_ENABLE
-#define LOG_TAG "ICTEST"
+#define LOG_TAG "IOTCON"
 #include <dlog.h>
+
+#ifdef IC_DAEMON
+
+#define _DBG(fmt, arg...) SLOGD(IC_LOG_GREEN "<Daemon>" IC_LOG_END fmt, ##arg)
+#define _INFO(fmt, arg...) SLOGI(IC_LOG_GREEN "<Daemon>" IC_LOG_END fmt, ##arg)
+#define _WARN(fmt, arg...) SLOGW(IC_LOG_GREEN "<Daemon>" IC_LOG_END fmt, ##arg)
+#define _ERR(fmt, arg...) SLOGE(IC_LOG_GREEN "<Daemon>" IC_LOG_END fmt, ##arg)
+
+#else /* IC_DAEMON */
 
 #define _DBG(fmt, arg...) SLOGD(fmt, ##arg)
 #define _INFO(fmt, arg...) SLOGI(fmt, ##arg)
 #define _WARN(fmt, arg...) SLOGW(fmt, ##arg)
 #define _ERR(fmt, arg...) SLOGE(fmt, ##arg)
 
+#endif /* IC_DAEMON */
+
 #if 0
 #define _DBG(fmt, arg...) \
-	printf("[IoTConTest]%s(%d):" fmt "\n", __FUNCTION__, __LINE__, ##arg)
+	printf("[IoTCon]%s(%d):" fmt "\n", __FUNCTION__, __LINE__, ##arg)
 #define _INFO(fmt, arg...) \
-	printf("[IoTConTest]%s(%d):" fmt "\n", __FUNCTION__, __LINE__, ##arg)
+	printf("[IoTCon]%s(%d):" fmt "\n", __FUNCTION__, __LINE__, ##arg)
 #define _WARN(fmt, arg...) \
-	printf("[IoTConTest]%s(%d):" fmt "\n", __FUNCTION__, __LINE__, ##arg)
+	printf("[IoTCon]%s(%d):" fmt "\n", __FUNCTION__, __LINE__, ##arg)
 #define _ERR(fmt, arg...) \
-	printf("[IoTConTest]%s(%d):" fmt "\n", __FUNCTION__, __LINE__, ##arg)
+	printf("[IoTCon]%s(%d):" fmt "\n", __FUNCTION__, __LINE__, ##arg)
 #endif
 
-#define ICTEST_DEBUGGING
+#define IC_DEBUGGING
 
-#ifdef ICTEST_DEBUGGING
+#ifdef IC_DEBUGGING
 
 #define FN_CALL _INFO(">>>>>>>> called")
 #define FN_END _INFO("<<<<<<<< ended")
 #define DBG(fmt, arg...) _DBG(fmt, ##arg)
-#define WARN(fmt, arg...) _WARN(ICTEST_LOGBROWN fmt ICTEST_LOGEND, ##arg)
-#define ERR(fmt, arg...) _ERR(ICTEST_LOGRED fmt ICTEST_LOGEND, ##arg)
-#define INFO(fmt, arg...) _INFO(ICTEST_LOGBLUE fmt ICTEST_LOGEND, ##arg)
+#define WARN(fmt, arg...) _WARN(IC_LOG_BROWN fmt IC_LOG_END, ##arg)
+#define ERR(fmt, arg...) _ERR(IC_LOG_RED fmt IC_LOG_END, ##arg)
+#define INFO(fmt, arg...) _INFO(IC_LOG_BLUE fmt IC_LOG_END, ##arg)
 #define SECURE_DBG(fmt, arg...) SECURE_SLOGD(fmt, ##arg)
 #define SECURE_ERR(fmt, arg...) SECURE_SLOGE(fmt, ##arg)
-#define ABORT() abort()
 
-#else /* ICTEST_DEBUGGING */
+#if __WORDSIZE == 64
+#define DBG_HANDLE(handle) _DBG("handle : %lld", #handle)
+#else
+#define DBG_HANDLE(handle) _DBG("handle : %d", #handle)
+#endif
+
+#else /* IC_DEBUGGING */
 
 #define FN_CALL
 #define FN_END
@@ -79,9 +92,8 @@
 #define INFO(fmt, arg...)
 #define SECURE_DBG(fmt, arg...)
 #define SECURE_ERR(fmt, arg...) SECURE_SLOGE(fmt, ##arg)
-#define ABORT()
 
-#endif /* ICTEST_DEBUGGING */
+#endif /* IC_DEBUGGING */
 
 #define RET_IF(expr) \
 	do { \
@@ -129,4 +141,4 @@
 		} \
 	} while (0)
 
-#endif /* __IOTCON_TEST_H__ */
+#endif /* __IOTCON_INTERNAL_LOG_H__ */
