@@ -119,6 +119,7 @@ static iotcon_error_e _provisioning_parse_oic_error(OCStackResult ret)
 	switch (ret) {
 	case OC_STACK_RESOURCE_CREATED:
 	case OC_STACK_RESOURCE_DELETED:
+	case OC_STACK_RESOURCE_CHANGED:
 		return IOTCON_ERROR_NONE;
 	case OC_STACK_AUTHENTICATION_FAILURE:
 		return IOTCON_ERROR_AUTHENTICATION_FAILURE;
@@ -985,13 +986,34 @@ static char* _provisioning_parse_uuid(OicUuid_t *uuid)
 }
 
 
+static void _provisioning_ace_add_resource(OicSecAce_t *ace, OicSecRsrc_t *resource)
+{
+	OicSecRsrc_t *current;
+
+	current = ace->resources;
+
+	if (NULL == current) {
+		ace->resources = resource;
+		return;
+	}
+
+	while (current->next)
+		current = current->next;
+
+	current->next = resource;
+}
+
+
 static OicSecAcl_t* _provisioning_convert_acl(iotcon_provisioning_device_h device,
 		iotcon_provisioning_acl_h acl)
 {
 	int i;
 	int permission;
+	int num_of_resources;
 	char *uri_path;
 	OicSecAcl_t *oic_acl;
+	OicSecAce_t *ace;
+	OicSecRsrc_t *resource;
 	OCProvisionDev_t *subject, *oic_device;
 
 	oic_acl = calloc(1, sizeof(OicSecAcl_t));
@@ -999,37 +1021,46 @@ static OicSecAcl_t* _provisioning_convert_acl(iotcon_provisioning_device_h devic
 		ERR("calloc() Fail(%d)", errno);
 		return NULL;
 	}
-
-	subject = icl_provisioning_acl_get_subject(acl);
-
-	memcpy(&oic_acl->subject, &subject->doxm->deviceID, 128/8);
-	memcpy(&oic_acl->rownerID, &subject->doxm->deviceID, sizeof(OicUuid_t));
-
-	_provisioning_parse_uuid(&oic_acl->subject);
-
-	oic_acl->resourcesLen = icl_provisioning_acl_get_resource_count(acl);
-
-	oic_acl->resources = calloc(oic_acl->resourcesLen, sizeof(char *));
-	if (NULL == oic_acl->resources) {
+	ace = calloc(1, sizeof(OicSecAce_t));
+	if (NULL == ace) {
 		ERR("calloc() Fail(%d)", errno);
 		OCDeleteACLList(oic_acl);
 		return NULL;
 	}
-	DBG("resource num : %d", oic_acl->resourcesLen);
+	oic_acl->aces = ace;
 
-	for (i = 0; i < oic_acl->resourcesLen; i++) {
-		uri_path = icl_provisioning_acl_get_nth_resource(acl, i);
-		if (NULL == uri_path) {
-			ERR("icl_provisioning_acl_get_nth_resource() Fail(%d)", errno);
+	subject = icl_provisioning_acl_get_subject(acl);
+
+	memcpy(&ace->subjectuuid, &subject->doxm->deviceID, 128/8);
+
+	_provisioning_parse_uuid(&ace->subjectuuid);
+
+	num_of_resources = icl_provisioning_acl_get_resource_count(acl);
+
+	for (i = 0; i < num_of_resources; i++) {
+		resource = calloc(1, sizeof(OicSecRsrc_t));
+		if (NULL == resource) {
+			ERR("calloc() Fail(%d)", errno);
 			OCDeleteACLList(oic_acl);
 			return NULL;
 		}
-		oic_acl->resources[i] = ic_utils_strdup(uri_path);
-		DBG("resource : (%s)", oic_acl->resources[i]);
+
+		uri_path = icl_provisioning_acl_get_nth_resource(acl, i);
+		if (NULL == uri_path) {
+			ERR("icl_provisioning_acl_get_nth_resource() Fail(%d)", errno);
+			free(resource);
+			OCDeleteACLList(oic_acl);
+			return NULL;
+		}
+		resource->href = ic_utils_strdup(uri_path);
+
+		// TODO: resource types & resource interfaces
+
+		_provisioning_ace_add_resource(ace, resource);
 	}
 
 	permission = icl_provisioning_acl_get_permission(acl);
-	oic_acl->permission = icl_provisioning_acl_convert_permission(permission);
+	ace->permission = icl_provisioning_acl_convert_permission(permission);
 
 	oic_device = icl_provisioning_device_get_device(device);
 
