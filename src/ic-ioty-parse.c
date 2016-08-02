@@ -373,10 +373,11 @@ int ic_ioty_parse_oic_device_payload(OCDevicePayload *payload,
 		ERR("strdup(device_name) Fail(%d)", errno);
 
 	info->spec_ver = ic_utils_strdup(payload->specVersion);
-	info->data_model_ver = ic_utils_strdup(payload->dataModelVersion);
 	info->device_id = ic_utils_strdup(payload->sid);
+	info->data_model_ver = OCCreateString(payload->dataModelVersions);
 
 	*device_info = info;
+
 	return IOTCON_ERROR_NONE;
 }
 
