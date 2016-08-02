@@ -355,6 +355,9 @@ int ic_ioty_parse_oic_discovery_payload(OCDevAddr *dev_addr,
 int ic_ioty_parse_oic_device_payload(OCDevicePayload *payload,
 		iotcon_device_info_h *device_info)
 {
+	int len = 0;
+	OCStringLL *data_model_ver_list;
+	char data_model_ver[1024] = {0};
 	struct icl_device_info *info = NULL;
 
 	RETV_IF(NULL == device_info, IOTCON_ERROR_INVALID_PARAMETER);
@@ -373,8 +376,19 @@ int ic_ioty_parse_oic_device_payload(OCDevicePayload *payload,
 		ERR("strdup(device_name) Fail(%d)", errno);
 
 	info->spec_ver = ic_utils_strdup(payload->specVersion);
-	info->data_model_ver = ic_utils_strdup(payload->dataModelVersion);
 	info->device_id = ic_utils_strdup(payload->sid);
+
+	data_model_ver_list = payload->dataModelVersions;
+
+	while (data_model_ver_list) {
+		snprintf(&data_model_ver[len], sizeof(data_model_ver), "%s,",
+				data_model_ver_list->value);
+		len = len + strlen(data_model_ver_list->value) + 1;
+		data_model_ver_list = data_model_ver_list->next;
+	}
+	data_model_ver[len - 1] = '\0';
+
+	info->data_model_ver = ic_utils_strdup(data_model_ver);
 
 	*device_info = info;
 	return IOTCON_ERROR_NONE;
